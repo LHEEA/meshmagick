@@ -948,19 +948,23 @@ def convert_mesh(infilename, outfilename, **args):
 def get_info(V, F):
     nv = np.size(V, 0)
     nf = np.size(F, 0)
-    print 'Mesh characteristics :'
     print ''
-    print 'Number of vertices : %u' % nv
-    print 'Number of facets   : %u' % nf
+    print 'o--------------------------------------------------o'
+    print '|               MESH CHARACTERISTICS               |'#28
+    print '|--------------------------------------------------|'
+    print '| Number of nodes  :     %15u           |' % nv
+    print '|--------------------------------------------------|'
+    print '| Number of facets :     %15u           |' % nf
+    print '|--------------------------------------------------|'#51
+    print '|      |          Min        |          Max        |'
+    print '|------|---------------------|---------------------|'
+    print '|   X  |%21E|%21E|' % (V[:,0].min(), V[:,0].max())
+    print '|------|---------------------|---------------------|'
+    print '|   Y  |%21E|%21E|' % (V[:,1].min(), V[:,1].max())
+    print '|------|---------------------|---------------------|'
+    print '|   Z  |%21E|%21E|' % (V[:,2].min(), V[:,2].max())
+    print 'o--------------------------------------------------o'
     print ''
-    print 'Min X : %f' % V[:,0].min()
-    print 'Max X : %f' % V[:,0].max()
-    print 'Min Y : %f' % V[:,1].min()
-    print 'Max Y : %f' % V[:,1].max()
-    print 'Min Z : %f' % V[:,2].min()
-    print 'Max Z : %f' % V[:,2].max()
-
-
 
 def translate(V, P):
     """
@@ -1048,7 +1052,7 @@ def scale(V, alpha):
 #                         COMMAND LINE USAGE
 # =======================================================================
 if __name__ == '__main__':
-    import argparse, argcomplete
+    import argparse#, argcomplete
 
     parser = argparse.ArgumentParser(
         description="""A python module to manipulate meshes from different format used in hydrodynamics as well as for
@@ -1150,7 +1154,7 @@ if __name__ == '__main__':
                         help="""optimizes the mesh. Same as --remove-duplicates
                         and --renumber used together""")
 
-    argcomplete.autocomplete(parser)
+    #~ argcomplete.autocomplete(parser)
     args = parser.parse_args()
 
     extension_dict = ('vtk', 'vtu', 'gdf', 'mar', 'nat','stl','msh','inp', 'tec', 'hst', 'rad')
