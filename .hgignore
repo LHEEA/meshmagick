@@ -1,0 +1,11 @@
+###############################
+# Use glob syntax
+###############################
+syntax: glob
+# extensions to ignore
+*.DAT
+
+
+
+# folders to ignore
+tests/**
