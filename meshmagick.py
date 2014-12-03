@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Python module to manipulate 2D meshes for hydrodynamics purposes
 
@@ -19,11 +20,20 @@ always start at 1 and do the appropriated conversions on F.
 """
 
 
-### TODO : PENSER A METTRE DANS L'ORDRE FORTRAN LES TABLEAUX NUMPY !!!!!
-
-
 import os, sys
 import numpy as np
+
+
+__author__     = "Francois Rongere"
+__copyright__  = "Copyright 2014, Ecole Centrale de Nantes"
+__credits__    = ["Francois Rongere"]
+__licence__    = "CeCILL"
+__version__    = "0.1"
+__maintainer__ = "Francois Rongere"
+__email__      = "Francois.Rongere@ec-nantes.fr"
+__status__     = "Development"
+
+
 
 
 real_str  = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?'

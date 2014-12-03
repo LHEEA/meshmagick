@@ -9,3 +9,4 @@ syntax: glob
 
 # folders to ignore
 tests/**
+.idea/**
