@@ -19,27 +19,244 @@ file formats. However, for VTK, it starts at 0. To avoid confusion, we should
 always start at 1 and do the appropriated conversions on F.
 """
 
-
 import os, sys
 import numpy as np
 
 
-__author__     = "Francois Rongere"
-__copyright__  = "Copyright 2014, Ecole Centrale de Nantes"
-__credits__    = ["Francois Rongere"]
-__licence__    = "CeCILL"
-__version__    = "0.1"
+__author__ = "Francois Rongere"
+__copyright__ = "Copyright 2014, Ecole Centrale de Nantes"
+__credits__ = ["Francois Rongere"]
+__licence__ = "CeCILL"
+__version__ = "0.1"
 __maintainer__ = "Francois Rongere"
-__email__      = "Francois.Rongere@ec-nantes.fr"
-__status__     = "Development"
+__email__ = "Francois.Rongere@ec-nantes.fr"
+__status__ = "Development"
+
+real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?'
+
+
+class HalfEdge:
+    def __init__(self, Vorig, Vtarget):
+        self.orig = Vorig
+        self.target = Vtarget
+
+
+class Cell:
+    def __init__(self, nodesIdx):
+        if len(nodesIdx) != 4:
+            raise ValueError, "The node list should have 4 elements"
+
+        if nodesIdx.__class__ is not np.ndarray:
+            nodesIdx = np.asarray(nodesIdx, dtype=np.int32, order='F')
+
+        if nodesIdx[0] == nodesIdx[-1]:
+            self.type = 3
+        else:
+            self.type = 4
+
+        self.nodesIdx = nodesIdx[:self.type]
+
+    def __iter__(self):
+        self.__index = 0
+        return self
+
+    def next(self):
+        if self.__index <= self.type - 1:
+            Vorig = self.nodesIdx[self.__index]
+            if self.__index == self.type - 1:
+                Vtarget = self.nodesIdx[0]
+            else:
+                Vtarget = self.nodesIdx[self.__index + 1]
+            curHE = HalfEdge(Vorig, Vtarget)
+            curHE.__index = self.__index
+            self.__index += 1
+
+            return curHE
+        else:  # Out of bounds
+            raise StopIteration
+
+    def area(self):
+        return 0.0
+
+
+class Mesh:
+    def __init__(self, V, F):
+        self.V = V
+        self.F = F - 1
+        self.nf = F.shape[0]
+        self.nv = V.shape[0]
+
+        V_oneOutgoingHE = [-1 for i in range(self.nv)]
+
+        cells = []
+        for cell in self.F:
+            cell = Cell(cell)
+            cells.append(cell)
+            cell.idx = len(cells) - 1
+        self.cells = cells
+
+        self.nhe = 0
+        self.HE = []
+        edges = [[[], []] for j in range(self.nv - 1)]
+        for cell in self.cells:
+            for curHE in cell:
+                self.nhe += 1
+                curHE.idx = self.nhe - 1
+                curHE.facet = cell.idx
+
+                if V_oneOutgoingHE[curHE.orig] == -1:
+                    V_oneOutgoingHE[curHE.orig] = curHE.idx
+
+                if curHE._Cell__index == cell.type - 1:
+                    curHE.prev = curHE.idx - 1
+                    curHE.next = curHE.idx - cell.type + 1
+                elif curHE._Cell__index == 0:
+                    curHE.prev = curHE.idx + cell.type - 1
+                    curHE.next = curHE.idx + 1
+                else:
+                    curHE.prev = curHE.idx - 1
+                    curHE.next = curHE.idx + 1
+
+                if curHE.orig < curHE.target:
+                    idx = curHE.orig
+                    V = curHE.target
+                else:
+                    idx = curHE.target
+                    V = curHE.orig
+
+                try:
+                    ipos = edges[idx][0].index(V)
+                    curHE.opposite = edges[idx][1][ipos]
+                    self.HE[curHE.opposite].opposite = curHE.idx
+                except:
+                    edges[idx][0].append(V)
+                    edges[idx][1].append(curHE.idx)
+
+                self.HE.append(curHE)
+            cell.oneHE = curHE.idx
+
+        for he in self.HE:
+            if hasattr(he, 'opposite'):
+                he.border = False
+            else:
+                he.border = True
+                print "(%u,%u) est une bordure !" % (he.orig, he.target)
+
+        return
 
 
 
 
-real_str  = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?'
 
 
-#=======================================================================
+
+
+
+
+
+
+
+
+
+
+        # def buildConnectivity(self):
+        # """Building connectivity from V and F"""
+        #
+        #     # Computing the number of half-edges
+        #     self.nhe = 0
+        #     for cell in self.cells:
+        #         self.nhe += cell.type
+        #
+        #
+        #     # temp arrays
+        #     WIDTH = 15
+        #     edges_NBHE = [0 for i in range(self.nv-1)]
+        #     edges_HE = [[-1 for i in range(self.nv-1)] for j in range(WIDTH)]
+        #
+        #     # Populating connectivities
+        #     HE_origV = []  # List of vertex origin of each HE
+        #
+        #     self.F_1HE     = []
+        #     self.HE_nextHE = []
+        #     self.HE_prevHE = []
+        #     self.V_1outgoingHE = [-1 for i in range(self.nv)]
+        #     self.HE_targetV = []
+        #     self.HE_F = []
+        #     self.HE_border = []
+        #
+        #     iHE = -1
+        #     icurF = 0
+        #     for cell in F:
+        #         icurF += 1
+        #         # Instantiate facet cell
+        #
+        #
+        #         iHE += 1
+        #         iV1 = cell[0]
+        #         iV2 = cell[1]
+        #
+        #         HE_origV.append(iV1)
+        #
+        #         if iV1 < iV2:
+        #             iV = iV1
+        #         else:
+        #             iV = iV2
+        #
+        #         edges_NBHE[iV] += 1
+        #         edges_HE[edges_NBHE[iV]] = iHE
+        #
+        #         self.F_1HE.append(iHE)  # One HE reference to the facet
+        #
+        #         self.HE_nextHE.append(iHE+1)
+        #         if isQuad[icurF]:
+        #             self.HE_prevHE.append(iHE+3)
+        #         else:
+        #             self.HE_prevHE.append(iHE+2)
+        #
+        #         if self.V_1outgoingHE[iV1] == -1:
+        #             self.V_1outgoingHE[iV1] = iHE
+
+
+def merge_duplicates(V, F):
+    nv, nbdim = V.shape
+
+    tol = 1e-8
+
+    indices = [j for j in range(nv)]
+    blocks = [indices]
+    for dim in range(nbdim):
+        # Sorting the first dimension
+        newblocks = []
+        for block in blocks:
+            col = V[block, dim]
+            indices = np.argsort(col)
+            diff = np.diff(col[indices]) < tol
+
+            # col_sorted = col[indices]
+
+            # forming blocks for next iteration
+            newblock = [indices[0]]
+            for idx in range(len(block)-1):
+                dupl = diff[idx]
+                if dupl:
+                    newblock.append(indices[idx+1])
+                else:
+                    newblocks.append(newblock)
+                    newblock = [indices[idx+1]]
+
+            count = 0
+            for newblock in newblocks:
+                count += len(newblock)
+
+        blocks = newblocks
+
+
+
+
+    return V
+
+
+# =======================================================================
 #                             MESH LOADERS
 #=======================================================================
 # Contains here all functions to load meshes from different file formats
@@ -48,7 +265,7 @@ def load_mesh(filename):
     """
     Function to load every known mesh file format
     """
-    _,ext = os.path.splitext(filename)
+    _, ext = os.path.splitext(filename)
     ext = ext.lower()
     if ext == '.vtk' or ext == '.vtu':
         V, F = load_VTK(filename)
@@ -90,9 +307,8 @@ def load_RAD(filename):
     ifile.close()
 
     # node_line = r'\s*\d+(?:\s*' + real_str + '){3}'
-    node_line = r'\s*\d+\s*('+real_str+')\s*('+real_str+')\s*('+real_str+')'
+    node_line = r'\s*\d+\s*(' + real_str + ')\s*(' + real_str + ')\s*(' + real_str + ')'
     node_section = r'((?:' + node_line + ')+)'
-
 
     elem_line = r'^\s*(?:\d+\s+){6}\d+\s*[\r\n]+'
     elem_section = r'((?:' + elem_line + '){3,})'
@@ -116,8 +332,6 @@ def load_RAD(filename):
     F = np.asarray(F, dtype=np.int32, order='F')
 
     return V, F
-
-
 
 
 def load_HST(filename):
@@ -176,7 +390,6 @@ def load_HST(filename):
     return V, F
 
 
-
 def load_INP(filename):
     """
     This function loads data from DIODORE (PRINCIPIA) INP file format.
@@ -220,16 +433,16 @@ def load_INP(filename):
         # Retrieving information on meshfiles and their usage
         file = fielddict['INPUT']
         if file in meshfiles:
-            meshfiles[file][fielddict['type']+'_CALL_INP'] += 1
+            meshfiles[file][fielddict['type'] + '_CALL_INP'] += 1
         else:
             meshfiles[file] = {}
             meshfiles[file]['NODE_CALL_INP'] = 0
             meshfiles[file]['ELEMENT_CALL_INP'] = 0
-            meshfiles[file][fielddict['type']+'_CALL_INP'] += 1
+            meshfiles[file][fielddict['type'] + '_CALL_INP'] += 1
 
         layout.append(fielddict)
 
-    # RETRIEVING DATA SECTIONS FROM MESHFILES
+        # RETRIEVING DATA SECTIONS FROM MESHFILES
         # patterns for recognition of sections
     node_line = r'\s*\d+(?:\s+' + real_str + '){3}'
     node_section = r'((?:' + node_line + ')+)'
@@ -242,7 +455,7 @@ def load_INP(filename):
 
     for file in meshfiles:
         try:
-            meshfile = open(file+'.DAT', 'r')
+            meshfile = open(file + '.DAT', 'r')
         except:
             raise IOError, u'File {0:s} not found'.format(file + '.DAT')
         data = meshfile.read()
@@ -253,7 +466,7 @@ def load_INP(filename):
             raise IOError, """Several NODE sections into a .DAT file is not supported by meshmagick
                               as it is considered as bad practice"""
         node_array = []
-        idx_array  = []
+        idx_array = []
         for node in pattern_node_line.findall(node_section[0]):
             node = node.split()
 
@@ -267,7 +480,7 @@ def load_INP(filename):
         # Detecting renumberings to do
         real_idx = 0
         # renumberings = []
-        id_new = - np.ones( max(idx_array)+1, dtype=int )
+        id_new = - np.ones(max(idx_array) + 1, dtype=int)
         for idx in idx_array:
             real_idx += 1
             if real_idx != idx:  # Node number and line number in the array are not consistant...
@@ -317,7 +530,7 @@ def load_INP(filename):
                 V = np.concatenate((V, nodes))
                 nbNodes = V.shape[0]
                 increment = True
-        else: # this is an ELEMENT section
+        else:  # this is an ELEMENT section
             elem_section = np.asarray(meshfiles[file]['ELEM_SECTIONS'][meshfiles[file]['nb_elem_sections_used']])
 
             meshfiles[file]['nb_elem_sections_used'] += 1
@@ -337,7 +550,7 @@ def load_INP(filename):
                 F = np.concatenate((F, elems))
                 nbElems = F.shape[0]
 
-    return V,F
+    return V, F
 
 
 def load_TEC(filename):
@@ -412,9 +625,11 @@ def load_VTK(filename):
 
     if ext == '.vtu':  # XML file format for unstructured grid
         from vtk import vtkXMLUnstructuredGridReader
+
         reader = vtkXMLUnstructuredGridReader()
     elif ext == '.vtk':  # Legacy file format for unstructured grid
         from vtk import vtkUnstructuredGridReader
+
         reader = vtkUnstructuredGridReader()
 
     else:
@@ -443,6 +658,7 @@ def load_VTK(filename):
     F += 1
     return V, F
 
+
 def load_STL(filename):
     """
     This function reads an STL file to extract the mesh
@@ -459,7 +675,7 @@ def load_STL(filename):
     data = reader.GetOutputDataObject(0)
 
     nv = data.GetNumberOfPoints()
-    V = np.zeros((nv,3), dtype=float, order='F')
+    V = np.zeros((nv, 3), dtype=float, order='F')
     for k in range(nv):
         V[k] = np.array(data.GetPoint(k))
     nf = data.GetNumberOfCells()
@@ -472,6 +688,7 @@ def load_STL(filename):
                 F[k][3] = F[k][0]
     F += 1
     return V, F
+
 
 def load_NAT(filename):
     """
@@ -536,7 +753,7 @@ def load_GDF(filename):
 
     nf = int(ifile.readline())
 
-    V = np.zeros((4*nf, 3), dtype=float, order='fortran')
+    V = np.zeros((4 * nf, 3), dtype=float, order='fortran')
     F = np.zeros((nf, 4), dtype=np.int32, order='fortran')
 
     iv = -1
@@ -585,7 +802,6 @@ def load_MAR(filename):
 
 
 def load_STL2(filename):
-
     import re
 
     ifile = open(filename, 'r')
@@ -594,13 +810,13 @@ def load_STL2(filename):
 
     endl = r'(?:\n|\r|\r\n)'
     patt_str = r"""
-            ^\s*facet\s+normal(.*)"""+ endl + """
-            ^\s*outer\sloop"""       + endl + """
-            ^\s*vertex\s+(.*)"""     + endl + """
-            ^\s*vertex\s+(.*)"""     + endl + """
-            ^\s*vertex\s+(.*)"""     + endl + """
-            ^\s*endloop"""           + endl + """
-            ^\s*endfacet"""          + endl + """
+            ^\s*facet\s+normal(.*)""" + endl + """
+            ^\s*outer\sloop""" + endl + """
+            ^\s*vertex\s+(.*)""" + endl + """
+            ^\s*vertex\s+(.*)""" + endl + """
+            ^\s*vertex\s+(.*)""" + endl + """
+            ^\s*endloop""" + endl + """
+            ^\s*endfacet""" + endl + """
            """
     pattern = re.compile(patt_str, re.MULTILINE | re.VERBOSE)
 
@@ -614,15 +830,14 @@ def load_STL2(filename):
 
     V = np.array(V, dtype=float, order='fortran')
 
-    nf = np.size(V, 0)/3
+    nf = np.size(V, 0) / 3
     F = np.zeros((nf, 4), dtype=np.int32, order='fortran')
 
     base = np.array([1, 2, 3, 1])
     for i in range(nf):
-        F[i, :] = base + 3*i
+        F[i, :] = base + 3 * i
 
     return V, F
-
 
 
 def load_MSH(filename):
@@ -632,14 +847,14 @@ def load_MSH(filename):
     myMesh.read_msh(filename)
     V = np.array(myMesh.Verts, dtype=float, order='fortran')
 
-    ntri  = myMesh.nElmts.get(2)
+    ntri = myMesh.nElmts.get(2)
     nquad = myMesh.nElmts.get(3)
     if ntri is None:
         ntri = 0
     if nquad is None:
         nquad = 0
 
-    nel = ntri+nquad
+    nel = ntri + nquad
 
     F = np.zeros((nel, 4), dtype=np.int32, order='fortran')
 
@@ -662,7 +877,7 @@ def write_mesh(filename, V, F):
     """
     This function writes mesh data into filename following its extension
     """
-    _,ext = os.path.splitext(filename)
+    _, ext = os.path.splitext(filename)
 
     ext = ext.lower()
     if ext == '.vtk' or ext == '.vtu':
@@ -700,28 +915,28 @@ def write_HST(filename, V, F):
 
     ofile = open(filename, 'w')
 
-    ofile.write('PROJECT:'+ls)
-    ofile.write('USERS:   meshmagick'+ls+ls)
+    ofile.write('PROJECT:' + ls)
+    ofile.write('USERS:   meshmagick' + ls + ls)
 
-    ofile.write('NBODY   1'+ls)
-    ofile.write('RHO   1025.0'+ls)
-    ofile.write('GRAVITY   9.81'+ls+ls)
+    ofile.write('NBODY   1' + ls)
+    ofile.write('RHO   1025.0' + ls)
+    ofile.write('GRAVITY   9.81' + ls + ls)
 
-    ofile.write('COORDINATES'+ls)
+    ofile.write('COORDINATES' + ls)
     idx = 0
-    line = '%10u%16.6E%16.6E%16.6E'+ls
+    line = '%10u%16.6E%16.6E%16.6E' + ls
     for node in V:
         idx += 1
         ofile.write(line % (idx, node[0], node[1], node[2]))
-    ofile.write('ENDCOORDINATES'+ls+ls)
+    ofile.write('ENDCOORDINATES' + ls + ls)
 
-    ofile.write('PANEL TYPE 0'+ls)
-    line = '%10u%10u%10u%10u'+ls
+    ofile.write('PANEL TYPE 0' + ls)
+    line = '%10u%10u%10u%10u' + ls
     for elem in F:
         ofile.write(line % (elem[0], elem[1], elem[2], elem[3]))
-    ofile.write('ENDPANEL'+ls+ls)
+    ofile.write('ENDPANEL' + ls + ls)
 
-    ofile.write('ENDFILE'+ls)
+    ofile.write('ENDFILE' + ls)
 
     ofile.close()
     print 'File %s written' % filename
@@ -741,16 +956,16 @@ def write_TEC(filename, V, F):
     nv = max(np.shape(V))
     nf = max(np.shape(F))
 
-    ofile.write('TITLE = \" THIS FILE WAS GENERATED BY MESHMAGICK - FICHIER : %s \" \n' % filename )
+    ofile.write('TITLE = \" THIS FILE WAS GENERATED BY MESHMAGICK - FICHIER : %s \" \n' % filename)
 
     ofile.write('VARIABLES = \"X\",\"Y\",\"Z\" \n')
     ofile.write('ZONE T=\"MESH\" \n')
-    ofile.write('N=%10u ,E=%10u ,F=FEPOINT, ET=QUADRILATERAL\n' % (nv,nf))
+    ofile.write('N=%10u ,E=%10u ,F=FEPOINT, ET=QUADRILATERAL\n' % (nv, nf))
 
     for node in V:
-        ofile.write('%16.6E%16.6E%16.6E\n' % (node[0], node[1], node[2]) )
+        ofile.write('%16.6E%16.6E%16.6E\n' % (node[0], node[1], node[2]))
     for elem in F:
-        ofile.write('%10u%10u%10u%10u\n' % (elem[0],elem[1],elem[2],elem[3]) )
+        ofile.write('%10u%10u%10u%10u\n' % (elem[0], elem[1], elem[2], elem[3]))
 
     ofile.close()
     print 'File %s written' % filename
@@ -766,13 +981,15 @@ def write_VTK(filename, V, F):
     _, ext = os.path.splitext(filename)
     if ext == '.vtk':
         from vtk import vtkUnstructuredGridWriter
+
         writer = vtkUnstructuredGridWriter()
     elif ext == '.vtu':
         from vtk import vtkXMLUnstructuredGridWriter
+
         writer = vtkXMLUnstructuredGridWriter()
         writer.SetDataModeToAscii()
     else:
-        raise RuntimeError, 'Unknown file extension %s'%ext
+        raise RuntimeError, 'Unknown file extension %s' % ext
 
     writer.SetFileName(filename)
     writer.SetInput(vtk_mesh)
@@ -854,16 +1071,14 @@ def write_GDF(filename, V, F, *args):
 
     for cell in F:
         for k in range(4):
-            Vcur = V[cell[k]-1, :]
+            Vcur = V[cell[k] - 1, :]
             ofile.write('%16.6E%16.6E%16.6E\n' % (Vcur[0], Vcur[1], Vcur[2]))
 
     ofile.close()
     print 'File %s written' % filename
 
 
-
 def write_MAR(filename, V, F, *args):
-
     # nf = max(np.shape(F))
 
     ofile = open(filename, 'w')
@@ -888,39 +1103,38 @@ def write_MAR(filename, V, F, *args):
 
 
 def write_STL(filename, V, F):
-
     ofile = open(filename, 'w')
 
-    ofile.write('solid meshmagick'+os.linesep)
-    F -=1
+    ofile.write('solid meshmagick' + os.linesep)
+    F -= 1
     for facet in F:
         if facet[0] != facet[3]:
             raise RuntimeError, 'Only full triangle meshes are accepted in STL files'
 
         # Computing normal
-        V0 = V[facet[0],:]
-        V1 = V[facet[1],:]
-        V2 = V[facet[2],:]
+        V0 = V[facet[0], :]
+        V1 = V[facet[1], :]
+        V2 = V[facet[2], :]
 
-        n = np.cross(V1-V0, V2-V0)
+        n = np.cross(V1 - V0, V2 - V0)
         n /= np.linalg.norm(n)
 
         ofile.write('  facet normal %15.6e%15.6e%15.6e' % (n[0], n[1], n[2]))
         ofile.write(os.linesep)
-        ofile.write('    outer loop'+os.linesep)
-        ofile.write('      vertex %15.6e%15.6e%15.6e' %(V0[0], V0[1], V0[2]))
+        ofile.write('    outer loop' + os.linesep)
+        ofile.write('      vertex %15.6e%15.6e%15.6e' % (V0[0], V0[1], V0[2]))
         ofile.write(os.linesep)
-        ofile.write('      vertex %15.6e%15.6e%15.6e' %(V1[0], V1[1], V1[2]))
+        ofile.write('      vertex %15.6e%15.6e%15.6e' % (V1[0], V1[1], V1[2]))
         ofile.write(os.linesep)
-        ofile.write('      vertex %15.6e%15.6e%15.6e' %(V2[0], V2[1], V2[2]))
+        ofile.write('      vertex %15.6e%15.6e%15.6e' % (V2[0], V2[1], V2[2]))
         ofile.write(os.linesep)
-        ofile.write('    endloop'+os.linesep)
-        ofile.write('  endfacet'+os.linesep)
+        ofile.write('    endloop' + os.linesep)
+        ofile.write('  endfacet' + os.linesep)
 
-
-    ofile.write('endsolid meshmagick'+os.linesep)
+    ofile.write('endsolid meshmagick' + os.linesep)
     ofile.close()
     print 'File %s written' % filename
+
 
 def convert_mesh(infilename, outfilename, **args):
     """
@@ -948,10 +1162,6 @@ def convert_mesh(infilename, outfilename, **args):
         raise RuntimeError, 'extension %s is not recognized' % ext
 
 
-
-
-
-
 #=======================================================================
 #                         MESH MANIPULATION HELPERS
 #=======================================================================
@@ -960,21 +1170,22 @@ def get_info(V, F):
     nf = np.size(F, 0)
     print ''
     print 'o--------------------------------------------------o'
-    print '|               MESH CHARACTERISTICS               |'#28
+    print '|               MESH CHARACTERISTICS               |'  #28
     print '|--------------------------------------------------|'
     print '| Number of nodes  :     %15u           |' % nv
     print '|--------------------------------------------------|'
     print '| Number of facets :     %15u           |' % nf
-    print '|--------------------------------------------------|'#51
+    print '|--------------------------------------------------|'  #51
     print '|      |          Min        |          Max        |'
     print '|------|---------------------|---------------------|'
-    print '|   X  |%21E|%21E|' % (V[:,0].min(), V[:,0].max())
+    print '|   X  |%21E|%21E|' % (V[:, 0].min(), V[:, 0].max())
     print '|------|---------------------|---------------------|'
-    print '|   Y  |%21E|%21E|' % (V[:,1].min(), V[:,1].max())
+    print '|   Y  |%21E|%21E|' % (V[:, 1].min(), V[:, 1].max())
     print '|------|---------------------|---------------------|'
-    print '|   Z  |%21E|%21E|' % (V[:,2].min(), V[:,2].max())
+    print '|   Z  |%21E|%21E|' % (V[:, 2].min(), V[:, 2].max())
     print 'o--------------------------------------------------o'
     print ''
+
 
 def translate(V, P):
     """
@@ -984,57 +1195,59 @@ def translate(V, P):
     :return:
     """
 
-
     if not isinstance(P, np.ndarray):
         P = np.asarray(P, dtype=float)
 
     try:
         for i in range(np.size(V, 0)):
-            V[i,:] += P
+            V[i, :] += P
     except:
         raise RuntimeError, 'second argument must be a 3D list or numpy array for the translation'
 
     return V
 
+
 def translate_1D(V, t, ddl):
-    if ddl=='x':
+    if ddl == 'x':
         j = 0
-    elif ddl=='y':
+    elif ddl == 'y':
         j = 1
-    elif ddl=='z':
-        j=2
+    elif ddl == 'z':
+        j = 2
     else:
         raise IOError, "ddl should be chosen among ('x', 'y', 'z')"
-    V[:,j] +=t
+    V[:, j] += t
     return V
+
 
 def rotate(V, rot):
     from math import cos, sin
+
     if not isinstance(rot, np.ndarray):
         rot = np.asarray(rot, dtype=float)
 
-    R = np.zeros((3,3), dtype=float, order='f')
+    R = np.zeros((3, 3), dtype=float, order='f')
 
-    phi   = rot[0]
+    phi = rot[0]
     theta = rot[1]
-    psi   = rot[2]
+    psi = rot[2]
 
-    cphi   = cos(phi)
-    sphi   = sin(phi)
+    cphi = cos(phi)
+    sphi = sin(phi)
     ctheta = cos(theta)
     stheta = sin(theta)
-    cpsi   = cos(psi)
-    spsi   = sin(psi)
+    cpsi = cos(psi)
+    spsi = sin(psi)
 
-    R[0, 0] = cpsi*ctheta
-    R[0, 1] = -spsi*cphi + cpsi*stheta*sphi
-    R[0, 2] = spsi*sphi  + cpsi*cphi*stheta
-    R[1, 0] = spsi*ctheta
-    R[1, 1] = cpsi*cphi  + sphi*stheta*spsi
-    R[1, 2] = -cpsi*sphi + spsi*cphi*stheta
+    R[0, 0] = cpsi * ctheta
+    R[0, 1] = -spsi * cphi + cpsi * stheta * sphi
+    R[0, 2] = spsi * sphi + cpsi * cphi * stheta
+    R[1, 0] = spsi * ctheta
+    R[1, 1] = cpsi * cphi + sphi * stheta * spsi
+    R[1, 2] = -cpsi * sphi + spsi * cphi * stheta
     R[2, 0] = -stheta
-    R[2, 1] = ctheta*sphi
-    R[2, 2] = ctheta*cphi
+    R[2, 1] = ctheta * sphi
+    R[2, 2] = ctheta * cphi
 
     return np.transpose(np.dot(R, V.T))
 
@@ -1055,14 +1268,25 @@ def rotate_1D(V, rot, ddl):
 
 
 def scale(V, alpha):
-    return alpha*V
+    return alpha * V
+
+
+def flip_normals(F):
+    return np.fliplr(F)
 
 
 # =======================================================================
 #                         COMMAND LINE USAGE
 # =======================================================================
 if __name__ == '__main__':
-    import argparse#, argcomplete
+    import argparse
+
+    try:
+        import argcomplete
+
+        acok = True
+    except:
+        acok = False
 
     parser = argparse.ArgumentParser(
         description="""A python module to manipulate meshes from different format used in hydrodynamics as well as for
@@ -1085,12 +1309,11 @@ if __name__ == '__main__':
         epilog="""Copyright 2014  - Francois Rongere\nEcole Centrale de Nantes""",
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
-
     parser.add_argument('infilename',
                         help='path of the input mesh file in any format')
     parser.add_argument('-o', '--outfilename',
                         help='path of the output mesh file. The format of ' +
-                        'this file is determined from the extension given')
+                             'this file is determined from the extension given')
 
     parser.add_argument('-fmt', '--format', type=str,
                         help="""specifies the output file format and use the base name
@@ -1135,10 +1358,12 @@ if __name__ == '__main__':
     parser.add_argument('-u', '--unit',
                         type=str, choices=['rad', 'deg'],
                         default='deg',
-                        help="""set the unit for rotations. Default is deg""")
+                        help="""sets the unit for rotations. Default is deg""")
     parser.add_argument('-s', '--scale',
                         type=float,
                         help="""scales the mesh""")
+    parser.add_argument('--flip-normals', action='store_true',
+                        help="""flips the normals of the mesh""")
     parser.add_argument('--cut', action='store_true',
                         help="""cuts the mesh with the plane defined with the option
                         --plane""")
@@ -1164,12 +1389,14 @@ if __name__ == '__main__':
                         help="""optimizes the mesh. Same as --remove-duplicates
                         and --renumber used together""")
 
-    #~ argcomplete.autocomplete(parser)
-    args = parser.parse_args()
+    if acok:
+        argcomplete.autocomplete(parser)
 
-    extension_dict = ('vtk', 'vtu', 'gdf', 'mar', 'nat','stl','msh','inp', 'tec', 'hst', 'rad')
+    args, unknown = parser.parse_known_args()
 
-    write_file = False # switch to decide if data should be written to outfilename
+    extension_dict = ('vtk', 'vtu', 'gdf', 'mar', 'nat', 'stl', 'msh', 'inp', 'tec', 'hst', 'rad')
+
+    write_file = False  # switch to decide if data should be written to outfilename
 
     _, ext = os.path.splitext(args.infilename)
     if ext[1:].lower() not in extension_dict:
@@ -1194,11 +1421,14 @@ if __name__ == '__main__':
 
 
     # Importing data from file
-    #try:
-    V, F = load_mesh(args.infilename)
-    #except:
-        ##pass
-    #    raise IOError, 'Problem loading %s' % args.infilename
+    try:
+        V, F = load_mesh(args.infilename)
+    except:
+        raise IOError, "Can't open %s" % args.infilename
+
+    V = merge_duplicates(V, F)
+
+    myMesh = Mesh(V, F)
 
     # Dealing with different options
 
@@ -1217,14 +1447,12 @@ if __name__ == '__main__':
         F = np.copy(pymesh.ff)
         pymesh.free_mesh_data()
 
-
     if args.renumber:
         try:
             from pymesh import pymesh
         except:
             raise ImportError, 'pymesh module is not available, unable to use the --renumber option'
-        ##raise NotImplementedError, '--renumber option is not implemented yet'
-
+            ##raise NotImplementedError, '--renumber option is not implemented yet'
 
     if args.binary:
         raise NotImplementedError, 'Not implemented yet'
@@ -1244,21 +1472,24 @@ if __name__ == '__main__':
 
     def cast_angles(angles, unit):
         from math import pi
+
         if unit == 'deg':
             try:
                 angles = map(float, angles)
             except:
                 raise IOError, 'Bad input for rotation arguments'
-            angles = np.array(angles)*pi/180.
+            angles = np.array(angles) * pi / 180.
         else:
             def evalpi(elt):
                 from math import pi
+
                 elttemp = elt.replace('pi', '1.')
                 try:
                     elttemp = eval(elttemp)
                 except:
-                    raise IOError, 'Bad input %s'% elt
+                    raise IOError, 'Bad input %s' % elt
                 return float(eval(elt))
+
             angles = map(evalpi, angles)
         return angles
 
@@ -1275,7 +1506,6 @@ if __name__ == '__main__':
     if args.rotatez is not None:
         args.rotatez = cast_angles(args.rotatez, args.unit)
         V = rotate_1D(V, args.rotatez[0], 'z')
-
 
     if args.scale is not None:
         V = scale(V, args.scale)
@@ -1313,15 +1543,11 @@ if __name__ == '__main__':
             F = np.copy(pymesh.ff)
             pymesh.free_mesh_data()
 
-
-
-
     if args.cut:
         raise NotImplementedError, '--cut option is not implemented yet'
 
-
-
-
+    if args.flip_normals:
+        F = flip_normals(F)
 
     if args.info:
         get_info(V, F)
