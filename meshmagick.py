@@ -160,48 +160,108 @@ def merge_duplicates(V, F):
         newblocks = []
         for block in blocks:
             col = V[block, dim]
-            indices = np.argsort(col)  # indices are relative to the block
-
+            # Sorting elements in ascending order along dimension dim
+            indices = np.argsort(col)  # Indices are here relative to the block array
             diff = np.abs(np.diff(col[indices])) < tol
-            
             if dim > 0:
-                indices = block[indices]
+                indices = block[indices]  # Making the indices relative to the global node list
 
-            # forming blocks for next iteration
+            # Forming blocks of contiguous values
             newblock = [indices[0]]
             for idx in range(len(block)-1):
-                dupl = diff[idx]
-
-                if dupl:
+                if diff[idx]:
                     newblock.append(indices[idx+1])
                 else:
-                    newblocks.append(np.array(newblock))
+                    # We add a nex block if it has more than one element
+                    if len(newblock) > 1:
+                        newblock = np.array(newblock)
+                        newblock.sort()
+                        newblocks.append(newblock)
                     newblock = [indices[idx+1]]
-            newblocks.append(np.array(newblock))
+            if len(newblock) > 1:
+                newblock = np.array(newblock)
+                newblock.sort()
+                newblocks.append(np.array(newblock))
+
+        if len(newblocks) == 0:
+            print "No duplicate nodes"
+            return V, F
 
         blocks = newblocks
 
-        # newblocks = []
-        # for block in blocks:
-        #     newblocks.append(block.tolist())
-        # a = [item for block in blocks for item in block]
-        # print a
-
-
-    idx = []
-    nbRedundants = 0
+    duplicates = {}
+    idx_extract = [j for j in range(nv)]  # extraction list
+    iperm = np.array(idx_extract)
     for block in blocks:
-        if len(block) == 1:
-            print 'singleton'
-        else:
-            print block, 'redundants'
-            nbRedundants += 1
-        idx.append(block[0])
+        remNodes = block[1:]
+        duplicates[block[0]] = remNodes
+        for idx in remNodes:
+            idx_extract.remove(idx)
 
-    if nbRedundants > 0:
-        print "%u duplicate vertices have been found"%nbRedundants
+    # Extracting the new list of nodes
+    V = V[idx_extract,:]
 
-    return V
+    # First pass to update the fact that lines of V are removed
+    iperm = np.array([j for j in range(nv)]) # voir si on peut degager
+    for block in blocks:
+        # block = iperm[block]  # Update the indices
+        print block
+        for idx in block[:0:-1]:
+            print idx
+            idx = iperm[idx]
+            print idx
+            iperm[idx+1:] -= 1
+
+    # Second pass
+    for block in blocks:
+        block = iperm[block]
+        iperm[block[1:]] = block[0]
+
+
+
+
+    # # Decalage des lignes vu qu'on en supprime dans le final
+    # for block in blocks:
+    #     idBase = block[0]
+    #     for idx in block[1:]:
+    #         idx = iperm[idx]
+    #         # iperm[idx] = iperm[idBase] # Ici, on peut plutôt mettre à jour les numeros de block
+    #         iperm[idx+1:] -= 1
+    #
+    # for block in blocks:
+    #     idBase = block[0]
+    #     for idx in block[1:]:
+    #         idx = iperm[idx]
+    #         iperm[idx] = iperm[idBase]
+
+
+
+    # keys = duplicates.keys()
+    # keys = np.array(keys)
+    # keys.sort()
+    #
+    # for key in keys:
+    #     for idx in duplicates[key]:
+    #         # Updating to the new indices
+    #         print idx
+    #         idx = iperm[idx]
+    #         # Making the duplicated nodes pointing toward the base node
+    #         print idx
+    #         print ''
+    #         iperm[idx] = iperm[key]
+    #         # Every initial node having a number greater than idx has lost one
+    #         iperm[idx+1:] -= 1
+
+    nvNew = len(idx_extract)  # New number of vertices
+    print "%u nodes have been merged" % (nv-nvNew)
+
+
+
+    # Updating the connectivities
+    for idx in range(F.shape[0]):
+        F[idx, :] = iperm[F[idx, :]-1]+1
+
+    return V, F
 
 
 # =======================================================================
@@ -1374,12 +1434,12 @@ if __name__ == '__main__':
     except:
         raise IOError, "Can't open %s" % args.infilename
 
-    V = merge_duplicates(V, F)
+    # TESTS OF FUNCTION MERGE_DUPLICATES : not operational yet
+    # V, F = merge_duplicates(V, F)
 
-    myMesh = Mesh(V, F)
+    # myMesh = Mesh(V, F)
 
     # Dealing with different options
-
     if args.optimize:
         args.remove_duplicates = True
         args.renumber = True
