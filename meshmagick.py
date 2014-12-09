@@ -39,6 +39,9 @@ class HalfEdge:
     def __init__(self, Vorig, Vtarget):
         self.orig = Vorig
         self.target = Vtarget
+    def reverse(self):
+        self.orig, self.target = self.target, self.orig
+        self.next, self.prev = self.prev, self.next
 
 
 class Cell:
@@ -146,112 +149,57 @@ class Mesh:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-        # def buildConnectivity(self):
-        # """Building connectivity from V and F"""
-        #
-        #     # Computing the number of half-edges
-        #     self.nhe = 0
-        #     for cell in self.cells:
-        #         self.nhe += cell.type
-        #
-        #
-        #     # temp arrays
-        #     WIDTH = 15
-        #     edges_NBHE = [0 for i in range(self.nv-1)]
-        #     edges_HE = [[-1 for i in range(self.nv-1)] for j in range(WIDTH)]
-        #
-        #     # Populating connectivities
-        #     HE_origV = []  # List of vertex origin of each HE
-        #
-        #     self.F_1HE     = []
-        #     self.HE_nextHE = []
-        #     self.HE_prevHE = []
-        #     self.V_1outgoingHE = [-1 for i in range(self.nv)]
-        #     self.HE_targetV = []
-        #     self.HE_F = []
-        #     self.HE_border = []
-        #
-        #     iHE = -1
-        #     icurF = 0
-        #     for cell in F:
-        #         icurF += 1
-        #         # Instantiate facet cell
-        #
-        #
-        #         iHE += 1
-        #         iV1 = cell[0]
-        #         iV2 = cell[1]
-        #
-        #         HE_origV.append(iV1)
-        #
-        #         if iV1 < iV2:
-        #             iV = iV1
-        #         else:
-        #             iV = iV2
-        #
-        #         edges_NBHE[iV] += 1
-        #         edges_HE[edges_NBHE[iV]] = iHE
-        #
-        #         self.F_1HE.append(iHE)  # One HE reference to the facet
-        #
-        #         self.HE_nextHE.append(iHE+1)
-        #         if isQuad[icurF]:
-        #             self.HE_prevHE.append(iHE+3)
-        #         else:
-        #             self.HE_prevHE.append(iHE+2)
-        #
-        #         if self.V_1outgoingHE[iV1] == -1:
-        #             self.V_1outgoingHE[iV1] = iHE
-
-
 def merge_duplicates(V, F):
     nv, nbdim = V.shape
 
     tol = 1e-8
 
-    indices = [j for j in range(nv)]
-    blocks = [indices]
+    blocks = [np.array([j for j in range(nv)])]
     for dim in range(nbdim):
         # Sorting the first dimension
         newblocks = []
         for block in blocks:
             col = V[block, dim]
-            indices = np.argsort(col)
-            diff = np.diff(col[indices]) < tol
+            indices = np.argsort(col)  # indices are relative to the block
 
-            # col_sorted = col[indices]
+            diff = np.abs(np.diff(col[indices])) < tol
+            
+            if dim > 0:
+                indices = block[indices]
 
             # forming blocks for next iteration
             newblock = [indices[0]]
             for idx in range(len(block)-1):
                 dupl = diff[idx]
+
                 if dupl:
                     newblock.append(indices[idx+1])
                 else:
-                    newblocks.append(newblock)
+                    newblocks.append(np.array(newblock))
                     newblock = [indices[idx+1]]
-
-            count = 0
-            for newblock in newblocks:
-                count += len(newblock)
+            newblocks.append(np.array(newblock))
 
         blocks = newblocks
 
+        # newblocks = []
+        # for block in blocks:
+        #     newblocks.append(block.tolist())
+        # a = [item for block in blocks for item in block]
+        # print a
 
 
+    idx = []
+    nbRedundants = 0
+    for block in blocks:
+        if len(block) == 1:
+            print 'singleton'
+        else:
+            print block, 'redundants'
+            nbRedundants += 1
+        idx.append(block[0])
+
+    if nbRedundants > 0:
+        print "%u duplicate vertices have been found"%nbRedundants
 
     return V
 
