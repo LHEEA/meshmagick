@@ -221,6 +221,24 @@ def merge_duplicates(V, F, verbose=False):
 
     return V, F
 
+def merge_cells(F):
+
+    # Sorting the connectivities in order to make the comparison efficient
+    nf = F.shape[0]
+    F.sort()
+    indices = F[:,0].argsort(axis=0)
+    # print F[indices, :]
+    F = F[indices]
+    precell = F[-1,:]
+    # print precell
+    # print '--'
+    for idx in xrange(nf-2, -1, -1):
+        cell = F[idx,:]
+        if np.all(cell == precell):
+            print "Duplicate facet !!"
+        precell = cell
+
+    return F
 
 # =======================================================================
 #                             MESH LOADERS
@@ -653,7 +671,11 @@ def load_STL(filename):
                 F[k][l] = cell.GetPointId(l)
                 F[k][3] = F[k][0]  # always repeating the first node as stl is triangle only
     F += 1
+
+    V, F = merge_duplicates(V, F)
     return V, F
+
+
 
 
 def load_NAT(filename):
@@ -731,6 +753,8 @@ def load_GDF(filename):
             F[icell, k] = iv + 1
 
     ifile.close()
+
+    V, F = merge_duplicates(V, F)
 
     return V, F
 
@@ -1386,16 +1410,14 @@ if __name__ == '__main__':
         else:
             args.outfilename = args.infilename
 
-
-
-
     # Importing data from file
     try:
         V, F = load_mesh(args.infilename)
     except:
         raise IOError, "Can't open %s" % args.infilename
-
-    # myMesh = Mesh(V, F)
+    V, F = merge_duplicates(V, F, verbose=True)
+    F = merge_cells(F)
+    myMesh = Mesh(V, F)
 
     # Dealing with different options
     if args.optimize:
