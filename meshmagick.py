@@ -225,6 +225,7 @@ def merge_cells(F):
 
     # Sorting the connectivities in order to make the comparison efficient
     nf = F.shape[0]
+    F_backup = F.copy()
     F.sort()
     indices = F[:,0].argsort(axis=0)
     # print F[indices, :]
@@ -238,7 +239,7 @@ def merge_cells(F):
             print "Duplicate facet !!"
         precell = cell
 
-    return F
+    return F_backup
 
 # =======================================================================
 #                             MESH LOADERS
@@ -1415,9 +1416,12 @@ if __name__ == '__main__':
         V, F = load_mesh(args.infilename)
     except:
         raise IOError, "Can't open %s" % args.infilename
+
+    # TESTING
     V, F = merge_duplicates(V, F, verbose=True)
     F = merge_cells(F)
     myMesh = Mesh(V, F)
+    # FIN TESTING
 
     # Dealing with different options
     if args.optimize:
