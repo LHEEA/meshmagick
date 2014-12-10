@@ -22,7 +22,6 @@ always start at 1 and do the appropriated conversions on F.
 import os, sys
 import numpy as np
 
-
 __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014, Ecole Centrale de Nantes"
 __credits__ = ["Francois Rongere"]
@@ -149,15 +148,17 @@ class Mesh:
 
 
 
-def merge_duplicates(V, F):
+def merge_duplicates(V, F, verbose=False):
     nv, nbdim = V.shape
 
     tol = 1e-8
 
     blocks = [np.array([j for j in range(nv)])]
+    Vtmp = []
+    iperm = np.zeros((nv), dtype=np.int32)
     for dim in range(nbdim):
         # Sorting the first dimension
-        newblocks = []
+        newBlocks = []
         for block in blocks:
             col = V[block, dim]
             # Sorting elements in ascending order along dimension dim
@@ -167,99 +168,56 @@ def merge_duplicates(V, F):
                 indices = block[indices]  # Making the indices relative to the global node list
 
             # Forming blocks of contiguous values
-            newblock = [indices[0]]
-            for idx in range(len(block)-1):
-                if diff[idx]:
-                    newblock.append(indices[idx+1])
+            newBlock = [indices[0]]
+            for idx in range(len(block)-1):  # -1 as size of diff is size of vector -1
+                if diff[idx]:  # elements at index idx and idx+1 are equal
+                    newBlock.append(indices[idx+1])
                 else:
-                    # We add a nex block if it has more than one element
-                    if len(newblock) > 1:
-                        newblock = np.array(newblock)
-                        newblock.sort()
-                        newblocks.append(newblock)
-                    newblock = [indices[idx+1]]
-            if len(newblock) > 1:
-                newblock = np.array(newblock)
-                newblock.sort()
-                newblocks.append(np.array(newblock))
+                    # We add an additional block if it has more than one element
+                    if len(newBlock) > 1:
+                        newBlock = np.array(newBlock)
+                        newBlock.sort()
+                        newBlocks.append(newBlock)
+                        if dim == nbdim-1:
+                            Vtmp.append(V[newBlock[0], :])
+                            iperm[newBlock] = len(Vtmp)-1
+                    else:
+                        Vtmp.append(V[newBlock[0], :])  # Keeping the vertex as it is a singleton
+                        iperm[newBlock] = len(Vtmp)-1
+                    newBlock = [indices[idx+1]]
+            if len(newBlock) > 1:
+                newBlock = np.array(newBlock)
+                newBlock.sort()
+                newBlocks.append(np.array(newBlock))
+                if dim == nbdim-1:
+                    Vtmp.append(V[newBlock[0], :])
+                    iperm[newBlock] = len(Vtmp)-1
+            else:
+                Vtmp.append(V[newBlock[0], :])  # Keeping the vertex as it is a singleton
+                iperm[newBlock] = len(Vtmp)-1
 
-        if len(newblocks) == 0:
-            print "No duplicate nodes"
+        # Termination condition if every block in newBlocks is a singleton
+        if len(newBlocks) == 0:
+            if verbose:
+                print "No duplicate nodes"
             return V, F
 
-        blocks = newblocks
+        blocks = newBlocks
 
-    duplicates = {}
-    idx_extract = [j for j in range(nv)]  # extraction list
-    iperm = np.array(idx_extract)
-    for block in blocks:
-        remNodes = block[1:]
-        duplicates[block[0]] = remNodes
-        for idx in remNodes:
-            idx_extract.remove(idx)
-
-    # Extracting the new list of nodes
-    V = V[idx_extract,:]
-
-    # First pass to update the fact that lines of V are removed
-    iperm = np.array([j for j in range(nv)]) # voir si on peut degager
-    for block in blocks:
-        # block = iperm[block]  # Update the indices
-        print block
-        for idx in block[:0:-1]:
-            print idx
-            idx = iperm[idx]
-            print idx
-            iperm[idx+1:] -= 1
-
-    # Second pass
-    for block in blocks:
-        block = iperm[block]
-        iperm[block[1:]] = block[0]
-
-
-
-
-    # # Decalage des lignes vu qu'on en supprime dans le final
-    # for block in blocks:
-    #     idBase = block[0]
-    #     for idx in block[1:]:
-    #         idx = iperm[idx]
-    #         # iperm[idx] = iperm[idBase] # Ici, on peut plutôt mettre à jour les numeros de block
-    #         iperm[idx+1:] -= 1
-    #
-    # for block in blocks:
-    #     idBase = block[0]
-    #     for idx in block[1:]:
-    #         idx = iperm[idx]
-    #         iperm[idx] = iperm[idBase]
-
-
-
-    # keys = duplicates.keys()
-    # keys = np.array(keys)
-    # keys.sort()
-    #
-    # for key in keys:
-    #     for idx in duplicates[key]:
-    #         # Updating to the new indices
-    #         print idx
-    #         idx = iperm[idx]
-    #         # Making the duplicated nodes pointing toward the base node
-    #         print idx
-    #         print ''
-    #         iperm[idx] = iperm[key]
-    #         # Every initial node having a number greater than idx has lost one
-    #         iperm[idx+1:] -= 1
-
-    nvNew = len(idx_extract)  # New number of vertices
-    print "%u nodes have been merged" % (nv-nvNew)
-
+    # New array of vertices
+    V = np.array(Vtmp, dtype=float, order='F')
+    nvNew = V.shape[0]
 
 
     # Updating the connectivities
-    for idx in range(F.shape[0]):
+    nf = F.shape[0]
+    for idx in range(nf):
         F[idx, :] = iperm[F[idx, :]-1]+1
+
+    if verbose :
+        print 'Initial number of vertices : %u' % nv
+        print 'New number of vertices     : %u' % nvNew
+        print "%u nodes have been merged" % (nv-nvNew)
 
     return V, F
 
@@ -693,7 +651,7 @@ def load_STL(filename):
         if cell is not None:
             for l in range(3):
                 F[k][l] = cell.GetPointId(l)
-                F[k][3] = F[k][0]
+                F[k][3] = F[k][0]  # always repeating the first node as stl is triangle only
     F += 1
     return V, F
 
@@ -1328,6 +1286,9 @@ if __name__ == '__main__':
                         of the infilename instead of the output file. File format has
                         to be chosen among VTK, VTU, MAR, GDF, STL, NAT, MHE. Default is VTU.
                         If -o option has been done, it has no effect""")
+    parser.add_argument('-v', '--verbose',
+                        help="""make the program give more informations on the computations""",
+                        action='store_true')
     parser.add_argument('-i', '--info',
                         help="""extract informations on the mesh on the standard output""",
                         action='store_true')
@@ -1387,14 +1348,14 @@ if __name__ == '__main__':
                         is a normal vector to the plane and c defines its position
                         following the equation <N|X> = c with X a point belonging
                         to the plane""")
-    parser.add_argument('--remove-duplicates', action='store_true',
-                        help="""removes the duplicate nodes in the mesh""")
+    parser.add_argument('--merge-duplicates', action='store_true',
+                        help="""merges the duplicate nodes in the mesh""")
     parser.add_argument('--renumber', action='store_true',
                         help="""renumbers the cells and nodes of the mesh so as
                         to optimize cache efficiency in algorithms. Uses the Sloan
                         method""")
     parser.add_argument('--optimize', action='store_true',
-                        help="""optimizes the mesh. Same as --remove-duplicates
+                        help="""optimizes the mesh. Same as --merge-duplicates
                         and --renumber used together""")
 
     if acok:
@@ -1434,33 +1395,31 @@ if __name__ == '__main__':
     except:
         raise IOError, "Can't open %s" % args.infilename
 
-    # TESTS OF FUNCTION MERGE_DUPLICATES : not operational yet
-    # V, F = merge_duplicates(V, F)
-
     # myMesh = Mesh(V, F)
 
     # Dealing with different options
     if args.optimize:
-        args.remove_duplicates = True
+        args.merge_duplicates = True
         args.renumber = True
 
-    if args.remove_duplicates:
+    if args.merge_duplicates:
         try:
             from pymesh import pymesh
+            pymesh.set_mesh_data(V, F)
+            pymesh.cleandata_py()
+            V = np.copy(pymesh.vv)
+            F = np.copy(pymesh.ff)
+            pymesh.free_mesh_data()
         except:
-            raise ImportError, 'pymesh module is not available, unable to use the --remove_duplicates option'
-        pymesh.set_mesh_data(V, F)
-        pymesh.cleandata_py()
-        V = np.copy(pymesh.vv)
-        F = np.copy(pymesh.ff)
-        pymesh.free_mesh_data()
+            V, F = merge_duplicates(V, F, args.verbose)
 
     if args.renumber:
-        try:
-            from pymesh import pymesh
-        except:
-            raise ImportError, 'pymesh module is not available, unable to use the --renumber option'
-            ##raise NotImplementedError, '--renumber option is not implemented yet'
+        raise NotImplementedError, "Renumbering is not implemented yet into meshmagick"
+        # try:
+        #     from pymesh import pymesh
+        # except:
+        #     raise ImportError, 'pymesh module is not available, unable to use the --renumber option'
+        #     ##raise NotImplementedError, '--renumber option is not implemented yet'
 
     if args.binary:
         raise NotImplementedError, 'Not implemented yet'
@@ -1519,37 +1478,38 @@ if __name__ == '__main__':
         V = scale(V, args.scale)
 
     if args.symmetrize is not None:
-        try:
-            from pymesh import pymesh
-        except:
-            raise ImportError, 'pymesh module is not available, unable to use the --symmetrize option'
+        raise NotImplementedError, "Symmetrization is not implemented yet into meshmagick"
+        # try:
+        #     from pymesh import pymesh
+        # except:
+        #     raise ImportError, 'pymesh module is not available, unable to use the --symmetrize option'
 
-        if 'p' in args.symmetrize:
-            if len(args.symmetrize) > 1:
-                raise RuntimeError, 'When using p argument of --symmetrize option, only one argument should be provided'
-            else:
-                # Using plane to symmetrize
-                if args.plane is None:
-                    raise RuntimeError, 'When using --symmetrize p option argument, you must also provide the --plane option'
-                pass
-                # Idee ici on se debrouille pour tourner le maillage afin que le plan de --plane soit
-                # le plan yOz pour s'appuer sur la fct Fortran de pymesh, on symmetrize puis on retransforme
-                # le maillage pour le remettre dans la bonne direction.
-            raise NotImplementedError, '--symmetrize option is not implemented yet for argument p'
-        else:
-            sym = np.zeros(3, dtype=np.int32)
-            for plane in args.symmetrize:
-                if plane == 'x':
-                    sym[0] = 1
-                elif plane == 'y':
-                    sym[1] = 1
-                else:
-                    sym[2] = 1
-            pymesh.set_mesh_data(V, F)
-            pymesh.symmetrizemesh_py(sym)
-            V = np.copy(pymesh.vv)
-            F = np.copy(pymesh.ff)
-            pymesh.free_mesh_data()
+        # if 'p' in args.symmetrize:
+        #     if len(args.symmetrize) > 1:
+        #         raise RuntimeError, 'When using p argument of --symmetrize option, only one argument should be provided'
+        #     else:
+        #         # Using plane to symmetrize
+        #         if args.plane is None:
+        #             raise RuntimeError, 'When using --symmetrize p option argument, you must also provide the --plane option'
+        #         pass
+        #         # Idee ici on se debrouille pour tourner le maillage afin que le plan de --plane soit
+        #         # le plan yOz pour s'appuer sur la fct Fortran de pymesh, on symmetrize puis on retransforme
+        #         # le maillage pour le remettre dans la bonne direction.
+        #     raise NotImplementedError, '--symmetrize option is not implemented yet for argument p'
+        # else:
+        #     sym = np.zeros(3, dtype=np.int32)
+        #     for plane in args.symmetrize:
+        #         if plane == 'x':
+        #             sym[0] = 1
+        #         elif plane == 'y':
+        #             sym[1] = 1
+        #         else:
+        #             sym[2] = 1
+        #     pymesh.set_mesh_data(V, F)
+        #     pymesh.symmetrizemesh_py(sym)
+        #     V = np.copy(pymesh.vv)
+        #     F = np.copy(pymesh.ff)
+        #     pymesh.free_mesh_data()
 
     if args.cut:
         raise NotImplementedError, '--cut option is not implemented yet'
