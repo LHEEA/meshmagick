@@ -34,118 +34,163 @@ __status__ = "Development"
 real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?'
 
 
-class HalfEdge:
-    def __init__(self, Vorig, Vtarget):
-        self.orig = Vorig
-        self.target = Vtarget
-    def reverse(self):
-        self.orig, self.target = self.target, self.orig
-        self.next, self.prev = self.prev, self.next
-
-
-class Cell:
-    def __init__(self, nodesIdx):
-        if len(nodesIdx) != 4:
-            raise ValueError, "The node list should have 4 elements"
-
-        if nodesIdx.__class__ is not np.ndarray:
-            nodesIdx = np.asarray(nodesIdx, dtype=np.int32, order='F')
-
-        if nodesIdx[0] == nodesIdx[-1]:
-            self.type = 3
-        else:
-            self.type = 4
-
-        self.nodesIdx = nodesIdx[:self.type]
-
-    def __iter__(self):
-        self.__index = 0
-        return self
-
-    def next(self):
-        if self.__index <= self.type - 1:
-            Vorig = self.nodesIdx[self.__index]
-            if self.__index == self.type - 1:
-                Vtarget = self.nodesIdx[0]
-            else:
-                Vtarget = self.nodesIdx[self.__index + 1]
-            curHE = HalfEdge(Vorig, Vtarget)
-            curHE.__index = self.__index
-            self.__index += 1
-
-            return curHE
-        else:  # Out of bounds
-            raise StopIteration
-
-    def area(self):
-        return 0.0
+# class HalfEdge:
+#     def __init__(self, Vorig, Vtarget):
+#         self.orig = Vorig
+#         self.target = Vtarget
+#     def reverse(self):
+#         self.orig, self.target = self.target, self.orig
+#         self.next, self.prev = self.prev, self.next
+#
+#
+# class Cell:
+#     def __init__(self, nodesIdx):
+#         if len(nodesIdx) != 4:
+#             raise ValueError, "The node list should have 4 elements"
+#
+#         if nodesIdx.__class__ is not np.ndarray:
+#             nodesIdx = np.asarray(nodesIdx, dtype=np.int32, order='F')
+#
+#         if nodesIdx[0] == nodesIdx[-1]:
+#             self.type = 3
+#         else:
+#             self.type = 4
+#
+#         self.nodesIdx = nodesIdx[:self.type]
+#
+#     def __iter__(self):
+#         self.__index = 0
+#         return self
+#
+#     def next(self):
+#         if self.__index <= self.type - 1:
+#             Vorig = self.nodesIdx[self.__index]
+#             if self.__index == self.type - 1:
+#                 Vtarget = self.nodesIdx[0]
+#             else:
+#                 Vtarget = self.nodesIdx[self.__index + 1]
+#             curHE = HalfEdge(Vorig, Vtarget)
+#             curHE.__index = self.__index
+#             self.__index += 1
+#
+#             return curHE
+#         else:  # Out of bounds
+#             raise StopIteration
+#
+#     def area(self):
+#
+#
+#
+#         return 0.0
 
 
 class Mesh:
     def __init__(self, V, F):
-        self.V = V
-        self.F = F - 1
+        # Storing vertices
+        if V.shape[0] > 3:
+            self.Vcoord = V.T
+        else:
+            self.Vcoord = V
+        self.nv = self.Vcoord.shape[1]
+
+        # if 0 not in F:
+        #     F -= 1
+
+        if F.shape[0] == 4:
+            F = F.T
+
         self.nf = F.shape[0]
-        self.nv = V.shape[0]
 
-        V_oneOutgoingHE = [-1 for i in range(self.nv)]
-
-        cells = []
-        for cell in self.F:
-            cell = Cell(cell)
-            cells.append(cell)
-            cell.idx = len(cells) - 1
-        self.cells = cells
-
-        self.nhe = 0
-        self.HE = []
+        # Building half-edge data structure
         edges = [[[], []] for j in range(self.nv - 1)]
-        for cell in self.cells:
-            for curHE in cell:
-                self.nhe += 1
-                curHE.idx = self.nhe - 1
-                curHE.facet = cell.idx
+        self.V_oneOutgoingHE = [-1 for i in range(self.nv)]
+        self.F_1HE = [-1 for i in range(self.nf)]
+        self.HE_targetV = []
+        self.HE_F = []
+        self.HE_nextHE = []
+        self.HE_prevHE = []
+        self.HE_oppositeHE = [-1 for j in range(4*self.nf)]
 
-                if V_oneOutgoingHE[curHE.orig] == -1:
-                    V_oneOutgoingHE[curHE.orig] = curHE.idx
+        nhe = 0
+        icell = -1
+        for cell in F-1:
+            icell += 1
+            if cell[0] == cell[-1]:
+                type = 3  # triangle
+                print "triangle"
+            else:
+                type = 4  # quadrangle
 
-                if curHE._Cell__index == cell.type - 1:
-                    curHE.prev = curHE.idx - 1
-                    curHE.next = curHE.idx - cell.type + 1
-                elif curHE._Cell__index == 0:
-                    curHE.prev = curHE.idx + cell.type - 1
-                    curHE.next = curHE.idx + 1
+            for idx in range(type-1):
+                # New half-edge
+                ihe = nhe
+                nhe += 1
+
+                self.HE_targetV.append(cell[idx+1])
+
+                if self.V_oneOutgoingHE[cell[idx]] == -1:
+                    self.V_oneOutgoingHE[cell[idx]] = ihe
+
+                if idx == 0:
+                    self.HE_prevHE.append(ihe+type-1)
+                    self.HE_nextHE.append(ihe+1)
                 else:
-                    curHE.prev = curHE.idx - 1
-                    curHE.next = curHE.idx + 1
+                    self.HE_prevHE.append(ihe-1)
+                    self.HE_nextHE.append(ihe+1)
 
-                if curHE.orig < curHE.target:
-                    idx = curHE.orig
-                    V = curHE.target
+                self.HE_F.append(icell)
+
+                if cell[idx] < cell[idx+1]:
+                    index = cell[idx]
+                    iV = cell[idx+1]
                 else:
-                    idx = curHE.target
-                    V = curHE.orig
+                    index = cell[idx+1]
+                    iV = cell[idx]
 
                 try:
-                    ipos = edges[idx][0].index(V)
-                    curHE.opposite = edges[idx][1][ipos]
-                    self.HE[curHE.opposite].opposite = curHE.idx
+                    ipos = edges[index][0].index(iV)
+                    self.HE_oppositeHE[ihe] = edges[index][1][ipos]
+                    self.HE_oppositeHE[self.HE_oppositeHE[ihe]] = ihe
                 except:
-                    edges[idx][0].append(V)
-                    edges[idx][1].append(curHE.idx)
+                    edges[index][0].append(iV)
+                    edges[index][1].append(ihe)
 
-                self.HE.append(curHE)
-            cell.oneHE = curHE.idx
+            # New half-edge
+            ihe = nhe
+            nhe += 1
+            self.HE_targetV.append(cell[0])
+            self.HE_prevHE.append(ihe-1)
+            self.HE_nextHE.append(ihe-type+1)
+            self.HE_F.append(icell)
 
-        for he in self.HE:
-            if hasattr(he, 'opposite'):
-                he.border = False
+            if cell[-1] < cell[0]:
+                index = cell[-1]
+                iV = cell[0]
             else:
-                he.border = True
-                print "(%u,%u) est une bordure !" % (he.orig, he.target)
+                index = cell[0]
+                iV = cell[-1]
+
+            try:
+                ipos = edges[index][0].index(iV)
+                self.HE_oppositeHE[ihe] = edges[index][1][ipos]
+                self.HE_oppositeHE[self.HE_oppositeHE[ihe]] = ihe
+            except:
+                edges[index][0].append(iV)
+                edges[index][1].append(ihe)
+
+            self.F_1HE[icell] = ihe
+
+        self.nhe = nhe
+        self.HE_oppositeHE = self.HE_oppositeHE[:self.nhe]
+
+        # Checking Borders
+        self.HE_border = [False for j in range(self.nhe)]
+        for ihe in range(self.nhe):
+            if self.HE_oppositeHE[ihe] == -1:
+                self.HE_border[ihe] = True
+                print "Facet %u is at a border" % self.HE_F[ihe]
 
         return
-
 
 
 def merge_duplicates(V, F, verbose=False):
@@ -221,6 +266,7 @@ def merge_duplicates(V, F, verbose=False):
 
     return V, F
 
+
 def merge_cells(F):
 
     # Sorting the connectivities in order to make the comparison efficient
@@ -240,6 +286,7 @@ def merge_cells(F):
         precell = cell
 
     return F_backup
+
 
 # =======================================================================
 #                             MESH LOADERS
@@ -385,11 +432,6 @@ def load_INP(filename):
     ifile = open(filename, 'r')
     text = ifile.read()
     ifile.close()
-
-    # End lines for every system
-    # endl = r'(?:\n|\r|\r\n)'
-
-
 
     # Retrieving frames into a dictionnary frames
     pattern_FRAME_str = r'^\s*\*FRAME,NAME=(.+)[\r\n]+(.*)'
@@ -1419,7 +1461,7 @@ if __name__ == '__main__':
 
     # TESTING
     V, F = merge_duplicates(V, F, verbose=True)
-    F = merge_cells(F)
+    # F = merge_cells(F)
     myMesh = Mesh(V, F)
     # FIN TESTING
 
