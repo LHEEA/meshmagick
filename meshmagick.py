@@ -110,7 +110,7 @@ class Mesh:
         self.HE_nextHE = []
         self.HE_prevHE = []
         self.HE_oppositeHE = [-1 for j in range(4*self.nf)]
-        HE_origV = []
+        HE_origV = [] # FIXME : Utile ?
 
         nhe = 0
         icell = -1
@@ -121,6 +121,7 @@ class Mesh:
             else:
                 type = 4  # quadrangle
 
+            # Iterating over the half-edges of the cell
             for idx in range(type-1):
                 # New half-edge
                 ihe = nhe
@@ -1163,6 +1164,7 @@ def write_MAR(filename, V, F, *args):
 
 
 def write_STL(filename, V, F):
+    # TODO : implement a STL writer based on vtk lib
     ofile = open(filename, 'w')
 
     ofile.write('solid meshmagick' + os.linesep)
@@ -1196,34 +1198,8 @@ def write_STL(filename, V, F):
     print 'File %s written' % filename
 
 
-def convert_mesh(infilename, outfilename, **args):
-    """
-    Function to convert meshes into an other format. Conversion is based on extensions
-    used.
-    """
-
-    V, F = load_mesh(infilename)
-
-    # Retrieving extension of outfilename
-    _, ext = os.path.splitext(outfilename)
-    ext = ext.lower()
-    # Writing the mesh in outfilename
-    if ext == '.vtk' or ext == '.vtu':
-        write_VTK(outfilename, V, F)
-    elif ext == '.gdf':
-        write_GDF(outfilename, V, F)
-    elif ext == '.mar':
-        write_MAR(outfilename, V, F)
-    elif ext == '.nat':
-        write_NAT(outfilename, V, F)
-    elif ext == '.stl':
-        write_STL(outfilename, V, F)
-    else:
-        raise RuntimeError, 'extension %s is not recognized' % ext
-
-
 #=======================================================================
-#                         MESH MANIPULATION HELPERS
+#                         MESH MANIPULATIONS
 #=======================================================================
 def get_info(V, F):
     nv = np.size(V, 0)
@@ -1324,6 +1300,7 @@ def rotate_1D(V, rot, ddl):
 
     rotvec = np.zeros(3, dtype=float)
     rotvec[j] = rot
+
     return rotate(V, rotvec)
 
 
@@ -1457,7 +1434,8 @@ if __name__ == '__main__':
 
     args, unknown = parser.parse_known_args()
 
-    extension_dict = ('vtk', 'vtu', 'gdf', 'mar', 'nat', 'stl', 'msh', 'inp', 'tec', 'hst', 'rad')
+    extension_dict = ('vtk', 'vtu', 'gdf', 'mar', 'nat', 'stl',
+                      'msh', 'inp', 'tec', 'hst', 'rad')
 
     write_file = False  # switch to decide if data should be written to outfilename
 
@@ -1469,6 +1447,7 @@ if __name__ == '__main__':
         _, ext = os.path.splitext(args.outfilename)
         write_file = True
         if ext[1:].lower() not in extension_dict:
+            # Unknown extension
             raise IOError, 'Extension "%s" is not known' % ext
     else:
         if args.format is not None:
@@ -1480,7 +1459,7 @@ if __name__ == '__main__':
         else:
             args.outfilename = args.infilename
 
-    # Importing data from file
+    # IMPORTING DATA FROM FILE
     try:
         V, F = load_mesh(args.infilename)
     except:
@@ -1509,7 +1488,7 @@ if __name__ == '__main__':
             V, F = merge_duplicates(V, F, args.verbose)
 
     if args.renumber:
-        raise NotImplementedError, "Renumbering is not implemented yet into meshmagick"
+        raise NotImplementedError, "Renumbering is not implemented yet"
         # try:
         #     from pymesh import pymesh
         # except:
