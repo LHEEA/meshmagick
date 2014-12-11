@@ -102,7 +102,7 @@ class Mesh:
         self.nf = F.shape[0]
 
         # Building half-edge data structure
-        edges = [[[], []] for j in range(self.nv - 1)]
+        edges = [[] for j in range(self.nv - 1)]
         self.V_oneOutgoingHE = [-1 for i in range(self.nv)]
         self.F_1HE = [-1 for i in range(self.nf)]
         self.HE_targetV = []
@@ -110,6 +110,7 @@ class Mesh:
         self.HE_nextHE = []
         self.HE_prevHE = []
         self.HE_oppositeHE = [-1 for j in range(4*self.nf)]
+        HE_origV = []
 
         nhe = 0
         icell = -1
@@ -117,7 +118,6 @@ class Mesh:
             icell += 1
             if cell[0] == cell[-1]:
                 type = 3  # triangle
-                print "triangle"
             else:
                 type = 4  # quadrangle
 
@@ -125,7 +125,7 @@ class Mesh:
                 # New half-edge
                 ihe = nhe
                 nhe += 1
-
+                HE_origV.append(cell[idx])
                 self.HE_targetV.append(cell[idx+1])
 
                 if self.V_oneOutgoingHE[cell[idx]] == -1:
@@ -141,55 +141,82 @@ class Mesh:
                 self.HE_F.append(icell)
 
                 if cell[idx] < cell[idx+1]:
-                    index = cell[idx]
-                    iV = cell[idx+1]
+                    edges[cell[idx]].append(ihe)
                 else:
-                    index = cell[idx+1]
-                    iV = cell[idx]
-
-                try:
-                    ipos = edges[index][0].index(iV)
-                    self.HE_oppositeHE[ihe] = edges[index][1][ipos]
-                    self.HE_oppositeHE[self.HE_oppositeHE[ihe]] = ihe
-                except:
-                    edges[index][0].append(iV)
-                    edges[index][1].append(ihe)
+                    edges[cell[idx+1]].append(ihe)
 
             # New half-edge
             ihe = nhe
             nhe += 1
+            HE_origV.append(cell[idx])
             self.HE_targetV.append(cell[0])
             self.HE_prevHE.append(ihe-1)
             self.HE_nextHE.append(ihe-type+1)
             self.HE_F.append(icell)
 
             if cell[-1] < cell[0]:
-                index = cell[-1]
-                iV = cell[0]
+                edges[cell[-1]].append(ihe)
             else:
-                index = cell[0]
-                iV = cell[-1]
-
-            try:
-                ipos = edges[index][0].index(iV)
-                self.HE_oppositeHE[ihe] = edges[index][1][ipos]
-                self.HE_oppositeHE[self.HE_oppositeHE[ihe]] = ihe
-            except:
-                edges[index][0].append(iV)
-                edges[index][1].append(ihe)
+                edges[cell[0]].append((ihe))
 
             self.F_1HE[icell] = ihe
 
         self.nhe = nhe
-        self.HE_oppositeHE = self.HE_oppositeHE[:self.nhe]
 
-        # Checking Borders
-        self.HE_border = [False for j in range(self.nhe)]
-        for ihe in range(self.nhe):
-            if self.HE_oppositeHE[ihe] == -1:
-                self.HE_border[ihe] = True
-                print "Facet %u is at a border" % self.HE_F[ihe]
+        # Getting connectivity of twin half-edges
+        self.HE_boundary = [-1 for j in range(self.nhe)]
+        nbBoundary = 0
+        for inode in range(self.nv-1):
+            heList = edges[inode]
+            nbHE = len(edges[inode])
+            if nbHE == 0:
+                continue
 
+            while len(heList) > 0:
+                ihe = heList.pop()
+                if len(heList) == 0:
+                    # ihe is alone and has no twin, it is a border
+                    self.HE_boundary[ihe] = True
+                    self.HE_oppositeHE[ihe] = -1
+                    nbBoundary += 1
+                    print "facet %u is a boundary" % self.HE_F[ihe]
+                else:
+                    if HE_origV[ihe] == inode:
+                        inode2 = self.HE_targetV[ihe]
+                    else:
+                        inode2 = HE_origV[ihe]
+
+                    # The edge associated to ihe is [inode, inode2]
+                    found = []
+                    for jhe in heList:
+                        # Testing wether jhe is
+                        if HE_origV[jhe] == inode2 or self.HE_targetV[jhe] == inode2:
+                            # Both ihe and jhe share the same edge
+                            self.HE_oppositeHE[ihe] = jhe
+                            self.HE_oppositeHE[jhe] = ihe
+                            self.HE_boundary[ihe] = False
+                            found.append(jhe)
+                    if len(found) > 1:
+                        print "Warning, these %u facets are sharing the same edges" % (len(found)+1)
+                        print self.HE_F[ihe]
+                        for i in range(len(found)):
+                            print self.HE_F[found[i]]
+
+                    elif len(found) == 1:
+                        # Only one corresponding half-edge has been found
+                        pass
+                    else:
+                        # No corresponding half-edge has been found, this is a boundary
+                        self.HE_boundary[ihe] = True
+                        self.HE_oppositeHE[ihe] = -1
+                        nbBoundary += 1
+
+                    for elt in found:
+                        try:
+                            heList.pop(elt)
+                        except:
+                            pass
+        print "%u facets are at boundary" % nbBoundary
         return
 
 
