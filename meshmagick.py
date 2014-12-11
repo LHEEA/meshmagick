@@ -247,6 +247,9 @@ def load_mesh(filename):
         V, F = load_MSH(filename)
     elif ext == '.inp':
         V, F = load_INP(filename)
+    elif ext == '.dat':
+        raise NotImplementedError, "Not implemented"
+        # V, F = load_DAT(filename)
     elif ext == '.tec':
         V, F = load_TEC(filename)
     elif ext == '.hst':
@@ -860,6 +863,8 @@ def write_mesh(filename, V, F):
         raise NotImplementedError, 'MSH file writer not implemented'
     elif ext == '.inp':
         raise NotImplementedError, 'INP file writer not implemented'
+    elif ext == '.dat':
+        write_DAT(filename, V, F)
     elif ext == '.tec':
         write_TEC(filename, V, F)
     elif ext == '.hst':
@@ -867,6 +872,38 @@ def write_mesh(filename, V, F):
     else:
         raise RuntimeError, 'extension %s is not recognized' % ext
 
+
+def write_DAT(filename, V, F):
+    """
+    Writes DAT files for DIODORE
+    :param filename:
+    :param V:
+    :param F:
+    :return:
+    """
+    ls = os.linesep
+
+    ofile = open(filename, 'w')
+
+    idx = 0
+    for node in V:
+        idx += 1
+        line = "%10u%16.6E%16.6E%16.6E"+ls
+        ofile.write(line % (idx, node[0], node[1], node[2]))
+    ofile.write('*RETURN'+ls)
+
+    idx = 0
+    for cell in F:
+        idx += 1
+        line = '%10u%10u%10u%10u%10u'+ls
+        ofile.write(line % (idx, cell[0], cell[1], cell[2], cell[3]))
+    ofile.write('*RETURN'+ls)
+
+    ofile.close()
+
+    print 'File %s written' % filename
+
+    return
 
 def write_HST(filename, V, F):
     """
@@ -1263,6 +1300,7 @@ if __name__ == '__main__':
                          - mar      (R/W) : the format used by BEM NEMOH software (Ecole Centrale de Nantes)
                          - gdf      (R/W) : the format used by BEM WAMIT software (WAMIT, Inc.)
                          - inp      (R)   : the format used by BEM DIODORE software (PRINCIPIA)
+                         - DAT      (W)   : the format of meshfiles used in DIODORE software (PRINCIPIA)
                          - hst      (R/W) : the format used by BEM HYDROSTAR software (BV)
                          - nat      (R/W) : a natural format to store unstructured 2D meshes
 
@@ -1363,7 +1401,7 @@ if __name__ == '__main__':
 
     args, unknown = parser.parse_known_args()
 
-    extension_dict = ('vtk', 'vtu', 'gdf', 'mar', 'nat', 'stl', 'msh', 'inp', 'tec', 'hst', 'rad')
+    extension_dict = ('vtk', 'vtu', 'gdf', 'mar', 'nat', 'stl', 'msh', 'inp', 'dat', 'tec', 'hst', 'rad')
 
     write_file = False  # switch to decide if data should be written to outfilename
 
