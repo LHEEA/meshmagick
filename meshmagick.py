@@ -19,7 +19,7 @@ file formats. However, for VTK, it starts at 0. To avoid confusion, we should
 always start at 1 and do the appropriated conversions on F.
 """
 
-import os, sys
+import os
 import numpy as np
 
 __author__ = "Francois Rongere"
@@ -31,61 +31,15 @@ __maintainer__ = "Francois Rongere"
 __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
 
+
 real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?'
 
 
-# class HalfEdge:
-#     def __init__(self, Vorig, Vtarget):
-#         self.orig = Vorig
-#         self.target = Vtarget
-#     def reverse(self):
-#         self.orig, self.target = self.target, self.orig
-#         self.next, self.prev = self.prev, self.next
-#
-#
-# class Cell:
-#     def __init__(self, nodesIdx):
-#         if len(nodesIdx) != 4:
-#             raise ValueError, "The node list should have 4 elements"
-#
-#         if nodesIdx.__class__ is not np.ndarray:
-#             nodesIdx = np.asarray(nodesIdx, dtype=np.int32, order='F')
-#
-#         if nodesIdx[0] == nodesIdx[-1]:
-#             self.type = 3
-#         else:
-#             self.type = 4
-#
-#         self.nodesIdx = nodesIdx[:self.type]
-#
-#     def __iter__(self):
-#         self.__index = 0
-#         return self
-#
-#     def next(self):
-#         if self.__index <= self.type - 1:
-#             Vorig = self.nodesIdx[self.__index]
-#             if self.__index == self.type - 1:
-#                 Vtarget = self.nodesIdx[0]
-#             else:
-#                 Vtarget = self.nodesIdx[self.__index + 1]
-#             curHE = HalfEdge(Vorig, Vtarget)
-#             curHE.__index = self.__index
-#             self.__index += 1
-#
-#             return curHE
-#         else:  # Out of bounds
-#             raise StopIteration
-#
-#     def area(self):
-#
-#
-#
-#         return 0.0
-
-
 class Mesh:
-    def __init__(self, V, F):
+    def __init__(self, V, F, verbose=False):
+
+        self.verbose = verbose
+
         # Storing vertices
         if V.shape[0] > 3:
             self.Vcoord = V.T
@@ -134,7 +88,7 @@ class Mesh:
 
             icell += 1
             istop = 3
-            if cell[0] == cell[-1]:  # Triangle
+            if cell[-1] in cell[:3]:  # Triangle
                 istop -= 1
 
             # Iterating over the half-edges of the cell
@@ -179,7 +133,7 @@ class Mesh:
         # Getting connectivity of twin half-edges
         self.HE_twinHE = [-1 for i in range(nhe)]
         self.HE_boundary = [False for i in range(nhe)]
-        boundaryF = []
+        boundaryHE = []
         for iVmin in edges.keys():
             for iVmax in edges[iVmin].keys():
 
@@ -191,25 +145,88 @@ class Mesh:
                     # This is a boundary half-edge
                     ihe = heList[0]
                     self.HE_boundary[ihe] = True
-                    boundaryF.append(self.HE_F[ihe])
+                    boundaryHE.append(ihe)
                 elif helen == 2:
                     # We have a twin
                     self.HE_twinHE[heList[0]] = heList[1]
                     self.HE_twinHE[heList[1]] = heList[0]
                 else:
                     # More than 2 half-edges are following the same edge...
-                    print "More than 2 half-edges are following the same edge"
-                    print "Facets :"
-                    for ihe in heList:
-                        print self.HE_F[ihe]
-        print boundaryF
+                    # print "More than 2 half-edges are following the same edge (%u,%u)" % (iVmin, iVmax)
+                    # print "Facets :"
+                    # for ihe in heList:
+                    #     print self.HE_F[ihe], F[self.HE_F[ihe]]-1
+                    pass
+
+        # Verifying that the boundary edges that have been found are real boundaries (should form a closed hole)
+        # or some non-conformal edges
+        nBound = len(boundaryHE)
+        visited = [False for i in range(nBound)]
+        nonConformalEdges = []
+        holes = []
+        while False in visited:
+            hole = []
+
+            idx = visited.index(False)
+            iheInit = boundaryHE[idx]
+            hole.append(self.HE_targetV[iheInit])
+            visited[idx] = True
+
+            ihe = self.next_HE_on_boundary(iheInit)
+            hole.append(self.HE_targetV[ihe])
+            if ihe not in boundaryHE:
+                nonConformalEdges.append((self.HE_get_origV(iheInit), self.HE_targetV[iheInit]))
+                continue
+            else:
+                visited[boundaryHE.index(ihe)] = True
+
+            closed = False
+            while 1:
+                iheOld = ihe
+                ihe = self.next_HE_on_boundary(ihe)
+                if ihe == iheInit:
+                    closed = True
+                    break
+                hole.append(self.HE_targetV[ihe])
+                if ihe not in boundaryHE:
+                    nonConformalEdges.append((self.HE_get_origV(iheOld), self.HE_targetV[iheOld]))
+                    break
+                else:
+                    visited[boundaryHE.index(ihe)] = True
+
+            if closed:
+                holes.append(hole)
+
+        if self.verbose:
+            if len(nonConformalEdges) != 0:
+                print ''
+                print "Mesh is non-conformal, the program won't be able to correct normal orientation"
+            else:
+                print ''
+                print 'Mesh is conformal'
+
+            if len(holes) == 0:
+                print "Mesh has no holes"
+            else:
+                print ''
+                print "%u holes have been found" % len(holes)
+                idx = 0
+                for hole in holes:
+                    idx+=1
+                    print idx, ':'
+                    print hole
+
         return
 
+    def next_HE_on_boundary(self, ihe):
+        return self.HE_nextHE[self.HE_twinHE[self.HE_nextHE[ihe]]]
 
-def merge_duplicates(V, F, verbose=False):
+    def HE_get_origV(self, ihe):
+        return self.HE_targetV[self.HE_prevHE[ihe]]
+
+
+def merge_duplicates(V, F, verbose=False, tol=1e-8):
     nv, nbdim = V.shape
-
-    tol = 1e-8
 
     blocks = [np.array([j for j in range(nv)])]
     Vtmp = []
@@ -1453,7 +1470,7 @@ if __name__ == '__main__':
     # TESTING
     V, F = merge_duplicates(V, F, verbose=True)
     # F = merge_cells(F)
-    myMesh = Mesh(V, F)
+    myMesh = Mesh(V, F, verbose=True)
     # FIN TESTING
 
     # Dealing with different options
