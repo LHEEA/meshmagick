@@ -101,28 +101,44 @@ class Mesh:
 
         self.nf = F.shape[0]
 
+        def store_edges_informations(iV1, iV2, ihe, edges):
+            # Storing edge informations
+            iVmin = iV1
+            iVmax = iV2
+            if iVmin > iVmax:
+                iVmin, iVmax = iVmax, iVmin
+
+            if not edges.has_key(iVmin):
+                edges[iVmin] = {}
+                edges[iVmin][iVmax] = [ihe]
+            else:
+                if not edges[iVmin].has_key(iVmax):
+                    edges[iVmin][iVmax] = [ihe]
+                else:
+                    edges[iVmin][iVmax].append(ihe)
+            return edges
+
         # Building half-edge data structure
-        edges = [[] for j in range(self.nv - 1)]
+        edges = {}
         self.V_oneOutgoingHE = [-1 for i in range(self.nv)]
         self.F_1HE = [-1 for i in range(self.nf)]
         self.HE_targetV = []
         self.HE_F = []
         self.HE_nextHE = []
         self.HE_prevHE = []
-        self.HE_oppositeHE = [-1 for j in range(4*self.nf)]
         HE_origV = [] # FIXME : Utile ?
 
         nhe = 0
         icell = -1
         for cell in F-1:
+
             icell += 1
-            if cell[0] == cell[-1]:
-                type = 3  # triangle
-            else:
-                type = 4  # quadrangle
+            istop = 3
+            if cell[0] == cell[-1]:  # Triangle
+                istop -= 1
 
             # Iterating over the half-edges of the cell
-            for idx in range(type-1):
+            for idx in range(istop):
                 # New half-edge
                 ihe = nhe
                 nhe += 1
@@ -133,7 +149,7 @@ class Mesh:
                     self.V_oneOutgoingHE[cell[idx]] = ihe
 
                 if idx == 0:
-                    self.HE_prevHE.append(ihe+type-1)
+                    self.HE_prevHE.append(ihe+istop)
                     self.HE_nextHE.append(ihe+1)
                 else:
                     self.HE_prevHE.append(ihe-1)
@@ -141,10 +157,8 @@ class Mesh:
 
                 self.HE_F.append(icell)
 
-                if cell[idx] < cell[idx+1]:
-                    edges[cell[idx]].append(ihe)
-                else:
-                    edges[cell[idx+1]].append(ihe)
+                # Storing edge informations
+                edges = store_edges_informations(cell[idx], cell[idx+1], ihe, edges)
 
             # New half-edge
             ihe = nhe
@@ -152,72 +166,43 @@ class Mesh:
             HE_origV.append(cell[idx])
             self.HE_targetV.append(cell[0])
             self.HE_prevHE.append(ihe-1)
-            self.HE_nextHE.append(ihe-type+1)
+            self.HE_nextHE.append(ihe-istop)
             self.HE_F.append(icell)
 
-            if cell[-1] < cell[0]:
-                edges[cell[-1]].append(ihe)
-            else:
-                edges[cell[0]].append((ihe))
+            # Storing edge informations
+            edges = store_edges_informations(cell[istop], cell[0], ihe, edges)
 
             self.F_1HE[icell] = ihe
 
         self.nhe = nhe
 
         # Getting connectivity of twin half-edges
-        self.HE_boundary = [-1 for j in range(self.nhe)]
-        nbBoundary = 0
-        for inode in range(self.nv-1):
-            heList = edges[inode]
-            nbHE = len(edges[inode])
-            if nbHE == 0:
-                continue
+        self.HE_twinHE = [-1 for i in range(nhe)]
+        self.HE_boundary = [False for i in range(nhe)]
+        boundaryF = []
+        for iVmin in edges.keys():
+            for iVmax in edges[iVmin].keys():
 
-            while len(heList) > 0:
-                ihe = heList.pop()
-                if len(heList) == 0:
-                    # ihe is alone and has no twin, it is a border
+                heList = edges[iVmin][iVmax]
+                helen = len(heList)
+                if helen == 0:
+                    raise "Erreur!!!"
+                elif helen == 1:
+                    # This is a boundary half-edge
+                    ihe = heList[0]
                     self.HE_boundary[ihe] = True
-                    self.HE_oppositeHE[ihe] = -1
-                    nbBoundary += 1
-                    print "facet %u is a boundary" % self.HE_F[ihe]
+                    boundaryF.append(self.HE_F[ihe])
+                elif helen == 2:
+                    # We have a twin
+                    self.HE_twinHE[heList[0]] = heList[1]
+                    self.HE_twinHE[heList[1]] = heList[0]
                 else:
-                    if HE_origV[ihe] == inode:
-                        inode2 = self.HE_targetV[ihe]
-                    else:
-                        inode2 = HE_origV[ihe]
-
-                    # The edge associated to ihe is [inode, inode2]
-                    found = []
-                    for jhe in heList:
-                        # Testing wether jhe is
-                        if HE_origV[jhe] == inode2 or self.HE_targetV[jhe] == inode2:
-                            # Both ihe and jhe share the same edge
-                            self.HE_oppositeHE[ihe] = jhe
-                            self.HE_oppositeHE[jhe] = ihe
-                            self.HE_boundary[ihe] = False
-                            found.append(jhe)
-                    if len(found) > 1:
-                        print "Warning, these %u facets are sharing the same edges" % (len(found)+1)
+                    # More than 2 half-edges are following the same edge...
+                    print "More than 2 half-edges are following the same edge"
+                    print "Facets :"
+                    for ihe in heList:
                         print self.HE_F[ihe]
-                        for i in range(len(found)):
-                            print self.HE_F[found[i]]
-
-                    elif len(found) == 1:
-                        # Only one corresponding half-edge has been found
-                        pass
-                    else:
-                        # No corresponding half-edge has been found, this is a boundary
-                        self.HE_boundary[ihe] = True
-                        self.HE_oppositeHE[ihe] = -1
-                        nbBoundary += 1
-
-                    for elt in found:
-                        try:
-                            heList.pop(elt)
-                        except:
-                            pass
-        print "%u facets are at boundary" % nbBoundary
+        print boundaryF
         return
 
 
@@ -801,14 +786,14 @@ def load_GDF(filename):
     """
     ifile = open(filename, 'r')
 
-    ifile.readline()  # skip one header line
-    ulen, grav = ifile.readline().split()
-    ulen = float(ulen)
-    grav = float(grav)
+    ifile.readline() # skip one header line
+    line = ifile.readline().split()
+    ulen = line[0]
+    grav = line[1]
 
-    isx, isy = ifile.readline().split()
-    isx = int(isx)
-    isy = int(isy)
+    line = ifile.readline().split()
+    isx = line[0]
+    isy = line[1]
 
     nf = int(ifile.readline())
 
