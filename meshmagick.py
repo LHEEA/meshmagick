@@ -712,13 +712,13 @@ def load_GDF(filename):
     ifile = open(filename, 'r')
 
     ifile.readline()  # skip one header line
-    ulen, grav = ifile.readline().split()
-    ulen = float(ulen)
-    grav = float(grav)
+    line = ifile.readline().split()
+    ulen = line[0]
+    grav = line[1]
 
-    isx, isy = ifile.readline().split()
-    isx = int(isx)
-    isy = int(isy)
+    line = ifile.readline().split()
+    isx = line[0]
+    isy = line[1]
 
     nf = int(ifile.readline())
 
@@ -734,6 +734,7 @@ def load_GDF(filename):
             F[icell, k] = iv + 1
 
     ifile.close()
+    V, F = merge_duplicates(V, F)
 
     return V, F
 
