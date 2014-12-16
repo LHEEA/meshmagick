@@ -38,6 +38,7 @@ class HalfEdge:
     def __init__(self, Vorig, Vtarget):
         self.orig = Vorig
         self.target = Vtarget
+
     def reverse(self):
         self.orig, self.target = self.target, self.orig
         self.next, self.prev = self.prev, self.next
@@ -147,7 +148,6 @@ class Mesh:
         return
 
 
-
 def merge_duplicates(V, F, verbose=False):
     nv, nbdim = V.shape
 
@@ -169,32 +169,32 @@ def merge_duplicates(V, F, verbose=False):
 
             # Forming blocks of contiguous values
             newBlock = [indices[0]]
-            for idx in range(len(block)-1):  # -1 as size of diff is size of vector -1
+            for idx in range(len(block) - 1):  # -1 as size of diff is size of vector -1
                 if diff[idx]:  # elements at index idx and idx+1 are equal
-                    newBlock.append(indices[idx+1])
+                    newBlock.append(indices[idx + 1])
                 else:
                     # We add an additional block if it has more than one element
                     if len(newBlock) > 1:
                         newBlock = np.array(newBlock)
                         newBlock.sort()
                         newBlocks.append(newBlock)
-                        if dim == nbdim-1:
+                        if dim == nbdim - 1:
                             Vtmp.append(V[newBlock[0], :])
-                            iperm[newBlock] = len(Vtmp)-1
+                            iperm[newBlock] = len(Vtmp) - 1
                     else:
                         Vtmp.append(V[newBlock[0], :])  # Keeping the vertex as it is a singleton
-                        iperm[newBlock] = len(Vtmp)-1
-                    newBlock = [indices[idx+1]]
+                        iperm[newBlock] = len(Vtmp) - 1
+                    newBlock = [indices[idx + 1]]
             if len(newBlock) > 1:
                 newBlock = np.array(newBlock)
                 newBlock.sort()
                 newBlocks.append(np.array(newBlock))
-                if dim == nbdim-1:
+                if dim == nbdim - 1:
                     Vtmp.append(V[newBlock[0], :])
-                    iperm[newBlock] = len(Vtmp)-1
+                    iperm[newBlock] = len(Vtmp) - 1
             else:
                 Vtmp.append(V[newBlock[0], :])  # Keeping the vertex as it is a singleton
-                iperm[newBlock] = len(Vtmp)-1
+                iperm[newBlock] = len(Vtmp) - 1
 
         # Termination condition if every block in newBlocks is a singleton
         if len(newBlocks) == 0:
@@ -212,18 +212,18 @@ def merge_duplicates(V, F, verbose=False):
     # Updating the connectivities
     nf = F.shape[0]
     for idx in range(nf):
-        F[idx, :] = iperm[F[idx, :]-1]+1
+        F[idx, :] = iperm[F[idx, :] - 1] + 1
 
-    if verbose :
+    if verbose:
         print 'Initial number of vertices : %u' % nv
         print 'New number of vertices     : %u' % nvNew
-        print "%u nodes have been merged" % (nv-nvNew)
+        print "%u nodes have been merged" % (nv - nvNew)
 
     return V, F
 
 
 # =======================================================================
-#                             MESH LOADERS
+# MESH LOADERS
 #=======================================================================
 # Contains here all functions to load meshes from different file formats
 
@@ -656,6 +656,9 @@ def load_STL(filename):
                 F[k][l] = cell.GetPointId(l)
                 F[k][3] = F[k][0]  # always repeating the first node as stl is triangle only
     F += 1
+
+    merge_duplicates(V, F)
+
     return V, F
 
 
@@ -885,19 +888,46 @@ def write_DAT(filename, V, F):
 
     ofile = open(filename, 'w')
 
-    for idx, node in enumerate(V):
-        ofile.write("%10u%16.6E%16.6E%16.6E\n" % (idx, node[0], node[1], node[2]))
-    ofile.write('*RETURN')
+    vertex_block = \
+        ''.join(
+            (
+                '\n'.join(
+                    ''.join(
+                        (
+                            '{:10d}'.format(idx+1),
+                            ''.join('{:16.6E}'.format(elt) for elt in node)
+                        )
+                    ) for (idx, node) in enumerate(V)
+                ),
 
-    for idx, cell in enumerate(F):
-        ofile.write('%10u%10u%10u%10u%10u\n' % (idx, cell[0], cell[1], cell[2], cell[3]))
-    ofile.write('*RETURN')
+                '\n*RETURN\n\n'
+            )
+        )
+
+    cells_block = \
+        ''.join(  # block
+            (
+                '\n'.join(  # line
+                    ''.join(
+                        (
+                            '{:10d}'.format(idx+1),  # index
+                            ''.join('{:10d}'.format(node_id) for node_id in cell)  # node IDs of cell
+                        )
+                    ) for (idx, cell) in enumerate(F)
+                ),
+
+                '\n*RETURN\n\n'
+            )
+        )
+
+    ofile.write(''.join((vertex_block, cells_block)))
 
     ofile.close()
 
     print 'File %s written' % filename
 
     return
+
 
 def write_HST(filename, V, F):
     """
@@ -910,26 +940,45 @@ def write_HST(filename, V, F):
 
     ofile = open(filename, 'w')
 
-    ofile.write('PROJECT:\n')
-    ofile.write('USERS:   meshmagick\n\n')
+    ofile.write(''.join((
+        'PROJECT:\n',
+        'USERS:   meshmagick\n\n'
+        'NBODY   1\n'
+        'RHO   1025.0\n'
+        'GRAVITY   9.81\n\n'
+    )))
 
-    ofile.write('NBODY   1\n')
-    ofile.write('RHO   1025.0\n')
-    ofile.write('GRAVITY   9.81\n\n')
+    coordinates_block = ''.join((  # block
+            'COORDINATES\n',
+            '\n'.join(  # line
+                ''.join(
+                    (
+                        '{:10d}'.format(idx+1),  # index
+                        ''.join('{:16.6E}'.format(elt) for elt in node)  # node coordinates
+                    )
+                ) for (idx, node) in enumerate(V)
+            ),
+            '\nENDCOORDINATES\n\n'
+    ))
 
-    ofile.write('COORDINATES\n')
-    for idx, node in enumerate(V):
-        ofile.write('{0:10d}{1:16.6E}{2:16.6E}{3:16.6E}\n'.format(idx, node[0], node[1], node[2]))
-    ofile.write('ENDCOORDINATES\n\n')
+    ofile.write(coordinates_block)
 
-    ofile.write('PANEL TYPE 0\n')
-    for elem in F:
-        ofile.write('{0:10d}{1:10d}{2:10d}{3:10d}\n'.format(elem[0], elem[1], elem[2], elem[3]))
-    ofile.write('ENDPANEL\n')
+    cells_coordinates = ''.join((  # block
+        'PANEL TYPE 0\n',
+        '\n'.join(  # line
+            ''.join(
+                '{:10d}'.format(node_idx) for node_idx in cell
+            ) for cell in F
+        ),
+        '\nENDPANEL\n\n'
+    ))
+
+    ofile.write(cells_coordinates)
 
     ofile.write('ENDFILE\n')
 
     ofile.close()
+
     print u'File {0:s} written'.format(filename)
 
 
@@ -944,19 +993,28 @@ def write_TEC(filename, V, F):
     """
     ofile = open(filename, 'w')
 
-    nv = max(np.shape(V))
-    nf = max(np.shape(F))
+    nv = V.shape[0]
+    nf = F.shape[0]
 
-    ofile.write('TITLE = \" THIS FILE WAS GENERATED BY MESHMAGICK - FICHIER : %s \" \n' % filename)
+    ofile.write('TITLE = \" THIS FILE WAS GENERATED BY MESHMAGICK - FICHIER : {} \" \n'.format(filename))
 
     ofile.write('VARIABLES = \"X\",\"Y\",\"Z\" \n')
     ofile.write('ZONE T=\"MESH\" \n')
-    ofile.write('N=%10u ,E=%10u ,F=FEPOINT, ET=QUADRILATERAL\n' % (nv, nf))
+    ofile.write('N={nv:10d} ,E={nf:10d} ,F=FEPOINT, ET=QUADRILATERAL\n'.format(nv=nv, nf=nf))
 
-    for node in V:
-        ofile.write('%16.6E%16.6E%16.6E\n' % (node[0], node[1], node[2]))
-    for elem in F:
-        ofile.write('%10u%10u%10u%10u\n' % (elem[0], elem[1], elem[2], elem[3]))
+    node_block = '\n'.join( # block
+        ''.join(
+            ''.join('{:16.6E}'.format(elt) for elt in node)
+        ) for node in V
+    ) + '\n'
+    ofile.write(node_block)
+
+    cells_block = '\n'.join(  # block
+        ''.join(
+            ''.join('{:10d}'.format(node_id) for node_id in cell)
+        ) for cell in F
+    ) + '\n'
+    ofile.write(cells_block)
 
     ofile.close()
     print 'File %s written' % filename
@@ -1070,56 +1128,62 @@ def write_GDF(filename, V, F, *args):
 
 
 def write_MAR(filename, V, F, *args):
-    # nf = max(np.shape(F))
-
     ofile = open(filename, 'w')
 
-    ofile.write('%6u%6u\n' % (2, 0))  # TODO : mettre les symetries en argument
-    idx = 0
-    for vertex in V:
-        idx += 1
-        ofile.write('%6u%12.5f%12.5f%12.5f\n' % (idx, vertex[0], vertex[1],
-                                                 vertex[2]))
-    ofile.write('%6u%6u%6u%6u%6u\n' % (0, 0, 0, 0, 0))
+    ofile.write('{0:6d}{1:6d}\n'.format(2, 0))  # TODO : mettre les symetries en argument
 
-    idx = 0
-    for cell in F:
-        idx += 1
-        ofile.write('%6u%6u%6u%6u\n' % (cell[0], cell[1], cell[2], cell[3]))
+    nv = V.shape[0]
+    vertex_block = '\n'.join(
+        ''.join('{0:10d}{1:16.6f}'.format(idx, elt) for (idx, elt) in zip(xrange(nv), vertex))
+        for vertex in V) + '\n'
+
+    ofile.write(vertex_block)
+
+    ofile.write('{0:6d}{1:6d}{2:6d}{3:6d}{4:6d}\n'.format(0, 0, 0, 0, 0))
+
+    cell_block = '\n'.join(
+        ''.join(u'{0:10d}'.format(elt) for elt in cell)
+        for cell in F
+    ) + '\n'
+    ofile.write(cell_block)
     ofile.write('%6u%6u%6u%6u\n' % (0, 0, 0, 0))
-    ofile.write('%6u\n' % 0)
 
     ofile.close()
     print 'File %s written' % filename
 
 
 def write_STL(filename, V, F):
+    """
+    :type filename: str
+    """
     ofile = open(filename, 'w')
 
     ofile.write('solid meshmagick\n')
-    F -= 1
+    F -= 1  # STL format specifications tells that numerotation starts at 0
+
     for facet in F:
         if facet[0] != facet[3]:
             raise RuntimeError, 'Only full triangle meshes are accepted in STL files'
 
         # Computing normal
-        V0 = V[facet[0], :]
-        V1 = V[facet[1], :]
-        V2 = V[facet[2], :]
+        v0 = V[facet[0], :]
+        v1 = V[facet[1], :]
+        v2 = V[facet[2], :]
 
-        n = np.cross(V1 - V0, V2 - V0)
+        n = np.cross(v1 - v0, v2 - v0)
         n /= np.linalg.norm(n)
 
-        ofile.write('  facet normal %15.6e%15.6e%15.6e\n' % (n[0], n[1], n[2]))
-        ofile.write('    outer loop')
-        ofile.write('      vertex %15.6e%15.6e%15.6e\n' % (V0[0], V0[1], V0[2]))
-        ofile.write('      vertex %15.6e%15.6e%15.6e\n' % (V1[0], V1[1], V1[2]))
-        ofile.write('      vertex %15.6e%15.6e%15.6e\n' % (V2[0], V2[1], V2[2]))
-        ofile.write('    endloop\n')
-        ofile.write('  endfacet\n')
-
+        block_facet = ''.join(['  facet normal ', ''.join('%15.6e' % ni for ni in n) + '\n',
+                               '    outer loop\n',
+                               '      vertex', ''.join('%15.6e' % Vi for Vi in v0) + '\n',
+                               '      vertex', ''.join('%15.6e' % Vi for Vi in v1) + '\n',
+                               '      vertex', ''.join('%15.6e' % Vi for Vi in v2) + '\n',
+                               '    endloop\n',
+                               '  endfacet\n'])
+        ofile.write(block_facet)
     ofile.write('endsolid meshmagick\n')
     ofile.close()
+
     print 'File %s written' % filename
 
 
@@ -1427,6 +1491,7 @@ if __name__ == '__main__':
     if args.merge_duplicates:
         try:
             from pymesh import pymesh
+
             pymesh.set_mesh_data(V, F)
             pymesh.cleandata_py()
             V = np.copy(pymesh.vv)
