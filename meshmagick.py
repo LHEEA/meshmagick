@@ -882,23 +882,16 @@ def write_DAT(filename, V, F):
     :param F:
     :return:
     """
-    ls = os.linesep
 
     ofile = open(filename, 'w')
 
-    idx = 0
-    for node in V:
-        idx += 1
-        line = "%10u%16.6E%16.6E%16.6E"+ls
-        ofile.write(line % (idx, node[0], node[1], node[2]))
-    ofile.write('*RETURN'+ls)
+    for idx, node in enumerate(V):
+        ofile.write("%10u%16.6E%16.6E%16.6E\n" % (idx, node[0], node[1], node[2]))
+    ofile.write('*RETURN')
 
-    idx = 0
-    for cell in F:
-        idx += 1
-        line = '%10u%10u%10u%10u%10u'+ls
-        ofile.write(line % (idx, cell[0], cell[1], cell[2], cell[3]))
-    ofile.write('*RETURN'+ls)
+    for idx, cell in enumerate(F):
+        ofile.write('%10u%10u%10u%10u%10u\n' % (idx, cell[0], cell[1], cell[2], cell[3]))
+    ofile.write('*RETURN')
 
     ofile.close()
 
@@ -915,35 +908,29 @@ def write_HST(filename, V, F):
     :return:
     """
 
-    ls = os.linesep
-
     ofile = open(filename, 'w')
 
-    ofile.write('PROJECT:' + ls)
-    ofile.write('USERS:   meshmagick' + ls + ls)
+    ofile.write('PROJECT:\n')
+    ofile.write('USERS:   meshmagick\n\n')
 
-    ofile.write('NBODY   1' + ls)
-    ofile.write('RHO   1025.0' + ls)
-    ofile.write('GRAVITY   9.81' + ls + ls)
+    ofile.write('NBODY   1\n')
+    ofile.write('RHO   1025.0\n')
+    ofile.write('GRAVITY   9.81\n\n')
 
-    ofile.write('COORDINATES' + ls)
-    idx = 0
-    line = '%10u%16.6E%16.6E%16.6E' + ls
-    for node in V:
-        idx += 1
-        ofile.write(line % (idx, node[0], node[1], node[2]))
-    ofile.write('ENDCOORDINATES' + ls + ls)
+    ofile.write('COORDINATES\n')
+    for idx, node in enumerate(V):
+        ofile.write('{0:10d}{1:16.6E}{2:16.6E}{3:16.6E}\n'.format(idx, node[0], node[1], node[2]))
+    ofile.write('ENDCOORDINATES\n\n')
 
-    ofile.write('PANEL TYPE 0' + ls)
-    line = '%10u%10u%10u%10u' + ls
+    ofile.write('PANEL TYPE 0\n')
     for elem in F:
-        ofile.write(line % (elem[0], elem[1], elem[2], elem[3]))
-    ofile.write('ENDPANEL' + ls + ls)
+        ofile.write('{0:10d}{1:10d}{2:10d}{3:10d}\n'.format(elem[0], elem[1], elem[2], elem[3]))
+    ofile.write('ENDPANEL\n')
 
-    ofile.write('ENDFILE' + ls)
+    ofile.write('ENDFILE\n')
 
     ofile.close()
-    print 'File %s written' % filename
+    print u'File {0:s} written'.format(filename)
 
 
 def write_TEC(filename, V, F):
@@ -1109,7 +1096,7 @@ def write_MAR(filename, V, F, *args):
 def write_STL(filename, V, F):
     ofile = open(filename, 'w')
 
-    ofile.write('solid meshmagick' + os.linesep)
+    ofile.write('solid meshmagick\n')
     F -= 1
     for facet in F:
         if facet[0] != facet[3]:
@@ -1123,19 +1110,15 @@ def write_STL(filename, V, F):
         n = np.cross(V1 - V0, V2 - V0)
         n /= np.linalg.norm(n)
 
-        ofile.write('  facet normal %15.6e%15.6e%15.6e' % (n[0], n[1], n[2]))
-        ofile.write(os.linesep)
-        ofile.write('    outer loop' + os.linesep)
-        ofile.write('      vertex %15.6e%15.6e%15.6e' % (V0[0], V0[1], V0[2]))
-        ofile.write(os.linesep)
-        ofile.write('      vertex %15.6e%15.6e%15.6e' % (V1[0], V1[1], V1[2]))
-        ofile.write(os.linesep)
-        ofile.write('      vertex %15.6e%15.6e%15.6e' % (V2[0], V2[1], V2[2]))
-        ofile.write(os.linesep)
-        ofile.write('    endloop' + os.linesep)
-        ofile.write('  endfacet' + os.linesep)
+        ofile.write('  facet normal %15.6e%15.6e%15.6e\n' % (n[0], n[1], n[2]))
+        ofile.write('    outer loop')
+        ofile.write('      vertex %15.6e%15.6e%15.6e\n' % (V0[0], V0[1], V0[2]))
+        ofile.write('      vertex %15.6e%15.6e%15.6e\n' % (V1[0], V1[1], V1[2]))
+        ofile.write('      vertex %15.6e%15.6e%15.6e\n' % (V2[0], V2[1], V2[2]))
+        ofile.write('    endloop\n')
+        ofile.write('  endfacet\n')
 
-    ofile.write('endsolid meshmagick' + os.linesep)
+    ofile.write('endsolid meshmagick\n')
     ofile.close()
     print 'File %s written' % filename
 
