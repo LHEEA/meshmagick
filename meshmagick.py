@@ -40,6 +40,8 @@ class Mesh:
 
         self.verbose = verbose
 
+        self.normal_consistency = True
+
         # Storing vertices
         if V.shape[0] > 3:
             self.Vcoord = V.T
@@ -160,6 +162,7 @@ class Mesh:
 
         # Verifying that the boundary edges that have been found are real boundaries (should form a closed hole)
         # or some non-conformal edges
+        # Ce qui suit ne peut fonctionner que si
         nBound = len(boundaryHE)
         visited = [False for i in range(nBound)]
         nonConformalEdges = []
@@ -172,27 +175,28 @@ class Mesh:
             hole.append(self.HE_targetV[iheInit])
             visited[idx] = True
 
-            ihe = self.next_HE_on_boundary(iheInit)
-            hole.append(self.HE_targetV[ihe])
-            if ihe not in boundaryHE:
-                nonConformalEdges.append((self.HE_get_origV(iheInit), self.HE_targetV[iheInit]))
+            ihe = self._next_HE_on_boundary(iheInit)
+            if ihe is None:
+                nonConformalEdges.append((self._HE_get_origV(iheInit), self.HE_targetV[iheInit]))
                 continue
             else:
+                hole.append(self.HE_targetV[ihe])
                 visited[boundaryHE.index(ihe)] = True
 
             closed = False
             while 1:
                 iheOld = ihe
-                ihe = self.next_HE_on_boundary(ihe)
-                if ihe == iheInit:
-                    closed = True
-                    break
-                hole.append(self.HE_targetV[ihe])
-                if ihe not in boundaryHE:
-                    nonConformalEdges.append((self.HE_get_origV(iheOld), self.HE_targetV[iheOld]))
+                ihe = self._next_HE_on_boundary(ihe)
+                if ihe is None:
+                    nonConformalEdges.append((self._HE_get_origV(iheOld), self.HE_targetV[iheOld]))
                     break
                 else:
+                    if ihe == iheInit:
+                        closed = True
+                        break
+                    hole.append(self.HE_targetV[ihe])
                     visited[boundaryHE.index(ihe)] = True
+
 
             if closed:
                 holes.append(hole)
@@ -218,14 +222,50 @@ class Mesh:
 
         return
 
-    def next_HE_on_boundary(self, ihe):
-        return self.HE_nextHE[self.HE_twinHE[self.HE_nextHE[ihe]]]
+    def _next_HE_on_boundary(self, ihe):
+        """
+        Returns the next boundary half-edge given a half-edge. If no boundary half-edge is found, return None
+        """
+        # FIXME : This method works also with non-harmonized normals but with a performance cost
 
-    def HE_get_origV(self, ihe):
+        if self.HE_twinHE[ihe] != -1:
+            raise ValueError, "ihe not on the boundary"
+
+        iv_pivot = self.HE_targetV[ihe]
+
+        ihe = self.HE_nextHE[ihe]
+        if self.HE_boundary[ihe]:
+            return ihe
+
+        while 1:
+            ihetwin = self.HE_twinHE[ihe]
+            if ihetwin == -1:
+                print self._get_nodes_of_he(ihe)
+                return None
+            # Managing inconsistant normal orientation
+            if self.HE_targetV[ihetwin] != iv_pivot:  # Consistant orientation
+                self.normal_consistency = False
+                print "Normal orientation inconsistant between " \
+                      "facets {:10d} and {:10d}".format(self.HE_F[ihe], self.HE_F[ihetwin])
+
+            ihe = self.HE_nextHE[ihetwin]
+
+            if self.HE_boundary[ihe]:
+                # ihe is on a boundary but it can be non-conform edge
+                break
+
+        return ihe
+
+
+    def _HE_get_origV(self, ihe):
         return self.HE_targetV[self.HE_prevHE[ihe]]
 
 
-def merge_duplicates(V, F, verbose=False, tol=1e-2):
+    def _get_nodes_of_he(self, ihe):
+        return self._HE_get_origV(ihe), self.HE_targetV[ihe]
+
+
+def merge_duplicates(V, F, verbose=False, tol=1e-3):
     nv, nbdim = V.shape
 
     blocks = [np.array([j for j in range(nv)])]
