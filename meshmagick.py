@@ -1068,7 +1068,7 @@ def build_vtk_mesh_obj(V, F):
     # Building the vtkCell data structure
     F = F - 1
     for cell in F:
-        if cell[0] == cell[-1]:
+        if cell[-1] in cell[:-1]:
             vtk_cell = vtk.vtkTriangle()
             nc = 3
         else:
