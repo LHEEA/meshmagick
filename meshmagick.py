@@ -225,7 +225,7 @@ class Mesh:
         return self.HE_targetV[self.HE_prevHE[ihe]]
 
 
-def merge_duplicates(V, F, verbose=False, tol=1e-8):
+def merge_duplicates(V, F, verbose=False, tol=1e-2):
     nv, nbdim = V.shape
 
     blocks = [np.array([j for j in range(nv)])]
@@ -827,7 +827,7 @@ def load_GDF(filename):
 
     ifile.close()
 
-    V, F = merge_duplicates(V, F)
+    V, F = merge_duplicates(V, F, verbose = True)
 
     return V, F
 
@@ -1082,7 +1082,7 @@ def build_vtk_mesh_obj(V, F):
     # Building the vtkCell data structure
     F = F - 1
     for cell in F:
-        if cell[0] == cell[-1]:
+        if cell[-1] in cell[:-1]:
             vtk_cell = vtk.vtkTriangle()
             nc = 3
         else:
