@@ -1326,12 +1326,57 @@ def flip_normals(F):
     return np.fliplr(F)
 
 
+
+
+def _fix_python_windows_install():
+    """
+    Fix a bug in the install of python into Windows. It modifies a registry key in order
+    to be able to use python scripts in the DOS prompt with command line arguments.
+    In the initial install, the system is unable to catch command line arguments.
+    :return:
+    """
+
+    try:
+        import _winreg as wr
+    except:
+        import sys
+        raise ImportError, "This function only concerns Windows " \
+                                "environment ! your environment is {:s}".format(sys.platform)
+
+    try:
+        key = wr.OpenKey(HKEY_CLASSES_ROOT, r'py_auto_file\shell\open\command', 0, KEY_ALL_ACCESS)
+    except:
+        raise OSError, "The key is not present on you system, " \
+                       "please check you have properly set the .py file association"
+
+    value = wr.QueryValue(key, '')
+
+    if value.find('%*') != -1:
+        print "The fix has already been done."
+        wr.CloseKey(key)
+        return
+
+    value = ' '.join((value, '%*'))
+
+    try:
+        wr.SetValueEx(key, '', 0, REG_SZ, value)
+        wr.CloseKey(key)
+    except:
+        raise OSError, """The function failed to change the registry key. You will have to do it by yourself.
+                        Please append %* to the default value of the following registry key :
+                        HKEY_CLASSES_ROOT\py_auto_file\shell\open\command\
+                        """
+
+
+    return
+
 # =======================================================================
 #                         COMMAND LINE USAGE
 # =======================================================================
 if __name__ == '__main__':
     import argparse
-
+	import sys
+	
     try:
         import argcomplete
 
@@ -1443,11 +1488,23 @@ if __name__ == '__main__':
     parser.add_argument('--optimize', action='store_true',
                         help="""optimizes the mesh. Same as --merge-duplicates
                         and --renumber used together""")
+    parser.add_argument('--fix-windows', action='store_true',
+						help="""Fix the python installation to be able to run
+						python scripts with command line arguments. It is not a
+						meshmagick fix but a windows fix. It modifies a registry key
+						of your Windows installation. It has to be run once, althought
+						the key is checked to ensure that the key has not already been
+						modified."""
 
     if acok:
         argcomplete.autocomplete(parser)
 
     args, unknown = parser.parse_known_args()
+    
+    if args.fix_windows:
+		_fix_python_windows_install()
+		sys.exit(1)
+    
 
     extension_dict = ('vtk', 'vtu', 'gdf', 'mar', 'nat', 'stl', 'msh', 'inp', 'dat', 'tec', 'hst', 'rad')
 
