@@ -1490,8 +1490,11 @@ if __name__ == '__main__':
                         is a normal vector to the plane and c defines its position
                         following the equation <N|X> = c with X a point belonging
                         to the plane""")
-    parser.add_argument('--merge-duplicates', action='store_true',
-                        help="""merges the duplicate nodes in the mesh""")
+    parser.add_argument('-m', '--merge-duplicates', nargs='?', const='1e-8', default='1e-8',
+                        help="""merges the duplicate nodes in the mesh with the absolute tolerance
+                        given as argument (default 1e-8)""")
+
+
     parser.add_argument('--renumber', action='store_true',
                         help="""renumbers the cells and nodes of the mesh so as
                         to optimize cache efficiency in algorithms. Uses the Sloan
@@ -1511,7 +1514,9 @@ if __name__ == '__main__':
         argcomplete.autocomplete(parser)
 
     args, unknown = parser.parse_known_args()
-    
+
+    tol = float(args.merge_duplicates)
+
     if args.fix_windows:
 		_fix_python_windows_install()
 		sys.exit(1)
@@ -1565,8 +1570,9 @@ if __name__ == '__main__':
             V = np.copy(pymesh.vv)
             F = np.copy(pymesh.ff)
             pymesh.free_mesh_data()
+            # TODO: implement the setting of tolerance externally into pymesh
         except:
-            V, F = merge_duplicates(V, F, args.verbose)
+            V, F = merge_duplicates(V, F, verbose=args.verbose, tol=tol)
 
     if args.renumber:
         raise NotImplementedError, "Renumbering is not implemented yet into meshmagick"
