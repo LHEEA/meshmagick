@@ -148,10 +148,19 @@ class Mesh:
         return
 
 
-def merge_duplicates(V, F, verbose=False):
-    nv, nbdim = V.shape
+def merge_duplicates(V, F, verbose=False, tol=1e-8):
+    """
+    Returns a new node array where close nodes have been merged into one node (following tol). It also returns
+    the connectivity array F with the new node IDs.
+    :param V:
+    :param F:
+    :param verbose:
+    :param tol:
+    :return:
+    """
 
-    tol = 1e-8
+    # TODO : Set a tolerance option in command line arguments
+    nv, nbdim = V.shape
 
     blocks = [np.array([j for j in range(nv)])]
     Vtmp = []
@@ -160,47 +169,49 @@ def merge_duplicates(V, F, verbose=False):
         # Sorting the first dimension
         newBlocks = []
         for block in blocks:
-            col = V[block, dim]
-            # Sorting elements in ascending order along dimension dim
-            indices = np.argsort(col)  # Indices are here relative to the block array
-            diff = np.abs(np.diff(col[indices])) < tol
-            if dim > 0:
-                indices = block[indices]  # Making the indices relative to the global node list
+            # Sorting elements of block along values of V[block, dim]
+            block = block[np.argsort(V[block, dim])]
 
             # Forming blocks of contiguous values
-            newBlock = [indices[0]]
-            for idx in range(len(block) - 1):  # -1 as size of diff is size of vector -1
-                if diff[idx]:  # elements at index idx and idx+1 are equal
-                    newBlock.append(indices[idx + 1])
-                else:
-                    # We add an additional block if it has more than one element
-                    if len(newBlock) > 1:
-                        newBlock = np.array(newBlock)
-                        newBlock.sort()
-                        newBlocks.append(newBlock)
-                        if dim == nbdim - 1:
-                            Vtmp.append(V[newBlock[0], :])
-                            iperm[newBlock] = len(Vtmp) - 1
-                    else:
-                        Vtmp.append(V[newBlock[0], :])  # Keeping the vertex as it is a singleton
-                        iperm[newBlock] = len(Vtmp) - 1
-                    newBlock = [indices[idx + 1]]
-            if len(newBlock) > 1:
-                newBlock = np.array(newBlock)
-                newBlock.sort()
-                newBlocks.append(np.array(newBlock))
-                if dim == nbdim - 1:
-                    Vtmp.append(V[newBlock[0], :])
-                    iperm[newBlock] = len(Vtmp) - 1
-            else:
-                Vtmp.append(V[newBlock[0], :])  # Keeping the vertex as it is a singleton
-                iperm[newBlock] = len(Vtmp) - 1
+            istart = 0
+            istop  = 1
+            valref = V[block[0], dim]
+            for (idxloc, idxglob) in enumerate(block):  # idx is a global id
+                if idxloc == 0:
+                    continue
 
-        # Termination condition if every block in newBlocks is a singleton
-        if len(newBlocks) == 0:
-            if verbose:
-                print "No duplicate nodes"
-            return V, F
+                val = V[idxglob, dim]  # current value
+                if np.abs(val-valref) < tol:
+                    # Same value as valref under tolerance tol
+                    istop +=1
+                else:
+                    # End of contiguous block of values
+                    newBlock = block[istart:istop]
+                    if istop-istart == 1:
+                        # singleton
+                        Vtmp.append(V[idxglob])
+                        iperm[idxglob] = len(Vtmp) - 1  # Updating position in iperm
+                    else:
+                        if dim == nbdim - 1:
+                            # newBlock contains definitely a group of nodes to merge
+                            Vtmp.append(V[newBlock[0]])  # TODO : taking the mean of nodes, not the first
+                            iperm[newBlock] = len(Vtmp) - 1
+                        else:
+                            newBlocks.append(newBlock)
+
+                    # Triggering a new initialization of block of values
+                    istart = idxloc
+                    istop = istart + 1
+                    valref = V[block[istart], dim]
+            else:
+                newBlock = block[istart:istop]
+                if istop-istart == 1 or dim == nbdim-1:
+                    # last element of block is a singleton
+                    Vtmp.append(V[newBlock[0]])
+                    iperm[newBlock] = len(Vtmp) - 1
+
+                else:
+                    newBlocks.append(newBlock)
 
         blocks = newBlocks
 
@@ -211,8 +222,8 @@ def merge_duplicates(V, F, verbose=False):
 
     # Updating the connectivities
     nf = F.shape[0]
-    for idx in range(nf):
-        F[idx, :] = iperm[F[idx, :] - 1] + 1
+    for (idx, cell) in enumerate(F):
+        F[idx] = iperm[cell-1]+1
 
     if verbose:
         print 'Initial number of vertices : %u' % nv
@@ -737,7 +748,7 @@ def load_GDF(filename):
             F[icell, k] = iv + 1
 
     ifile.close()
-    V, F = merge_duplicates(V, F)
+    V, F = merge_duplicates(V, F, verbose=True)
 
     return V, F
 
@@ -1375,7 +1386,7 @@ def _fix_python_windows_install():
 # =======================================================================
 if __name__ == '__main__':
     import argparse
-	import sys
+    import sys
 	
     try:
         import argcomplete
@@ -1494,7 +1505,7 @@ if __name__ == '__main__':
 						meshmagick fix but a windows fix. It modifies a registry key
 						of your Windows installation. It has to be run once, althought
 						the key is checked to ensure that the key has not already been
-						modified."""
+						modified.""")
 
     if acok:
         argcomplete.autocomplete(parser)
