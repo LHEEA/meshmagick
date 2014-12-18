@@ -85,10 +85,8 @@ class Mesh:
         HE_origV = [] # FIXME : Utile ?
 
         nhe = 0
-        icell = -1
-        for cell in F-1:
+        for (icell, cell) in enumerate(F-1):  # FIXME : utiliser (icell, cell) in enumerate(F-1)
 
-            icell += 1
             istop = 3
             if cell[-1] in cell[:3]:  # Triangle
                 istop -= 1
@@ -132,6 +130,7 @@ class Mesh:
 
         self.nhe = nhe
 
+
         # Getting connectivity of twin half-edges
         self.HE_twinHE = [-1 for i in range(nhe)]
         self.HE_boundary = [False for i in range(nhe)]
@@ -154,17 +153,19 @@ class Mesh:
                     self.HE_twinHE[heList[1]] = heList[0]
                 else:
                     # More than 2 half-edges are following the same edge...
-                    # print "More than 2 half-edges are following the same edge (%u,%u)" % (iVmin, iVmax)
+                    print "WARNING : More than 2 half-edges are following the same edge (%u,%u)" % (iVmin, iVmax)
+                    for ihe in heList:
+                        self.HE_twinHE[ihe] = heList[:ihe] + heList[ihe+1:]
                     # print "Facets :"
                     # for ihe in heList:
                     #     print self.HE_F[ihe], F[self.HE_F[ihe]]-1
                     pass
 
+        # Ce qui suit est une detection de trous, a faire dans une methode a part ?
         # Verifying that the boundary edges that have been found are real boundaries (should form a closed hole)
         # or some non-conformal edges
         # Ce qui suit ne peut fonctionner que si
-        nBound = len(boundaryHE)
-        visited = [False for i in range(nBound)]
+        visited = [False for i in range(len(boundaryHE))]
         nonConformalEdges = []
         holes = []
         while False in visited:
@@ -175,50 +176,79 @@ class Mesh:
             hole.append(self.HE_targetV[iheInit])
             visited[idx] = True
 
-            ihe = self._next_HE_on_boundary(iheInit)
-            if ihe is None:
-                nonConformalEdges.append((self._HE_get_origV(iheInit), self.HE_targetV[iheInit]))
-                continue
-            else:
-                hole.append(self.HE_targetV[ihe])
-                visited[boundaryHE.index(ihe)] = True
-
-            closed = False
-            while 1:
-                iheOld = ihe
-                ihe = self._next_HE_on_boundary(ihe)
+            ihe = -1  # to enter in the following loop
+            ihe_old = iheInit
+            while ihe != iheInit:
+                ihe = self._next_HE_on_boundary(ihe_old)
                 if ihe is None:
-                    nonConformalEdges.append((self._HE_get_origV(iheOld), self.HE_targetV[iheOld]))
                     break
                 else:
-                    if ihe == iheInit:
-                        closed = True
-                        break
-                    hole.append(self.HE_targetV[ihe])
                     visited[boundaryHE.index(ihe)] = True
 
-
-            if closed:
+                hole.append(self.HE_targetV[ihe])
+                ihe_old = ihe
+            else:
+                # the loop has been closed
+                hole.pop()
                 holes.append(hole)
 
-        if self.verbose:
-            if len(nonConformalEdges) != 0:
-                print ''
-                print "Mesh is non-conformal, the program won't be able to correct normal orientation"
-            else:
-                print ''
-                print 'Mesh is conformal'
 
-            if len(holes) == 0:
-                print "Mesh has no holes"
+        if verbose:
+            nb_hole = len(holes)
+            if nb_hole == 1:
+                msg = "{:d} hole has been found"
             else:
-                print ''
-                print "%u holes have been found" % len(holes)
-                idx = 0
-                for hole in holes:
-                    idx+=1
-                    print idx, ':'
-                    print hole
+                msg = "{:d} holes have been found"
+
+            print msg.format(nb_hole)
+            for (idx, hole) in enumerate(holes):
+                print idx, ':'
+                print hole
+
+            # ihe = self._next_HE_on_boundary(iheInit)
+            # if ihe is None:
+            #     nonConformalEdges.append((self._HE_get_origV(iheInit), self.HE_targetV[iheInit]))
+            #     continue
+            # else:
+            #     hole.append(self.HE_targetV[ihe])
+            #     visited[boundaryHE.index(ihe)] = True
+            #
+            # closed = False
+            # while 1:
+            #     iheOld = ihe
+            #     ihe = self._next_HE_on_boundary(ihe)
+            #     if ihe is None:
+            #         nonConformalEdges.append((self._HE_get_origV(iheOld), self.HE_targetV[iheOld]))
+            #         break
+            #     else:
+            #         if ihe == iheInit:
+            #             closed = True
+            #             break
+            #         hole.append(self.HE_targetV[ihe])
+            #         visited[boundaryHE.index(ihe)] = True
+
+
+            # if closed:
+            #     holes.append(hole)
+
+        # if self.verbose:
+        #     if len(nonConformalEdges) != 0:
+        #         print ''
+        #         print "Mesh is non-conformal, the program won't be able to correct normal orientation"
+        #     else:
+        #         print ''
+        #         print 'Mesh is conformal'
+        #
+        #     if len(holes) == 0:
+        #         print "Mesh has no holes"
+        #     else:
+        #         print ''
+        #         print "%u holes have been found" % len(holes)
+        #         idx = 0
+        #         for hole in holes:
+        #             idx+=1
+        #             print idx, ':'
+        #             print hole
 
         return
 
@@ -226,8 +256,9 @@ class Mesh:
         """
         Returns the next boundary half-edge given a half-edge. If no boundary half-edge is found, return None
         """
-        # FIXME : This method works also with non-harmonized normals but with a performance cost
 
+        # The given ihe should be on a boundary
+        # FIXME : Mieux gerer le cas ou ihe n'est pas un HE frontière
         if self.HE_twinHE[ihe] != -1:
             raise ValueError, "ihe not on the boundary"
 
@@ -266,6 +297,17 @@ class Mesh:
 
 
 def merge_duplicates(V, F, verbose=False, tol=1e-3):
+    """
+    Returns a new node array where close nodes have been merged into one node (following tol). It also returns
+    the connectivity array F with the new node IDs.
+    :param V:
+    :param F:
+    :param verbose:
+    :param tol:
+    :return:
+    """
+
+    # TODO : Set a tolerance option in command line arguments
     nv, nbdim = V.shape
 
     blocks = [np.array([j for j in range(nv)])]
@@ -275,59 +317,58 @@ def merge_duplicates(V, F, verbose=False, tol=1e-3):
         # Sorting the first dimension
         newBlocks = []
         for block in blocks:
-            col = V[block, dim]
-            # Sorting elements in ascending order along dimension dim
-            indices = np.argsort(col)  # Indices are here relative to the block array
-            diff = np.abs(np.diff(col[indices])) < tol
-            if dim > 0:
-                indices = block[indices]  # Making the indices relative to the global node list
+            # Sorting elements of block along values of V[block, dim]
+            block = block[np.argsort(V[block, dim])]
 
             # Forming blocks of contiguous values
-            newBlock = [indices[0]]
-            for idx in range(len(block)-1):  # -1 as size of diff is size of vector -1
-                if diff[idx]:  # elements at index idx and idx+1 are equal
-                    newBlock.append(indices[idx+1])
-                else:
-                    # We add an additional block if it has more than one element
-                    if len(newBlock) > 1:
-                        newBlock = np.array(newBlock)
-                        newBlock.sort()
-                        newBlocks.append(newBlock)
-                        if dim == nbdim-1:
-                            Vtmp.append(V[newBlock[0], :])
-                            iperm[newBlock] = len(Vtmp)-1
-                    else:
-                        Vtmp.append(V[newBlock[0], :])  # Keeping the vertex as it is a singleton
-                        iperm[newBlock] = len(Vtmp)-1
-                    newBlock = [indices[idx+1]]
-            if len(newBlock) > 1:
-                newBlock = np.array(newBlock)
-                newBlock.sort()
-                newBlocks.append(np.array(newBlock))
-                if dim == nbdim-1:
-                    Vtmp.append(V[newBlock[0], :])
-                    iperm[newBlock] = len(Vtmp)-1
-            else:
-                Vtmp.append(V[newBlock[0], :])  # Keeping the vertex as it is a singleton
-                iperm[newBlock] = len(Vtmp)-1
+            istart = 0
+            istop  = 1
+            valref = V[block[0], dim]
+            for (idxloc, idxglob) in enumerate(block):  # idx is a global id
+                if idxloc == 0:
+                    continue
 
-        # Termination condition if every block in newBlocks is a singleton
-        if len(newBlocks) == 0:
-            if verbose:
-                print "No duplicate nodes"
-            return V, F
+                val = V[idxglob, dim]  # current value
+                if np.abs(val-valref) < tol:
+                    # Same value as valref under tolerance tol
+                    istop +=1
+                else:
+                    # End of contiguous block of values
+                    newBlock = block[istart:istop]
+                    if istop-istart == 1:
+                        # singleton
+                        Vtmp.append(V[idxglob])
+                        iperm[idxglob] = len(Vtmp) - 1  # Updating position in iperm
+                    else:
+                        if dim == nbdim -1:
+                            # newBlock contains definitely a group of nodes to merge
+                            Vtmp.append(V[newBlock[0]])  # TODO : taking the mean of nodes, not the first
+                            iperm[newBlock] = len(Vtmp) - 1
+                        else:
+                            newBlocks.append(newBlock)
+
+                    # Triggering a new initialization of block of values
+                    istart = idxloc
+                    istop = istart + 1
+                    valref = V[block[istart], dim]
+            else:
+                newBlock = block[istart:istop]
+                if istop-istart == 1 or dim == nbdim-1:
+                    # last element of block is a singleton
+                    Vtmp.append(V[newBlock[0]])
+                    iperm[newBlock] = len(Vtmp) - 1
+                else:
+                    newBlocks.append(newBlock)
 
         blocks = newBlocks
 
-    # New array of vertices
     V = np.array(Vtmp, dtype=float, order='F')
     nvNew = V.shape[0]
 
-
     # Updating the connectivities
     nf = F.shape[0]
-    for idx in range(nf):
-        F[idx, :] = iperm[F[idx, :]-1]+1
+    for (idx, cell) in enumerate(F):
+        F[idx] = iperm[cell-1]+1
 
     if verbose :
         print 'Initial number of vertices : %u' % nv
@@ -867,7 +908,7 @@ def load_GDF(filename):
 
     ifile.close()
 
-    V, F = merge_duplicates(V, F, verbose = True)
+    V, F = merge_duplicates(V, F)
 
     return V, F
 
@@ -1502,13 +1543,14 @@ if __name__ == '__main__':
             args.outfilename = args.infilename
 
     # IMPORTING DATA FROM FILE
-    try:
-        V, F = load_mesh(args.infilename)
-    except:
-        raise IOError, "Can't open %s" % args.infilename
+    # try:
+    V, F = load_mesh(args.infilename)
+    # except:
+    #     # FIXME :
+    #     raise IOError, "Can't open %s" % args.infilename
 
     # TESTING
-    V, F = merge_duplicates(V, F, verbose=True)
+    # V, F = merge_duplicates(V, F, verbose=True)
     # F = merge_cells(F)
     myMesh = Mesh(V, F, verbose=True)
     # FIN TESTING
