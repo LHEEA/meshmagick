@@ -162,76 +162,67 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
     # TODO : Set a tolerance option in command line arguments
     nv, nbdim = V.shape
 
-    blocks = [np.array([j for j in range(nv)])]
+    levels = [0, nv]
     Vtmp = []
-    iperm = np.zeros((nv), dtype=np.int32)
+    iperm = np.array([i for i in xrange(nv)])
+
     for dim in range(nbdim):
         # Sorting the first dimension
-        newBlocks = []
-        for block in blocks:
-            # Sorting elements of block along values of V[block, dim]
-            block = block[np.argsort(V[block, dim])]
+        values = V[:, dim].copy()
+        if dim > 0:
+            values = values[iperm]
+        levels_tmp = []
+        for (ilevel, istart) in enumerate(levels[:-1]):
+            istop = levels[ilevel+1]
 
-            # Forming blocks of contiguous values
-            istart = 0
-            istop  = 1
-            valref = V[block[0], dim]
-            for (idxloc, idxglob) in enumerate(block):  # idx is a global id
-                if idxloc == 0:
-                    continue
+            if istop-istart > 1:
+                level_values = values[istart:istop]
+                iperm_view = iperm[istart:istop]
 
-                val = V[idxglob, dim]  # current value
-                if np.abs(val-valref) < tol:
-                    # Same value as valref under tolerance tol
-                    istop +=1
-                else:
-                    # End of contiguous block of values
-                    newBlock = block[istart:istop]
-                    if istop-istart == 1:
-                        # singleton
-                        if len(block) == 2:  # quickfix
-                            Vtmp.append(V[block[0]])
-                            iperm[block[0]] = len(Vtmp) - 1
-                        Vtmp.append(V[idxglob])
-                        iperm[idxglob] = len(Vtmp) - 1  # Updating position in iperm
-                    else:
-                        if dim == nbdim - 1:
-                            # newBlock contains definitely a group of nodes to merge
-                            Vtmp.append(V[newBlock[0]])  # TODO : taking the mean of nodes, not the first
-                            iperm[newBlock] = len(Vtmp) - 1
-                        else:
-                            newBlocks.append(newBlock)
+                iperm_tmp = level_values.argsort()
 
-                    # Triggering a new initialization of block of values
-                    istart = idxloc
-                    istop = istart + 1
-                    valref = V[block[istart], dim]
+                level_values[:] = level_values[iperm_tmp]
+                iperm_view[:] = iperm_view[iperm_tmp]
+
+                levels_tmp.append(istart)
+                vref = values[istart]
+
+                for idx in xrange(istart, istop):
+                    cur_val = values[idx]
+                    if np.abs(cur_val - vref) > tol:
+                        levels_tmp.append(idx)
+                        vref = cur_val
+
             else:
-                newBlock = block[istart:istop]
-                if istop-istart == 1 or dim == nbdim-1:
-                    # last element of block is a singleton
-                    Vtmp.append(V[newBlock[0]])
-                    iperm[newBlock] = len(Vtmp) - 1
+                levels_tmp.append(levels[ilevel])
+        if len(levels_tmp) == nv:
+            # No duplicate vertices
+            if verbose:  # TODO : verify it with SEAREV mesh
+                print "The mesh has no duplicate vertices"
+            break
 
-                else:
-                    newBlocks.append(newBlock)
+        levels_tmp.append(nv)
+        levels = levels_tmp
 
-        blocks = newBlocks
+    else:
+        # Building the new merged node list
+        Vtmp = []
+        newID = np.array([i for i in xrange(nv)])
+        for (ilevel, istart) in enumerate(levels[:-1]):
+            istop = levels[ilevel+1]
 
-    # New array of vertices
-    V = np.array(Vtmp, dtype=float, order='F')
-    nvNew = V.shape[0]
+            Vtmp.append(V[iperm[istart]])
+            newID[iperm[range(istart, istop)]] = ilevel
+        V = np.array(Vtmp, dtype=float, order='F')
+        # Applying renumbering to cells
+        for cell in F:
+            cell[:] = newID[cell-1]+1
 
-
-    # Updating the connectivities
-    nf = F.shape[0]
-    for (idx, cell) in enumerate(F):
-        F[idx] = iperm[cell-1]+1
-
-    if verbose:
-        print 'Initial number of vertices : %u' % nv
-        print 'New number of vertices     : %u' % nvNew
-        print "%u nodes have been merged" % (nv - nvNew)
+        if verbose:
+            nv_new = V.shape[0]
+            print "Initial number of nodes : {:d}".format(nv)
+            print "New number of nodes     : {:d}".format(nv_new)
+            print "{:d} nodes have been merged".format(nv-nv_new)
 
     return V, F
 
