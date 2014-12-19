@@ -189,6 +189,9 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
                     newBlock = block[istart:istop]
                     if istop-istart == 1:
                         # singleton
+                        if len(block) == 2:  # quickfix
+                            Vtmp.append(V[block[0]])
+                            iperm[block[0]] = len(Vtmp) - 1
                         Vtmp.append(V[idxglob])
                         iperm[idxglob] = len(Vtmp) - 1  # Updating position in iperm
                     else:
