@@ -1138,11 +1138,8 @@ def write_MAR(filename, V, F, *args):
     ofile.write('{0:6d}{1:6d}\n'.format(2, 0))  # TODO : mettre les symetries en argument
 
     nv = V.shape[0]
-    vertex_block = '\n'.join(
-        ''.join('{0:10d}{1:16.6f}'.format(idx, elt) for (idx, elt) in zip(xrange(nv), vertex))
-        for vertex in V) + '\n'
-
-    ofile.write(vertex_block)
+    for (idx, vertex) in zip(xrange(nv), V):
+        ofile.write('{0:6d}{1:16.6f}{1:16.6f}{1:16.6f}\n'.format(idx+1, vertex[0], vertex[1], vertex[2]))
 
     ofile.write('{0:6d}{1:6d}{2:6d}{3:6d}{4:6d}\n'.format(0, 0, 0, 0, 0))
 
