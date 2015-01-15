@@ -1139,7 +1139,7 @@ def write_MAR(filename, V, F, *args):
 
     nv = V.shape[0]
     for (idx, vertex) in zip(xrange(nv), V):
-        ofile.write('{0:6d}{1:16.6f}{1:16.6f}{1:16.6f}\n'.format(idx+1, vertex[0], vertex[1], vertex[2]))
+        ofile.write('{0:6d}{1:16.6f}{2:16.6f}{3:16.6f}\n'.format(idx+1, vertex[0], vertex[1], vertex[2]))
 
     ofile.write('{0:6d}{1:6d}{2:6d}{3:6d}{4:6d}\n'.format(0, 0, 0, 0, 0))
 
