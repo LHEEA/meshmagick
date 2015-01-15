@@ -894,8 +894,8 @@ def write_DAT(filename, V, F):
     import time
     import os
 
-    rootfilename, _ = os.path.splitext(filename)
-
+    rootfilename, ext = os.path.splitext(filename)
+    filename = rootfilename+ext.upper()
     ofile = open(filename, 'w')
 
     ofile.write('$\n$ Data for DIODORE input file : {0}\n'.format(rootfilename.upper()))
