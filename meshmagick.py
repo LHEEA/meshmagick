@@ -944,7 +944,7 @@ def write_DAT(filename, V, F):
             )
 
     print '-------------------------------------------------'
-    print 'Lines to add to .INP file should look like this :'
+    print 'Suggestion for .inp DIODORE input file :'
     print ''
     print '*NODE,INPUT={0},FRAME=???'.format(rootfilename)
     if quad_block != '':
