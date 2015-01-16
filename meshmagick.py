@@ -1249,6 +1249,84 @@ def convert_mesh(infilename, outfilename, **args):
 #=======================================================================
 #                         MESH MANIPULATION HELPERS
 #=======================================================================
+def mesh_quality(V, F):
+    # This function is reproduced from
+    # http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py
+    import vtk
+    import math
+
+    vtk_mesh = build_vtk_mesh_obj(V, F)
+    quality = vtk.vtkMeshQuality()
+    quality.SetInput(vtk_mesh)
+
+    def DumpQualityStats(iq, arrayname):
+        an = iq.GetOutput().GetFieldData().GetArray(arrayname)
+        cardinality = an.GetComponent(0, 4)
+        range = list()
+        range.append(an.GetComponent(0, 0))
+        range.append(an.GetComponent(0, 2))
+        average = an.GetComponent(0, 1)
+        stdDev = math.sqrt(math.fabs(an.GetComponent(0, 3)))
+        outStr = '%s%g%s%g\n%s%g%s%g' % (
+                '    range: ', range[0], '  -  ', range[1],
+                '    average: ', average, '  , standard deviation: ', stdDev)
+        return outStr
+
+    # Here we define the various mesh types and labels for output.
+    meshTypes = [
+                ['Triangle', 'Triangle',
+                 [['QualityMeasureToArea', ' Area Ratio:'],
+                  ['QualityMeasureToEdgeRatio', ' Edge Ratio:'],
+                  ['QualityMeasureToAspectRatio', ' Aspect Ratio:'],
+                  ['QualityMeasureToRadiusRatio', ' Radius Ratio:'],
+                  ['QualityMeasureToAspectFrobenius', ' Frobenius Norm:'],
+                  ['QualityMeasureToMinAngle', ' Minimal Angle:']
+                 ]
+                 ],
+
+                ['Quad', 'Quadrilateral',
+                 [['QualityMeasureToArea', ' Area Ratio:'],
+                  ['QualityMeasureToEdgeRatio', ' Edge Ratio:'],
+                  ['QualityMeasureToAspectRatio', ' Aspect Ratio:'],
+                  ['QualityMeasureToRadiusRatio', ' Radius Ratio:'],
+                  ['QualityMeasureToMedAspectFrobenius',
+                  ' Average Frobenius Norm:'],
+                  ['QualityMeasureToMaxAspectFrobenius',
+                  ' Maximal Frobenius Norm:'],
+                  ['QualityMeasureToMinAngle', ' Minimal Angle:']
+                 ]
+                ]
+                ]
+
+    if vtk_mesh.GetNumberOfCells() > 0:
+        res = ''
+        for meshType in meshTypes:
+            res += '\n%s%s' % (meshType[1], ' quality of the mesh ')
+            quality.Update()
+            an = quality.GetOutput().GetFieldData().GetArray('Mesh ' + meshType[1] + ' Quality')
+            cardinality = an.GetComponent(0, 4)
+
+            res = ''.join((res, '(%u elements):\n' % (cardinality)))
+
+            # res += '('+str(cardinality) +meshType[1]+'):\n'
+
+            for measure in meshType[2]:
+                eval('quality.Set' + meshType[0] + measure[0] + '()')
+                quality.Update()
+                res += '\n%s\n%s' % (measure[1],
+                        DumpQualityStats(quality,
+                                 'Mesh ' + meshType[1] + ' Quality'))
+            res += '\n'
+
+    info = """\n\nDefinition of the different quality measures is given
+in the verdict library manual :
+http://www.vtk.org/Wiki/images/6/6b/VerdictManual-revA.pdf\n"""
+    res += info
+    return vtk_mesh, res
+
+
+
+
 def get_info(V, F):
     nv = np.size(V, 0)
     nf = np.size(F, 0)
@@ -1270,6 +1348,8 @@ def get_info(V, F):
     print 'o--------------------------------------------------o'
     print ''
 
+    _, res = mesh_quality(V, F)
+    print res
 
 def translate(V, P):
     """
