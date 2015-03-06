@@ -23,7 +23,7 @@ import os, sys
 import numpy as np
 
 __author__ = "Francois Rongere"
-__copyright__ = "Copyright 2014, Ecole Centrale de Nantes"
+__copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
 __credits__ = ["Francois Rongere"]
 __licence__ = "CeCILL"
 __version__ = "0.1"
@@ -1325,8 +1325,6 @@ http://www.vtk.org/Wiki/images/6/6b/VerdictManual-revA.pdf\n"""
     return vtk_mesh, res
 
 
-
-
 def get_info(V, F):
     nv = np.size(V, 0)
     nf = np.size(F, 0)
@@ -1350,6 +1348,7 @@ def get_info(V, F):
 
     _, res = mesh_quality(V, F)
     print res
+
 
 def translate(V, P):
     """
@@ -1439,8 +1438,6 @@ def flip_normals(F):
     return np.fliplr(F)
 
 
-
-
 def _fix_python_windows_install():
     """
     Fix a bug in the install of python into Windows. It modifies a registry key in order
@@ -1516,7 +1513,7 @@ if __name__ == '__main__':
                          - tec      (R/W) : file format for visualization in Tecplot
 
                     """,
-        epilog="""Copyright 2014  - Francois Rongere\nEcole Centrale de Nantes""",
+        epilog="""--  Copyright 2014-2015  --  Francois Rongere\nEcole Centrale de Nantes  --""",
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('infilename',
@@ -1574,7 +1571,10 @@ if __name__ == '__main__':
                         help="""sets the unit for rotations. Default is deg""")
     parser.add_argument('-s', '--scale',
                         type=float,
-                        help="""scales the mesh""")
+                        help="""scales the mesh. CAUTION : if used along
+                         with a translation option, the scaling is done before
+                        the translations. The translation magnitude should be set
+                        accordingly to the newly scaled mesh.""")
     parser.add_argument('--flip-normals', action='store_true',
                         help="""flips the normals of the mesh""")
     parser.add_argument('--cut', action='store_true',
