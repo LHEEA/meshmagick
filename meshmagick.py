@@ -1189,6 +1189,9 @@ def write_STL(filename, V, F):
     """
     :type filename: str
     """
+
+    # TODO : replace this implementation by using the vtk functionalities
+
     ofile = open(filename, 'w')
 
     ofile.write('solid meshmagick\n')
@@ -1218,32 +1221,6 @@ def write_STL(filename, V, F):
     ofile.close()
 
     print 'File %s written' % filename
-
-
-def convert_mesh(infilename, outfilename, **args):
-    """
-    Function to convert meshes into an other format. Conversion is based on extensions
-    used.
-    """
-
-    V, F = load_mesh(infilename)
-
-    # Retrieving extension of outfilename
-    _, ext = os.path.splitext(outfilename)
-    ext = ext.lower()
-    # Writing the mesh in outfilename
-    if ext == '.vtk' or ext == '.vtu':
-        write_VTK(outfilename, V, F)
-    elif ext == '.gdf':
-        write_GDF(outfilename, V, F)
-    elif ext == '.mar':
-        write_MAR(outfilename, V, F)
-    elif ext == '.nat':
-        write_NAT(outfilename, V, F)
-    elif ext == '.stl':
-        write_STL(outfilename, V, F)
-    else:
-        raise RuntimeError, 'extension %s is not recognized' % ext
 
 
 #=======================================================================
@@ -1495,25 +1472,45 @@ if __name__ == '__main__':
         acok = False
 
     parser = argparse.ArgumentParser(
-        description="""A python module to manipulate meshes from different format used in hydrodynamics as well as for
-                    visualization of these meshes into paraview and tecplot.
+        description="""  --  MESHMAGICK --
+                    A python module and a command line utility to manipulate meshes from different format used in
+                    hydrodynamics as well as for visualization.
 
-                    The formats actually supported are (R: reading; W: writing):
+                    The formats currently supported by meshmagick are :
 
-                         - mar      (R/W) : the format used by BEM NEMOH software (Ecole Centrale de Nantes)
-                         - gdf      (R/W) : the format used by BEM WAMIT software (WAMIT, Inc.)
-                         - inp      (R)   : the format used by BEM DIODORE software (PRINCIPIA)
-                         - DAT      (W)   : the format of meshfiles used in DIODORE software (PRINCIPIA)
-                         - hst      (R/W) : the format used by BEM HYDROSTAR software (BV)
-                         - nat      (R/W) : a natural format to store unstructured 2D meshes
+                    *---------------*-------------*-----------------*-----------------------*
+                    | File          | R: Reading  | Software        | Keywords              |
+                    | extension     | W: writing  |                 |                       |
+                    *---------------*-------------*-----------------*-----------------------*
+                    |     .mar      |    R/W      | NEMOH (1)       | nemoh, mar            |
+                    |     .gdf      |    R/W      | WAMIT (2)       | wamit, gdf            |
+                    |     .inp      |    R        | DIODORE (3)     | diodore-inp, inp      |
+                    |     .DAT      |    R/W      | DIODORE (3)     | diodore-dat           |
+                    |     .hst      |    R/W      | HYDROSTAR (4)   | hydrostar, hst        |
+                    |     .nat      |    R/W      |    -            | natural, nat          |
+                    |     .msh      |    R        | GMSH (5)        | gmsh, msh             |
+                    |     .stl      |    R/W      |    -            | stl                   |
+                    |     .vtu      |    R/W      | PARAVIEW (6)    | paraview, vtu         |
+                    |     .vtk      |    R/W      | PARAVIEW (6)    | paraview-legacy, vtk  |
+                    |     .tec      |    R/W      | TECPLOT (7)     | tecplot, tec          |
+                    *---------------*-------------------------------------------------------*
 
-                         - msh      (R)   : the file format from the GMSH mesher (C. Geuzaine, J.-F. Remacle)
-                         - stl      (R/W) : broadly used file format for meshes, mostly generated from CAO softwares
-                         - vtk, vtu (R/W) : file format for visualization in Paraview software (Kitware) (vtk is the old release and vtu is the new release)
-                         - tec      (R/W) : file format for visualization in Tecplot
+                    By default, Meshmagick uses the filename extensions to choose the appropriate reader/writer.
+                    This behaviour might be bypassed using the -ifmt and -ofmt optional arguments. When using these
+                    options, keywords defined in the table above must be used as format identifiers.
+
+                    (1) NEMOH is an open source BEM Software for seakeeping developped at Ecole Centrale de Nantes (LHHEA)
+                    (2) WAMIT is a BEM Software for seakeeping developped by WAMIT, Inc.
+                    (3) DIODORE is a BEM Software for seakeeping developped by PRINCIPIA
+                    (4) HYDROSTAR is a BEM Software for seakeeping developped by BUREAU VERITAS
+                    (5) GMSH is an open source meshing software developped by C. Geuzaine and J.-F. Remacle
+                    (6) PARAVIEW is an open source visualization software developped by Kitware
+                    (7) TECPLOT is a visualization software developped by Tecplot
+
 
                     """,
-        epilog="""--  Copyright 2014-2015  --  Francois Rongere\nEcole Centrale de Nantes  --""",
+        epilog="""             --  Copyright 2014-2015  --
+        --  Francois Rongere  /  Ecole Centrale de Nantes  --""",
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('infilename',
@@ -1521,23 +1518,26 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--outfilename',
                         help='path of the output mesh file. The format of ' +
                              'this file is determined from the extension given')
-
-    parser.add_argument('-fmt', '--format', type=str,
-                        help="""specifies the output file format and use the base name
-                        of the infilename instead of the output file. File format has
-                        to be chosen among VTK, VTU, MAR, GDF, STL, NAT, MHE. Default is VTU.
-                        If -o option has been done, it has no effect""")
+    parser.add_argument('-ifmt', '--input-format',
+                        help="""Input format. Meshmagick will read the input file considering the INPUT_FORMAT rather than using the extension""")
+    parser.add_argument('-ofmt', '--output-format',
+                        help="""Output format. Meshmagick will write the output file considering the OUTPUT_FORMAT rather than using the extension""")
+    # parser.add_argument('-fmt', '--format', type=str,
+    #                     help="""specifies the output file format and use the base name
+    #                     of the infilename instead of the output file. File format has
+    #                     to be chosen among VTK, VTU, MAR, GDF, STL, NAT, MHE. Default is VTU.
+    #                     If -o option has been done, it has no effect""")
     parser.add_argument('-v', '--verbose',
                         help="""make the program give more informations on the computations""",
                         action='store_true')
     parser.add_argument('-i', '--info',
                         help="""extract informations on the mesh on the standard output""",
                         action='store_true')
-    parser.add_argument('-b', '--binary',
-                        help="""specifies wether the output file will be in a binary
-                        format. It is only used when used with --convert option and
-                        with .vtu output format""",
-                        action='store_true')
+    # parser.add_argument('-b', '--binary',
+    #                     help="""specifies wether the output file will be in a binary
+    #                     format. It is only used when used with --convert option and
+    #                     with .vtu output format""",
+    #                     action='store_true')
 
     parser.add_argument('-t', '--translate',
                         nargs=3, type=float,
@@ -1565,10 +1565,10 @@ if __name__ == '__main__':
     parser.add_argument('-rz', '--rotatez',
                         nargs=1, type=str,
                         help="""rotates the mesh around the z direction""")
-    parser.add_argument('-u', '--unit',
-                        type=str, choices=['rad', 'deg'],
-                        default='deg',
-                        help="""sets the unit for rotations. Default is deg""")
+    # parser.add_argument('-u', '--unit',
+    #                     type=str, choices=['rad', 'deg'],
+    #                     default='deg',
+    #                     help="""sets the unit for rotations. Default is deg""")
     parser.add_argument('-s', '--scale',
                         type=float,
                         help="""scales the mesh. CAUTION : if used along
@@ -1577,40 +1577,40 @@ if __name__ == '__main__':
                         accordingly to the newly scaled mesh.""")
     parser.add_argument('--flip-normals', action='store_true',
                         help="""flips the normals of the mesh""")
-    parser.add_argument('--cut', action='store_true',
-                        help="""cuts the mesh with the plane defined with the option
-                        --plane""")
-    parser.add_argument('--symmetrize', type=str,
-                        nargs='*', default=None, choices=['x', 'y', 'z', 'p'],
-                        help="""performs a symmetry of the mesh.
-                        If x argument is given, then a symmetry with respect to plane
-                        0yz etc... If p or no argument is given, then the --plane option
-                        is used.""")
-    parser.add_argument('-p', '--plane', nargs=4, type=float,
-                        help="""Defines a plane used by the --cut option.
-                        It is followed by the floats nx ny nz c where [nx, ny, nz]
-                        is a normal vector to the plane and c defines its position
-                        following the equation <N|X> = c with X a point belonging
-                        to the plane""")
+    # parser.add_argument('--cut', action='store_true',
+    #                     help="""cuts the mesh with the plane defined with the option
+    #                     --plane""")
+    # parser.add_argument('--symmetrize', type=str,
+    #                     nargs='*', default=None, choices=['x', 'y', 'z', 'p'],
+    #                     help="""performs a symmetry of the mesh.
+    #                     If x argument is given, then a symmetry with respect to plane
+    #                     0yz etc... If p or no argument is given, then the --plane option
+    #                     is used.""")
+    # parser.add_argument('-p', '--plane', nargs=4, type=float,
+    #                     help="""Defines a plane used by the --cut option.
+    #                     It is followed by the floats nx ny nz c where [nx, ny, nz]
+    #                     is a normal vector to the plane and c defines its position
+    #                     following the equation <N|X> = c with X a point belonging
+    #                     to the plane""")
     parser.add_argument('-m', '--merge-duplicates', nargs='?', const='1e-8', default='1e-8',
                         help="""merges the duplicate nodes in the mesh with the absolute tolerance
                         given as argument (default 1e-8)""")
 
 
-    parser.add_argument('--renumber', action='store_true',
-                        help="""renumbers the cells and nodes of the mesh so as
-                        to optimize cache efficiency in algorithms. Uses the Sloan
-                        method""")
-    parser.add_argument('--optimize', action='store_true',
-                        help="""optimizes the mesh. Same as --merge-duplicates
-                        and --renumber used together""")
-    parser.add_argument('--fix-windows', action='store_true',
-						help="""Fix the python installation to be able to run
-						python scripts with command line arguments. It is not a
-						meshmagick fix but a windows fix. It modifies a registry key
-						of your Windows installation. It has to be run once, althought
-						the key is checked to ensure that the key has not already been
-						modified.""")
+    # parser.add_argument('--renumber', action='store_true',
+    #                     help="""renumbers the cells and nodes of the mesh so as
+    #                     to optimize cache efficiency in algorithms. Uses the Sloan
+    #                     method""")
+    # parser.add_argument('--optimize', action='store_true',
+    #                     help="""optimizes the mesh. Same as --merge-duplicates
+    #                     and --renumber used together""")
+    # parser.add_argument('--fix-windows', action='store_true',
+		# 				help="""Fix the python installation to be able to run
+		# 				python scripts with command line arguments. It is not a
+		# 				meshmagick fix but a windows fix. It modifies a registry key
+		# 				of your Windows installation. It has to be run once, althought
+		# 				the key is checked to ensure that the key has not already been
+		# 				modified.""")
 
     if acok:
         argcomplete.autocomplete(parser)
@@ -1619,9 +1619,9 @@ if __name__ == '__main__':
 
     tol = float(args.merge_duplicates)
 
-    if args.fix_windows:
-		_fix_python_windows_install()
-		sys.exit(1)
+    # if args.fix_windows:
+		# _fix_python_windows_install()
+		# sys.exit(1)
     
 
     extension_dict = ('vtk', 'vtu', 'gdf', 'mar', 'nat', 'stl', 'msh', 'inp', 'dat', 'tec', 'hst', 'rad')
@@ -1637,31 +1637,28 @@ if __name__ == '__main__':
         write_file = True
         if ext[1:].lower() not in extension_dict:
             raise IOError, 'Extension "%s" is not known' % ext
-    else:
-        if args.format is not None:
-            write_file = True
-            if args.format.lower() not in extension_dict:
-                raise IOError, 'Extension ".%s" is not known' % args.format
-            root, _ = os.path.splitext(args.infilename)
-            args.outfilename = root + '.' + args.format
-        else:
-            args.outfilename = args.infilename
+    # else:
+        # if args.format is not None:
+        #     write_file = True
+        #     if args.format.lower() not in extension_dict:
+        #         raise IOError, 'Extension ".%s" is not known' % args.format
+        #     root, _ = os.path.splitext(args.infilename)
+        #     args.outfilename = root + '.' + args.format
+        # else:
+        #     args.outfilename = args.infilename
 
 
 
 
     # Importing data from file
-    try:
-        V, F = load_mesh(args.infilename)
-    except:
-        raise IOError, "Can't open %s" % args.infilename
+    V, F = load_mesh(args.infilename)
 
     # myMesh = Mesh(V, F)
 
     # Dealing with different options
-    if args.optimize:
-        args.merge_duplicates = True
-        args.renumber = True
+    # if args.optimize:
+    #     args.merge_duplicates = True
+    #     args.renumber = True
 
     if args.merge_duplicates:
         try:
@@ -1676,16 +1673,16 @@ if __name__ == '__main__':
         except:
             V, F = merge_duplicates(V, F, verbose=args.verbose, tol=tol)
 
-    if args.renumber:
-        raise NotImplementedError, "Renumbering is not implemented yet into meshmagick"
+    # if args.renumber:
+    #     raise NotImplementedError, "Renumbering is not implemented yet into meshmagick"
         # try:
         #     from pymesh import pymesh
         # except:
         #     raise ImportError, 'pymesh module is not available, unable to use the --renumber option'
         #     ##raise NotImplementedError, '--renumber option is not implemented yet'
 
-    if args.binary:
-        raise NotImplementedError, 'Not implemented yet'
+    # if args.binary:
+    #     raise NotImplementedError, 'Not implemented yet'
 
     if args.translate is not None:
         V = translate(V, args.translate)
@@ -1700,28 +1697,28 @@ if __name__ == '__main__':
         V = translate_1D(V, args.translatez, 'z')
         write_file = True
 
-    def cast_angles(angles, unit):
-        from math import pi
-
-        if unit == 'deg':
-            try:
-                angles = map(float, angles)
-            except:
-                raise IOError, 'Bad input for rotation arguments'
-            angles = np.array(angles) * pi / 180.
-        else:
-            def evalpi(elt):
-                from math import pi
-
-                elttemp = elt.replace('pi', '1.')
-                try:
-                    elttemp = eval(elttemp)
-                except:
-                    raise IOError, 'Bad input %s' % elt
-                return float(eval(elt))
-
-            angles = map(evalpi, angles)
-        return angles
+    # def cast_angles(angles, unit):
+    #     from math import pi
+    #
+    #     if unit == 'deg':
+    #         try:
+    #             angles = map(float, angles)
+    #         except:
+    #             raise IOError, 'Bad input for rotation arguments'
+    #         angles = np.array(angles) * pi / 180.
+    #     else:
+    #         def evalpi(elt):
+    #             from math import pi
+    #
+    #             elttemp = elt.replace('pi', '1.')
+    #             try:
+    #                 elttemp = eval(elttemp)
+    #             except:
+    #                 raise IOError, 'Bad input %s' % elt
+    #             return float(eval(elt))
+    #
+    #         angles = map(evalpi, angles)
+    #     return angles
 
     if args.rotate is not None:
         args.rotate = cast_angles(args.rotate, args.unit)
@@ -1740,8 +1737,8 @@ if __name__ == '__main__':
     if args.scale is not None:
         V = scale(V, args.scale)
 
-    if args.symmetrize is not None:
-        raise NotImplementedError, "Symmetrization is not implemented yet into meshmagick"
+    # if args.symmetrize is not None:
+    #     raise NotImplementedError, "Symmetrization is not implemented yet into meshmagick"
         # try:
         #     from pymesh import pymesh
         # except:
@@ -1774,8 +1771,8 @@ if __name__ == '__main__':
         #     F = np.copy(pymesh.ff)
         #     pymesh.free_mesh_data()
 
-    if args.cut:
-        raise NotImplementedError, '--cut option is not implemented yet'
+    # if args.cut:
+    #     raise NotImplementedError, '--cut option is not implemented yet'
 
     if args.flip_normals:
         F = flip_normals(F)
