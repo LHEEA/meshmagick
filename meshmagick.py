@@ -33,7 +33,6 @@ __status__ = "Development"
 
 real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?'
 
-
 class HalfEdge:
     def __init__(self, Vorig, Vtarget):
         self.orig = Vorig
@@ -232,37 +231,18 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
 #=======================================================================
 # Contains here all functions to load meshes from different file formats
 
-def load_mesh(filename):
+def load_mesh(filename, format):
     """
     Function to load every known mesh file format
     """
-    _, ext = os.path.splitext(filename)
-    ext = ext.lower()
-    if ext == '.vtk' or ext == '.vtu':
-        V, F = load_VTK(filename)
-    elif ext == '.gdf':
-        V, F = load_GDF(filename)
-    elif ext == '.mar':
-        V, F = load_MAR(filename)
-    elif ext == '.nat':
-        V, F = load_NAT(filename)
-    elif ext == '.stl':
-        V, F = load_STL(filename)
-    elif ext == '.msh':
-        V, F = load_MSH(filename)
-    elif ext == '.inp':
-        V, F = load_INP(filename)
-    elif ext == '.dat':
-        raise NotImplementedError, "Not implemented"
-        # V, F = load_DAT(filename)
-    elif ext == '.tec':
-        V, F = load_TEC(filename)
-    elif ext == '.hst':
-        V, F = load_HST(filename)
-    elif ext == '.rad':
-        V, F = load_RAD(filename)
-    else:
-        raise RuntimeError, 'extension %s is not recognized' % ext
+    os.path.isfile(filename)
+
+    if not extension_dict.has_key(format):
+        raise IOError, 'Extension ".%s" is not known' % format
+
+    loader = extension_dict[format][0]
+
+    V, F = loader(filename)
 
     return V, F
 
@@ -374,11 +354,6 @@ def load_INP(filename):
     ifile = open(filename, 'r')
     text = ifile.read()
     ifile.close()
-
-    # End lines for every system
-    # endl = r'(?:\n|\r|\r\n)'
-
-
 
     # Retrieving frames into a dictionnary frames
     pattern_FRAME_str = r'^\s*\*FRAME,NAME=(.+)[\r\n]+(.*)'
@@ -587,6 +562,21 @@ def load_TEC(filename):
     return V, F
 
 
+def load_VTU(filename):
+    """
+    This function loads data from XML VTK file format.
+
+    Usage:
+        V, F = load_VTU(filename)
+    """
+
+    from vtk import vtkXMLUnstructuredGridReader
+    reader = vtkXMLUnstructuredGridReader()
+
+    V, F = _load_paraview(filename, reader)
+    return V, F
+
+
 def load_VTK(filename):
     """
     This function loads data from XML and legacy VTK file format.
@@ -595,19 +585,14 @@ def load_VTK(filename):
     Usage:
         V, F = load_VTK(filename)
     """
-    ext = os.path.splitext(filename)[1]
+    from vtk import vtkUnstructuredGridReader
+    reader = vtkUnstructuredGridReader()
 
-    if ext == '.vtu':  # XML file format for unstructured grid
-        from vtk import vtkXMLUnstructuredGridReader
+    V, F = _load_paraview(filename, reader)
+    return V, F
 
-        reader = vtkXMLUnstructuredGridReader()
-    elif ext == '.vtk':  # Legacy file format for unstructured grid
-        from vtk import vtkUnstructuredGridReader
 
-        reader = vtkUnstructuredGridReader()
-
-    else:
-        raise RuntimeError('Unknown file type %s ' % filename)
+def _load_paraview(filename, reader):
 
     # Importing the mesh from the file
     reader.SetFileName(filename)
@@ -851,35 +836,17 @@ def load_MSH(filename):
 #                             MESH WRITERS
 #=======================================================================
 
-def write_mesh(filename, V, F):
+def write_mesh(filename, V, F, format):
     """
     This function writes mesh data into filename following its extension
     """
-    _, ext = os.path.splitext(filename)
 
-    ext = ext.lower()
-    if ext == '.vtk' or ext == '.vtu':
-        write_VTK(filename, V, F)
-    elif ext == '.gdf':
-        write_GDF(filename, V, F)
-    elif ext == '.mar':
-        write_MAR(filename, V, F)
-    elif ext == '.nat':
-        write_NAT(filename, V, F)
-    elif ext == '.stl':
-        write_STL(filename, V, F)
-    elif ext == '.msh':
-        raise NotImplementedError, 'MSH file writer not implemented'
-    elif ext == '.inp':
-        raise NotImplementedError, 'INP file writer not implemented'
-    elif ext == '.dat':
-        write_DAT(filename, V, F)
-    elif ext == '.tec':
-        write_TEC(filename, V, F)
-    elif ext == '.hst':
-        write_HST(filename, V, F)
-    else:
-        raise RuntimeError, 'extension %s is not recognized' % ext
+    if not extension_dict.has_key(format):
+        raise IOError, 'Extension "%s" is not known' % format
+
+    writer = extension_dict[format][1]
+
+    writer(filename, V, F)
 
 
 def write_DAT(filename, V, F):
@@ -921,9 +888,12 @@ def write_DAT(filename, V, F):
 
     quad_block = '$\n$ ELEMENT,TYPE=Q4C000,ELSTRUCTURE={0}'.format(rootfilename.upper())
     tri_block  = '$\n$ ELEMENT,TYPE=T3C000,ELSTRUCTURE={0}'.format(rootfilename.upper())
+    nq = 0
+    nt = 0
     for (idx, cell) in enumerate(F):
-        if cell[3] != cell[2]:
+        if cell[0] != cell[-1]:
             # quadrangle
+            nq += 1
             quad_block = ''.join(
                 (quad_block,
                  '\n',
@@ -935,6 +905,7 @@ def write_DAT(filename, V, F):
 
         else:
             # Triangle
+            nt += 1
             tri_block = ''.join(
                 (tri_block,
                 '\n',
@@ -947,11 +918,12 @@ def write_DAT(filename, V, F):
     print 'Suggestion for .inp DIODORE input file :'
     print ''
     print '*NODE,INPUT={0},FRAME=???'.format(rootfilename)
-    if quad_block != '':
+
+    if nq > 0:
         quad_block = ''.join((quad_block, '\n*RETURN\n'))
         ofile.write(quad_block)
         print '*ELEMENT,TYPE=Q4C000,ELSTRUCTURE={0},INPUT={0}'.format(rootfilename)
-    if tri_block != '':
+    if nt > 0:
         tri_block = ''.join((tri_block, '\n*RETURN\n'))
         ofile.write(tri_block)
         print '*ELEMENT,TYPE=T3C000,ELSTRUCTURE={0},INPUT={0}'.format(rootfilename)
@@ -1056,27 +1028,27 @@ def write_TEC(filename, V, F):
     print 'File %s written' % filename
 
 
+def write_VTU(filename, V, F):
+    from vtk import vtkXMLUnstructuredGridWriter
+    writer = vtkXMLUnstructuredGridWriter()
+    writer.SetDataModeToAscii()
+    _write_paraview(filename, V, F, writer)
+
+
 def write_VTK(filename, V, F):
     """ This function writes data in a VTK XML file.
     Currently, it only support writing unstructured grids
     """
 
-    vtk_mesh = build_vtk_mesh_obj(V, F)
-    # Writing it to the file
-    _, ext = os.path.splitext(filename)
-    if ext == '.vtk':
-        from vtk import vtkUnstructuredGridWriter
+    from vtk import vtkUnstructuredGridWriter
+    writer = vtkUnstructuredGridWriter()
+    _write_paraview(filename, V, F, writer)
 
-        writer = vtkUnstructuredGridWriter()
-    elif ext == '.vtu':
-        from vtk import vtkXMLUnstructuredGridWriter
 
-        writer = vtkXMLUnstructuredGridWriter()
-        writer.SetDataModeToAscii()
-    else:
-        raise RuntimeError, 'Unknown file extension %s' % ext
+def _write_paraview(filename, V, F, writer):
 
     writer.SetFileName(filename)
+    vtk_mesh = build_vtk_mesh_obj(V, F)
     writer.SetInput(vtk_mesh)
     writer.Write()
     print 'File %s written' % filename
@@ -1221,6 +1193,12 @@ def write_STL(filename, V, F):
     ofile.close()
 
     print 'File %s written' % filename
+
+def write_INP(filename, V, F):
+    raise NotImplementedError
+
+def write_MSH(filename, V, F):
+    raise NotImplementedError
 
 
 #=======================================================================
@@ -1460,6 +1438,29 @@ def _fix_python_windows_install():
 # =======================================================================
 #                         COMMAND LINE USAGE
 # =======================================================================
+extension_dict = { #keyword           reader,   writer
+                  'mar':             (load_MAR, write_MAR),
+                  'nemoh':           (load_MAR, write_MAR),
+                  'wamit':           (load_GDF, write_GDF),
+                  'gdf':             (load_GDF, write_GDF),
+                  'diodore-inp':     (load_INP, write_INP),
+                  'inp':             (load_INP, write_INP),
+                  'hydrostar':       (load_HST, write_HST),
+                  'hst':             (load_HST, write_HST),
+                  'natural':         (load_NAT, write_NAT),
+                  'nat':             (load_NAT, write_NAT),
+                  'gmsh':            (load_MSH, write_MSH),
+                  'msh':             (load_MSH, write_MSH),
+                  'stl':             (load_STL, write_STL),# FIXME: Verifier que ce n'est pas load_STL2
+                  'paraview':        (load_VTK, write_VTU),# VTU
+                  'vtu':             (load_VTK, write_VTU),
+                  'paraview-legacy': (load_VTK, write_VTK),# VTK
+                  'vtk':             (load_VTK, write_VTK),
+                  'tecplot':         (load_TEC, write_TEC),
+                  'tec':             (load_TEC, write_TEC)
+                  }
+
+
 if __name__ == '__main__':
     import argparse
     import sys
@@ -1485,7 +1486,6 @@ if __name__ == '__main__':
                     |     .mar      |    R/W      | NEMOH (1)       | nemoh, mar            |
                     |     .gdf      |    R/W      | WAMIT (2)       | wamit, gdf            |
                     |     .inp      |    R        | DIODORE (3)     | diodore-inp, inp      |
-                    |     .DAT      |    R/W      | DIODORE (3)     | diodore-dat           |
                     |     .hst      |    R/W      | HYDROSTAR (4)   | hydrostar, hst        |
                     |     .nat      |    R/W      |    -            | natural, nat          |
                     |     .msh      |    R        | GMSH (5)        | gmsh, msh             |
@@ -1619,46 +1619,23 @@ if __name__ == '__main__':
 
     tol = float(args.merge_duplicates)
 
-    # if args.fix_windows:
-		# _fix_python_windows_install()
-		# sys.exit(1)
-    
-
-    extension_dict = ('vtk', 'vtu', 'gdf', 'mar', 'nat', 'stl', 'msh', 'inp', 'dat', 'tec', 'hst', 'rad')
-
     write_file = False  # switch to decide if data should be written to outfilename
 
-    _, ext = os.path.splitext(args.infilename)
-    if ext[1:].lower() not in extension_dict:
-        raise IOError, 'Extension "%s" is not known' % ext
+    # TODO : supprimer le bloc suivant
 
-    if args.outfilename is not None:
-        _, ext = os.path.splitext(args.outfilename)
-        write_file = True
-        if ext[1:].lower() not in extension_dict:
-            raise IOError, 'Extension "%s" is not known' % ext
-    # else:
-        # if args.format is not None:
-        #     write_file = True
-        #     if args.format.lower() not in extension_dict:
-        #         raise IOError, 'Extension ".%s" is not known' % args.format
-        #     root, _ = os.path.splitext(args.infilename)
-        #     args.outfilename = root + '.' + args.format
-        # else:
-        #     args.outfilename = args.infilename
+    # LOADING DATA FROM FILE
+    if args.input_format is not None:
+        format = args.input_format
+    else:
+        # Format based on extension
+        _ ,ext = os.path.splitext(args.infilename)
+        format = ext[1:].lower()
+        if format == '':
+            raise IOError, 'Unable to determine the input file format from its extension. Please specify an input format.'
 
-
-
-
-    # Importing data from file
-    V, F = load_mesh(args.infilename)
+    V, F = load_mesh(args.infilename, format)
 
     # myMesh = Mesh(V, F)
-
-    # Dealing with different options
-    # if args.optimize:
-    #     args.merge_duplicates = True
-    #     args.renumber = True
 
     if args.merge_duplicates:
         try:
@@ -1697,45 +1674,29 @@ if __name__ == '__main__':
         V = translate_1D(V, args.translatez, 'z')
         write_file = True
 
-    # def cast_angles(angles, unit):
-    #     from math import pi
-    #
-    #     if unit == 'deg':
-    #         try:
-    #             angles = map(float, angles)
-    #         except:
-    #             raise IOError, 'Bad input for rotation arguments'
-    #         angles = np.array(angles) * pi / 180.
-    #     else:
-    #         def evalpi(elt):
-    #             from math import pi
-    #
-    #             elttemp = elt.replace('pi', '1.')
-    #             try:
-    #                 elttemp = eval(elttemp)
-    #             except:
-    #                 raise IOError, 'Bad input %s' % elt
-    #             return float(eval(elt))
-    #
-    #         angles = map(evalpi, angles)
-    #     return angles
 
+    # FIXME : supprimer le cast angles et ne prendre que des degres
     if args.rotate is not None:
         args.rotate = cast_angles(args.rotate, args.unit)
         V = rotate(V, args.rotate)
+        write_file = True
 
     if args.rotatex is not None:
         args.rotatex = cast_angles(args.rotatex, args.unit)
         V = rotate_1D(V, args.rotatex[0], 'x')
+        write_file = True
     if args.rotatey is not None:
         args.rotatey = cast_angles(args.rotatey, args.unit)
         V = rotate_1D(V, args.rotatey[0], 'y')
+        write_file = True
     if args.rotatez is not None:
         args.rotatez = cast_angles(args.rotatez, args.unit)
         V = rotate_1D(V, args.rotatez[0], 'z')
+        write_file = True
 
     if args.scale is not None:
         V = scale(V, args.scale)
+        write_file = True
 
     # if args.symmetrize is not None:
     #     raise NotImplementedError, "Symmetrization is not implemented yet into meshmagick"
@@ -1776,10 +1737,41 @@ if __name__ == '__main__':
 
     if args.flip_normals:
         F = flip_normals(F)
+        write_file = True
 
     if args.info:
         get_info(V, F)
 
+    if args.outfilename is None:
+        base, ext = os.path.splitext(args.infilename)
+        # Case where only the output format is given
+        if args.output_format is not None:
+            write_file = True
+            args.outfilename = '%s.%s' % (base, args.output_format)
+        # Case where a transformation has been done
+        if write_file:
+            args.outfilename = '%s_modified%s' % (base, ext)
+
+    else:
+        write_file = True
+
+    # Writing an output file
     if write_file:
-        write_mesh(args.outfilename, V, F)
+        if args.output_format is not None:
+            format = args.output_format
+        else:
+            if args.outfilename is None:
+                # We base the output format on the input format used
+                if args.input_format is not None:
+                    format = args.input_format
+                else:
+                    _, ext = os.path.splitext(args.infilename)
+                    format = ext[1:].lower()
+                    if not extension_dict.has_key(format):
+                        raise IOError, 'Could not determine a format from input file extension, please specify an input format or an extension'
+            else:
+                _, ext = os.path.splitext(args.outfilename)
+                format = ext[1:].lower()
+
+        write_mesh(args.outfilename, V, F, format)
 
