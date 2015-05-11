@@ -320,7 +320,7 @@ def load_HST(filename):
 
     import re
 
-    project = re.search(r'PROJECT\s*:\s*(.*)\s*', data).group(1).strip()
+#    project = re.search(r'PROJECT\s*:\s*(.*)\s*', data).group(1).strip()
 
     node_line = r'\s*\d+(?:\s+' + real_str + '){3}'
     node_section = r'((?:' + node_line + ')+)'
@@ -358,7 +358,7 @@ def load_HST(filename):
             F = Ftmp.copy()
             nf = nftmp
         else:
-            F = np.concatenate((F, Ftemp))
+            F = np.concatenate((F, Ftmp))
             nf += nftmp
 
     return V, F
@@ -662,7 +662,7 @@ def load_STL(filename):
                 F[k][3] = F[k][0]  # always repeating the first node as stl is triangle only
     F += 1
 
-    merge_duplicates(V, F)
+    V, F = merge_duplicates(V, F)
 
     return V, F
 

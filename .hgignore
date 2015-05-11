@@ -4,7 +4,7 @@
 syntax: glob
 # extensions to ignore
 *.DAT
-
+*.pyc
 
 
 # folders to ignore
