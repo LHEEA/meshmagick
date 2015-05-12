@@ -1398,6 +1398,8 @@ def _fix_python_windows_install():
     Fix a bug in the install of python into Windows. It modifies a registry key in order
     to be able to use python scripts in the DOS prompt with command line arguments.
     In the initial install, the system is unable to catch command line arguments.
+
+    Fix found at
     :return:
     """
 
@@ -1592,7 +1594,7 @@ def main():
     #                     is a normal vector to the plane and c defines its position
     #                     following the equation <N|X> = c with X a point belonging
     #                     to the plane""")
-    parser.add_argument('-m', '--merge-duplicates', nargs='?', const='1e-8', default='1e-8',
+    parser.add_argument('-m', '--merge-duplicates', nargs='?', const='1e-8', default=None,
                         help="""merges the duplicate nodes in the mesh with the absolute tolerance
                         given as argument (default 1e-8)""")
 
@@ -1617,8 +1619,6 @@ def main():
 
     args, unknown = parser.parse_known_args()
 
-    tol = float(args.merge_duplicates)
-
     write_file = False  # switch to decide if data should be written to outfilename
 
     # TODO : supprimer le bloc suivant
@@ -1637,8 +1637,10 @@ def main():
 
     # myMesh = Mesh(V, F)
 
-    if args.merge_duplicates:
+    if args.merge_duplicates is not None:
+        tol = float(args.merge_duplicates)
         try:
+            # TODO : fournir une version compilee de l'algo de merging (exercice...)
             from pymesh import pymesh
 
             pymesh.set_mesh_data(V, F)
@@ -1745,14 +1747,13 @@ def main():
 
     if args.outfilename is None:
         base, ext = os.path.splitext(args.infilename)
+        if write_file:
+            args.outfilename = '%s_modified%s' % (base, ext)
         # Case where only the output format is given
         if args.output_format is not None:
             write_file = True
             args.outfilename = '%s.%s' % (base, args.output_format)
         # Case where a transformation has been done
-        if write_file:
-            args.outfilename = '%s_modified%s' % (base, ext)
-
     else:
         write_file = True
 
