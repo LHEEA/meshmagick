@@ -24,7 +24,7 @@ import numpy as np
 
 __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
-__credits__ = ["Francois Rongere"]
+__credits__ = "Francois Rongere"
 __licence__ = "CeCILL"
 __version__ = "0.1"
 __maintainer__ = "Francois Rongere"
@@ -1048,13 +1048,13 @@ def write_VTK(filename, V, F):
 def _write_paraview(filename, V, F, writer):
 
     writer.SetFileName(filename)
-    vtk_mesh = build_vtk_mesh_obj(V, F)
+    vtk_mesh = _build_vtk_mesh_obj(V, F)
     writer.SetInput(vtk_mesh)
     writer.Write()
     print 'File %s written' % filename
 
 
-def build_vtk_mesh_obj(V, F):
+def _build_vtk_mesh_obj(V, F):
     import vtk
 
     nv = max(np.shape(V))
@@ -1210,7 +1210,7 @@ def mesh_quality(V, F):
     import vtk
     import math
 
-    vtk_mesh = build_vtk_mesh_obj(V, F)
+    vtk_mesh = _build_vtk_mesh_obj(V, F)
     quality = vtk.vtkMeshQuality()
     quality.SetInput(vtk_mesh)
 
@@ -1460,8 +1460,8 @@ extension_dict = { #keyword           reader,   writer
                   'tec':             (load_TEC, write_TEC)
                   }
 
+def main():
 
-if __name__ == '__main__':
     import argparse
     import sys
 	
@@ -1649,6 +1649,7 @@ if __name__ == '__main__':
             # TODO: implement the setting of tolerance externally into pymesh
         except:
             V, F = merge_duplicates(V, F, verbose=args.verbose, tol=tol)
+        write_file = True
 
     # if args.renumber:
     #     raise NotImplementedError, "Renumbering is not implemented yet into meshmagick"
@@ -1775,3 +1776,6 @@ if __name__ == '__main__':
 
         write_mesh(args.outfilename, V, F, format)
 
+
+if __name__ == '__main__':
+    main()
