@@ -1476,8 +1476,8 @@ def main():
 
     parser = argparse.ArgumentParser(
         description="""  --  MESHMAGICK --
-                    A python module and a command line utility to manipulate meshes from different format used in
-                    hydrodynamics as well as for visualization.
+                    A python module and a command line utility to manipulate meshes from different
+                    format used in hydrodynamics as well as for visualization.
 
                     The formats currently supported by meshmagick are :
 
@@ -1497,15 +1497,18 @@ def main():
                     |     .tec      |    R/W      | TECPLOT (7)     | tecplot, tec          |
                     *---------------*-------------------------------------------------------*
 
-                    By default, Meshmagick uses the filename extensions to choose the appropriate reader/writer.
-                    This behaviour might be bypassed using the -ifmt and -ofmt optional arguments. When using these
-                    options, keywords defined in the table above must be used as format identifiers.
+                    By default, Meshmagick uses the filename extensions to choose the appropriate
+                    reader/writer. This behaviour might be bypassed using the -ifmt and -ofmt
+                    optional arguments. When using these options, keywords defined in the table
+                    above must be used as format identifiers.
 
-                    (1) NEMOH is an open source BEM Software for seakeeping developped at Ecole Centrale de Nantes (LHHEA)
+                    (1) NEMOH is an open source BEM Software for seakeeping developped at
+                        Ecole Centrale de Nantes (LHHEA)
                     (2) WAMIT is a BEM Software for seakeeping developped by WAMIT, Inc.
                     (3) DIODORE is a BEM Software for seakeeping developped by PRINCIPIA
                     (4) HYDROSTAR is a BEM Software for seakeeping developped by BUREAU VERITAS
-                    (5) GMSH is an open source meshing software developped by C. Geuzaine and J.-F. Remacle
+                    (5) GMSH is an open source meshing software developped by C. Geuzaine and
+                        J.-F. Remacle
                     (6) PARAVIEW is an open source visualization software developped by Kitware
                     (7) TECPLOT is a visualization software developped by Tecplot
 
@@ -1767,13 +1770,11 @@ def main():
                 if args.input_format is not None:
                     format = args.input_format
                 else:
-                    _, ext = os.path.splitext(args.infilename)
-                    format = ext[1:].lower()
+                    format = os.path.splitext(args.infilename)[1][1:].lower()
                     if not extension_dict.has_key(format):
                         raise IOError, 'Could not determine a format from input file extension, please specify an input format or an extension'
             else:
-                _, ext = os.path.splitext(args.outfilename)
-                format = ext[1:].lower()
+                format = os.path.splitext(args.outfilename)[1][1:].lower()
 
         write_mesh(args.outfilename, V, F, format)
 
