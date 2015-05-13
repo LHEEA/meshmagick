@@ -1393,49 +1393,22 @@ def flip_normals(F):
     return np.fliplr(F)
 
 
-def _fix_python_windows_install():
-    """
-    Fix a bug in the install of python into Windows. It modifies a registry key in order
-    to be able to use python scripts in the DOS prompt with command line arguments.
-    In the initial install, the system is unable to catch command line arguments.
+def symmetrize(V, F, normal, c):
 
-    Fix found at
-    :return:
-    """
+    # Symmetrizing the nodes
+    V2 = V.copy()
+    normal = normal/np.dot(normal, normal)
+    for (inode, node) in enumerate(V2):
+        V2[inode] = node - 2* (np.dot(node, normal)-c) * normal
 
-    try:
-        import _winreg as wr
-    except:
-        import sys
-        raise ImportError, "This function only concerns Windows " \
-                                "environment ! your environment is {:s}".format(sys.platform)
+    V = np.concatenate((V, V2))
 
-    try:
-        key = wr.OpenKey(HKEY_CLASSES_ROOT, r'py_auto_file\shell\open\command', 0, KEY_ALL_ACCESS)
-    except:
-        raise OSError, "The key is not present on you system, " \
-                       "please check you have properly set the .py file association"
+    F2 = np.fliplr(F.copy()+inode+1)
+    F = np.concatenate((F, F2))
 
-    value = wr.QueryValue(key, '')
+    V, F = merge_duplicates(V, F, verbose=False)
 
-    if value.find('%*') != -1:
-        print "The fix has already been done."
-        wr.CloseKey(key)
-        return
-
-    value = ' '.join((value, '%*'))
-
-    try:
-        wr.SetValueEx(key, '', 0, REG_SZ, value)
-        wr.CloseKey(key)
-    except:
-        raise OSError, """The function failed to change the registry key. You will have to do it by yourself.
-                        Please append %* to the default value of the following registry key :
-                        HKEY_CLASSES_ROOT\py_auto_file\shell\open\command\
-                        """
-
-
-    return
+    return V, F
 
 # =======================================================================
 #                         COMMAND LINE USAGE
@@ -1454,8 +1427,8 @@ extension_dict = { #keyword           reader,   writer
                   'gmsh':            (load_MSH, write_MSH),
                   'msh':             (load_MSH, write_MSH),
                   'stl':             (load_STL, write_STL),# FIXME: Verifier que ce n'est pas load_STL2
-                  'paraview':        (load_VTK, write_VTU),# VTU
-                  'vtu':             (load_VTK, write_VTU),
+                  'paraview':        (load_VTU, write_VTU),# VTU
+                  'vtu':             (load_VTU, write_VTU),
                   'paraview-legacy': (load_VTK, write_VTK),# VTK
                   'vtk':             (load_VTK, write_VTK),
                   'tecplot':         (load_TEC, write_TEC),
@@ -1514,8 +1487,7 @@ def main():
 
 
                     """,
-        epilog="""             --  Copyright 2014-2015  --
-        --  Francois Rongere  /  Ecole Centrale de Nantes  --""",
+        epilog='--  Copyright 2014-2015  -  Francois Rongere  /  Ecole Centrale de Nantes  --',
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('infilename',
@@ -1600,7 +1572,14 @@ def main():
     parser.add_argument('-m', '--merge-duplicates', nargs='?', const='1e-8', default=None,
                         help="""merges the duplicate nodes in the mesh with the absolute tolerance
                         given as argument (default 1e-8)""")
-
+    parser.add_argument('-sym', '--symmetrize', nargs='*',
+                        help="""Symmetrize the mesh by a plane defined wether by 4 scalars, i.e.
+                        the plane normal vector coordinates and a scalar c such as N.X=c is the
+                        plane equation (with X a point of the plane) or a string among Oxz, Oxy
+                        and Oyz which are shortcuts for planes passing by the origin and whose
+                        normals are the reference axes. Default is Oxz if only -y is specified.
+                        Be careful that symmetry is applied before any rotation so as the plane
+                        equation is defined in the initial frame of reference.""")
 
     # parser.add_argument('--renumber', action='store_true',
     #                     help="""renumbers the cells and nodes of the mesh so as
@@ -1680,6 +1659,23 @@ def main():
         V = translate_1D(V, args.translatez, 'z')
         write_file = True
 
+    if args.symmetrize is not None:
+        sym = args.symmetrize
+        c = 0
+        if sym[0] == 'Oxz':
+            normal = np.array([0,1,0])
+        elif sym[0] == 'Oxy':
+            normal = np.array([0,0,1])
+        elif sym[0] == 'Oyz':
+            normal = np.array([1,0,0])
+        else:
+            if len(sym) == 4:
+                normal = np.array(map(float, sym[:3]))
+                c = float(sym[-1])
+            else:
+                raise RuntimeError, 'Error in the specification of the symmetry plane'
+        V, F = symmetrize(V, F, normal, c)
+        write_file = True
 
     # FIXME : supprimer le cast angles et ne prendre que des degres
     if args.rotate is not None:
