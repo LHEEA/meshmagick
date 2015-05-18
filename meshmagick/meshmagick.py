@@ -1410,6 +1410,42 @@ def symmetrize(V, F, normal, c):
 
     return V, F
 
+def show(V, F):
+    import vtk
+
+    vtk_mesh = _build_vtk_mesh_obj(V, F)
+
+    surface = vtk.vtkDataSetSurfaceFilter()
+    surface.SetInput(vtk_mesh)
+    surface.Update()
+
+    mapper = vtk.vtkDataSetMapper()
+    mapper.SetInput(surface.GetOutput())
+
+    actor = vtk.vtkActor()
+    actor.SetMapper(mapper)
+    actor.AddPosition(0, 0, 0)
+    actor.GetProperty().SetColor(1, 1, 0)
+    actor.GetProperty().SetOpacity(0.60)
+    actor.GetProperty().EdgeVisibilityOn()
+    actor.GetProperty().SetEdgeColor(1, 1, 1)
+    actor.GetProperty().SetLineWidth(1.5)
+
+    renderer = vtk.vtkRenderer()
+    renderer.AddActor(actor)
+    renderer.SetBackground(1, 1, 1)
+
+    renderWindow = vtk.vtkRenderWindow()
+    renderWindow.AddRenderer(renderer)
+
+    interactor = vtk.vtkRenderWindowInteractor()
+    interactor.SetRenderWindow(renderWindow)
+
+    renderWindow.Render()
+
+    interactor.Start()
+
+
 # =======================================================================
 #                         COMMAND LINE USAGE
 # =======================================================================
@@ -1581,6 +1617,10 @@ def main():
                         Be careful that symmetry is applied before any rotation so as the plane
                         equation is defined in the initial frame of reference.""")
 
+    parser.add_argument('--show', action='store_true',
+                        help="""Shows the input mesh in an interactive window""")
+    parser.add_argument('--oshow', action='store_true',
+                        help="""Shows the output mesh in an interactive window""")
     # parser.add_argument('--renumber', action='store_true',
     #                     help="""renumbers the cells and nodes of the mesh so as
     #                     to optimize cache efficiency in algorithms. Uses the Sloan
@@ -1618,6 +1658,10 @@ def main():
     V, F = load_mesh(args.infilename, format)
 
     # myMesh = Mesh(V, F)
+
+    if args.show:
+        show(V, F)
+
 
     if args.merge_duplicates is not None:
         tol = float(args.merge_duplicates)
@@ -1743,6 +1787,9 @@ def main():
 
     if args.info:
         get_info(V, F)
+
+    if args.oshow:
+        show(V, F)
 
     if args.outfilename is None:
         base, ext = os.path.splitext(args.infilename)
