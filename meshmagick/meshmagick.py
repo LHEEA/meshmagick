@@ -1422,24 +1422,36 @@ def show(V, F):
     mapper = vtk.vtkDataSetMapper()
     mapper.SetInput(surface.GetOutput())
 
-    actor = vtk.vtkActor()
-    actor.SetMapper(mapper)
-    actor.AddPosition(0, 0, 0)
-    actor.GetProperty().SetColor(1, 1, 0)
-    actor.GetProperty().SetOpacity(0.60)
-    actor.GetProperty().EdgeVisibilityOn()
-    actor.GetProperty().SetEdgeColor(1, 1, 1)
-    actor.GetProperty().SetLineWidth(1.5)
+    mesh_actor = vtk.vtkActor()
+    mesh_actor.SetMapper(mapper)
+    mesh_actor.AddPosition(0, 0, 0)
+    mesh_actor.GetProperty().SetColor(1, 1, 0)
+    mesh_actor.GetProperty().SetOpacity(1)
+    mesh_actor.GetProperty().EdgeVisibilityOn()
+    mesh_actor.GetProperty().SetEdgeColor(0, 0, 0)
+    mesh_actor.GetProperty().SetLineWidth(1)
+
+    # transform = vtk.vtkTransform()
+    axes_actor = vtk.vtkAxesActor()
+    axes = vtk.vtkOrientationMarkerWidget()
+    axes.SetOrientationMarker(axes_actor)
+
 
     renderer = vtk.vtkRenderer()
-    renderer.AddActor(actor)
-    renderer.SetBackground(1, 1, 1)
+    renderer.AddActor(mesh_actor)
+    # renderer.AddActor(axes_actor)
+    renderer.SetBackground(0.7706, 0.8165, 1.0)
 
     renderWindow = vtk.vtkRenderWindow()
     renderWindow.AddRenderer(renderer)
 
     interactor = vtk.vtkRenderWindowInteractor()
     interactor.SetRenderWindow(renderWindow)
+
+    axes.SetInteractor(interactor)
+    axes.EnabledOn()
+    axes.InteractiveOn()
+
 
     renderWindow.Render()
 
@@ -1617,9 +1629,9 @@ def main():
                         Be careful that symmetry is applied before any rotation so as the plane
                         equation is defined in the initial frame of reference.""")
 
-    parser.add_argument('--show', action='store_true',
+    parser.add_argument('-show', '--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
-    parser.add_argument('--oshow', action='store_true',
+    parser.add_argument('-oshow', '--output_show', action='store_true',
                         help="""Shows the output mesh in an interactive window""")
     # parser.add_argument('--renumber', action='store_true',
     #                     help="""renumbers the cells and nodes of the mesh so as
@@ -1788,7 +1800,7 @@ def main():
     if args.info:
         get_info(V, F)
 
-    if args.oshow:
+    if args.output_show:
         show(V, F)
 
     if args.outfilename is None:
