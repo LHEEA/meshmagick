@@ -26,125 +26,36 @@ __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
 __credits__ = "Francois Rongere"
 __licence__ = "CeCILL"
-__version__ = "0.2"
+__version__ = "0.2.1"
 __maintainer__ = "Francois Rongere"
 __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
 
 real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?'
 
-class HalfEdge:
-    def __init__(self, Vorig, Vtarget):
-        self.orig = Vorig
-        self.target = Vtarget
+import numpy as np
+import math
 
-    def reverse(self):
-        self.orig, self.target = self.target, self.orig
-        self.next, self.prev = self.prev, self.next
+# Classes
+class plane:
+    def __init__(self):
+        plane.normal = np.array([0., 0., 1.])
+        plane.e = 0.
 
+    def flip(self):
+        self.normal = -self.normal
 
-class Cell:
-    def __init__(self, nodesIdx):
-        if len(nodesIdx) != 4:
-            raise ValueError, "The node list should have 4 elements"
+    def set_position(self, z=0., phi=0., theta=0.):
+        """Performs the transformation of the plane"""
 
-        if nodesIdx.__class__ is not np.ndarray:
-            nodesIdx = np.asarray(nodesIdx, dtype=np.int32, order='F')
+        # Rotation matrix
+        cphi = math.cos(phi)
+        sphi = math.sin(phi)
+        ctheta = math.cos(theta)
+        stheta = math.sin(theta)
 
-        if nodesIdx[0] == nodesIdx[-1]:
-            self.type = 3
-        else:
-            self.type = 4
-
-        self.nodesIdx = nodesIdx[:self.type]
-
-    def __iter__(self):
-        self.__index = 0
-        return self
-
-    def next(self):
-        if self.__index <= self.type - 1:
-            Vorig = self.nodesIdx[self.__index]
-            if self.__index == self.type - 1:
-                Vtarget = self.nodesIdx[0]
-            else:
-                Vtarget = self.nodesIdx[self.__index + 1]
-            curHE = HalfEdge(Vorig, Vtarget)
-            curHE.__index = self.__index
-            self.__index += 1
-
-            return curHE
-        else:  # Out of bounds
-            raise StopIteration
-
-    def area(self):
-        return 0.0
-
-
-class Mesh:
-    def __init__(self, V, F):
-        self.V = V
-        self.F = F - 1
-        self.nf = F.shape[0]
-        self.nv = V.shape[0]
-
-        V_oneOutgoingHE = [-1 for i in range(self.nv)]
-
-        cells = []
-        for cell in self.F:
-            cell = Cell(cell)
-            cells.append(cell)
-            cell.idx = len(cells) - 1
-        self.cells = cells
-
-        self.nhe = 0
-        self.HE = []
-        edges = [[[], []] for j in range(self.nv - 1)]
-        for cell in self.cells:
-            for curHE in cell:
-                self.nhe += 1
-                curHE.idx = self.nhe - 1
-                curHE.facet = cell.idx
-
-                if V_oneOutgoingHE[curHE.orig] == -1:
-                    V_oneOutgoingHE[curHE.orig] = curHE.idx
-
-                if curHE._Cell__index == cell.type - 1:
-                    curHE.prev = curHE.idx - 1
-                    curHE.next = curHE.idx - cell.type + 1
-                elif curHE._Cell__index == 0:
-                    curHE.prev = curHE.idx + cell.type - 1
-                    curHE.next = curHE.idx + 1
-                else:
-                    curHE.prev = curHE.idx - 1
-                    curHE.next = curHE.idx + 1
-
-                if curHE.orig < curHE.target:
-                    idx = curHE.orig
-                    V = curHE.target
-                else:
-                    idx = curHE.target
-                    V = curHE.orig
-
-                try:
-                    ipos = edges[idx][0].index(V)
-                    curHE.opposite = edges[idx][1][ipos]
-                    self.HE[curHE.opposite].opposite = curHE.idx
-                except:
-                    edges[idx][0].append(V)
-                    edges[idx][1].append(curHE.idx)
-
-                self.HE.append(curHE)
-            cell.oneHE = curHE.idx
-
-        for he in self.HE:
-            if hasattr(he, 'opposite'):
-                he.border = False
-            else:
-                he.border = True
-                print "(%u,%u) est une bordure !" % (he.orig, he.target)
-
-        return
+        self.normal = np.array([stheta*cphi, -sphi, ctheta*cphi])
+        self.e = z * self.normal[-1]
 
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
@@ -1627,10 +1538,11 @@ def main():
                         Be careful that symmetry is applied before any rotation so as the plane
                         equation is defined in the initial frame of reference.""")
 
-    parser.add_argument('-show', '--show', action='store_true',
+    parser.add_argument('--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
-    parser.add_argument('-oshow', '--output_show', action='store_true',
-                        help="""Shows the output mesh in an interactive window""")
+
+    parser.add_argument('--version', action='store_true',
+                        help="""Shows the version number""")
     # parser.add_argument('--renumber', action='store_true',
     #                     help="""renumbers the cells and nodes of the mesh so as
     #                     to optimize cache efficiency in algorithms. Uses the Sloan
@@ -1649,7 +1561,12 @@ def main():
     if acok:
         argcomplete.autocomplete(parser)
 
+    # TODO : Utiliser des sous-commandes pour l'utilisation de meshmagick
+
     args, unknown = parser.parse_known_args()
+
+    if args.version:
+        print 'meshmagick version %s' % (__version__)
 
     write_file = False  # switch to decide if data should be written to outfilename
 
@@ -1668,10 +1585,6 @@ def main():
     V, F = load_mesh(args.infilename, format)
 
     # myMesh = Mesh(V, F)
-
-    if args.show:
-        show(V, F)
-
 
     if args.merge_duplicates is not None:
         tol = float(args.merge_duplicates)
@@ -1798,7 +1711,9 @@ def main():
     if args.info:
         get_info(V, F)
 
-    if args.output_show:
+    # No more mesh modification should be released from this point -->
+
+    if args.show:
         show(V, F)
 
     if args.outfilename is None:
