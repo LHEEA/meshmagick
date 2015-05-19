@@ -26,7 +26,7 @@ __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
 __credits__ = "Francois Rongere"
 __licence__ = "CeCILL"
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = "Francois Rongere"
 __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
@@ -1431,11 +1431,9 @@ def show(V, F):
     mesh_actor.GetProperty().SetEdgeColor(0, 0, 0)
     mesh_actor.GetProperty().SetLineWidth(1)
 
-    # transform = vtk.vtkTransform()
     axes_actor = vtk.vtkAxesActor()
     axes = vtk.vtkOrientationMarkerWidget()
     axes.SetOrientationMarker(axes_actor)
-
 
     renderer = vtk.vtkRenderer()
     renderer.AddActor(mesh_actor)
@@ -1446,12 +1444,12 @@ def show(V, F):
     renderWindow.AddRenderer(renderer)
 
     interactor = vtk.vtkRenderWindowInteractor()
+    interactor.SetDesiredUpdateRate(100)
     interactor.SetRenderWindow(renderWindow)
 
     axes.SetInteractor(interactor)
     axes.EnabledOn()
     axes.InteractiveOn()
-
 
     renderWindow.Render()
 
