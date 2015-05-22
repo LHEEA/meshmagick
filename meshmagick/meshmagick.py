@@ -624,7 +624,8 @@ def load_GDF(filename):
     isx = line[0]
     isy = line[1]
 
-    nf = int(ifile.readline())
+    line = ifile.readline().split()
+    nf = int(line[0])
 
     V = np.zeros((4 * nf, 3), dtype=float, order='fortran')
     F = np.zeros((nf, 4), dtype=np.int32, order='fortran')
