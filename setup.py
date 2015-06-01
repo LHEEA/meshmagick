@@ -24,7 +24,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.2.1',
+    version='0.3.1',
 
     description="""An utility for unstructured mesh conversion and manipulation
                    for the hydrodynamic community""",
@@ -60,10 +60,6 @@ setup(
         'Programming Language :: Python :: 2',# TODO : tester avec un virtualenv !
         'Programming Language :: Python :: 2.6',# TODO : tester avec un virtualenv !
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',   # TODO : tester avec un virtualenv !
-        'Programming Language :: Python :: 3.2',# TODO : tester avec un virtualenv !
-        'Programming Language :: Python :: 3.3',# TODO : tester avec un virtualenv !
-        'Programming Language :: Python :: 3.4',# TODO : tester avec un virtualenv !
     ],
 
     # What does your project relate to?
