@@ -37,10 +37,10 @@ import numpy as np
 import math
 
 # Classes
-class plane:
-    def __init__(self):
-        plane.normal = np.array([0., 0., 1.])
-        plane.e = 0.
+class Plane:
+    def __init__(self, normal=np.array([0., 0., 1.]), e=0.):
+        self.normal = normal
+        self.e = e
 
     def flip(self):
         self.normal = -self.normal
@@ -57,6 +57,159 @@ class plane:
         self.normal = np.array([stheta*cphi, -sphi, ctheta*cphi])
         self.e = z * self.normal[-1]
 
+    def point_distance(self, point, tol=1e-9):
+        dist = np.dot(self.normal, point)
+        if math.fabs(dist) < tol:
+            # Point on plane
+            position = 0
+        elif dist < self.e:
+            # Point under plane
+            position = -1
+        elif dist > self.e:
+            # Point above plane
+            position = 1
+        return dist, position
+
+
+def clip_by_plane(V, F, plane, abs_tol=1e-3):
+
+    n_threshold = 5 # devrait etre reglagble
+
+
+    # Classification of vertices
+    nv = V.shape[0]
+    nf = F.shape[0]
+
+    positions = np.dot(V, plane.normal)-plane.e
+    keepV = positions <= abs_tol
+
+    keepF = np.array([False for i in xrange(nf)], dtype=bool)
+    clipped_faces = []
+
+    # version vectorisee
+    nbs_kept = np.sum(keepV[(F-1).flatten()].reshape((nf, 4)), axis=1)
+
+    keepF = np.array([False for i in xrange(nf)], dtype=bool)
+    keepF[nbs_kept == 4] = True
+    clipped_mask = (nbs_kept > 0) * (nbs_kept < 4)
+    keepF[clipped_mask] = True
+    clipped_faces = np.array([i for i in xrange(nf)], dtype=np.int32)[clipped_mask]
+
+    # clipping faces
+    nb_new_V = 0
+    newV = []
+    nb_new_F = 0
+    newF = []
+    # print nv
+
+    # print clipped_faces
+
+    # TODO : etablir ici une connectivite des faces a couper afin d'aider a la projection des vertex sur le plan
+
+    # Loop on the faces to clip
+    for (iface, face) in enumerate(F[clipped_faces]-1):
+        # face is a copy (not a reference) of the line of F
+        clipped_face_id = clipped_faces[iface]
+
+        # print '----------------------------------------'
+        # print "clipping face nb : ", clipped_face_id
+
+
+        if face[0] == face[-1]:
+            # Triangle
+            nb = 3
+        else:
+            nb = 4
+
+        pos_lst = list(keepV[face[:nb]]) # Ne pas revenir a une liste, tout traiter en numpy !!!
+        face_lst = list(face[:nb])
+        # print "Vertices of face : ", face_lst
+        # print "positions of vertices : ", pos_lst
+
+        for iv in range(nb-1, -1, -1):
+            # For loop on vertices
+            if pos_lst[iv-1] != pos_lst[iv]: # TODO : Gerer les projections ici !!!!
+                # TODO : mettre un switch pour activer la projection ou pas...
+
+                # PARTIE EN DEVELOPPEMENT (si commentee, on revient a du sain)
+                V0 = V[face_lst[iv-1]]
+                V1 = V[face_lst[iv]]
+                edge_length = np.linalg.norm(V1-V0)
+
+                # Intersection
+                d0 = np.dot(plane.normal, V0) - plane.e
+                d1 = np.dot(plane.normal, V1) - plane.e
+                # if d0==d1:
+                #     print "divide"
+                # FIXME : gerer eventuellement le cas ou les deux vertex sont sur le plan (d0==d1) --> ne devrait pas
+                #  arriver
+                t = d0 / (d0-d1)
+                Q = V0+t*(V1-V0)
+
+                # POUR LE MOMENT, ON NE FAIT PAS DE PROJECTION !!!!!!
+
+                # FIN PARTIE EN DEVELOPPEMENT
+                nb_new_V += 1
+                newV.append(Q)
+                face_lst.insert(iv, int(nv)+nb_new_V-1) # TODO : utiliser les fonctions np.insert de numpy et ne pas
+                # revenir a une liste !!!
+                pos_lst.insert(iv, True)
+        # print face_lst, pos_lst
+
+        face_w = np.asarray(face_lst, dtype=np.int32)
+        pos = np.asarray(pos_lst, dtype=bool)
+
+        clipped_face = face_w[pos]
+
+        if len(clipped_face) == 3: # We get a triangle
+            clipped_face = np.append(clipped_face, clipped_face[0])
+        if len(clipped_face) == 5: # A quad has degenerated in a pentagon, we have to split it in two faces
+            # print "5 vertices!!"
+            n_roll = np.where(pos==False)[0][0]
+            # print np.roll(pos, -n_roll)
+            # TODO : mettre ces definitions en debut de fonction !! (pas a reetablir a chque fois)
+            triangle = [2, 3, 4, 2]
+            quadrangle = [1, 2, 4, 5]
+            clipped_face = np.roll(face_w, -n_roll)
+
+            quadrangle = clipped_face[quadrangle] # To add to the faces
+            nb_new_F += 1
+            newF.append(quadrangle)
+
+            clipped_face = clipped_face[triangle]
+
+        #     print "quadrangle : ", quadrangle
+        #     print "triangle : ", clipped_face
+        # print "New vertices of face : ", clipped_face
+        # Updating the initial face with the clipped face
+        F[clipped_face_id] = clipped_face + 1 # Staying consistent with what is done in F (indexing starting at 1)
+
+    # TODO : merger les vertex ajoutes --> on devrait ne retenir environ que la moitier...
+
+
+    # Adding new elements to the initial mesh
+    V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
+    if nb_new_F > 0:
+        F = np.concatenate((F, np.asarray(newF, dtype=np.int32)+1))
+    extended_nb_V = nv + nb_new_V
+    new_nb_V = np.sum(keepV) + nb_new_V
+    new_nb_F = np.sum(keepF) + nb_new_F
+
+    keepV = np.concatenate((keepV, np.array([True for i in xrange(nb_new_V)], dtype=bool)))
+    keepF = np.concatenate((keepF, np.array([True for i in xrange(nb_new_F)], dtype=bool)))
+
+    # Extracting the kept mesh
+    clipped_V = V[keepV]
+    clipped_F = F[keepF]
+
+    # Making indices consistent
+    newID_V = np.array([i for i in xrange(extended_nb_V)], dtype=np.int32)
+    newID_V[keepV] = [i for i in xrange(new_nb_V)]
+
+    clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
+
+
+    return clipped_V, clipped_F
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
     """
@@ -1668,46 +1821,12 @@ def main():
         V = scale(V, args.scale)
         write_file = True
 
-    # if args.symmetrize is not None:
-    #     raise NotImplementedError, "Symmetrization is not implemented yet into meshmagick"
-        # try:
-        #     from pymesh import pymesh
-        # except:
-        #     raise ImportError, 'pymesh module is not available, unable to use the --symmetrize option'
-
-        # if 'p' in args.symmetrize:
-        #     if len(args.symmetrize) > 1:
-        #         raise RuntimeError, 'When using p argument of --symmetrize option, only one argument should be provided'
-        #     else:
-        #         # Using plane to symmetrize
-        #         if args.plane is None:
-        #             raise RuntimeError, 'When using --symmetrize p option argument, you must also provide the --plane option'
-        #         pass
-        #         # Idee ici on se debrouille pour tourner le maillage afin que le plan de --plane soit
-        #         # le plan yOz pour s'appuer sur la fct Fortran de pymesh, on symmetrize puis on retransforme
-        #         # le maillage pour le remettre dans la bonne direction.
-        #     raise NotImplementedError, '--symmetrize option is not implemented yet for argument p'
-        # else:
-        #     sym = np.zeros(3, dtype=np.int32)
-        #     for plane in args.symmetrize:
-        #         if plane == 'x':
-        #             sym[0] = 1
-        #         elif plane == 'y':
-        #             sym[1] = 1
-        #         else:
-        #             sym[2] = 1
-        #     pymesh.set_mesh_data(V, F)
-        #     pymesh.symmetrizemesh_py(sym)
-        #     V = np.copy(pymesh.vv)
-        #     F = np.copy(pymesh.ff)
-        #     pymesh.free_mesh_data()
-
-    # if args.cut:
-    #     raise NotImplementedError, '--cut option is not implemented yet'
-
     if args.flip_normals:
         F = flip_normals(F)
         write_file = True
+
+    V, F = clip_by_plane(V, F, Plane())
+
 
     if args.info:
         get_info(V, F)
