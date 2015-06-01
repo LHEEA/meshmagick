@@ -73,8 +73,13 @@ class Plane:
 
 def clip_by_plane(V, F, plane, abs_tol=1e-3):
 
-    n_threshold = 5 # devrait etre reglagble
+    n_threshold = 5 # devrait etre reglagble, non utilise pour le moment
 
+    # TODO : Partir d'un F indice utilisant des indices de vertex commencant a 0 (F -=1)
+
+    # Necessary to deal with clipping of quadrangle that give a pentagon
+    triangle = [2, 3, 4, 2]
+    quadrangle = [1, 2, 4, 5]
 
     # Classification of vertices
     nv = V.shape[0]
@@ -83,37 +88,27 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     positions = np.dot(V, plane.normal)-plane.e
     keepV = positions <= abs_tol
 
-    keepF = np.array([False for i in xrange(nf)], dtype=bool)
-    clipped_faces = []
-
-    # version vectorisee
+    # Getting kept faces and clipped faces
     nbs_kept = np.sum(keepV[(F-1).flatten()].reshape((nf, 4)), axis=1)
 
-    keepF = np.array([False for i in xrange(nf)], dtype=bool)
+    keepF = np.zeros(nf, dtype=bool)
     keepF[nbs_kept == 4] = True
     clipped_mask = (nbs_kept > 0) * (nbs_kept < 4)
     keepF[clipped_mask] = True
     clipped_faces = np.array([i for i in xrange(nf)], dtype=np.int32)[clipped_mask]
 
-    # clipping faces
+    # TODO : etablir ici une connectivite des faces a couper afin d'aider a la projection des vertex sur le plan
+
+    # Initializing the mesh clipping
     nb_new_V = 0
     newV = []
     nb_new_F = 0
     newF = []
-    # print nv
-
-    # print clipped_faces
-
-    # TODO : etablir ici une connectivite des faces a couper afin d'aider a la projection des vertex sur le plan
 
     # Loop on the faces to clip
     for (iface, face) in enumerate(F[clipped_faces]-1):
         # face is a copy (not a reference) of the line of F
         clipped_face_id = clipped_faces[iface]
-
-        # print '----------------------------------------'
-        # print "clipping face nb : ", clipped_face_id
-
 
         if face[0] == face[-1]:
             # Triangle
@@ -129,9 +124,8 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
         for iv in range(nb-1, -1, -1):
             # For loop on vertices
             if pos_lst[iv-1] != pos_lst[iv]: # TODO : Gerer les projections ici !!!!
-                # TODO : mettre un switch pour activer la projection ou pas...
+                # TODO : mettre un switch pour activer la projection ou pas... --> permettra de merger en meme temps
 
-                # PARTIE EN DEVELOPPEMENT (si commentee, on revient a du sain)
                 V0 = V[face_lst[iv-1]]
                 V1 = V[face_lst[iv]]
                 edge_length = np.linalg.norm(V1-V0)
@@ -139,22 +133,14 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
                 # Intersection
                 d0 = np.dot(plane.normal, V0) - plane.e
                 d1 = np.dot(plane.normal, V1) - plane.e
-                # if d0==d1:
-                #     print "divide"
-                # FIXME : gerer eventuellement le cas ou les deux vertex sont sur le plan (d0==d1) --> ne devrait pas
-                #  arriver
                 t = d0 / (d0-d1)
                 Q = V0+t*(V1-V0)
 
-                # POUR LE MOMENT, ON NE FAIT PAS DE PROJECTION !!!!!!
-
-                # FIN PARTIE EN DEVELOPPEMENT
+                # Adding a new vertex
                 nb_new_V += 1
                 newV.append(Q)
-                face_lst.insert(iv, int(nv)+nb_new_V-1) # TODO : utiliser les fonctions np.insert de numpy et ne pas
-                # revenir a une liste !!!
+                face_lst.insert(iv, int(nv)+nb_new_V-1)
                 pos_lst.insert(iv, True)
-        # print face_lst, pos_lst
 
         face_w = np.asarray(face_lst, dtype=np.int32)
         pos = np.asarray(pos_lst, dtype=bool)
@@ -163,40 +149,34 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
 
         if len(clipped_face) == 3: # We get a triangle
             clipped_face = np.append(clipped_face, clipped_face[0])
+
         if len(clipped_face) == 5: # A quad has degenerated in a pentagon, we have to split it in two faces
-            # print "5 vertices!!"
             n_roll = np.where(pos==False)[0][0]
-            # print np.roll(pos, -n_roll)
-            # TODO : mettre ces definitions en debut de fonction !! (pas a reetablir a chque fois)
-            triangle = [2, 3, 4, 2]
-            quadrangle = [1, 2, 4, 5]
             clipped_face = np.roll(face_w, -n_roll)
 
-            quadrangle = clipped_face[quadrangle] # To add to the faces
+            quadrangle = clipped_face[quadrangle] # New face to add
             nb_new_F += 1
             newF.append(quadrangle)
 
-            clipped_face = clipped_face[triangle]
+            clipped_face = clipped_face[triangle] # Modified face
 
-        #     print "quadrangle : ", quadrangle
-        #     print "triangle : ", clipped_face
-        # print "New vertices of face : ", clipped_face
         # Updating the initial face with the clipped face
         F[clipped_face_id] = clipped_face + 1 # Staying consistent with what is done in F (indexing starting at 1)
 
-    # TODO : merger les vertex ajoutes --> on devrait ne retenir environ que la moitier...
+    # TODO : merge the new added vertices
 
 
     # Adding new elements to the initial mesh
     V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
     if nb_new_F > 0:
         F = np.concatenate((F, np.asarray(newF, dtype=np.int32)+1))
+
     extended_nb_V = nv + nb_new_V
     new_nb_V = np.sum(keepV) + nb_new_V
     new_nb_F = np.sum(keepF) + nb_new_F
 
-    keepV = np.concatenate((keepV, np.array([True for i in xrange(nb_new_V)], dtype=bool)))
-    keepF = np.concatenate((keepF, np.array([True for i in xrange(nb_new_F)], dtype=bool)))
+    keepV = np.concatenate((keepV, np.ones(nb_new_V, dtype=bool)))
+    keepF = np.concatenate((keepF, np.ones(nb_new_F, dtype=bool)))
 
     # Extracting the kept mesh
     clipped_V = V[keepV]
@@ -207,7 +187,6 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     newID_V[keepV] = [i for i in xrange(new_nb_V)]
 
     clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
-
 
     return clipped_V, clipped_F
 
