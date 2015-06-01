@@ -37,10 +37,10 @@ import numpy as np
 import math
 
 # Classes
-class plane:
-    def __init__(self):
-        plane.normal = np.array([0., 0., 1.])
-        plane.e = 0.
+class Plane:
+    def __init__(self, normal=np.array([0., 0., 1.]), e=0.):
+        self.normal = normal
+        self.e = e
 
     def flip(self):
         self.normal = -self.normal
@@ -57,6 +57,143 @@ class plane:
         self.normal = np.array([stheta*cphi, -sphi, ctheta*cphi])
         self.e = z * self.normal[-1]
 
+    def point_distance(self, point, tol=1e-9):
+        dist = np.dot(self.normal, point)
+        if math.fabs(dist) < tol:
+            # Point on plane
+            position = 0
+        elif dist < self.e:
+            # Point under plane
+            position = -1
+        elif dist > self.e:
+            # Point above plane
+            position = 1
+        return dist, position
+
+
+def clip_by_plane(V, F, plane, abs_tol=1e-3):
+
+    n_threshold = 5 # devrait etre reglagble, non utilise pour le moment
+
+    # TODO : Partir d'un F indice utilisant des indices de vertex commencant a 0 (F -=1)
+
+    # Necessary to deal with clipping of quadrangle that give a pentagon
+    triangle = [2, 3, 4, 2]
+    quadrangle = [1, 2, 4, 5]
+
+    # Classification of vertices
+    nv = V.shape[0]
+    nf = F.shape[0]
+
+    positions = np.dot(V, plane.normal)-plane.e
+    keepV = positions <= abs_tol
+
+    nb_kept = np.sum(keepV)
+    if nb_kept == nv:
+        return V, F
+    elif nb_kept == 0:
+        return [], []
+
+    # Getting kept faces and clipped faces
+    nbs_kept = np.sum(keepV[(F-1).flatten()].reshape((nf, 4)), axis=1)
+
+    keepF = np.zeros(nf, dtype=bool)
+    keepF[nbs_kept == 4] = True
+    clipped_mask = (nbs_kept > 0) * (nbs_kept < 4)
+    keepF[clipped_mask] = True
+    clipped_faces = np.array([i for i in xrange(nf)], dtype=np.int32)[clipped_mask]
+
+    # TODO : etablir ici une connectivite des faces a couper afin d'aider a la projection des vertex sur le plan
+
+    # Initializing the mesh clipping
+    nb_new_V = 0
+    newV = []
+    nb_new_F = 0
+    newF = []
+
+    # Loop on the faces to clip
+    for (iface, face) in enumerate(F[clipped_faces]-1):
+        # face is a copy (not a reference) of the line of F
+        clipped_face_id = clipped_faces[iface]
+
+        if face[0] == face[-1]:
+            # Triangle
+            nb = 3
+        else:
+            nb = 4
+
+        pos_lst = list(keepV[face[:nb]]) # Ne pas revenir a une liste, tout traiter en numpy !!!
+        face_lst = list(face[:nb])
+        # print "Vertices of face : ", face_lst
+        # print "positions of vertices : ", pos_lst
+
+        for iv in range(nb-1, -1, -1):
+            # For loop on vertices
+            if pos_lst[iv-1] != pos_lst[iv]: # TODO : Gerer les projections ici !!!!
+                # TODO : mettre un switch pour activer la projection ou pas... --> permettra de merger en meme temps
+
+                V0 = V[face_lst[iv-1]]
+                V1 = V[face_lst[iv]]
+                edge_length = np.linalg.norm(V1-V0)
+
+                # Intersection
+                d0 = np.dot(plane.normal, V0) - plane.e
+                d1 = np.dot(plane.normal, V1) - plane.e
+                t = d0 / (d0-d1)
+                Q = V0+t*(V1-V0)
+
+                # Adding a new vertex
+                nb_new_V += 1
+                newV.append(Q)
+                face_lst.insert(iv, int(nv)+nb_new_V-1)
+                pos_lst.insert(iv, True)
+
+        face_w = np.asarray(face_lst, dtype=np.int32)
+        pos = np.asarray(pos_lst, dtype=bool)
+
+        clipped_face = face_w[pos]
+
+        if len(clipped_face) == 3: # We get a triangle
+            clipped_face = np.append(clipped_face, clipped_face[0])
+
+        if len(clipped_face) == 5: # A quad has degenerated in a pentagon, we have to split it in two faces
+            n_roll = np.where(pos==False)[0][0]
+            clipped_face = np.roll(face_w, -n_roll)
+
+            quadrangle = clipped_face[quadrangle] # New face to add
+            nb_new_F += 1
+            newF.append(quadrangle)
+
+            clipped_face = clipped_face[triangle] # Modified face
+
+        # Updating the initial face with the clipped face
+        F[clipped_face_id] = clipped_face + 1 # Staying consistent with what is done in F (indexing starting at 1)
+
+    # TODO : merge the new added vertices
+
+    # Adding new elements to the initial mesh
+    V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
+    if nb_new_F > 0:
+        F = np.concatenate((F, np.asarray(newF, dtype=np.int32)+1))
+
+    extended_nb_V = nv + nb_new_V
+    new_nb_V = np.sum(keepV) + nb_new_V
+    new_nb_F = np.sum(keepF) + nb_new_F
+
+    keepV = np.concatenate((keepV, np.ones(nb_new_V, dtype=bool)))
+    keepF = np.concatenate((keepF, np.ones(nb_new_F, dtype=bool)))
+
+    # Extracting the kept mesh
+    clipped_V = V[keepV]
+    clipped_F = F[keepF]
+
+    # Making indices consistent
+    newID_V = np.array([i for i in xrange(extended_nb_V)], dtype=np.int32)
+    newID_V[keepV] = [i for i in xrange(new_nb_V)]
+
+    clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
+
+    return clipped_V, clipped_F
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
     """
@@ -211,8 +348,6 @@ def load_HST(filename):
 
     import re
 
-#    project = re.search(r'PROJECT\s*:\s*(.*)\s*', data).group(1).strip()
-
     node_line = r'\s*\d+(?:\s+' + real_str + '){3}'
     node_section = r'((?:' + node_line + ')+)'
 
@@ -345,14 +480,9 @@ def load_INP(filename):
             real_idx += 1
             if real_idx != idx:  # Node number and line number in the array are not consistant...
                 id_new[idx] = real_idx
-                # renumberings.append( (r'(?<!\n)(\s*)' + str(node[0]) + '(\s+)', str(idx))  )
 
         meshfiles[file]['ELEM_SECTIONS'] = []
         for elem_section in pattern_elem_section.findall(data):
-
-            # Renumbering if any
-            # for renumber in renumberings:
-            #     elem_section = re.sub(renumber[0], '\g<1>'+renumber[1]+'\g<2>', elem_section)
 
             elem_array = []
             for elem in pattern_elem_line.findall(elem_section):
@@ -1305,22 +1435,16 @@ def flip_normals(F):
     return np.fliplr(F)
 
 
-def symmetrize(V, F, normal, c):
+def symmetrize(V, F, plane):
 
     # Symmetrizing the nodes
-    V2 = V.copy()
-    normal = normal/np.dot(normal, normal)
-    for (inode, node) in enumerate(V2):
-        V2[inode] = node - 2* (np.dot(node, normal)-c) * normal
+    nv = V.shape[0]
 
-    V = np.concatenate((V, V2))
+    normal = plane.normal/np.dot(plane.normal, plane.normal)
+    V = np.concatenate((V, V-2*np.outer(np.dot(V, normal)-plane.e, normal)))
+    F = np.concatenate((F, np.fliplr(F.copy()+nv)))
 
-    F2 = np.fliplr(F.copy()+inode+1)
-    F = np.concatenate((F, F2))
-
-    V, F = merge_duplicates(V, F, verbose=False)
-
-    return V, F
+    return merge_duplicates(V, F, verbose=False)
 
 def show(V, F):
     import vtk
@@ -1450,40 +1574,38 @@ def main():
 
     parser.add_argument('infilename',
                         help='path of the input mesh file in any format')
+
     parser.add_argument('-o', '--outfilename',
                         help='path of the output mesh file. The format of ' +
                              'this file is determined from the extension given')
+
     parser.add_argument('-ifmt', '--input-format',
                         help="""Input format. Meshmagick will read the input file considering the INPUT_FORMAT rather than using the extension""")
+
     parser.add_argument('-ofmt', '--output-format',
                         help="""Output format. Meshmagick will write the output file considering the OUTPUT_FORMAT rather than using the extension""")
-    # parser.add_argument('-fmt', '--format', type=str,
-    #                     help="""specifies the output file format and use the base name
-    #                     of the infilename instead of the output file. File format has
-    #                     to be chosen among VTK, VTU, MAR, GDF, STL, NAT, MHE. Default is VTU.
-    #                     If -o option has been done, it has no effect""")
+
     parser.add_argument('-v', '--verbose',
                         help="""make the program give more informations on the computations""",
                         action='store_true')
+
     parser.add_argument('-i', '--info',
                         help="""extract informations on the mesh on the standard output""",
                         action='store_true')
-    # parser.add_argument('-b', '--binary',
-    #                     help="""specifies wether the output file will be in a binary
-    #                     format. It is only used when used with --convert option and
-    #                     with .vtu output format""",
-    #                     action='store_true')
 
     parser.add_argument('-t', '--translate',
                         nargs=3, type=float,
                         help="""translates the mesh in 3D
                         Usage -translate tx ty tz""")
+
     parser.add_argument('-tx', '--translatex',
                         nargs=1, type=float,
                         help="""translates the mesh following the x direction""")
+
     parser.add_argument('-ty', '--translatey',
                         nargs=1, type=float,
                         help="""translates the mesh following the y direction""")
+
     parser.add_argument('-tz', '--translatez',
                         nargs=1, type=float,
                         help="""translates the mesh following the z direction""")
@@ -1491,19 +1613,19 @@ def main():
     parser.add_argument('-r', '--rotate',
                         nargs=3, type=str,
                         help="""rotates the mesh in 3D""")
+
     parser.add_argument('-rx', '--rotatex',
                         nargs=1, type=str,
                         help="""rotates the mesh around the x direction""")
+
     parser.add_argument('-ry', '--rotatey',
                         nargs=1, type=str,
                         help="""rotates the mesh around the y direction""")
+
     parser.add_argument('-rz', '--rotatez',
                         nargs=1, type=str,
                         help="""rotates the mesh around the z direction""")
-    # parser.add_argument('-u', '--unit',
-    #                     type=str, choices=['rad', 'deg'],
-    #                     default='deg',
-    #                     help="""sets the unit for rotations. Default is deg""")
+
     parser.add_argument('-s', '--scale',
                         type=float,
                         help="""scales the mesh. CAUTION : if used along
@@ -1512,25 +1634,34 @@ def main():
                         accordingly to the newly scaled mesh.""")
     parser.add_argument('--flip-normals', action='store_true',
                         help="""flips the normals of the mesh""")
-    # parser.add_argument('--cut', action='store_true',
-    #                     help="""cuts the mesh with the plane defined with the option
-    #                     --plane""")
-    # parser.add_argument('--symmetrize', type=str,
-    #                     nargs='*', default=None, choices=['x', 'y', 'z', 'p'],
-    #                     help="""performs a symmetry of the mesh.
-    #                     If x argument is given, then a symmetry with respect to plane
-    #                     0yz etc... If p or no argument is given, then the --plane option
-    #                     is used.""")
-    # parser.add_argument('-p', '--plane', nargs=4, type=float,
-    #                     help="""Defines a plane used by the --cut option.
-    #                     It is followed by the floats nx ny nz c where [nx, ny, nz]
-    #                     is a normal vector to the plane and c defines its position
-    #                     following the equation <N|X> = c with X a point belonging
-    #                     to the plane""")
+
+    parser.add_argument('-p', '--plane', nargs='+', action='append',
+                        help="""Defines a plane used by the --clip and --symmetrize options.
+                        It can be defined by the floats nx ny nz c where [nx, ny, nz]
+                        is a normal vector to the plane and c defines its position
+                        following the equation <N|X> = c with X a point belonging
+                        to the plane.
+                        It can also be defined by a string among [Oxy, Oxz, Oyz, \Oxy, \Oxz, \Oyz]
+                        for quick definition. Several planes may be defined on the same command
+                        line. Planes with a prepended '\' have normals inverted i.e. if Oxy has its
+                        normal pointing upwards, \Oxy has its normal pointing downwards.
+                        In that case, the planes are indexed by an integer starting by
+                        0 following the order given in the command line.
+                        """)
+
+    parser.add_argument('-clip', '--clip', nargs='*', action='append',
+                        help="""cuts the mesh with a plane. Is no arguments are given, the Oxy plane
+                        is used. If an integer is given, it should correspond to a plane defined with
+                        the --plane option. If a key string is given, it should be a valid key (see
+                        help of --plane option for valid plane keys). A normal and a scalar could
+                        also be given for the plane definition just as for the --plane option. Several
+                        clipping planes may be defined on the same command line.""")
+
     parser.add_argument('-m', '--merge-duplicates', nargs='?', const='1e-8', default=None,
                         help="""merges the duplicate nodes in the mesh with the absolute tolerance
                         given as argument (default 1e-8)""")
-    parser.add_argument('-sym', '--symmetrize', nargs='*',
+
+    parser.add_argument('-sym', '--symmetrize', nargs='*', action='append',
                         help="""Symmetrize the mesh by a plane defined wether by 4 scalars, i.e.
                         the plane normal vector coordinates and a scalar c such as N.X=c is the
                         plane equation (with X a point of the plane) or a string among Oxz, Oxy
@@ -1544,20 +1675,7 @@ def main():
 
     parser.add_argument('--version', action='store_true',
                         help="""Shows the version number""")
-    # parser.add_argument('--renumber', action='store_true',
-    #                     help="""renumbers the cells and nodes of the mesh so as
-    #                     to optimize cache efficiency in algorithms. Uses the Sloan
-    #                     method""")
-    # parser.add_argument('--optimize', action='store_true',
-    #                     help="""optimizes the mesh. Same as --merge-duplicates
-    #                     and --renumber used together""")
-    # parser.add_argument('--fix-windows', action='store_true',
-		# 				help="""Fix the python installation to be able to run
-		# 				python scripts with command line arguments. It is not a
-		# 				meshmagick fix but a windows fix. It modifies a registry key
-		# 				of your Windows installation. It has to be run once, althought
-		# 				the key is checked to ensure that the key has not already been
-		# 				modified.""")
+
 
     if acok:
         argcomplete.autocomplete(parser)
@@ -1583,37 +1701,119 @@ def main():
         if format == '':
             raise IOError, 'Unable to determine the input file format from its extension. Please specify an input format.'
 
+    # Loading mesh elements from file
     V, F = load_mesh(args.infilename, format)
 
-    # myMesh = Mesh(V, F)
 
     if args.merge_duplicates is not None:
         tol = float(args.merge_duplicates)
-        try:
-            # TODO : fournir une version compilee de l'algo de merging (exercice...)
-            from pymesh import pymesh
-
-            pymesh.set_mesh_data(V, F)
-            pymesh.cleandata_py()
-            V = np.copy(pymesh.vv)
-            F = np.copy(pymesh.ff)
-            pymesh.free_mesh_data()
-            # TODO: implement the setting of tolerance externally into pymesh
-        except:
-            V, F = merge_duplicates(V, F, verbose=args.verbose, tol=tol)
+        V, F = merge_duplicates(V, F, verbose=args.verbose, tol=tol)
         write_file = True
 
-    # if args.renumber:
-    #     raise NotImplementedError, "Renumbering is not implemented yet into meshmagick"
-        # try:
-        #     from pymesh import pymesh
-        # except:
-        #     raise ImportError, 'pymesh module is not available, unable to use the --renumber option'
-        #     ##raise NotImplementedError, '--renumber option is not implemented yet'
+    # TODO : put that dict at the begining of the main function
+    plane_str_list = {'Oxy':[0.,0.,1.],
+                      'Oxz':[0.,1.,0.],
+                      'Oyz':[1.,0.,0.],
+                      '\Oxy':[0.,0.,-1.],
+                      '\Oxz':[0.,-1.,0.],
+                      '\Oyz':[-1.,0.,0.]}
 
-    # if args.binary:
-    #     raise NotImplementedError, 'Not implemented yet'
+    # Defining planes
+    if args.plane is not None:
 
+        nb_planes = len(args.plane)
+        planes = [Plane() for i in xrange(nb_planes)]
+        for (iplane, plane) in enumerate(args.plane):
+            if len(plane) == 4:
+                # plane is defined by normal and scalar
+                try:
+                    planes[iplane].normal = np.array(map(float, plane[:3]), dtype=np.float)
+                    planes[iplane].e = float(plane[3])
+                except:
+                    raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
+
+            elif len(plane) == 1:
+                if plane_str_list.has_key(plane[0]):
+                    planes[iplane].normal = np.array(plane_str_list[plane[0]], dtype=np.float)
+                    planes[iplane].e = 0.
+                else:
+                    raise AssertionError, '%s key for plane is not known. Choices are [%s].' % (plane[0], ', '.join(plane_str_list.keys()) )
+            else:
+                raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
+
+    # Clipping the mesh
+    if args.clip is not None:
+        clipping_plane = Plane()
+        nb_clip = len(args.clip)
+        for plane in args.clip:
+            if len(plane) == 0:
+                # Default clipping plane Oxy
+                clipping_plane.normal = np.array([0., 0., 1.], dtype=np.float)
+                clipping_plane.e = 0.
+            elif len(plane) == 1:
+                try:
+                    # Plane ID
+                    plane_id = int(plane[0])
+                    if plane_id < nb_planes:
+                        clipping_plane = planes[plane_id]
+                    else:
+                        raise AssertionError, 'Plane with ID %u has not been defined with option --plane' % plane_id
+                except:
+                    # A key string
+                    if plane_str_list.has_key(plane[0]):
+                        clipping_plane.normal = np.asarray(plane_str_list[plane[0]], dtype=np.float)
+                        clipping_plane.e = 0.
+                    else:
+                        raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
+            elif len(plane) == 4:
+                # Plane defined by a normal and a scalar
+                try:
+                    clipping_plane.normal = np.array(map(float, plane[:3]), dtype=np.float)
+                    clipping_plane.e = float(plane[3])
+                except:
+                    raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
+            else:
+                raise AssertionError, 'Unknown mean to define a plane for clipping'
+            V, F = clip_by_plane(V, F, clipping_plane)
+        write_file = True
+
+    # Symmetrizing the mesh
+    if args.symmetrize is not None:
+        nb_sym = len(args.symmetrize)
+        sym_plane = Plane()
+        for plane in args.symmetrize:
+            if len(plane) == 0:
+                # Default symmetry by plane Oxz
+                sym_plane.normal = np.array([0., 1., 0.], dtype=np.float)
+                sym_plane.e = 0.
+            elif len(plane) == 1:
+                try:
+                    # Plane ID
+                    plane_id = int(plane[0])
+                    if plane_id < nb_planes:
+                        sym_plane = planes[plane_id]
+                    else:
+                        raise AssertionError, 'Plane with ID %u has not been defined with option --plane' % plane_id
+                except:
+                    # A key string
+                    if plane_str_list.has_key(plane[0]):
+                        sym_plane.normal = np.asarray(plane_str_list[plane[0]], dtype=np.float)
+                        sym_plane.e = 0.
+                    else:
+                        raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
+            elif len(plane) == 4:
+                # Plane defined by a normal and a scalar
+                try:
+                    sym_plane.normal = np.array(map(float, plane[:3]), dtype=np.float)
+                    sym_plane.e = float(plane[3])
+                except:
+                    raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
+            else:
+                raise AssertionError, 'Unknown mean to define a plane for symmetry'
+            V, F = symmetrize(V, F, sym_plane)
+        write_file = True
+
+    # Mesh translations
     if args.translate is not None:
         V = translate(V, args.translate)
         write_file = True
@@ -1627,24 +1827,7 @@ def main():
         V = translate_1D(V, args.translatez, 'z')
         write_file = True
 
-    if args.symmetrize is not None:
-        sym = args.symmetrize
-        c = 0
-        if sym[0] == 'Oxz':
-            normal = np.array([0,1,0])
-        elif sym[0] == 'Oxy':
-            normal = np.array([0,0,1])
-        elif sym[0] == 'Oyz':
-            normal = np.array([1,0,0])
-        else:
-            if len(sym) == 4:
-                normal = np.array(map(float, sym[:3]))
-                c = float(sym[-1])
-            else:
-                raise RuntimeError, 'Error in the specification of the symmetry plane'
-        V, F = symmetrize(V, F, normal, c)
-        write_file = True
-
+    # Mesh rotations
     # FIXME : supprimer le cast angles et ne prendre que des degres
     if args.rotate is not None:
         args.rotate = cast_angles(args.rotate, args.unit)
@@ -1667,43 +1850,6 @@ def main():
     if args.scale is not None:
         V = scale(V, args.scale)
         write_file = True
-
-    # if args.symmetrize is not None:
-    #     raise NotImplementedError, "Symmetrization is not implemented yet into meshmagick"
-        # try:
-        #     from pymesh import pymesh
-        # except:
-        #     raise ImportError, 'pymesh module is not available, unable to use the --symmetrize option'
-
-        # if 'p' in args.symmetrize:
-        #     if len(args.symmetrize) > 1:
-        #         raise RuntimeError, 'When using p argument of --symmetrize option, only one argument should be provided'
-        #     else:
-        #         # Using plane to symmetrize
-        #         if args.plane is None:
-        #             raise RuntimeError, 'When using --symmetrize p option argument, you must also provide the --plane option'
-        #         pass
-        #         # Idee ici on se debrouille pour tourner le maillage afin que le plan de --plane soit
-        #         # le plan yOz pour s'appuer sur la fct Fortran de pymesh, on symmetrize puis on retransforme
-        #         # le maillage pour le remettre dans la bonne direction.
-        #     raise NotImplementedError, '--symmetrize option is not implemented yet for argument p'
-        # else:
-        #     sym = np.zeros(3, dtype=np.int32)
-        #     for plane in args.symmetrize:
-        #         if plane == 'x':
-        #             sym[0] = 1
-        #         elif plane == 'y':
-        #             sym[1] = 1
-        #         else:
-        #             sym[2] = 1
-        #     pymesh.set_mesh_data(V, F)
-        #     pymesh.symmetrizemesh_py(sym)
-        #     V = np.copy(pymesh.vv)
-        #     F = np.copy(pymesh.ff)
-        #     pymesh.free_mesh_data()
-
-    # if args.cut:
-    #     raise NotImplementedError, '--cut option is not implemented yet'
 
     if args.flip_normals:
         F = flip_normals(F)
