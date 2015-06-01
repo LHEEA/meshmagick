@@ -103,13 +103,35 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     keepF[clipped_mask] = True
     clipped_faces = np.array([i for i in xrange(nf)], dtype=np.int32)[clipped_mask]
 
+    # print clipped_faces
     # TODO : etablir ici une connectivite des faces a couper afin d'aider a la projection des vertex sur le plan
+
+    # Establishing connectivity for the band of clipped faces
+
+    # EXPERIMENTAL ----->
+    VV_dict = {}
+    VF_dict = {}
+    FF_dict = {}
+    for iface in clipped_faces:
+        # Il nous faut une connectivite vertex-vertex, vertex-facette et facette-facette
+        face = F[iface]-1
+        if face[0] == face[-1]:
+            # triangle
+            nb = 3
+        else:
+            nb = 4
+        for (index, ivertex) in enumerate(face[:nb]):
+            if not VV_dict.has_key(ivertex):
+                VV_dict[ivertex] = []
+
+    # <------- EXPERIMENTAL
 
     # Initializing the mesh clipping
     nb_new_V = 0
     newV = []
     nb_new_F = 0
     newF = []
+    clipped_edges_dict = {} # keys are the vertices that are under the plane and values are those above
 
     # Loop on the faces to clip
     for (iface, face) in enumerate(F[clipped_faces]-1):
@@ -124,16 +146,18 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
 
         pos_lst = list(keepV[face[:nb]]) # Ne pas revenir a une liste, tout traiter en numpy !!!
         face_lst = list(face[:nb])
-        # print "Vertices of face : ", face_lst
-        # print "positions of vertices : ", pos_lst
 
         for iv in range(nb-1, -1, -1):
             # For loop on vertices
             if pos_lst[iv-1] != pos_lst[iv]: # TODO : Gerer les projections ici !!!!
                 # TODO : mettre un switch pour activer la projection ou pas... --> permettra de merger en meme temps
 
-                V0 = V[face_lst[iv-1]]
-                V1 = V[face_lst[iv]]
+                # Testing if the edge has already been clipped
+                iV0 = face_lst[iv-1]
+                iV1 = face_lst[iv]
+
+                V0 = V[iV0]
+                V1 = V[iV1]
                 edge_length = np.linalg.norm(V1-V0)
 
                 # Intersection
@@ -145,6 +169,7 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
                 # Adding a new vertex
                 nb_new_V += 1
                 newV.append(Q)
+
                 face_lst.insert(iv, int(nv)+nb_new_V-1)
                 pos_lst.insert(iv, True)
 
