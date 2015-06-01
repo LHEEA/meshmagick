@@ -389,6 +389,8 @@ def load_HST(filename):
 
     return V, F
 
+def load_DAT(filename):
+    raise NotImplementedError
 
 def load_INP(filename):
     """
@@ -1502,6 +1504,7 @@ extension_dict = { #keyword           reader,   writer
                   'gdf':             (load_GDF, write_GDF),
                   'diodore-inp':     (load_INP, write_INP),
                   'inp':             (load_INP, write_INP),
+                  'diodore-dat':     (load_DAT, write_DAT),
                   'hydrostar':       (load_HST, write_HST),
                   'hst':             (load_HST, write_HST),
                   'natural':         (load_NAT, write_NAT),
@@ -1543,6 +1546,7 @@ def main():
                     |     .mar      |    R/W      | NEMOH (1)       | nemoh, mar            |
                     |     .gdf      |    R/W      | WAMIT (2)       | wamit, gdf            |
                     |     .inp      |    R        | DIODORE (3)     | diodore-inp, inp      |
+                    |     .DAT      |    W        | DIODORE (3)     | diodore-dat
                     |     .hst      |    R/W      | HYDROSTAR (4)   | hydrostar, hst        |
                     |     .nat      |    R/W      |    -            | natural, nat          |
                     |     .msh      |    R        | GMSH (5)        | gmsh, msh             |
