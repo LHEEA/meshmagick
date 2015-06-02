@@ -85,25 +85,78 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     nv = V.shape[0]
     nf = F.shape[0]
 
+    # Getting the position of each vertex with respect to the plane (projected distance)
     positions = np.dot(V, plane.normal)-plane.e
-    keepV = positions <= abs_tol
 
-    nb_kept = np.sum(keepV)
-    if nb_kept == nv:
+    # Getting the vertices we are sure to keep
+    keepV = positions <= abs_tol # Vertices we know we will keep
+
+    # Getting the vertices that are already on the boundary
+    boundary_V = np.fabs(positions)<=abs_tol # Vertices that are already on the boundary
+
+    # If the mesh is totally at one side of the plane, no need to go further !
+    nb_kept_V = np.sum(keepV)
+    if nb_kept_V == nv:
         return V, F
-    elif nb_kept == 0:
+    elif nb_kept_V == 0:
         return [], []
 
-    # Getting kept faces and clipped faces
-    nbs_kept = np.sum(keepV[(F-1).flatten()].reshape((nf, 4)), axis=1)
+    # Getting triangles and quads masks
+    triangle_mask = F[:,0] == F[:,-1]
+    nb_triangles = np.sum(triangle_mask)
+    quad_mask = np.invert(triangle_mask)
+    nb_quads = nf-nb_triangles
 
+    # Getting the number of kept vertex by face
+    nb_V_kept_by_face = np.zeros(nf, dtype=np.int32)
+    nb_V_kept_by_face[triangle_mask] = \
+        np.sum(keepV[(F[triangle_mask,:3]-1).flatten()].reshape((nb_triangles, 3)), axis=1)
+    nb_V_kept_by_face[quad_mask] = \
+        np.sum(keepV[(F[quad_mask]-1).flatten()].reshape((nb_quads, 4)), axis=1)
+
+    # Getting the number of vertex below the plane by face
+    nb_V_below_by_face = np.zeros(nf, dtype=np.int32)
+    V_below_mask = positions < -abs_tol
+    nb_V_below_by_face[triangle_mask] = np.sum(V_below_mask[(F[triangle_mask,:3]-1).flatten()].reshape(nb_triangles,
+                                                                                                       3), axis=1)
+    nb_V_below_by_face[quad_mask] = np.sum(V_below_mask[(F[quad_mask]-1).flatten()].reshape(nb_quads, 4), axis=1)
+
+    # Getting the faces that are kept as every of their vertices are kept
     keepF = np.zeros(nf, dtype=bool)
-    keepF[nbs_kept == 4] = True
-    clipped_mask = (nbs_kept > 0) * (nbs_kept < 4)
+    keepF[np.logical_and(triangle_mask, nb_V_kept_by_face == 3)] = True
+    keepF[np.logical_and(quad_mask, nb_V_kept_by_face == 4)] = True
+
+    # Getting the boundary faces
+    nb_V_on_boundary_by_face = np.zeros(nf, dtype=np.int32)
+    nb_V_on_boundary_by_face[triangle_mask] = \
+        np.sum(boundary_V[(F[triangle_mask,:3]-1).flatten()].reshape((nb_triangles, 3)), axis=1)
+    nb_V_on_boundary_by_face[quad_mask] = \
+        np.sum(boundary_V[(F[quad_mask]-1).flatten()].reshape((nb_quads, 4)), axis=1)
+
+    # Faces that are at the boundary but that have to be clipped, sharing an edge with the boundary
+    boundary_faces_mask = np.zeros(nf, dtype=bool)
+    boundary_faces_mask[triangle_mask] =  np.logical_and(nb_V_on_boundary_by_face[triangle_mask] == 2,
+                                                         nb_V_kept_by_face[triangle_mask] == 3)
+    boundary_faces_mask[quad_mask] =  np.logical_and(nb_V_on_boundary_by_face[quad_mask] == 2,
+                                                         nb_V_kept_by_face[quad_mask] == 4)
+
+    # Building the boundary edges that are formed by the boundary_vertices
+    boundary_faces = np.array([i for i in xrange(nf)])[boundary_faces_mask]
+    for iface in boundary_faces:
+        # TODO : continuer ICI l'implementation
+        print iface
+
+    clipped_mask = np.zeros(nf, dtype=bool)
+    clipped_mask[triangle_mask] = np.logical_and(nb_V_kept_by_face[triangle_mask] < 3,
+                                                 nb_V_below_by_face[triangle_mask] > 0)
+    clipped_mask[quad_mask] = np.logical_and(nb_V_kept_by_face[quad_mask] < 4,
+                                                 nb_V_below_by_face[quad_mask] > 0)
+
     keepF[clipped_mask] = True
     clipped_faces = np.array([i for i in xrange(nf)], dtype=np.int32)[clipped_mask]
 
-    # print clipped_faces
+    nb_kept_F = np.sum(keepF)
+
     # TODO : etablir ici une connectivite des faces a couper afin d'aider a la projection des vertex sur le plan
 
     # Initializing the mesh clipping
@@ -113,7 +166,9 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     newF = []
     edges = {} # keys are ID of vertices that are above the plane
 
+
     # Loop on the faces to clip
+    boundary_edges = [[0,0] for i in xrange(len(clipped_faces))] # They are stored by pairs and oriented
     for (iface, face) in enumerate(F[clipped_faces]-1):
         # face is a copy (not a reference) of the line of F
         clipped_face_id = clipped_faces[iface]
@@ -178,6 +233,16 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
 
         clipped_face = face_w[pos]
 
+        # Storing the boundary edge, making the orientation so that the normals of the final closed polygon will be
+        # upward
+        for index, ivertex in enumerate(clipped_face):
+            if ivertex >= nv:
+                if clipped_face[index-1] >= nv:
+                    boundary_edges[iface] = [ivertex, clipped_face[index-1]]
+                else:
+                    boundary_edges[iface] = [clipped_face[index+1], ivertex]
+                break
+
         if len(clipped_face) == 3: # We get a triangle
             clipped_face = np.append(clipped_face, clipped_face[0])
 
@@ -196,18 +261,55 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
 
     # TODO : merge the new added vertices
 
-
     # Adding new elements to the initial mesh
-    V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
+    if nb_new_V > 0:
+        V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
     if nb_new_F > 0:
         F = np.concatenate((F, np.asarray(newF, dtype=np.int32)+1))
 
+    # write_VTU('tests/SEAREV/extended_SEAREV.vtu', V, F)
+
     extended_nb_V = nv + nb_new_V
-    new_nb_V = np.sum(keepV) + nb_new_V
-    new_nb_F = np.sum(keepF) + nb_new_F
+    new_nb_V = nb_kept_V + nb_new_V
+    new_nb_F = nb_kept_F + nb_new_F
 
     keepV = np.concatenate((keepV, np.ones(nb_new_V, dtype=bool)))
     keepF = np.concatenate((keepF, np.ones(nb_new_F, dtype=bool)))
+
+
+    # Extracting vertices that are on the boundary of intersections
+    # TODO : il serait plus performant de faire une extraction sur le positions initial puis d'ajouter ensuite les
+    # nouveaux vertex qui sont necessairement sur la frontiere
+
+    positions = np.concatenate((positions, np.zeros(nb_new_V, dtype=np.float)))
+    boundary_V_clipped = np.array([i for i in xrange(extended_nb_V)], dtype=np.int32)[np.fabs(positions) < abs_tol]
+    print list(boundary_V_clipped)
+
+    # Sorting the vertices to make it a closed continuous contour
+
+
+
+    # Here, we try to project vertices that are too close from the plane to avoid degeneracies
+    # TODO : activer avec un flag ou pas !!!  ----> laisse pour le moment la projection experimentale
+    # abs_ratio = 1./n_threshold
+    # for iV0 in edges.keys():
+    #     V0 = V[iV0]
+    #     cur_edges = edges[iV0]
+    #     twin_vertices = cur_edges[0]
+    #     intersection_vertices = cur_edges[1]
+    #     nb_clipped_edges = len(twin_vertices)
+    #     min_ratio = 1
+    #     imin = 0
+    #     for (index ,iV1) in enumerate(twin_vertices):
+    #         V1 = V[iV1]
+    #         Q = V[intersection_vertices[index]]
+    #         ratio = np.linalg.norm(Q-V0) / np.linalg.norm(V1-V0)
+    #         if ratio < abs_ratio:
+    #             print '%u could be projected on the plane in %u in the direction of %u]' % (iV0,
+    #                                                                                        intersection_vertices[index],
+    #                                                                                        twin_vertices[index])
+
+
 
     # Extracting the kept mesh
     clipped_V = V[keepV]
