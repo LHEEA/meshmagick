@@ -106,32 +106,12 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     # print clipped_faces
     # TODO : etablir ici une connectivite des faces a couper afin d'aider a la projection des vertex sur le plan
 
-    # Establishing connectivity for the band of clipped faces
-
-    # EXPERIMENTAL ----->
-    VV_dict = {}
-    VF_dict = {}
-    FF_dict = {}
-    for iface in clipped_faces:
-        # Il nous faut une connectivite vertex-vertex, vertex-facette et facette-facette
-        face = F[iface]-1
-        if face[0] == face[-1]:
-            # triangle
-            nb = 3
-        else:
-            nb = 4
-        for (index, ivertex) in enumerate(face[:nb]):
-            if not VV_dict.has_key(ivertex):
-                VV_dict[ivertex] = []
-
-    # <------- EXPERIMENTAL
-
     # Initializing the mesh clipping
     nb_new_V = 0
     newV = []
     nb_new_F = 0
     newF = []
-    clipped_edges_dict = {} # keys are the vertices that are under the plane and values are those above
+    edges = {} # keys are ID of vertices that are above the plane
 
     # Loop on the faces to clip
     for (iface, face) in enumerate(F[clipped_faces]-1):
@@ -150,27 +130,47 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
         for iv in range(nb-1, -1, -1):
             # For loop on vertices
             if pos_lst[iv-1] != pos_lst[iv]: # TODO : Gerer les projections ici !!!!
+                # We get an edge
                 # TODO : mettre un switch pour activer la projection ou pas... --> permettra de merger en meme temps
 
-                # Testing if the edge has already been clipped
                 iV0 = face_lst[iv-1]
                 iV1 = face_lst[iv]
-
                 V0 = V[iV0]
                 V1 = V[iV1]
-                edge_length = np.linalg.norm(V1-V0)
 
-                # Intersection
-                d0 = np.dot(plane.normal, V0) - plane.e
-                d1 = np.dot(plane.normal, V1) - plane.e
-                t = d0 / (d0-d1)
-                Q = V0+t*(V1-V0)
+                # Storing the edge and the vertex
+                if edges.has_key(iV0):
+                    if iV1 not in edges[iV0][0]:
+                        # We have to compute the intersection
+                        Q = get_edge_intersection_by_plane(plane, V0, V1)
+                        nb_new_V += 1
+                        newV.append(Q)
+                        id_Q = int(nv) + nb_new_V - 1
 
-                # Adding a new vertex
-                nb_new_V += 1
-                newV.append(Q)
+                        edges[iV0][0].append(iV1)
+                        edges[iV0][1].append(id_Q)
+                    else:
+                        # Intersection has already been calculated
+                        id_Q = edges[iV0][1][edges[iV0][0].index(iV1)]
+                else:
+                    # We have to compute the intersection
+                    Q = get_edge_intersection_by_plane(plane, V0, V1)
+                    nb_new_V += 1
+                    newV.append(Q)
+                    id_Q = int(nv) + nb_new_V - 1
 
-                face_lst.insert(iv, int(nv)+nb_new_V-1)
+                    edges[iV0] = [[iV1], [id_Q]]
+
+                # Here, we know the intersection
+                if edges.has_key(iV1):
+                    if iV0 not in edges[iV1][0]:
+                        edges[iV1][0].append(iV0)
+                        edges[iV1][1].append(id_Q)
+                else:
+                    edges[iV1] = [[iV0], [id_Q]]
+
+
+                face_lst.insert(iv, id_Q)
                 pos_lst.insert(iv, True)
 
         face_w = np.asarray(face_lst, dtype=np.int32)
@@ -196,6 +196,7 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
 
     # TODO : merge the new added vertices
 
+
     # Adding new elements to the initial mesh
     V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
     if nb_new_F > 0:
@@ -219,6 +220,13 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
 
     return clipped_V, clipped_F
+
+def get_edge_intersection_by_plane(plane, V0, V1):
+    d0 = np.dot(plane.normal, V0) - plane.e
+    d1 = np.dot(plane.normal, V1) - plane.e
+    t = d0 / (d0-d1)
+    return V0+t*(V1-V0)
+
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
     """
