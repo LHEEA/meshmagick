@@ -143,7 +143,8 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False):
                                                              nb_V_kept_by_face[quad_mask] == 4)
 
         # Building the boundary edges that are formed by the boundary_vertices
-        boundary_faces = np.array([i for i in xrange(nf)])[boundary_faces_mask]
+        # boundary_faces = np.array([i for i in xrange(nf)])[boundary_faces_mask]
+        boundary_faces = np.arange(nf)[boundary_faces_mask]
         boundary_edges = {}
         for face in F[boundary_faces]-1:
             # TODO : continuer ICI l'implementation
@@ -167,7 +168,7 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False):
                                                  nb_V_below_by_face[quad_mask] > 0)
 
     keepF[clipped_mask] = True
-    clipped_faces = np.array([i for i in xrange(nf)], dtype=np.int32)[clipped_mask]
+    clipped_faces = np.arange(nf)[clipped_mask]
 
     nb_kept_F = np.sum(keepF)
 
@@ -186,8 +187,7 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False):
         # face is a copy (not a reference) of the line of F
         clipped_face_id = clipped_faces[iface]
 
-        if face[0] == face[-1]:
-            # Triangle
+        if triangle_mask[clipped_face_id]:
             nb = 3
         else:
             nb = 4
@@ -308,8 +308,8 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False):
     clipped_F = F[keepF]
 
     # Upgrading connectivity array with new indexing
-    newID_V = np.array([i for i in xrange(extended_nb_V)], dtype=np.int32)
-    newID_V[keepV] = [i for i in xrange(new_nb_V)]
+    newID_V = np.arange(extended_nb_V)
+    newID_V[keepV] = np.arange(new_nb_V)
     clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
 
     if get_polygon:
@@ -323,6 +323,63 @@ def get_edge_intersection_by_plane(plane, V0, V1):
     t = d0 / (d0-d1)
     return V0+t*(V1-V0)
 
+def get_all_faces_properties(V, F):
+
+    nf = F.shape[0]
+
+    F -= 1
+
+    triangle_mask = F[:,0] == F[:,-1]
+    nb_triangles = np.sum(triangle_mask)
+    quads_mask = np.invert(triangle_mask)
+    nb_quads = nf-nb_triangles
+
+    areas = np.zeros(nf, dtype=np.float)
+    normals = np.zeros((nf, 3), dtype=np.float)
+    centers = np.zeros((nf, 3), dtype=np.float)
+
+    # Collectively dealing with triangles
+    triangles = F[triangle_mask]
+
+    triangles_normals = np.cross(V[triangles[:,1]] - V[triangles[:,0]], V[triangles[:,2]] - V[triangles[:,0]])
+    triangles_areas = np.linalg.norm(triangles_normals, axis=1)
+    # TODO : voir pour une maniere plus numpy de dupliquer
+    d1 = np.zeros((nb_triangles, 3), dtype=np.float)
+    d1[:,0] = triangles_areas
+    d1[:,1] = triangles_areas
+    d1[:,2] = triangles_areas
+
+    normals[triangle_mask] = triangles_normals / d1
+    areas[triangle_mask] = triangles_areas/2.
+
+    centers[triangle_mask] = np.sum(V[triangles[:, :3]], axis=1)/3.
+
+    # Collectively dealing with quads
+    quads = F[quads_mask]
+    quads_normals = np.cross(V[quads[:,2]] - V[quads[:,0]], V[quads[:,3]] - V[quads[:,1]])
+    d1 = np.zeros((nb_quads, 3), dtype=np.float)
+    d1[:,0] = np.linalg.norm(quads_normals, axis=1)
+    d1[:,1] = d1[:,0]
+    d1[:,2] = d1[:,0]
+    normals[quads_mask] = quads_normals / d1
+
+    a1 = np.linalg.norm(np.cross(V[quads[:,3]] - V[quads[:,0]], V[quads[:,2]] - V[quads[:,0]]), axis=1)/2.
+    a2 = np.linalg.norm(np.cross(V[quads[:,3]] - V[quads[:,0]], V[quads[:,2]] - V[quads[:,0]]), axis=1)/2.
+    areas[quads_mask] = a1 + a2
+
+    C1 = np.sum(V[quads[:, :3]], axis=1) / 3.
+    C2 = (np.sum(V[quads[:, 2:4]], axis=1) + V[quads[:, 0]]) / 3.
+
+    d1 = np.zeros((nb_quads, 3), dtype=np.float)
+    d1[:,0] = np.linalg.norm(quads_normals, axis=1)
+    d1[:,1] = d1[:,0]
+    d1[:,2] = d1[:,0]
+
+    C = (a1*C1 + a2*C2) /  areas[quads_mask]
+
+
+
+    return areas, normals, centers
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
     """
@@ -340,7 +397,7 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
 
     levels = [0, nv]
     Vtmp = []
-    iperm = np.array([i for i in xrange(nv)])
+    iperm = np.arange(nv)
 
     for dim in range(nbdim):
         # Sorting the first dimension
@@ -383,7 +440,7 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
     else:
         # Building the new merged node list
         Vtmp = []
-        newID = np.array([i for i in xrange(nv)])
+        newID = np.arange(nv)
         for (ilevel, istart) in enumerate(levels[:-1]):
             istop = levels[ilevel+1]
 
@@ -1988,6 +2045,10 @@ def main():
 
     if args.info:
         get_info(V, F)
+
+
+    # TESTING :
+    get_all_faces_properties(V, F)
 
     # No more mesh modification should be released from this point -->
 
