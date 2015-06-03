@@ -71,7 +71,7 @@ class Plane:
         return dist, position
 
 
-def clip_by_plane(V, F, plane, abs_tol=1e-3):
+def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False):
 
     n_threshold = 5 # devrait etre reglagble, non utilise pour le moment
 
@@ -90,9 +90,6 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
 
     # Getting the vertices we are sure to keep
     keepV = positions <= abs_tol # Vertices we know we will keep
-
-    # Getting the vertices that are already on the boundary
-    boundary_V = np.fabs(positions)<=abs_tol # Vertices that are already on the boundary
 
     # If the mesh is totally at one side of the plane, no need to go further !
     nb_kept_V = np.sum(keepV)
@@ -126,25 +123,42 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     keepF[np.logical_and(triangle_mask, nb_V_kept_by_face == 3)] = True
     keepF[np.logical_and(quad_mask, nb_V_kept_by_face == 4)] = True
 
-    # Getting the boundary faces
-    nb_V_on_boundary_by_face = np.zeros(nf, dtype=np.int32)
-    nb_V_on_boundary_by_face[triangle_mask] = \
-        np.sum(boundary_V[(F[triangle_mask,:3]-1).flatten()].reshape((nb_triangles, 3)), axis=1)
-    nb_V_on_boundary_by_face[quad_mask] = \
-        np.sum(boundary_V[(F[quad_mask]-1).flatten()].reshape((nb_quads, 4)), axis=1)
+    if get_polygon:
+        # Getting the vertices that are already on the boundary
+        boundary_V_mask = np.fabs(positions)<=abs_tol # Vertices that are already on the boundary
 
-    # Faces that are at the boundary but that have to be clipped, sharing an edge with the boundary
-    boundary_faces_mask = np.zeros(nf, dtype=bool)
-    boundary_faces_mask[triangle_mask] =  np.logical_and(nb_V_on_boundary_by_face[triangle_mask] == 2,
-                                                         nb_V_kept_by_face[triangle_mask] == 3)
-    boundary_faces_mask[quad_mask] =  np.logical_and(nb_V_on_boundary_by_face[quad_mask] == 2,
-                                                         nb_V_kept_by_face[quad_mask] == 4)
+        # Getting the boundary faces
+        nb_V_on_boundary_by_face = np.zeros(nf, dtype=np.int32)
+        nb_V_on_boundary_by_face[triangle_mask] = \
+            np.sum(boundary_V_mask[(F[triangle_mask,:3]-1).flatten()].reshape((nb_triangles, 3)), axis=1)
+        nb_V_on_boundary_by_face[quad_mask] = \
+            np.sum(boundary_V_mask[(F[quad_mask]-1).flatten()].reshape((nb_quads, 4)), axis=1)
 
-    # Building the boundary edges that are formed by the boundary_vertices
-    boundary_faces = np.array([i for i in xrange(nf)])[boundary_faces_mask]
-    for iface in boundary_faces:
-        # TODO : continuer ICI l'implementation
-        print iface
+
+        # Faces that are at the boundary but that have to be clipped, sharing an edge with the boundary
+        boundary_faces_mask = np.zeros(nf, dtype=bool)
+        boundary_faces_mask[triangle_mask] =  np.logical_and(nb_V_on_boundary_by_face[triangle_mask] == 2,
+                                                             nb_V_kept_by_face[triangle_mask] == 3)
+        boundary_faces_mask[quad_mask] =  np.logical_and(nb_V_on_boundary_by_face[quad_mask] == 2,
+                                                             nb_V_kept_by_face[quad_mask] == 4)
+
+        # Building the boundary edges that are formed by the boundary_vertices
+        boundary_faces = np.array([i for i in xrange(nf)])[boundary_faces_mask]
+        boundary_edges = {}
+        for face in F[boundary_faces]-1:
+            # TODO : continuer ICI l'implementation
+            if face[0] == face[-1]:
+                face_w = face[:3]
+            else:
+                face_w = face
+            boundary_V_face_mask = boundary_V_mask[face_w]
+            for (index, is_V_on_boundary) in enumerate(boundary_V_face_mask):
+                if is_V_on_boundary:
+                    if boundary_V_face_mask[index-1]:
+                        boundary_edges[face_w[index]] = face_w[index-1]
+                    else:
+                        boundary_edges[face_w[index+1]] = face_w[index]
+                    break
 
     clipped_mask = np.zeros(nf, dtype=bool)
     clipped_mask[triangle_mask] = np.logical_and(nb_V_kept_by_face[triangle_mask] < 3,
@@ -168,7 +182,6 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
 
 
     # Loop on the faces to clip
-    boundary_edges = [[0,0] for i in xrange(len(clipped_faces))] # They are stored by pairs and oriented
     for (iface, face) in enumerate(F[clipped_faces]-1):
         # face is a copy (not a reference) of the line of F
         clipped_face_id = clipped_faces[iface]
@@ -233,15 +246,16 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
 
         clipped_face = face_w[pos]
 
-        # Storing the boundary edge, making the orientation so that the normals of the final closed polygon will be
-        # upward
-        for index, ivertex in enumerate(clipped_face):
-            if ivertex >= nv:
-                if clipped_face[index-1] >= nv:
-                    boundary_edges[iface] = [ivertex, clipped_face[index-1]]
-                else:
-                    boundary_edges[iface] = [clipped_face[index+1], ivertex]
-                break
+        if get_polygon:
+            # Storing the boundary edge, making the orientation so that the normals of the final closed polygon will be
+            # upward
+            for index, ivertex in enumerate(clipped_face):
+                if ivertex >= nv:
+                    if clipped_face[index-1] >= nv:
+                        boundary_edges[ivertex] = clipped_face[index-1]
+                    else:
+                        boundary_edges[clipped_face[index+1]] = ivertex
+                    break
 
         if len(clipped_face) == 3: # We get a triangle
             clipped_face = np.append(clipped_face, clipped_face[0])
@@ -250,16 +264,13 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
             n_roll = np.where(pos==False)[0][0]
             clipped_face = np.roll(face_w, -n_roll)
 
-            quadrangle = clipped_face[quadrangle] # New face to add
             nb_new_F += 1
-            newF.append(quadrangle)
+            newF.append(clipped_face[quadrangle])
 
             clipped_face = clipped_face[triangle] # Modified face
 
         # Updating the initial face with the clipped face
         F[clipped_face_id] = clipped_face + 1 # Staying consistent with what is done in F (indexing starting at 1)
-
-    # TODO : merge the new added vertices
 
     # Adding new elements to the initial mesh
     if nb_new_V > 0:
@@ -276,52 +287,35 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     keepV = np.concatenate((keepV, np.ones(nb_new_V, dtype=bool)))
     keepF = np.concatenate((keepF, np.ones(nb_new_F, dtype=bool)))
 
-
-    # Extracting vertices that are on the boundary of intersections
-    # TODO : il serait plus performant de faire une extraction sur le positions initial puis d'ajouter ensuite les
-    # nouveaux vertex qui sont necessairement sur la frontiere
-
-    positions = np.concatenate((positions, np.zeros(nb_new_V, dtype=np.float)))
-    boundary_V_clipped = np.array([i for i in xrange(extended_nb_V)], dtype=np.int32)[np.fabs(positions) < abs_tol]
-    print list(boundary_V_clipped)
-
-    # Sorting the vertices to make it a closed continuous contour
-
-
-
-    # Here, we try to project vertices that are too close from the plane to avoid degeneracies
-    # TODO : activer avec un flag ou pas !!!  ----> laisse pour le moment la projection experimentale
-    # abs_ratio = 1./n_threshold
-    # for iV0 in edges.keys():
-    #     V0 = V[iV0]
-    #     cur_edges = edges[iV0]
-    #     twin_vertices = cur_edges[0]
-    #     intersection_vertices = cur_edges[1]
-    #     nb_clipped_edges = len(twin_vertices)
-    #     min_ratio = 1
-    #     imin = 0
-    #     for (index ,iV1) in enumerate(twin_vertices):
-    #         V1 = V[iV1]
-    #         Q = V[intersection_vertices[index]]
-    #         ratio = np.linalg.norm(Q-V0) / np.linalg.norm(V1-V0)
-    #         if ratio < abs_ratio:
-    #             print '%u could be projected on the plane in %u in the direction of %u]' % (iV0,
-    #                                                                                        intersection_vertices[index],
-    #                                                                                        twin_vertices[index])
-
-
+    if get_polygon:
+        # Computing the boundary curves
+        initV = boundary_edges.keys()[0]
+        polygons = []
+        while len(boundary_edges) > 0:
+            polygon = [initV]
+            closed = False
+            iV = initV
+            while not closed:
+                iVtarget = boundary_edges.pop(iV)
+                polygon.append(iVtarget)
+                iV = iVtarget
+                if iVtarget == initV:
+                    polygons.append(polygon)
+                    break
 
     # Extracting the kept mesh
     clipped_V = V[keepV]
     clipped_F = F[keepF]
 
-    # Making indices consistent
+    # Upgrading connectivity array with new indexing
     newID_V = np.array([i for i in xrange(extended_nb_V)], dtype=np.int32)
     newID_V[keepV] = [i for i in xrange(new_nb_V)]
-
     clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
 
-    return clipped_V, clipped_F
+    if get_polygon:
+        return clipped_V, clipped_F, polygons
+    else:
+        return clipped_V, clipped_F
 
 def get_edge_intersection_by_plane(plane, V0, V1):
     d0 = np.dot(plane.normal, V0) - plane.e
@@ -1812,8 +1806,9 @@ def main():
     parser.add_argument('--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
 
-    parser.add_argument('--version', action='store_true',
-                        help="""Shows the version number""")
+    parser.add_argument('--version', action='version',
+                        version='meshmagick - version %s\n%s'%(__version__, __copyright__),
+                        help="""Shows the version number and exit""")
 
 
     if acok:
@@ -1822,9 +1817,6 @@ def main():
     # TODO : Utiliser des sous-commandes pour l'utilisation de meshmagick
 
     args, unknown = parser.parse_known_args()
-
-    if args.version:
-        print 'meshmagick version %s' % (__version__)
 
     write_file = False  # switch to decide if data should be written to outfilename
 
