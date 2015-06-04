@@ -323,6 +323,28 @@ def get_edge_intersection_by_plane(plane, V0, V1):
     t = d0 / (d0-d1)
     return V0+t*(V1-V0)
 
+def get_face_properties(V):
+    nv = V.shape[0]
+    if nv == 3: # triangle
+        normal = np.cross(V[1]-V[0], V[2]-V[0])
+        area = np.linag.norm(normal)
+        normal /= area
+        area /= 2.
+        center = np.sum(V, axis=0) / 3.
+    else: # quadrangle
+        normal = np.cross(V[2]-V[0], V[3]-V[1])
+        normal /= np.linalg.norm(normal)
+        a1 = np.linalg.norm(np.cross(V[1]-V[0], V[2]-V[0])) / 2.
+        a2 = np.linalg.norm(np.cross(V[3]-V[0], V[2]-V[0])) / 2.
+        area = a1 + a2
+        C1 = np.sum(V[:3], axis=0) / 3.
+        C2 = (np.sum(V[2:4], axis=0) + V[0])/ 3. # FIXME : A verifier
+        center = (a1*C1 + a2*C2) / area
+
+    # Ne pas oublier de normer la normale
+
+    return area, normal, center
+
 def get_all_faces_properties(V, F):
 
     nf = F.shape[0]
@@ -343,41 +365,25 @@ def get_all_faces_properties(V, F):
 
     triangles_normals = np.cross(V[triangles[:,1]] - V[triangles[:,0]], V[triangles[:,2]] - V[triangles[:,0]])
     triangles_areas = np.linalg.norm(triangles_normals, axis=1)
-    # TODO : voir pour une maniere plus numpy de dupliquer
-    d1 = np.zeros((nb_triangles, 3), dtype=np.float)
-    d1[:,0] = triangles_areas
-    d1[:,1] = triangles_areas
-    d1[:,2] = triangles_areas
-
-    normals[triangle_mask] = triangles_normals / d1
+    normals[triangle_mask] = triangles_normals / np.array(([triangles_areas,]*3)).T
     areas[triangle_mask] = triangles_areas/2.
-
     centers[triangle_mask] = np.sum(V[triangles[:, :3]], axis=1)/3.
 
     # Collectively dealing with quads
     quads = F[quads_mask]
-    quads_normals = np.cross(V[quads[:,2]] - V[quads[:,0]], V[quads[:,3]] - V[quads[:,1]])
-    d1 = np.zeros((nb_quads, 3), dtype=np.float)
-    d1[:,0] = np.linalg.norm(quads_normals, axis=1)
-    d1[:,1] = d1[:,0]
-    d1[:,2] = d1[:,0]
-    normals[quads_mask] = quads_normals / d1
 
-    a1 = np.linalg.norm(np.cross(V[quads[:,3]] - V[quads[:,0]], V[quads[:,2]] - V[quads[:,0]]), axis=1)/2.
+    quads_normals = np.cross(V[quads[:,2]] - V[quads[:,0]], V[quads[:,3]] - V[quads[:,1]])
+    normals[quads_mask] = quads_normals / np.array(([np.linalg.norm(quads_normals, axis=1),]*3)).T
+
+    a1 = np.linalg.norm(np.cross(V[quads[:,1]] - V[quads[:,0]], V[quads[:,2]] - V[quads[:,0]]), axis=1)/2.
     a2 = np.linalg.norm(np.cross(V[quads[:,3]] - V[quads[:,0]], V[quads[:,2]] - V[quads[:,0]]), axis=1)/2.
     areas[quads_mask] = a1 + a2
 
     C1 = np.sum(V[quads[:, :3]], axis=1) / 3.
     C2 = (np.sum(V[quads[:, 2:4]], axis=1) + V[quads[:, 0]]) / 3.
 
-    d1 = np.zeros((nb_quads, 3), dtype=np.float)
-    d1[:,0] = np.linalg.norm(quads_normals, axis=1)
-    d1[:,1] = d1[:,0]
-    d1[:,2] = d1[:,0]
-
-    C = (a1*C1 + a2*C2) /  areas[quads_mask]
-
-
+    centers[quads_mask] = ( np.array(([a1,]*3)).T * C1 +
+          np.array(([a2,]*3)).T * C2 ) /  np.array(([areas[quads_mask],]*3)).T
 
     return areas, normals, centers
 
