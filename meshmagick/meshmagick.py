@@ -2023,9 +2023,6 @@ def main():
 
     args, unknown = parser.parse_known_args()
 
-    if args.version:
-        print 'meshmagick version %s' % (__version__)
-
     write_file = False  # switch to decide if data should be written to outfilename
 
     # TODO : supprimer le bloc suivant
