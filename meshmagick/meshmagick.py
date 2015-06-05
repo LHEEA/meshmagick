@@ -503,9 +503,14 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
                 print "Warning, the mesh seems not watertight"
 
         if hs[2] < 0:
+            flipped = True
             F = flip_normals(F)
-            if verbose:
-                print 'normals have been reversed to be outgoing'
+        else:
+            flipped = False
+
+        if verbose and flipped:
+            print 'normals have been reversed to be outgoing'
+
 
     else:
         if verbose:
@@ -1960,7 +1965,12 @@ def main():
                          with a translation option, the scaling is done before
                         the translations. The translation magnitude should be set
                         accordingly to the newly scaled mesh.""")
-    parser.add_argument('--flip-normals', action='store_true',
+
+    parser.add_argument('-hn', '--heal_normals', action='store_true',
+                        help="""Checks and heals the normals consistency and
+                        verify if they are outgoing.""")
+
+    parser.add_argument('-fn', '--flip-normals', action='store_true',
                         help="""flips the normals of the mesh""")
 
     parser.add_argument('-p', '--plane', nargs='+', action='append',
@@ -2035,6 +2045,10 @@ def main():
         tol = float(args.merge_duplicates)
         V, F = merge_duplicates(V, F, verbose=args.verbose, tol=tol)
         write_file = True
+
+    if args.heal_normals:
+        F = heal_normals(V, F, verbose=args.verbose)
+
 
     # TODO : put that dict at the begining of the main function
     plane_str_list = {'Oxy':[0.,0.,1.],
@@ -2186,9 +2200,8 @@ def main():
 
 
     # TESTING --> A retirer
-    F = heal_normals(V, F, verbose=args.verbose)
-    import hydrostatics as hs
-    hsMesh = hs.HydrostaticsMesh(V, F)
+    # import hydrostatics as hs
+    # hsMesh = hs.HydrostaticsMesh(V, F)
 
     ##
 
