@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# PYTHON_ARGCOMPLTETE_OK
 
 # Python module to manipulate 2D meshes for hydrodynamics purposes
 
@@ -385,6 +386,8 @@ def get_all_faces_properties(V, F):
     centers[quads_mask] = ( np.array(([a1,]*3)).T * C1 +
           np.array(([a2,]*3)).T * C2 ) /  np.array(([areas[quads_mask],]*3)).T
 
+    # Returning to 1 indexing
+    F += 1
     return areas, normals, centers
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
