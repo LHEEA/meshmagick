@@ -1777,7 +1777,8 @@ def symmetrize(V, F, plane):
 
     return merge_duplicates(V, F, verbose=False)
 
-def show(V, F):
+
+def show(V, F, normals=False):
     import vtk
 
     vtk_mesh = _build_vtk_mesh_obj(V, F)
@@ -1785,6 +1786,54 @@ def show(V, F):
     surface = vtk.vtkDataSetSurfaceFilter()
     surface.SetInput(vtk_mesh)
     surface.Update()
+
+    if normals:
+
+        polydata = surface.GetOutput()
+
+        normals = vtk.vtkPolyDataNormals()
+        normals.SetConsistency(0)
+        normals.ComputeCellNormalsOn()
+        normals.SetInput(polydata)
+        normals.Update()
+
+        normals_mapper = vtk.vtkPolyDataMapper()
+        normals_mapper.SetInput(normals.GetOutput())
+
+        normals_actor = vtk.vtkActor()
+        normals_actor.SetMapper(normals_mapper)
+
+        maskPts = vtk.vtkMaskPoints()
+        maskPts.SetOnRatio(5)
+        maskPts.RandomModeOn()
+        maskPts.SetInput(polydata)
+        maskPts.SetMaximumNumberOfPoints(5000)
+        maskPts.Update()
+
+        arrow = vtk.vtkArrowSource()
+        arrow.SetTipResolution(16)
+        arrow.SetTipLength(0.3)
+        arrow.SetTipRadius(0.1)
+
+        glyph = vtk.vtkGlyph3D()
+        glyph.SetSourceConnection(arrow.GetOutputPort())
+        glyph.SetInputConnection(maskPts.GetOutputPort())
+        glyph.SetInputConnection(normals.GetOutputPort())
+        glyph.SetVectorModeToUseNormal()
+        # glyph.SetScaleFactor(1)
+        # glyph.SetColorModeToColorByVector()
+        # glyph.SetScaleModeToScaleByVector()
+        # glyph.OrientOn()
+        glyph.Update()
+        #
+        glyphMapper = vtk.vtkPolyDataMapper()
+        glyphMapper.SetInputConnection(glyph.GetOutputPort())
+        #
+        glyphActor = vtk.vtkActor()
+        glyphActor.SetMapper(glyphMapper)
+
+
+
 
     mapper = vtk.vtkDataSetMapper()
     mapper.SetInput(surface.GetOutput())
@@ -1804,7 +1853,8 @@ def show(V, F):
 
     renderer = vtk.vtkRenderer()
     renderer.AddActor(mesh_actor)
-    # renderer.AddActor(axes_actor)
+    if normals:
+        renderer.AddActor(glyphActor)
     renderer.SetBackground(0.7706, 0.8165, 1.0)
 
     renderWindow = vtk.vtkRenderWindow()
@@ -2011,6 +2061,10 @@ def main():
     parser.add_argument('--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
 
+    parser.add_argument('--shown', action='store_true',
+                        help="""Shows the input mesh in an interactive window
+                        along with normals""")
+
     parser.add_argument('--version', action='version',
                         version='meshmagick - version %s\n%s'%(__version__, __copyright__),
                         help="""Shows the version number and exit""")
@@ -2202,6 +2256,9 @@ def main():
 
     if args.show:
         show(V, F)
+
+    if args.shown:
+        show(V, F, normals=True)
 
     if args.outfilename is None:
         base, ext = os.path.splitext(args.infilename)
