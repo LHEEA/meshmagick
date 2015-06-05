@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# PYTHON_ARGCOMPLTETE_OK
 
 # Python module to manipulate 2D meshes for hydrodynamics purposes
 
@@ -71,7 +72,7 @@ class Plane:
         return dist, position
 
 
-def clip_by_plane(V, F, plane, abs_tol=1e-3):
+def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, areas=None):
 
     n_threshold = 5 # devrait etre reglagble, non utilise pour le moment
 
@@ -85,23 +86,92 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     nv = V.shape[0]
     nf = F.shape[0]
 
+    # Getting the position of each vertex with respect to the plane (projected distance)
     positions = np.dot(V, plane.normal)-plane.e
-    keepV = positions <= abs_tol
 
-    nb_kept = np.sum(keepV)
-    if nb_kept == nv:
+    # Getting the vertices we are sure to keep
+    keepV = positions <= abs_tol # Vertices we know we will keep
+
+    # If the mesh is totally at one side of the plane, no need to go further !
+    nb_kept_V = np.sum(keepV)
+    if nb_kept_V == nv:
         return V, F
-    elif nb_kept == 0:
+    elif nb_kept_V == 0:
         return [], []
 
-    # Getting kept faces and clipped faces
-    nbs_kept = np.sum(keepV[(F-1).flatten()].reshape((nf, 4)), axis=1)
+    # Getting triangles and quads masks
+    triangle_mask = F[:,0] == F[:,-1]
+    nb_triangles = np.sum(triangle_mask)
+    quad_mask = np.invert(triangle_mask)
+    nb_quads = nf-nb_triangles
 
+    # Getting the number of kept vertex by face
+    nb_V_kept_by_face = np.zeros(nf, dtype=np.int32)
+    nb_V_kept_by_face[triangle_mask] = \
+        np.sum(keepV[(F[triangle_mask,:3]-1).flatten()].reshape((nb_triangles, 3)), axis=1)
+    nb_V_kept_by_face[quad_mask] = \
+        np.sum(keepV[(F[quad_mask]-1).flatten()].reshape((nb_quads, 4)), axis=1)
+
+    # Getting the number of vertex below the plane by face
+    nb_V_below_by_face = np.zeros(nf, dtype=np.int32)
+    V_below_mask = positions < -abs_tol
+    nb_V_below_by_face[triangle_mask] = np.sum(V_below_mask[(F[triangle_mask,:3]-1).flatten()].reshape(nb_triangles,
+                                                                                                       3), axis=1)
+    nb_V_below_by_face[quad_mask] = np.sum(V_below_mask[(F[quad_mask]-1).flatten()].reshape(nb_quads, 4), axis=1)
+
+    # Getting the faces that are kept as every of their vertices are kept
     keepF = np.zeros(nf, dtype=bool)
-    keepF[nbs_kept == 4] = True
-    clipped_mask = (nbs_kept > 0) * (nbs_kept < 4)
+    keepF[np.logical_and(triangle_mask, nb_V_kept_by_face == 3)] = True
+    keepF[np.logical_and(quad_mask, nb_V_kept_by_face == 4)] = True
+
+    if get_polygon:
+        # Getting the vertices that are already on the boundary
+        boundary_V_mask = np.fabs(positions)<=abs_tol # Vertices that are already on the boundary
+
+        # Getting the boundary faces
+        nb_V_on_boundary_by_face = np.zeros(nf, dtype=np.int32)
+        nb_V_on_boundary_by_face[triangle_mask] = \
+            np.sum(boundary_V_mask[(F[triangle_mask,:3]-1).flatten()].reshape((nb_triangles, 3)), axis=1)
+        nb_V_on_boundary_by_face[quad_mask] = \
+            np.sum(boundary_V_mask[(F[quad_mask]-1).flatten()].reshape((nb_quads, 4)), axis=1)
+
+
+        # Faces that are at the boundary but that have to be clipped, sharing an edge with the boundary
+        boundary_faces_mask = np.zeros(nf, dtype=bool)
+        boundary_faces_mask[triangle_mask] =  np.logical_and(nb_V_on_boundary_by_face[triangle_mask] == 2,
+                                                             nb_V_kept_by_face[triangle_mask] == 3)
+        boundary_faces_mask[quad_mask] =  np.logical_and(nb_V_on_boundary_by_face[quad_mask] == 2,
+                                                             nb_V_kept_by_face[quad_mask] == 4)
+
+        # Building the boundary edges that are formed by the boundary_vertices
+        # boundary_faces = np.array([i for i in xrange(nf)])[boundary_faces_mask]
+        boundary_faces = np.arange(nf)[boundary_faces_mask]
+        boundary_edges = {}
+        for face in F[boundary_faces]-1:
+            # TODO : continuer ICI l'implementation
+            if face[0] == face[-1]:
+                face_w = face[:3]
+            else:
+                face_w = face
+            boundary_V_face_mask = boundary_V_mask[face_w]
+            for (index, is_V_on_boundary) in enumerate(boundary_V_face_mask):
+                if is_V_on_boundary:
+                    if boundary_V_face_mask[index-1]:
+                        boundary_edges[face_w[index]] = face_w[index-1]
+                    else:
+                        boundary_edges[face_w[index+1]] = face_w[index]
+                    break
+
+    clipped_mask = np.zeros(nf, dtype=bool)
+    clipped_mask[triangle_mask] = np.logical_and(nb_V_kept_by_face[triangle_mask] < 3,
+                                                 nb_V_below_by_face[triangle_mask] > 0)
+    clipped_mask[quad_mask] = np.logical_and(nb_V_kept_by_face[quad_mask] < 4,
+                                                 nb_V_below_by_face[quad_mask] > 0)
+
     keepF[clipped_mask] = True
-    clipped_faces = np.array([i for i in xrange(nf)], dtype=np.int32)[clipped_mask]
+    clipped_faces = np.arange(nf)[clipped_mask]
+
+    nb_kept_F = np.sum(keepF)
 
     # TODO : etablir ici une connectivite des faces a couper afin d'aider a la projection des vertex sur le plan
 
@@ -110,48 +180,83 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
     newV = []
     nb_new_F = 0
     newF = []
+    edges = {} # keys are ID of vertices that are above the plane
+
 
     # Loop on the faces to clip
     for (iface, face) in enumerate(F[clipped_faces]-1):
         # face is a copy (not a reference) of the line of F
         clipped_face_id = clipped_faces[iface]
 
-        if face[0] == face[-1]:
-            # Triangle
+        if triangle_mask[clipped_face_id]:
             nb = 3
         else:
             nb = 4
 
         pos_lst = list(keepV[face[:nb]]) # Ne pas revenir a une liste, tout traiter en numpy !!!
         face_lst = list(face[:nb])
-        # print "Vertices of face : ", face_lst
-        # print "positions of vertices : ", pos_lst
 
         for iv in range(nb-1, -1, -1):
             # For loop on vertices
             if pos_lst[iv-1] != pos_lst[iv]: # TODO : Gerer les projections ici !!!!
+                # We get an edge
                 # TODO : mettre un switch pour activer la projection ou pas... --> permettra de merger en meme temps
 
-                V0 = V[face_lst[iv-1]]
-                V1 = V[face_lst[iv]]
-                edge_length = np.linalg.norm(V1-V0)
+                iV0 = face_lst[iv-1]
+                iV1 = face_lst[iv]
+                V0 = V[iV0]
+                V1 = V[iV1]
 
-                # Intersection
-                d0 = np.dot(plane.normal, V0) - plane.e
-                d1 = np.dot(plane.normal, V1) - plane.e
-                t = d0 / (d0-d1)
-                Q = V0+t*(V1-V0)
+                # Storing the edge and the vertex
+                if edges.has_key(iV0):
+                    if iV1 not in edges[iV0][0]:
+                        # We have to compute the intersection
+                        Q = get_edge_intersection_by_plane(plane, V0, V1)
+                        nb_new_V += 1
+                        newV.append(Q)
+                        id_Q = int(nv) + nb_new_V - 1
 
-                # Adding a new vertex
-                nb_new_V += 1
-                newV.append(Q)
-                face_lst.insert(iv, int(nv)+nb_new_V-1)
+                        edges[iV0][0].append(iV1)
+                        edges[iV0][1].append(id_Q)
+                    else:
+                        # Intersection has already been calculated
+                        id_Q = edges[iV0][1][edges[iV0][0].index(iV1)]
+                else:
+                    # We have to compute the intersection
+                    Q = get_edge_intersection_by_plane(plane, V0, V1)
+                    nb_new_V += 1
+                    newV.append(Q)
+                    id_Q = int(nv) + nb_new_V - 1
+
+                    edges[iV0] = [[iV1], [id_Q]]
+
+                # Here, we know the intersection
+                if edges.has_key(iV1):
+                    if iV0 not in edges[iV1][0]:
+                        edges[iV1][0].append(iV0)
+                        edges[iV1][1].append(id_Q)
+                else:
+                    edges[iV1] = [[iV0], [id_Q]]
+
+
+                face_lst.insert(iv, id_Q)
                 pos_lst.insert(iv, True)
 
         face_w = np.asarray(face_lst, dtype=np.int32)
         pos = np.asarray(pos_lst, dtype=bool)
 
         clipped_face = face_w[pos]
+
+        if get_polygon:
+            # Storing the boundary edge, making the orientation so that the normals of the final closed polygon will be
+            # upward
+            for index, ivertex in enumerate(clipped_face):
+                if ivertex >= nv:
+                    if clipped_face[index-1] >= nv:
+                        boundary_edges[ivertex] = clipped_face[index-1]
+                    else:
+                        boundary_edges[clipped_face[index+1]] = ivertex
+                    break
 
         if len(clipped_face) == 3: # We get a triangle
             clipped_face = np.append(clipped_face, clipped_face[0])
@@ -160,40 +265,264 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3):
             n_roll = np.where(pos==False)[0][0]
             clipped_face = np.roll(face_w, -n_roll)
 
-            quadrangle = clipped_face[quadrangle] # New face to add
             nb_new_F += 1
-            newF.append(quadrangle)
+            newF.append(clipped_face[quadrangle])
 
             clipped_face = clipped_face[triangle] # Modified face
 
         # Updating the initial face with the clipped face
         F[clipped_face_id] = clipped_face + 1 # Staying consistent with what is done in F (indexing starting at 1)
 
-    # TODO : merge the new added vertices
-
     # Adding new elements to the initial mesh
-    V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
+    if nb_new_V > 0:
+        V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
     if nb_new_F > 0:
         F = np.concatenate((F, np.asarray(newF, dtype=np.int32)+1))
 
+    # write_VTU('tests/SEAREV/extended_SEAREV.vtu', V, F)
+
     extended_nb_V = nv + nb_new_V
-    new_nb_V = np.sum(keepV) + nb_new_V
-    new_nb_F = np.sum(keepF) + nb_new_F
+    new_nb_V = nb_kept_V + nb_new_V
+    new_nb_F = nb_kept_F + nb_new_F
 
     keepV = np.concatenate((keepV, np.ones(nb_new_V, dtype=bool)))
     keepF = np.concatenate((keepF, np.ones(nb_new_F, dtype=bool)))
+
+    if get_polygon:
+        # Computing the boundary curves
+        initV = boundary_edges.keys()[0]
+        polygons = []
+        while len(boundary_edges) > 0:
+            polygon = [initV]
+            closed = False
+            iV = initV
+            while not closed:
+                iVtarget = boundary_edges.pop(iV)
+                polygon.append(iVtarget)
+                iV = iVtarget
+                if iVtarget == initV:
+                    polygons.append(polygon)
+                    break
 
     # Extracting the kept mesh
     clipped_V = V[keepV]
     clipped_F = F[keepF]
 
-    # Making indices consistent
-    newID_V = np.array([i for i in xrange(extended_nb_V)], dtype=np.int32)
-    newID_V[keepV] = [i for i in xrange(new_nb_V)]
+    if areas is not None:
+        # Computing the new areas for the clipped faces only
+        for face in F[clipped_mask]-1:
+            print face
 
+
+    # Upgrading connectivity array with new indexing
+    newID_V = np.arange(extended_nb_V)
+    newID_V[keepV] = np.arange(new_nb_V)
     clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
 
-    return clipped_V, clipped_F
+    if get_polygon:
+        if areas is not None:
+            return clipped_V, clipped_F, polygons, areas
+        else:
+            return clipped_V, clipped_F, polygons
+    else:
+        if areas is not None:
+            return clipped_V, clipped_F, areas
+        else:
+            return clipped_V, clipped_F
+
+def get_edge_intersection_by_plane(plane, V0, V1):
+    d0 = np.dot(plane.normal, V0) - plane.e
+    d1 = np.dot(plane.normal, V1) - plane.e
+    t = d0 / (d0-d1)
+    return V0+t*(V1-V0)
+
+def get_face_properties(V):
+    nv = V.shape[0]
+    if nv == 3: # triangle
+        normal = np.cross(V[1]-V[0], V[2]-V[0])
+        area = np.linag.norm(normal)
+        normal /= area
+        area /= 2.
+        center = np.sum(V, axis=0) / 3.
+    else: # quadrangle
+        normal = np.cross(V[2]-V[0], V[3]-V[1])
+        normal /= np.linalg.norm(normal)
+        a1 = np.linalg.norm(np.cross(V[1]-V[0], V[2]-V[0])) / 2.
+        a2 = np.linalg.norm(np.cross(V[2]-V[0], V[3]-V[1])) / 2.
+        area = a1 + a2
+        C1 = np.sum(V[:3], axis=0) / 3.
+        C2 = (np.sum(V[2:4], axis=0) + V[0])/ 3. # FIXME : A verifier
+        center = (a1*C1 + a2*C2) / area
+
+    # Ne pas oublier de normer la normale
+
+    return area, normal, center
+
+def get_all_faces_properties(V, F):
+
+    nf = F.shape[0]
+
+    F -= 1
+
+    triangle_mask = F[:,0] == F[:,-1]
+    nb_triangles = np.sum(triangle_mask)
+    quads_mask = np.invert(triangle_mask)
+    nb_quads = nf-nb_triangles
+
+    areas = np.zeros(nf, dtype=np.float)
+    normals = np.zeros((nf, 3), dtype=np.float)
+    centers = np.zeros((nf, 3), dtype=np.float)
+
+    # Collectively dealing with triangles
+    triangles = F[triangle_mask]
+
+    triangles_normals = np.cross(V[triangles[:,1]] - V[triangles[:,0]], V[triangles[:,2]] - V[triangles[:,0]])
+    triangles_areas = np.linalg.norm(triangles_normals, axis=1)
+    normals[triangle_mask] = triangles_normals / np.array(([triangles_areas,]*3)).T
+    areas[triangle_mask] = triangles_areas/2.
+    centers[triangle_mask] = np.sum(V[triangles[:, :3]], axis=1)/3.
+
+    # Collectively dealing with quads
+    quads = F[quads_mask]
+
+    quads_normals = np.cross(V[quads[:,2]] - V[quads[:,0]], V[quads[:,3]] - V[quads[:,1]])
+    normals[quads_mask] = quads_normals / np.array(([np.linalg.norm(quads_normals, axis=1),]*3)).T
+
+    a1 = np.linalg.norm(np.cross(V[quads[:,1]] - V[quads[:,0]], V[quads[:,2]] - V[quads[:,0]]), axis=1)/2.
+    a2 = np.linalg.norm(np.cross(V[quads[:,3]] - V[quads[:,0]], V[quads[:,2]] - V[quads[:,0]]), axis=1)/2.
+    areas[quads_mask] = a1 + a2
+
+    C1 = np.sum(V[quads[:, :3]], axis=1) / 3.
+    C2 = (np.sum(V[quads[:, 2:4]], axis=1) + V[quads[:, 0]]) / 3.
+
+    centers[quads_mask] = ( np.array(([a1,]*3)).T * C1 +
+          np.array(([a2,]*3)).T * C2 ) /  np.array(([areas[quads_mask],]*3)).T
+
+    # Returning to 1 indexing
+    F += 1
+    return areas, normals, centers
+
+def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'implementation
+
+    F -=1
+
+    nv = V.shape[0]
+    nf = F.shape[0]
+
+    mesh_closed = True
+
+    # Building connectivities
+
+    # Establishing VV and VF connectivities
+    VV = dict([(i, set()) for i in xrange(nv)])
+    VF = dict([(i, set()) for i in xrange(nv)])
+    for (iface, face) in enumerate(F):
+        if face[0] == face[-1]:
+            face_w = face[:3]
+        else:
+            face_w = face
+        for (index, iV) in enumerate(face_w):
+            VF[iV].add(iface)
+            VV[face_w[index-1]].add(iV)
+            VV[iV].add(face_w[index-1])
+
+    # Connectivity FF
+    FF = dict([(i, set()) for i in xrange(nf)])
+    for ivertex in xrange(nv):
+        S1 = VF[ivertex]
+        for iadjV in VV[ivertex]:
+            S2 = VF[iadjV]
+            I = list(S1 & S2)
+            if len(I) != 1:
+                FF[I[0]].add(I[1])
+                FF[I[1]].add(I[0])
+            else:
+                mesh_closed = False
+
+    # Flooding the mesh to find inconsistent normals
+    type_cell = np.zeros(nf, dtype=np.int32)
+    type_cell[:] = 4
+    triangles_mask = F[:,0] == F[:,-1]
+    type_cell[triangles_mask] = 3
+
+    FVis = np.zeros(nf, dtype=bool)
+    FVis[0] = True
+    stack = [0]
+    nb_reversed = 0
+    while len(stack) > 0:
+        iface = stack.pop()
+        face = F[iface]
+        S1 = set(face)
+
+        for iadjF in FF[iface]:
+            if FVis[iadjF]:
+                continue
+            FVis[iadjF] = True
+            # Removing the other pointer
+            FF[iadjF].remove(iface) # So as it won't go from iadjF to iface in the future
+
+            # Shared vertices
+            adjface = F[iadjF]
+            S2 = set(adjface)
+            iV1, iV2 = list(S1 & S2)
+
+            # Checking normal consistency
+            face_ref = np.roll(face[:type_cell[iface]], -np.where(face == iV1)[0][0])
+            adj_face_ref = np.roll(adjface[:type_cell[iadjF]], -np.where(adjface == iV1)[0][0])
+
+            if face_ref[1] == iV2:
+                i = 1
+            else:
+                i = -1
+
+            if adj_face_ref[i] == iV2:
+                # Reversing normal
+                nb_reversed += 1
+                F[iadjF] = np.flipud(F[iadjF])
+
+            # Appending to the stack
+            stack.append(iadjF)
+
+    F += 1
+
+    if verbose:
+        print '%u faces have been reversed'% nb_reversed
+
+
+    # Checking if the normals are outgoing
+    if mesh_closed:
+        zmax = np.max(V[:,2])
+
+        areas, normals, centers = get_all_faces_properties(V, F)
+
+        hs = (np.array([(centers[:, 2]-zmax)*areas,]*3).T * normals).sum(axis=0)
+
+        tol = 1e-9
+        if math.fabs(hs[0]) > tol or math.fabs(hs[1]) > tol:
+            if verbose:
+                print "Warning, the mesh seems not watertight"
+
+        if hs[2] < 0:
+            flipped = True
+            F = flip_normals(F)
+        else:
+            flipped = False
+
+        if verbose and flipped:
+            print 'normals have been reversed to be outgoing'
+
+
+    else:
+        if verbose:
+            #TODO : adding the possibility to plot normals on visualization
+            print "Mesh is not closed, meshmagick cannot test if the normals are outgoing. Please consider checking visually (with Paraview by e.g.)"
+
+    return F
+
+
+def get_volume(V, F):
+
+    return vol
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
     """
@@ -211,7 +540,7 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
 
     levels = [0, nv]
     Vtmp = []
-    iperm = np.array([i for i in xrange(nv)])
+    iperm = np.arange(nv)
 
     for dim in range(nbdim):
         # Sorting the first dimension
@@ -254,7 +583,7 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
     else:
         # Building the new merged node list
         Vtmp = []
-        newID = np.array([i for i in xrange(nv)])
+        newID = np.arange(nv)
         for (ilevel, istart) in enumerate(levels[:-1]):
             istop = levels[ilevel+1]
 
@@ -1636,7 +1965,12 @@ def main():
                          with a translation option, the scaling is done before
                         the translations. The translation magnitude should be set
                         accordingly to the newly scaled mesh.""")
-    parser.add_argument('--flip-normals', action='store_true',
+
+    parser.add_argument('-hn', '--heal_normals', action='store_true',
+                        help="""Checks and heals the normals consistency and
+                        verify if they are outgoing.""")
+
+    parser.add_argument('-fn', '--flip-normals', action='store_true',
                         help="""flips the normals of the mesh""")
 
     parser.add_argument('-p', '--plane', nargs='+', action='append',
@@ -1677,8 +2011,9 @@ def main():
     parser.add_argument('--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
 
-    parser.add_argument('--version', action='store_true',
-                        help="""Shows the version number""")
+    parser.add_argument('--version', action='version',
+                        version='meshmagick - version %s\n%s'%(__version__, __copyright__),
+                        help="""Shows the version number and exit""")
 
 
     if acok:
@@ -1713,6 +2048,10 @@ def main():
         tol = float(args.merge_duplicates)
         V, F = merge_duplicates(V, F, verbose=args.verbose, tol=tol)
         write_file = True
+
+    if args.heal_normals:
+        F = heal_normals(V, F, verbose=args.verbose)
+
 
     # TODO : put that dict at the begining of the main function
     plane_str_list = {'Oxy':[0.,0.,1.],
