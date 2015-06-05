@@ -72,7 +72,7 @@ class Plane:
         return dist, position
 
 
-def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False):
+def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, areas=None):
 
     n_threshold = 5 # devrait etre reglagble, non utilise pour le moment
 
@@ -308,15 +308,27 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False):
     clipped_V = V[keepV]
     clipped_F = F[keepF]
 
+    if areas is not None:
+        # Computing the new areas for the clipped faces only
+        for face in F[clipped_mask]-1:
+            print face
+
+
     # Upgrading connectivity array with new indexing
     newID_V = np.arange(extended_nb_V)
     newID_V[keepV] = np.arange(new_nb_V)
     clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
 
     if get_polygon:
-        return clipped_V, clipped_F, polygons
+        if areas is not None:
+            return clipped_V, clipped_F, polygons, areas
+        else:
+            return clipped_V, clipped_F, polygons
     else:
-        return clipped_V, clipped_F
+        if areas is not None:
+            return clipped_V, clipped_F, areas
+        else:
+            return clipped_V, clipped_F
 
 def get_edge_intersection_by_plane(plane, V0, V1):
     d0 = np.dot(plane.normal, V0) - plane.e
@@ -336,7 +348,7 @@ def get_face_properties(V):
         normal = np.cross(V[2]-V[0], V[3]-V[1])
         normal /= np.linalg.norm(normal)
         a1 = np.linalg.norm(np.cross(V[1]-V[0], V[2]-V[0])) / 2.
-        a2 = np.linalg.norm(np.cross(V[3]-V[0], V[2]-V[0])) / 2.
+        a2 = np.linalg.norm(np.cross(V[2]-V[0], V[3]-V[1])) / 2.
         area = a1 + a2
         C1 = np.sum(V[:3], axis=0) / 3.
         C2 = (np.sum(V[2:4], axis=0) + V[0])/ 3. # FIXME : A verifier
@@ -389,6 +401,123 @@ def get_all_faces_properties(V, F):
     # Returning to 1 indexing
     F += 1
     return areas, normals, centers
+
+def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'implementation
+
+    F -=1
+
+    nv = V.shape[0]
+    nf = F.shape[0]
+
+    mesh_closed = True
+
+    # Building connectivities
+
+    # Establishing VV and VF connectivities
+    VV = dict([(i, set()) for i in xrange(nv)])
+    VF = dict([(i, set()) for i in xrange(nv)])
+    for (iface, face) in enumerate(F):
+        if face[0] == face[-1]:
+            face_w = face[:3]
+        else:
+            face_w = face
+        for (index, iV) in enumerate(face_w):
+            VF[iV].add(iface)
+            VV[face_w[index-1]].add(iV)
+            VV[iV].add(face_w[index-1])
+
+    # Connectivity FF
+    FF = dict([(i, set()) for i in xrange(nf)])
+    for ivertex in xrange(nv):
+        S1 = VF[ivertex]
+        for iadjV in VV[ivertex]:
+            S2 = VF[iadjV]
+            I = list(S1 & S2)
+            if len(I) != 1:
+                FF[I[0]].add(I[1])
+                FF[I[1]].add(I[0])
+            else:
+                mesh_closed = False
+
+    # Flooding the mesh to find inconsistent normals
+    type_cell = np.zeros(nf, dtype=np.int32)
+    type_cell[:] = 4
+    triangles_mask = F[:,0] == F[:,-1]
+    type_cell[triangles_mask] = 3
+
+    FVis = np.zeros(nf, dtype=bool)
+    FVis[0] = True
+    stack = [0]
+    nb_reversed = 0
+    while len(stack) > 0:
+        iface = stack.pop()
+        face = F[iface]
+        S1 = set(face)
+
+        for iadjF in FF[iface]:
+            if FVis[iadjF]:
+                continue
+            FVis[iadjF] = True
+            # Removing the other pointer
+            FF[iadjF].remove(iface) # So as it won't go from iadjF to iface in the future
+
+            # Shared vertices
+            adjface = F[iadjF]
+            S2 = set(adjface)
+            iV1, iV2 = list(S1 & S2)
+
+            # Checking normal consistency
+            face_ref = np.roll(face[:type_cell[iface]], -np.where(face == iV1)[0][0])
+            adj_face_ref = np.roll(adjface[:type_cell[iadjF]], -np.where(adjface == iV1)[0][0])
+
+            if face_ref[1] == iV2:
+                i = 1
+            else:
+                i = -1
+
+            if adj_face_ref[i] == iV2:
+                # Reversing normal
+                nb_reversed += 1
+                F[iadjF] = np.flipud(F[iadjF])
+
+            # Appending to the stack
+            stack.append(iadjF)
+
+    F += 1
+
+    if verbose:
+        print '%u faces have been reversed'% nb_reversed
+
+
+    # Checking if the normals are outgoing
+    if mesh_closed:
+        zmax = np.max(V[:,2])
+
+        areas, normals, centers = get_all_faces_properties(V, F)
+
+        hs = (np.array([(centers[:, 2]-zmax)*areas,]*3).T * normals).sum(axis=0)
+
+        tol = 1e-9
+        if math.fabs(hs[0]) > tol or math.fabs(hs[1]) > tol:
+            if verbose:
+                print "Warning, the mesh seems not watertight"
+
+        if hs[2] < 0:
+            F = flip_normals(F)
+            if verbose:
+                print 'normals have been reversed to be outgoing'
+
+    else:
+        if verbose:
+            #TODO : adding the possibility to plot normals on visualization
+            print "Mesh is not closed, meshmagick cannot test if the normals are outgoing. Please consider checking visually (with Paraview by e.g.)"
+
+    return F
+
+
+def get_volume(V, F):
+
+    return vol
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
     """
@@ -2056,8 +2185,13 @@ def main():
         get_info(V, F)
 
 
-    # TESTING :
-    get_all_faces_properties(V, F)
+    # TESTING --> A retirer
+    F = heal_normals(V, F, verbose=args.verbose)
+    import hydrostatics as hs
+    hsMesh = hs.HydrostaticsMesh(V, F)
+
+    ##
+
 
     # No more mesh modification should be released from this point -->
 
