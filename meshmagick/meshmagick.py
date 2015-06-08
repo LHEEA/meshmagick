@@ -1662,7 +1662,7 @@ def get_info(V, F):
     print '|--------------------------------------------------|'
     print '| Number of nodes  :     %15u           |' % nv
     print '|--------------------------------------------------|'
-    print '| Number of facets :     %15u           |' % nf
+    print '| Number of faces  :     %15u           |' % nf
     print '|--------------------------------------------------|'  #51
     print '|      |          Min        |          Max        |'
     print '|------|---------------------|---------------------|'
@@ -1803,12 +1803,16 @@ def show(V, F, normals=False):
         normals_actor = vtk.vtkActor()
         normals_actor.SetMapper(normals_mapper)
 
-        maskPts = vtk.vtkMaskPoints()
-        maskPts.SetOnRatio(5)
-        maskPts.RandomModeOn()
-        maskPts.SetInput(polydata)
-        maskPts.SetMaximumNumberOfPoints(5000)
-        maskPts.Update()
+        # maskPts = vtk.vtkMaskPoints()
+        # maskPts.SetOnRatio(5)
+        # maskPts.RandomModeOn()
+        # maskPts.SetInput(polydata)
+        # maskPts.SetMaximumNumberOfPoints(5000)
+        # maskPts.Update()
+
+        # maskPts = vtk.vtkCellCenters()
+        # maskPts.SetInput(vtk_mesh)
+        # maskPts.Update()
 
         arrow = vtk.vtkArrowSource()
         arrow.SetTipResolution(16)
@@ -1817,29 +1821,23 @@ def show(V, F, normals=False):
 
         glyph = vtk.vtkGlyph3D()
         glyph.SetSourceConnection(arrow.GetOutputPort())
-        glyph.SetInputConnection(maskPts.GetOutputPort())
+        # glyph.SetInputConnection(maskPts.GetOutputPort())
         glyph.SetInputConnection(normals.GetOutputPort())
         glyph.SetVectorModeToUseNormal()
-        # glyph.SetScaleFactor(1)
-        # glyph.SetColorModeToColorByVector()
-        # glyph.SetScaleModeToScaleByVector()
-        # glyph.OrientOn()
         glyph.Update()
-        #
+
         glyphMapper = vtk.vtkPolyDataMapper()
         glyphMapper.SetInputConnection(glyph.GetOutputPort())
-        #
+
         glyphActor = vtk.vtkActor()
         glyphActor.SetMapper(glyphMapper)
 
 
-
-
-    mapper = vtk.vtkDataSetMapper()
-    mapper.SetInput(surface.GetOutput())
+    surface_mapper = vtk.vtkDataSetMapper()
+    surface_mapper.SetInput(surface.GetOutput())
 
     mesh_actor = vtk.vtkActor()
-    mesh_actor.SetMapper(mapper)
+    mesh_actor.SetMapper(surface_mapper)
     mesh_actor.AddPosition(0, 0, 0)
     mesh_actor.GetProperty().SetColor(1, 1, 0)
     mesh_actor.GetProperty().SetOpacity(1)
@@ -2037,7 +2035,7 @@ def main():
                         0 following the order given in the command line.
                         """)
 
-    parser.add_argument('-clip', '--clip', nargs='*', action='append',
+    parser.add_argument('-c', '--clip', nargs='*', action='append',
                         help="""cuts the mesh with a plane. Is no arguments are given, the Oxy plane
                         is used. If an integer is given, it should correspond to a plane defined with
                         the --plane option. If a key string is given, it should be a valid key (see
@@ -2045,7 +2043,7 @@ def main():
                         also be given for the plane definition just as for the --plane option. Several
                         clipping planes may be defined on the same command line.""")
 
-    parser.add_argument('-m', '--merge-duplicates', nargs='?', const='1e-8', default=None,
+    parser.add_argument('-md', '--merge-duplicates', nargs='?', const='1e-8', default=None,
                         help="""merges the duplicate nodes in the mesh with the absolute tolerance
                         given as argument (default 1e-8)""")
 
