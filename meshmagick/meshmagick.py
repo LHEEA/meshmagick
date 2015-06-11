@@ -2340,9 +2340,9 @@ def main():
 
 
     # TESTING --> A retirer
-    print get_mass_cog(V, F, rho=10.5)
+    # print get_mass_cog(V, F, rho=10.5)
     import hydrostatics as hs
-    # hsMesh = hs.HydrostaticsMesh(V, F)
+    hsMesh = hs.HydrostaticsMesh(V, F)
 
     ##
 
