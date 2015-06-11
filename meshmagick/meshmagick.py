@@ -132,7 +132,7 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
         return [], []
 
     # Getting triangles and quads masks
-    triangle_mask = F[:,0] == F[:,-1]
+    triangle_mask = F[:, 0] == F[:, -1]
     nb_triangles = np.sum(triangle_mask)
     quad_mask = np.invert(triangle_mask)
     nb_quads = nf-nb_triangles
@@ -147,7 +147,7 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
     # Getting the number of vertex below the plane by face
     nb_V_below_by_face = np.zeros(nf, dtype=np.int32)
     V_below_mask = positions < -abs_tol
-    nb_V_below_by_face[triangle_mask] = np.sum(V_below_mask[(F[triangle_mask,:3]-1).flatten()].reshape(nb_triangles,
+    nb_V_below_by_face[triangle_mask] = np.sum(V_below_mask[(F[triangle_mask, :3]-1).flatten()].reshape(nb_triangles,
                                                                                                        3), axis=1)
     nb_V_below_by_face[quad_mask] = np.sum(V_below_mask[(F[quad_mask]-1).flatten()].reshape(nb_quads, 4), axis=1)
 
@@ -158,15 +158,14 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
 
     if get_polygon:
         # Getting the vertices that are already on the boundary
-        boundary_V_mask = np.fabs(positions)<=abs_tol # Vertices that are already on the boundary
+        boundary_v_mask = np.fabs(positions)<=abs_tol # Vertices that are already on the boundary
 
         # Getting the boundary faces
         nb_V_on_boundary_by_face = np.zeros(nf, dtype=np.int32)
         nb_V_on_boundary_by_face[triangle_mask] = \
-            np.sum(boundary_V_mask[(F[triangle_mask,:3]-1).flatten()].reshape((nb_triangles, 3)), axis=1)
+            np.sum(boundary_v_mask[(F[triangle_mask, :3]-1).flatten()].reshape((nb_triangles, 3)), axis=1)
         nb_V_on_boundary_by_face[quad_mask] = \
-            np.sum(boundary_V_mask[(F[quad_mask]-1).flatten()].reshape((nb_quads, 4)), axis=1)
-
+            np.sum(boundary_v_mask[(F[quad_mask]-1).flatten()].reshape((nb_quads, 4)), axis=1)
 
         # Faces that are at the boundary but that have to be clipped, sharing an edge with the boundary
         boundary_faces_mask = np.zeros(nf, dtype=bool)
@@ -185,10 +184,10 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
                 face_w = face[:3]
             else:
                 face_w = face
-            boundary_V_face_mask = boundary_V_mask[face_w]
-            for (index, is_V_on_boundary) in enumerate(boundary_V_face_mask):
+            boundary_v_face_mask = boundary_v_mask[face_w]
+            for (index, is_V_on_boundary) in enumerate(boundary_v_face_mask):
                 if is_V_on_boundary:
-                    if boundary_V_face_mask[index-1]:
+                    if boundary_v_face_mask[index-1]:
                         boundary_edges[face_w[index]] = face_w[index-1]
                     else:
                         boundary_edges[face_w[index+1]] = face_w[index]
@@ -228,7 +227,7 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
         else:
             nb = 4
 
-        pos_lst = list(keepV[face[:nb]]) # Ne pas revenir a une liste, tout traiter en numpy !!!
+        pos_lst = list(keepV[face[:nb]])
         face_lst = list(face[:nb])
 
         for iv in range(nb-1, -1, -1):
@@ -457,15 +456,21 @@ def get_all_faces_properties(V, F):
     return areas, normals, centers
 
 _mult = np.array([1/6., 1/24., 1/24., 1/24., 1/60., 1/60., 1/60., 1/120., 1/120., 1/120.], dtype=float)
-def _get_volume_integrals(V, F):
-    """Based on the paper from David Eberly"""
+def _get_volume_integrals(V, F, sum=True):
+    """Based on the work of David Eberly"""
 
-    intg = np.zeros(10, dtype=float)
+    nf = F.shape[0]
+
+    if sum:
+        intg = np.zeros(10, dtype=float)
+    else:
+        intg = np.zeros((nf, 10), dtype=float)
 
     tri1 = [0, 1, 2]
     tri2 = [0, 2, 3]
 
-    for face in F-1:
+    intg_tmp = np.zeros(10)
+    for (iface, face) in enumerate(F-1):
         if face[0] == face[-1]:
             nb = 1
         else:
@@ -479,7 +484,7 @@ def _get_volume_integrals(V, F):
             else:
                 triangle = tri2
 
-            V0, V1, V2  = vertices[triangle]
+            V0, V1, V2 = vertices[triangle]
             d0, d1, d2 = np.cross(V1-V0, V2-V0)
 
             temp0 = V0+V1
@@ -493,19 +498,26 @@ def _get_volume_integrals(V, F):
             g2 = f2 + V2*(f1+V2)
 
             # Update integrals
-            intg[0] += d0 * f1[0]
-            intg[1] += d0 * f2[0]
-            intg[2] += d1 * f2[1]
-            intg[3] += d2 * f2[2]
-            intg[4] += d0 * f3[0]
-            intg[5] += d1 * f3[1]
-            intg[6] += d1 * f3[2]
-            intg[7] += d0 * (V0[1]*g0[0] + V1[1]*g1[0] + V2[1]*g2[0])
-            intg[8] += d1 * (V0[2]*g0[1] + V1[2]*g1[1] + V2[2]*g2[1])
-            intg[9] += d2 * (V0[0]*g0[2] + V1[0]*g1[2] + V2[0]*g2[2])
+            intg_tmp[0] += d0 * f1[0]
+            intg_tmp[1] += d0 * f2[0]
+            intg_tmp[2] += d1 * f2[1]
+            intg_tmp[3] += d2 * f2[2]
+            intg_tmp[4] += d0 * f3[0]
+            intg_tmp[5] += d1 * f3[1]
+            intg_tmp[6] += d1 * f3[2]
+            intg_tmp[7] += d0 * (V0[1]*g0[0] + V1[1]*g1[0] + V2[1]*g2[0])
+            intg_tmp[8] += d1 * (V0[2]*g0[1] + V1[2]*g1[1] + V2[2]*g2[1])
+            intg_tmp[9] += d2 * (V0[0]*g0[2] + V1[0]*g1[2] + V2[0]*g2[2])
 
+            if sum:
+                intg += intg_tmp
+            else:
+                intg[iface] = intg_tmp
 
-    intg *= _mult
+    if sum:
+        intg *= _mult
+    else:
+        intg *= np.array([_mult, ]*3).T
 
     return intg
 

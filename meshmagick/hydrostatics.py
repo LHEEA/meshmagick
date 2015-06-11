@@ -1,82 +1,114 @@
-__author__ = 'frongere'
+
+__author__ = "Francois Rongere"
+__copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
+__credits__ = "Francois Rongere"
+__licence__ = "CeCILL"
+__version__ = "0.3.1"
+__maintainer__ = "Francois Rongere"
+__email__ = "Francois.Rongere@ec-nantes.fr"
+__status__ = "Development"
 
 import meshmagick as mm
 import numpy as np
 
 
 class HydrostaticsMesh:
-    def __init__(self, V, F, rho_water=1023.):
+    def __init__(self, V, F, rho_water=1023., g=9.81):
         self.V = V
         self.F = F
         self.rho_water = rho_water
+        self.g = g
 
-        # TODO : ne conserver ici que les operation d'initialisation, on mettra les operations de decoupe et de
-        # calcul des pptes dans un fonction d'update qui se chargera de faire que les infos sur le maillage coupe
-        # soient bien a jour.
+        # Computing initial mesh properties
+        self.areas, self.normals, self.centers = mm.get_all_faces_properties(V, F)
 
-        props = mm.get_all_faces_properties(V, F)
-        self.areas, self.normals, self.centers = props
+        # Computing once the volume integrals on faces of the initial mesh to be used by the clipped mesh
+        self._volint = mm._get_volume_integrals(V, F, sum=False)
 
-        # Defining the first plane
-        self.plane = mm.Plane()
+        # Defining the clipping plane Oxy and updating hydrostatics
+        self._plane = mm.Plane()
+        self.update([0., 0., 0.])
 
-        self.clipped_V, self.clipped_F, polygons, props = \
-            mm.clip_by_plane(V, F, self.plane, get_polygon=True, props=props)
+        self._has_plane_changed = True
 
+        # Defining protected attributes
+        self._cV = None
+        self._cF = None
+        self._c_areas = None
+        self._c_normals = None
+        self._c_centers = None
+        self._boundary_vertices = None
+        self._sfint = np.zeros(6, dtype=float)
+        self.sf = 0.
+        self.vw = 0.
+
+    def update(self, eta):
+
+        # Updating the clipping plane position
+        self._plane.set_position(z=eta[0], phi=eta[1], theta=eta[2])
+
+        # Clipping the mesh by the plane
+        self._cV, self._cF, polygons, props = mm.clip_by_plane(self.V, self.F, self._plane, get_polygon=True,
+                                                                props=(self.areas, self.normals, self.centers))
+
+        # Testing if the mesh presents intersections and storing the clipped mesh properties
         if len(polygons) == 0:
             raise RuntimeError, 'could not compute any intersection polygon'
+        self._c_areas, self._c_normals, self._c_centers = props
 
-        self.clipped_areas, self.clipped_normals, self.clipped_centers = props
-
-        # Projecting the intersection polygons to the plane coordinates
-        self.intersection_vertices = []
+        # Projecting the boundary polygons into the frame of the clipping plane
+        self._boundary_vertices = []
         for polygon in polygons:
-            self.intersection_vertices.append(self.plane.coord_in_plane(self.clipped_V[polygon]))
+            self._boundary_vertices.append(self._plane.coord_in_plane(self._cV[polygon]))
 
-        # Updating volume integrals
-        self.volint = mm._get_volume_integrals(self.clipped_V, self.clipped_F)
-        self.sfint = self._get_surface_integrals()
+        # Computing surface integrals for the floating plane
+        self._sfint = self._get_floating_surface_integrals()
+        self.sf = self._sfint[0]
 
-        # Computing the flottation surface area
-        self.sf = self.sfint[0]
+        # TODO : Summing up the volume integrals for the clipped mesh
+        self._cvolint = self._extract_c_volint()
+
         # Computing the immersed volume
-        self.Vw = self.get_vw()
+        self.vw = self.get_vw()
 
-        # Computing the volume integrals
+        return 1
 
+    def _extract_c_volint(self):
+        """Extraction of volume integrals from the initial mesh to the clipped mesh"""
+        # On a besoin ici des informations sur l'extraction du maillage par rapport au maillage initial. Il faut donc
+        #  sortir les infos d'extraction, tant au niveau des facettes conservees. Pour les facettes crees ou
+        # modifiees, il convient de relancer un calcul d'integrales de volume.
+        if self._keepF is None:
+            raise RuntimeError
 
-
-
-        self.Vw = self.get_displacement()
+        # TODO : extract clipped faces, newly created ones and added ones ids to compute their volume integrals
+        raise NotImplemented
 
     def get_vw(self):
 
-        R11 = self.plane.Re0[0,0]
-        R21 = self.plane.Re0[1,0]
-        Vw = self.volint[0] + self.plane.normal[0] * (R11*self.sfint[1] + R21*self.sfint[2] +
-                                                      self.plane.e*self.plane.normal[0]*self.sf)
-
-        return Vw
+        r11 = self._plane.Re0[0, 0]
+        r21 = self._plane.Re0[1, 0]
+        vw = self._c_volint[0] + self._plane.normal[0] * (r11*self._sfint[1] + r21*self._sfint[2] +
+                                                      self._plane.e*self._plane.normal[0]*self.sf)
+        return vw
 
     def get_buoyancy_center(self):
-        pass
+        raise NotImplemented
 
     def get_displacement(self):
-        return self.rho_water * self.Vw
+        # This function should not be used in loops for performance reasons, please inline the code
+        return self.rho_water * self.vw
 
-    # def clip_by_plane(self, plane):
-    #     mm.clip_by_plane(self.V, self.F, plane, get_polygon=True)
+    def get_wet_surface(self):
+        return np.sum(self._c_areas)
 
-    def get_wetted_surface(self):
-        return np.sum(self.clipped_areas)
-
-    def _get_surface_integrals(self):
+    def _get_floating_surface_integrals(self):
 
         mult = np.array([1/2., 1/6., -1/6., 1/12., 1/12., -1/12.], dtype=float) # FIXME : a completer
 
         sint = np.zeros(6, dtype=float)
 
-        for ring_vertices in self.intersection_vertices:
+        for ring_vertices in self._boundary_vertices:
             nv = len(ring_vertices)-1
             x = ring_vertices[:, 0]
             y = ring_vertices[:, 1]
@@ -84,28 +116,23 @@ class HydrostaticsMesh:
             # int(1)
             sint[0] += np.array([ y[j+1] * x[j] - y[j] * x[j+1]  for j in xrange(nv) ], dtype=float).sum()
             # int(x)
-            sint[1] += np.array([ ((x[j]+x[j+1])**2 - x[j]*x[j+1]) * (y[j+1]-y[j]) for j in xrange(nv) ],
-                                dtype=float).sum()
+            sint[1] += np.array([ ((x[j]+x[j+1])**2 - x[j]*x[j+1]) * (y[j+1]-y[j]) for j in xrange(nv) ],dtype=float).sum()
             # int(y)
-            sint[2] += np.array([ ((y[j]+y[j+1])**2 - y[j]*y[j+1]) * (x[j+1]-x[j]) for j in xrange(nv) ],
-                                dtype=float).sum()
+            sint[2] += np.array([ ((y[j]+y[j+1])**2 - y[j]*y[j+1]) * (x[j+1]-x[j]) for j in xrange(nv) ],dtype=float).sum()
             # int(xy)
             sint[3] += np.array(
                 [(y[j+1]-y[j]) * ( (y[j+1]-y[j]) * (2*x[j]*x[j+1]-x[j]**2) + 2*y[j]*(x[j]**2+x[j+1]**2) +
-                                    2*x[j]*x[j+1]*y[j+1]) for j in xrange(nv)],
-            dtype=float).sum()
+                                    2*x[j]*x[j+1]*y[j+1] ) for j in xrange(nv)],dtype=float).sum()
             # int(x**2)
-            sint[4] += np.array([ (y[j+1]-y[j]) * (x[j]**3 + x[j]**2*x[j+1] + x[j]*x[j+1]**2 + x[j+1]**3)
+            sint[4] += np.array([(y[j+1]-y[j]) * (x[j]**3 + x[j]**2*x[j+1] + x[j]*x[j+1]**2 + x[j+1]**3)
                                  for j in xrange(nv)], dtype=float).sum()
             # int(y**2)
-            sint[5] += np.array([ (x[j+1]-x[j]) * (y[j]**3 + y[j]**2*y[j+1] + y[j]*y[j+1]**2 + y[j+1]**3)
+            sint[5] += np.array([(x[j+1]-x[j]) * (y[j]**3 + y[j]**2*y[j+1] + y[j]*y[j+1]**2 + y[j+1]**3)
                                  for j in xrange(nv)], dtype=float).sum()
 
         sint *= mult
 
         return sint
-
-
 
 
 
