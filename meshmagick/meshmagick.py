@@ -42,12 +42,21 @@ class Plane:
     def __init__(self, normal=np.array([0., 0., 1.]), e=0.):
         self.normal = normal
         self.e = e
+        self.Re0 = np.zeros((3,3), dtype=float)
 
     def flip(self):
         self.normal = -self.normal
 
-    def set_position(self, z=0., phi=0., theta=0.):
+    def set_position(self, z=0., phi=0., theta=0., unit='rad'):
         """Performs the transformation of the plane"""
+
+        if unit not in ['deg', 'rad']:
+            raise RuntimeError, 'unit %s is not known for angles'%unit
+
+        if unit == 'deg':
+            cor = math.pi/180.
+            phi *= cor
+            theta *= cor
 
         # Rotation matrix
         cphi = math.cos(phi)
@@ -55,8 +64,12 @@ class Plane:
         ctheta = math.cos(theta)
         stheta = math.sin(theta)
 
-        self.normal = np.array([stheta*cphi, -sphi, ctheta*cphi])
-        self.e = z * self.normal[-1]
+        self.Re0[1] = [ctheta, 0., -stheta]
+        self.Re0[2] = [sphi*stheta, cphi, sphi*ctheta]
+        self.Re0[3] = [cphi*stheta, -sphi, cphi*ctheta]
+
+        self.normal = self.Re0[3]
+        self.e = z * self.normal[-1] # FIXME : to verify !!!
 
     def point_distance(self, point, tol=1e-9):
         dist = np.dot(self.normal, point)
@@ -72,9 +85,14 @@ class Plane:
         return dist, position
 
 
-def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, areas=None):
+def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
 
     n_threshold = 5 # devrait etre reglagble, non utilise pour le moment
+
+    if props is not None:
+        areas = props[0]
+        normals = props[1]
+        centers = props[2]
 
     # TODO : Partir d'un F indice utilisant des indices de vertex commencant a 0 (F -=1)
 
@@ -95,7 +113,18 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, areas=None):
     # If the mesh is totally at one side of the plane, no need to go further !
     nb_kept_V = np.sum(keepV)
     if nb_kept_V == nv:
-        return V, F
+        # TODO : gerer egalement les demandes de polygone et de proprietes de facette
+        polygons = [] # TODO : mettre en oeuvre un calcul des polygones d'intersection si il y en a !!!
+        if get_polygon:
+            if props is not None:
+                return V, F, polygons, props
+            else:
+                return V, F, polygons
+        else:
+            if props is not None:
+                return V, F, props
+            else:
+                return V, F
     elif nb_kept_V == 0:
         return [], []
 
@@ -180,6 +209,9 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, areas=None):
     newV = []
     nb_new_F = 0
     newF = []
+    new_areas = []
+    new_normals = []
+    new_centers = []
     edges = {} # keys are ID of vertices that are above the plane
 
 
@@ -266,7 +298,13 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, areas=None):
             clipped_face = np.roll(face_w, -n_roll)
 
             nb_new_F += 1
-            newF.append(clipped_face[quadrangle])
+            quad = clipped_face[quadrangle]
+            newF.append(quad)
+            if props is not None:
+                new_prop = get_face_properties(V[quad])
+                new_areas.append(new_prop[0])
+                new_normals.append(new_prop[1])
+                new_centers.append(new_prop[2])
 
             clipped_face = clipped_face[triangle] # Modified face
 
@@ -278,8 +316,19 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, areas=None):
         V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
     if nb_new_F > 0:
         F = np.concatenate((F, np.asarray(newF, dtype=np.int32)+1))
+        if props is not None: # FIXME : a priori, la concatenation est buggee
+            areas = np.concatenate(areas, np.asarray(new_areas, dtype=np.float))
+            normals = np.concatenate(normals, np.asarray(new_normals, dtype=np.float))
+            centers = np.concatenate(centers, np.asarray(new_centers, dtype=np.float))
 
-    # write_VTU('tests/SEAREV/extended_SEAREV.vtu', V, F)
+    # TODO : faire les corrections d'aire de maniere collective en utilisant plutot get_all_faces_properties sur le subset des facettes modifiees et ajoutees
+    if props is not None:
+        # Computing the new properties of the clipped faces
+        for (iface, face) in enumerate(F[clipped_faces]-1):
+            new_prop = get_face_properties(V[face])
+            areas[clipped_faces[iface]] = new_prop[0]
+            normals[clipped_faces[iface]] = new_prop[1]
+            centers[clipped_faces[iface]] = new_prop[2]
 
     extended_nb_V = nv + nb_new_V
     new_nb_V = nb_kept_V + nb_new_V
@@ -308,25 +357,23 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, areas=None):
     clipped_V = V[keepV]
     clipped_F = F[keepF]
 
-    if areas is not None:
-        # Computing the new areas for the clipped faces only
-        for face in F[clipped_mask]-1:
-            print face
-
-
     # Upgrading connectivity array with new indexing
     newID_V = np.arange(extended_nb_V)
     newID_V[keepV] = np.arange(new_nb_V)
     clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
 
+    if props is not None:
+        # extracting the properties corresponding to the extracted mesh
+        props = (areas[keepF], normals[keepF], centers[keepF])
+
     if get_polygon:
-        if areas is not None:
-            return clipped_V, clipped_F, polygons, areas
+        if props is not None:
+            return clipped_V, clipped_F, polygons, props
         else:
             return clipped_V, clipped_F, polygons
     else:
-        if areas is not None:
-            return clipped_V, clipped_F, areas
+        if props is not None:
+            return clipped_V, clipped_F, props
         else:
             return clipped_V, clipped_F
 
@@ -2038,7 +2085,10 @@ def main():
             raise IOError, 'Unable to determine the input file format from its extension. Please specify an input format.'
 
     # Loading mesh elements from file
-    V, F = load_mesh(args.infilename, format)
+    if os.path.isfile(args.infilename):
+        V, F = load_mesh(args.infilename, format)
+    else:
+        raise IOError, 'file %s not found'%args.infilename
 
 
     if args.merge_duplicates is not None:
@@ -2200,8 +2250,8 @@ def main():
 
 
     # TESTING --> A retirer
-    # import hydrostatics as hs
-    # hsMesh = hs.HydrostaticsMesh(V, F)
+    import hydrostatics as hs
+    hsMesh = hs.HydrostaticsMesh(V, F)
 
     ##
 
