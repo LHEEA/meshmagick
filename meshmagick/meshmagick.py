@@ -42,7 +42,7 @@ class Plane:
     def __init__(self, normal=np.array([0., 0., 1.]), e=0.):
         self.normal = normal
         self.e = e
-        self.Re0 = np.zeros((3,3), dtype=float)
+        self.Re0 = np.eye(3, dtype=float)
 
     def flip(self):
         self.normal = -self.normal
@@ -69,7 +69,7 @@ class Plane:
         self.Re0[3] = [cphi*stheta, -sphi, cphi*ctheta]
 
         self.normal = self.Re0[3]
-        self.e = z * self.normal[-1] # FIXME : to verify !!!
+        self.e = z # FIXME : to verify !!!
 
     def point_distance(self, point, tol=1e-9):
         dist = np.dot(self.normal, point)
@@ -83,6 +83,9 @@ class Plane:
             # Point above plane
             position = 1
         return dist, position
+
+    def coord_in_plane(self, vertices):
+        return np.array([np.dot(self.Re0, vertices[i]) for i in xrange(len(vertices))], dtype=float)
 
 
 def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
@@ -337,6 +340,15 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
     keepV = np.concatenate((keepV, np.ones(nb_new_V, dtype=bool)))
     keepF = np.concatenate((keepF, np.ones(nb_new_F, dtype=bool)))
 
+    # Extracting the kept mesh
+    clipped_V = V[keepV]
+    clipped_F = F[keepF]
+
+    # Upgrading connectivity array with new indexing
+    newID_V = np.arange(extended_nb_V)
+    newID_V[keepV] = np.arange(new_nb_V)
+    clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
+
     if get_polygon:
         # Computing the boundary curves
         initV = boundary_edges.keys()[0]
@@ -352,15 +364,10 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
                 if iVtarget == initV:
                     polygons.append(polygon)
                     break
+        # Upgrading with the new connectivity
+        for (index, polygon) in enumerate(polygons):
+            polygons[index] = newID_V[polygon]
 
-    # Extracting the kept mesh
-    clipped_V = V[keepV]
-    clipped_F = F[keepF]
-
-    # Upgrading connectivity array with new indexing
-    newID_V = np.arange(extended_nb_V)
-    newID_V[keepV] = np.arange(new_nb_V)
-    clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
 
     if props is not None:
         # extracting the properties corresponding to the extracted mesh
@@ -448,6 +455,93 @@ def get_all_faces_properties(V, F):
     # Returning to 1 indexing
     F += 1
     return areas, normals, centers
+
+_mult = np.array([1/6., 1/24., 1/24., 1/24., 1/60., 1/60., 1/60., 1/120., 1/120., 1/120.], dtype=float)
+def _get_volume_integrals(V, F):
+    """Based on the paper from David Eberly"""
+
+    intg = np.zeros(10, dtype=float)
+
+    tri1 = [0, 1, 2]
+    tri2 = [0, 2, 3]
+
+    for face in F-1:
+        if face[0] == face[-1]:
+            nb = 1
+        else:
+            nb = 2
+
+        vertices = V[face]
+        # Loop on triangles of the face
+        for itri in xrange(nb):
+            if itri == 0:
+                triangle = tri1
+            else:
+                triangle = tri2
+
+            V0, V1, V2  = vertices[triangle]
+            d0, d1, d2 = np.cross(V1-V0, V2-V0)
+
+            temp0 = V0+V1
+            f1 = temp0+V2
+            temp1 = V0*V0
+            temp2 = temp1 + V1*temp0
+            f2 = temp2 + V2*f1
+            f3 = V0*temp1 + V1*temp2 + V2*f2
+            g0 = f2 + V0*(f1+V0)
+            g1 = f2 + V1*(f1+V1)
+            g2 = f2 + V2*(f1+V2)
+
+            # Update integrals
+            intg[0] += d0 * f1[0]
+            intg[1] += d0 * f2[0]
+            intg[2] += d1 * f2[1]
+            intg[3] += d2 * f2[2]
+            intg[4] += d0 * f3[0]
+            intg[5] += d1 * f3[1]
+            intg[6] += d1 * f3[2]
+            intg[7] += d0 * (V0[1]*g0[0] + V1[1]*g1[0] + V2[1]*g2[0])
+            intg[8] += d1 * (V0[2]*g0[1] + V1[2]*g1[1] + V2[2]*g2[1])
+            intg[9] += d2 * (V0[0]*g0[2] + V1[0]*g1[2] + V2[0]*g2[2])
+
+
+    intg *= _mult
+
+    return intg
+
+def get_mass_cog(V, F, rho=1.):
+    return get_inertial_properties(V, F, rho=rho)[:2]
+
+def get_inertial_properties(V, F, rho=1.):
+
+    intg = _get_volume_integrals(V, F)
+
+    vol = intg[0] * rho
+    cog = np.array([intg[1]/vol, intg[2]/vol, intg[3]/vol], dtype=float)
+
+    xx = intg[5] + intg[6] - vol*(cog[1]**2 + cog[2]**2)
+    yy = intg[4] + intg[6] - vol*(cog[2]**2 + cog[0]**2)
+    zz = intg[4] + intg[5] - vol*(cog[0]**2 + cog[1]**2)
+    xy = -(intg[7] - vol*cog[0]*cog[1])
+    yz = -(intg[8] - vol*cog[1]*cog[2])
+    xz = -(intg[9] - vol*cog[2]*cog[0])
+
+    mass = rho * vol
+    inertia_matrix = rho * np.array(
+        [
+            [xx, xy, xz],
+            [xy, yy, yz],
+            [xz, yz, zz]
+        ]
+    )
+
+    return mass, cog, inertia_matrix
+
+def get_volume(V, F):
+    return _get_volume_integrals(V, F)[0]
+
+def get_COM(V, F):
+    return _get_volume_integrals(V, F)
 
 def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'implementation
 
@@ -566,10 +660,6 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
 
     return F
 
-
-def get_volume(V, F):
-
-    return vol
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
     """
@@ -2250,8 +2340,9 @@ def main():
 
 
     # TESTING --> A retirer
+    print get_mass_cog(V, F, rho=10.5)
     import hydrostatics as hs
-    hsMesh = hs.HydrostaticsMesh(V, F)
+    # hsMesh = hs.HydrostaticsMesh(V, F)
 
     ##
 
