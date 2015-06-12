@@ -64,11 +64,11 @@ class Plane:
         ctheta = math.cos(theta)
         stheta = math.sin(theta)
 
-        self.Re0[1] = [ctheta, 0., -stheta]
-        self.Re0[2] = [sphi*stheta, cphi, sphi*ctheta]
-        self.Re0[3] = [cphi*stheta, -sphi, cphi*ctheta]
+        self.Re0[0] = [ctheta, 0., -stheta]
+        self.Re0[1] = [sphi*stheta, cphi, sphi*ctheta]
+        self.Re0[2] = [cphi*stheta, -sphi, cphi*ctheta]
 
-        self.normal = self.Re0[3]
+        self.normal = self.Re0[2]
         self.e = z # FIXME : to verify !!!
 
     def point_distance(self, point, tol=1e-9):
@@ -88,14 +88,15 @@ class Plane:
         return np.array([np.dot(self.Re0, vertices[i]) for i in xrange(len(vertices))], dtype=float)
 
 
-def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
+def clip_by_plane(V, F, plane, abs_tol=1e-3, infos=False):
 
     n_threshold = 5 # devrait etre reglagble, non utilise pour le moment
 
-    if props is not None:
-        areas = props[0]
-        normals = props[1]
-        centers = props[2]
+    # TODO : gerer les updates de mise a jour a l'aide d'infos sur les facettes conservees tel quel, et les facettes
+    # necessitant un update
+
+    # To store information about extraction
+    clip_infos = {'FkeptOldID':[], 'FkeptNewID':[], 'FToUpdateNewID':[], 'PolygonsNewID':[]}
 
     # TODO : Partir d'un F indice utilisant des indices de vertex commencant a 0 (F -=1)
 
@@ -118,18 +119,15 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
     if nb_kept_V == nv:
         # TODO : gerer egalement les demandes de polygone et de proprietes de facette
         polygons = [] # TODO : mettre en oeuvre un calcul des polygones d'intersection si il y en a !!!
-        if get_polygon:
-            if props is not None:
-                return V, F, polygons, props
-            else:
-                return V, F, polygons
+        if infos:
+            return V, F, clip_infos
         else:
-            if props is not None:
-                return V, F, props
-            else:
-                return V, F
+            return V, F
     elif nb_kept_V == 0:
-        return [], []
+        if infos:
+            return [], [], clip_infos
+        else:
+            return [], []
 
     # Getting triangles and quads masks
     triangle_mask = F[:, 0] == F[:, -1]
@@ -156,7 +154,9 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
     keepF[np.logical_and(triangle_mask, nb_V_kept_by_face == 3)] = True
     keepF[np.logical_and(quad_mask, nb_V_kept_by_face == 4)] = True
 
-    if get_polygon:
+    clip_infos['FkeptOldID'] = np.arange(nf)[keepF]
+
+    if infos:
         # Getting the vertices that are already on the boundary
         boundary_v_mask = np.fabs(positions)<=abs_tol # Vertices that are already on the boundary
 
@@ -179,7 +179,6 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
         boundary_faces = np.arange(nf)[boundary_faces_mask]
         boundary_edges = {}
         for face in F[boundary_faces]-1:
-            # TODO : continuer ICI l'implementation
             if face[0] == face[-1]:
                 face_w = face[:3]
             else:
@@ -211,9 +210,6 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
     newV = []
     nb_new_F = 0
     newF = []
-    new_areas = []
-    new_normals = []
-    new_centers = []
     edges = {} # keys are ID of vertices that are above the plane
 
 
@@ -234,7 +230,7 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
             # For loop on vertices
             if pos_lst[iv-1] != pos_lst[iv]: # TODO : Gerer les projections ici !!!!
                 # We get an edge
-                # TODO : mettre un switch pour activer la projection ou pas... --> permettra de merger en meme temps
+                # TODO : use a switch to activate vertices projections (or doing it outside based on the clip_infos data)
 
                 iV0 = face_lst[iv-1]
                 iV1 = face_lst[iv]
@@ -281,7 +277,7 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
 
         clipped_face = face_w[pos]
 
-        if get_polygon:
+        if infos:
             # Storing the boundary edge, making the orientation so that the normals of the final closed polygon will be
             # upward
             for index, ivertex in enumerate(clipped_face):
@@ -302,11 +298,6 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
             nb_new_F += 1
             quad = clipped_face[quadrangle]
             newF.append(quad)
-            if props is not None:
-                new_prop = get_face_properties(V[quad])
-                new_areas.append(new_prop[0])
-                new_normals.append(new_prop[1])
-                new_centers.append(new_prop[2])
 
             clipped_face = clipped_face[triangle] # Modified face
 
@@ -318,38 +309,38 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
         V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
     if nb_new_F > 0:
         F = np.concatenate((F, np.asarray(newF, dtype=np.int32)+1))
-        if props is not None: # FIXME : a priori, la concatenation est buggee
-            areas = np.concatenate(areas, np.asarray(new_areas, dtype=np.float))
-            normals = np.concatenate(normals, np.asarray(new_normals, dtype=np.float))
-            centers = np.concatenate(centers, np.asarray(new_centers, dtype=np.float))
-
-    # TODO : faire les corrections d'aire de maniere collective en utilisant plutot get_all_faces_properties sur le subset des facettes modifiees et ajoutees
-    if props is not None:
-        # Computing the new properties of the clipped faces
-        for (iface, face) in enumerate(F[clipped_faces]-1):
-            new_prop = get_face_properties(V[face])
-            areas[clipped_faces[iface]] = new_prop[0]
-            normals[clipped_faces[iface]] = new_prop[1]
-            centers[clipped_faces[iface]] = new_prop[2]
 
     extended_nb_V = nv + nb_new_V
     new_nb_V = nb_kept_V + nb_new_V
     new_nb_F = nb_kept_F + nb_new_F
 
+    # Getting the new IDs of kept faces before concatenation
+    if infos:
+        newID_F = np.arange(extended_nb_V)
+        newID_F[keepF] = np.arange(new_nb_F)
+
+    # extending the masks to comply with the extended mesh
     keepV = np.concatenate((keepV, np.ones(nb_new_V, dtype=bool)))
     keepF = np.concatenate((keepF, np.ones(nb_new_F, dtype=bool)))
 
     # Extracting the kept mesh
     clipped_V = V[keepV]
-    clipped_F = F[keepF]
+    # clipped_F = F[keepF]
 
     # Upgrading connectivity array with new indexing
     newID_V = np.arange(extended_nb_V)
     newID_V[keepV] = np.arange(new_nb_V)
     clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
 
-    if get_polygon:
-        # Computing the boundary curves
+    if infos:
+        # Grabing faces that have been modified or added
+        modifiedF = newID_F[clipped_faces]
+        if nb_new_F > 0:
+            modifiedF = np.concatenate((modifiedF, np.arange(nb_kept_F, new_nb_F)))
+        clip_infos['FToUpdateNewID'] = modifiedF
+        clip_infos['FkeptNewID'] = newID_F[clip_infos['FkeptOldID']]
+
+        # Computing the boundary polygons
         initV = boundary_edges.keys()[0]
         polygons = []
         while len(boundary_edges) > 0:
@@ -366,22 +357,32 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, get_polygon=False, props=None):
         # Upgrading with the new connectivity
         for (index, polygon) in enumerate(polygons):
             polygons[index] = newID_V[polygon]
+        clip_infos['PolygonsNewID'] = polygons
 
-
-    if props is not None:
-        # extracting the properties corresponding to the extracted mesh
-        props = (areas[keepF], normals[keepF], centers[keepF])
-
-    if get_polygon:
-        if props is not None:
-            return clipped_V, clipped_F, polygons, props
-        else:
-            return clipped_V, clipped_F, polygons
+    if infos:
+        return clipped_V, clipped_F, clip_infos
     else:
-        if props is not None:
-            return clipped_V, clipped_F, props
-        else:
-            return clipped_V, clipped_F
+        return clipped_V, clipped_F
+
+def extract_faces(V, F, idF):
+
+    nv = V.shape[0]
+    nf = F.shape[0]
+
+    # Determination of the vertices to keep
+    Vmask = np.zeros(nv, dtype=bool)
+    Vmask[F[idF].flatten()-1] = True
+    idV = np.arange(nv)[Vmask]
+
+    # Building up the vertex array
+    Vring = V[idV]
+    newID_V = np.arange(nv)
+    newID_V[idV] = np.arange(len(idV))
+
+    Fring = F[idF]
+    Fring = newID_V[Fring.flatten()-1].reshape((len(idF), 4))+1
+
+    return Vring, Fring
 
 def get_edge_intersection_by_plane(plane, V0, V1):
     d0 = np.dot(plane.normal, V0) - plane.e
@@ -462,14 +463,14 @@ def _get_volume_integrals(V, F, sum=True):
     nf = F.shape[0]
 
     if sum:
-        intg = np.zeros(10, dtype=float)
+        volint = np.zeros(10, dtype=float)
     else:
-        intg = np.zeros((nf, 10), dtype=float)
+        volint = np.zeros((nf, 10), dtype=float)
 
     tri1 = [0, 1, 2]
     tri2 = [0, 2, 3]
 
-    intg_tmp = np.zeros(10)
+    volint_tmp = np.zeros(10)
     for (iface, face) in enumerate(F-1):
         if face[0] == face[-1]:
             nb = 1
@@ -498,28 +499,28 @@ def _get_volume_integrals(V, F, sum=True):
             g2 = f2 + V2*(f1+V2)
 
             # Update integrals
-            intg_tmp[0] += d0 * f1[0]
-            intg_tmp[1] += d0 * f2[0]
-            intg_tmp[2] += d1 * f2[1]
-            intg_tmp[3] += d2 * f2[2]
-            intg_tmp[4] += d0 * f3[0]
-            intg_tmp[5] += d1 * f3[1]
-            intg_tmp[6] += d1 * f3[2]
-            intg_tmp[7] += d0 * (V0[1]*g0[0] + V1[1]*g1[0] + V2[1]*g2[0])
-            intg_tmp[8] += d1 * (V0[2]*g0[1] + V1[2]*g1[1] + V2[2]*g2[1])
-            intg_tmp[9] += d2 * (V0[0]*g0[2] + V1[0]*g1[2] + V2[0]*g2[2])
+            volint_tmp[0] += d0 * f1[0]
+            volint_tmp[1] += d0 * f2[0]
+            volint_tmp[2] += d1 * f2[1]
+            volint_tmp[3] += d2 * f2[2]
+            volint_tmp[4] += d0 * f3[0]
+            volint_tmp[5] += d1 * f3[1]
+            volint_tmp[6] += d1 * f3[2]
+            volint_tmp[7] += d0 * (V0[1]*g0[0] + V1[1]*g1[0] + V2[1]*g2[0])
+            volint_tmp[8] += d1 * (V0[2]*g0[1] + V1[2]*g1[1] + V2[2]*g2[1])
+            volint_tmp[9] += d2 * (V0[0]*g0[2] + V1[0]*g1[2] + V2[0]*g2[2])
 
             if sum:
-                intg += intg_tmp
+                volint += volint_tmp
             else:
-                intg[iface] = intg_tmp
+                volint[iface] = volint_tmp
 
     if sum:
-        intg *= _mult
+        volint *= _mult
     else:
-        intg *= np.array([_mult, ]*3).T
+        volint = np.array([volint[j]*_mult for j in xrange(nf)], dtype=float)
 
-    return intg
+    return volint
 
 def get_mass_cog(V, F, rho=1.):
     return get_inertial_properties(V, F, rho=rho)[:2]

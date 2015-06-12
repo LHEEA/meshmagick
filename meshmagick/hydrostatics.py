@@ -41,6 +41,7 @@ class HydrostaticsMesh:
         self._sfint = np.zeros(6, dtype=float)
         self.sf = 0.
         self.vw = 0.
+        self.cw = np.zeros(3, dtype=np.float)
 
     def update(self, eta):
 
@@ -48,52 +49,110 @@ class HydrostaticsMesh:
         self._plane.set_position(z=eta[0], phi=eta[1], theta=eta[2])
 
         # Clipping the mesh by the plane
-        self._cV, self._cF, polygons, props = mm.clip_by_plane(self.V, self.F, self._plane, get_polygon=True,
-                                                                props=(self.areas, self.normals, self.centers))
+        self._cV, self._cF, clip_infos = mm.clip_by_plane(self.V, self.F, self._plane, infos=True)
 
         # Testing if the mesh presents intersections and storing the clipped mesh properties
-        if len(polygons) == 0:
+        if len(clip_infos['PolygonsNewID']) == 0:
             raise RuntimeError, 'could not compute any intersection polygon'
-        self._c_areas, self._c_normals, self._c_centers = props
+
+        # TODO : mettre les updates dans des methodes
+        # Extracting a mesh composed by only the faces that have to be updated
+        V_update, F_update = mm.extract_faces(self._cV, self._cF, clip_infos['FToUpdateNewID'])
+
+        # Updating faces properties for the clipped mesh
+        self._update_faces_properties(V_update, F_update, clip_infos)
+
+        # Updating volume integrals for the clipped mesh
+        self._update_volint(V_update, F_update, clip_infos)
 
         # Projecting the boundary polygons into the frame of the clipping plane
         self._boundary_vertices = []
-        for polygon in polygons:
+        for polygon in clip_infos['PolygonsNewID']:
             self._boundary_vertices.append(self._plane.coord_in_plane(self._cV[polygon]))
 
         # Computing surface integrals for the floating plane
         self._sfint = self._get_floating_surface_integrals()
         self.sf = self._sfint[0]
 
-        # TODO : Summing up the volume integrals for the clipped mesh
-        self._cvolint = self._extract_c_volint()
-
         # Computing the immersed volume
         self.vw = self.get_vw()
 
+        # Computing the center of buoyancy
+        self.cw = self.get_buoyancy_center()
+
         return 1
 
-    def _extract_c_volint(self):
+    def _update_volint(self, V_update, F_update, clip_infos):
         """Extraction of volume integrals from the initial mesh to the clipped mesh"""
         # On a besoin ici des informations sur l'extraction du maillage par rapport au maillage initial. Il faut donc
         #  sortir les infos d'extraction, tant au niveau des facettes conservees. Pour les facettes crees ou
         # modifiees, il convient de relancer un calcul d'integrales de volume.
-        if self._keepF is None:
-            raise RuntimeError
+        up_volint = mm._get_volume_integrals(V_update, F_update)
 
-        # TODO : extract clipped faces, newly created ones and added ones ids to compute their volume integrals
-        raise NotImplemented
+        c_volint = np.zeros((self._cF.shape[0], 10), dtype=np.float)
+        c_volint[clip_infos['FkeptNewID']] = self._volint[clip_infos['FkeptOldID']]
+        c_volint[clip_infos['FToUpdateNewID']] = up_volint
+
+        self._c_volint = c_volint.sum(axis=0)
+
+        return
+
+    def _update_faces_properties(self, V_update, F_update, clip_infos):
+
+        up_areas, up_normals, up_centers = mm.get_all_faces_properties(V_update, F_update)
+
+        # Collectively updating properties of wetted mesh
+        nf = self._cF.shape[0]
+        self._c_areas = np.zeros(nf, dtype=float)
+        self._c_areas[clip_infos['FkeptNewID']] = self.areas[clip_infos['FkeptOldID']]
+        self._c_areas[clip_infos['FToUpdateNewID']] = up_areas
+
+        self._c_normals = np.zeros((nf, 3), dtype=float)
+        self._c_normals[clip_infos['FkeptNewID']] = self.normals[clip_infos['FkeptOldID']]
+        self._c_normals[clip_infos['FToUpdateNewID']] = up_normals
+
+        self._c_centers = np.zeros((nf, 3), dtype=float)
+        self._c_centers[clip_infos['FkeptNewID']] = self.centers[clip_infos['FkeptOldID']]
+        self._c_centers[clip_infos['FToUpdateNewID']] = up_centers
+
+        return
 
     def get_vw(self):
 
         r11 = self._plane.Re0[0, 0]
         r21 = self._plane.Re0[1, 0]
         vw = self._c_volint[0] + self._plane.normal[0] * (r11*self._sfint[1] + r21*self._sfint[2] +
-                                                      self._plane.e*self._plane.normal[0]*self.sf)
+                                                      self._plane.e*self._plane.normal[0]**2*self.sf)
         return vw
 
     def get_buoyancy_center(self):
-        raise NotImplemented
+        R11 = self._plane.Re0[0, 0]
+        R21 = self._plane.Re0[1, 0]
+        R12 = self._plane.Re0[0, 1]
+        R22 = self._plane.Re0[1, 1]
+        R13 = self._plane.Re0[0, 2]
+        R23 = self._plane.Re0[1, 2]
+
+        s1 = self._sfint[1]
+        s2 = self._sfint[2]
+        s3 = self._sfint[3]
+        s4 = self._sfint[4]
+        s5 = self._sfint[5]
+
+        (up, vp, wp) = self._plane.normal
+        e = self._plane.e
+        e2 = e*e
+
+        cw = np.zeros(3, dtype=np.float)
+        cw[0] = self._c_volint[4] + up * (R11**2*s4 + R21**2*s5 + e2*up**2*self.sf +
+                                          2*(R11*R21*s3 + R11*e*up*s1 + R21*e*up*s2))
+        cw[1] = self._c_volint[5] + vp * (R12**2*s4 + R22**2*s5 + e2*vp**2*self.sf +
+                                          2*(R12*R22*s3 + R12*e*vp*s1 + R22*e*vp*s2))
+        cw[2] = self._c_volint[6] + wp * (R13**2*s4 + R23**2*s5 + e2*wp**2*self.sf +
+                                          2*(R13*R23*s3 + R13*e*wp*s1 + R23*e*wp*s2))
+
+        cw /= (2*self.vw)
+        return cw
 
     def get_displacement(self):
         # This function should not be used in loops for performance reasons, please inline the code
