@@ -161,9 +161,8 @@ class HydrostaticsMesh:
     def get_wet_surface(self):
         return np.sum(self._c_areas)
 
+mult_sf = np.array([1/2., 1/6., -1/6., 1/12., 1/12., -1/12.], dtype=float)
     def _get_floating_surface_integrals(self):
-
-        mult = np.array([1/2., 1/6., -1/6., 1/12., 1/12., -1/12.], dtype=float) # FIXME : a completer
 
         sint = np.zeros(6, dtype=float)
 
@@ -189,7 +188,7 @@ class HydrostaticsMesh:
             sint[5] += np.array([(x[j+1]-x[j]) * (y[j]**3 + y[j]**2*y[j+1] + y[j]*y[j+1]**2 + y[j+1]**3)
                                  for j in xrange(nv)], dtype=float).sum()
 
-        sint *= mult
+        sint *= mult_sf
 
         return sint
 
