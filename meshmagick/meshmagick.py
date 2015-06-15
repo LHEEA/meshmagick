@@ -365,7 +365,12 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, infos=False):
         return clipped_V, clipped_F
 
 def extract_faces(V, F, idF):
-
+    """
+    :param V: Initial vertices array
+    :param F: Initial faces connectivity array
+    :param idF: Ids of faces to extract
+    :return:
+    """
     nv = V.shape[0]
     nf = F.shape[0]
 
@@ -456,28 +461,31 @@ def get_all_faces_properties(V, F):
     F += 1
     return areas, normals, centers
 
-_mult = np.array([1/6., 1/24., 1/24., 1/24., 1/60., 1/60., 1/60., 1/120., 1/120., 1/120.], dtype=float)
-def _get_volume_integrals(V, F, sum=True):
+_mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float)
+def _get_surface_integrals(V, F, sum=True):
     """Based on the work of David Eberly"""
 
     nf = F.shape[0]
 
     if sum:
-        volint = np.zeros(10, dtype=float)
+        sint = np.zeros(12, dtype=float)
     else:
-        volint = np.zeros((nf, 10), dtype=float)
+        sint = np.zeros((nf, 12), dtype=float)
 
     tri1 = [0, 1, 2]
     tri2 = [0, 2, 3]
 
-    volint_tmp = np.zeros(10)
+    sint_tmp = np.zeros(12)
     for (iface, face) in enumerate(F-1):
+        sint_tmp *= 0.
+
         if face[0] == face[-1]:
             nb = 1
         else:
             nb = 2
 
         vertices = V[face]
+
         # Loop on triangles of the face
         for itri in xrange(nb):
             if itri == 0:
@@ -488,8 +496,8 @@ def _get_volume_integrals(V, F, sum=True):
             V0, V1, V2 = vertices[triangle]
             d0, d1, d2 = np.cross(V1-V0, V2-V0)
 
-            temp0 = V0+V1
-            f1 = temp0+V2
+            temp0 = V0 + V1
+            f1 = temp0 + V2
             temp1 = V0*V0
             temp2 = temp1 + V1*temp0
             f2 = temp2 + V2*f1
@@ -499,45 +507,53 @@ def _get_volume_integrals(V, F, sum=True):
             g2 = f2 + V2*(f1+V2)
 
             # Update integrals
-            volint_tmp[0] += d0 * f1[0]
-            volint_tmp[1] += d0 * f2[0]
-            volint_tmp[2] += d1 * f2[1]
-            volint_tmp[3] += d2 * f2[2]
-            volint_tmp[4] += d0 * f3[0]
-            volint_tmp[5] += d1 * f3[1]
-            volint_tmp[6] += d1 * f3[2]
-            volint_tmp[7] += d0 * (V0[1]*g0[0] + V1[1]*g1[0] + V2[1]*g2[0])
-            volint_tmp[8] += d1 * (V0[2]*g0[1] + V1[2]*g1[1] + V2[2]*g2[1])
-            volint_tmp[9] += d2 * (V0[0]*g0[2] + V1[0]*g1[2] + V2[0]*g2[2])
+            sint_tmp[0] += d0 * f1[0] # order 1 in vol, x in surf
+            sint_tmp[1] += d1 * f1[1] # order 1 in vol, y in surf
+            sint_tmp[2] += d2 * f1[2] # order 1 in vol, z in surf
+            sint_tmp[3] += d0 * f2[0] # order x in vol, x**2 in surf
+            sint_tmp[4] += d1 * f2[1] # order y in vol, y**2 in surf
+            sint_tmp[5] += d2 * f2[2] # order z in vol, z**2 in surf
+            sint_tmp[6] += d0 * f3[0] # order x**2 in vol, x**3 in surf
+            sint_tmp[7] += d1 * f3[1] # order y**2 in vol, y**3 in surf
+            sint_tmp[8] += d2 * f3[2] # order z**2 in vol, z**3 in surf
+            sint_tmp[9] += d0 * (V0[1]*g0[0] + V1[1]*g1[0] + V2[1]*g2[0]) # order xy in vol, x**2*y in surf
+            sint_tmp[10] += d1 * (V0[2]*g0[1] + V1[2]*g1[1] + V2[2]*g2[1]) # order yz in vol, y**2*z in surf
+            sint_tmp[11] += d2 * (V0[0]*g0[2] + V1[0]*g1[2] + V2[0]*g2[2]) # order zx in vol, z**2*x in surf
 
             if sum:
-                volint += volint_tmp
+                sint += sint_tmp
             else:
-                volint[iface] = volint_tmp
+                sint[iface] = sint_tmp
 
     if sum:
-        volint *= _mult
+        sint *= _mult_surf
     else:
-        volint = np.array([volint[j]*_mult for j in xrange(nf)], dtype=float)
+        sint = np.array([sint[j]*_mult_surf for j in xrange(nf)], dtype=float)
 
-    return volint
+    return sint
 
 def get_mass_cog(V, F, rho=1.):
     return get_inertial_properties(V, F, rho=rho)[:2]
 
-def get_inertial_properties(V, F, rho=1.):
+_mult_vol = np.array([1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.])
+def get_inertial_properties(V, F, rho=1.,
+                            point=np.zeros(3, dtype=np.float),
+                            rot = np.eye(3, dtype=np.float)):
 
-    intg = _get_volume_integrals(V, F)
+    sint = _get_surface_integrals(V, F)
 
-    vol = intg[0] * rho
-    cog = np.array([intg[1]/vol, intg[2]/vol, intg[3]/vol], dtype=float)
+    # Appliying multipliers
+    sint *= _mult_vol
 
-    xx = intg[5] + intg[6] - vol*(cog[1]**2 + cog[2]**2)
-    yy = intg[4] + intg[6] - vol*(cog[2]**2 + cog[0]**2)
-    zz = intg[4] + intg[5] - vol*(cog[0]**2 + cog[1]**2)
-    xy = -(intg[7] - vol*cog[0]*cog[1])
-    yz = -(intg[8] - vol*cog[1]*cog[2])
-    xz = -(intg[9] - vol*cog[2]*cog[0])
+    vol = (sint[0] + sint[1] + sint[2]) / 3.
+    cog = np.array([sint[3]/vol, sint[4]/vol, sint[5]/vol], dtype=float)
+
+    xx = sint[7] + sint[8] - vol*(cog[1]**2 + cog[2]**2)
+    yy = sint[6] + sint[8] - vol*(cog[2]**2 + cog[0]**2)
+    zz = sint[6] + sint[7] - vol*(cog[0]**2 + cog[1]**2)
+    xy = -(sint[9] - vol*cog[0]*cog[1])
+    yz = -(sint[10] - vol*cog[1]*cog[2])
+    xz = -(sint[11] - vol*cog[2]*cog[0])
 
     mass = rho * vol
     inertia_matrix = rho * np.array(
@@ -550,11 +566,20 @@ def get_inertial_properties(V, F, rho=1.):
 
     return mass, cog, inertia_matrix
 
+def transport_inertia_matrix(mass, cog, Ig, point, rot):
+
+    point_cog = cog - point
+    Ipoint = rot * Ig * rot.T + \
+             mass * (np.eye(3, dtype=float) * np.dot(point_cog, point_cog)
+                     - np.outer(point_cog, point_cog))
+    return Ipoint
+
+
 def get_volume(V, F):
-    return _get_volume_integrals(V, F)[0]
+    return _get_surface_integrals(V, F)[0]
 
 def get_COM(V, F):
-    return _get_volume_integrals(V, F)
+    return _get_surface_integrals(V, F)
 
 def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'implementation
 
@@ -2323,21 +2348,17 @@ def main():
     # Mesh rotations
     # FIXME : supprimer le cast angles et ne prendre que des degres
     if args.rotate is not None:
-        args.rotate = cast_angles(args.rotate, args.unit)
-        V = rotate(V, args.rotate)
+        V = rotate(V, map(float, args.rotate)*math.pi/180.)
         write_file = True
 
     if args.rotatex is not None:
-        args.rotatex = cast_angles(args.rotatex, args.unit)
-        V = rotate_1D(V, args.rotatex[0], 'x')
+        V = rotate_1D(V, float(args.rotatex[0])*math.pi/180., 'x')
         write_file = True
     if args.rotatey is not None:
-        args.rotatey = cast_angles(args.rotatey, args.unit)
-        V = rotate_1D(V, args.rotatey[0], 'y')
+        V = rotate_1D(V, float(args.rotatey[0])*math.pi/180., 'y')
         write_file = True
     if args.rotatez is not None:
-        args.rotatez = cast_angles(args.rotatez, args.unit)
-        V = rotate_1D(V, args.rotatez[0], 'z')
+        V = rotate_1D(V, float(args.rotatez[0])*math.pi/180., 'z')
         write_file = True
 
     if args.scale is not None:
@@ -2355,6 +2376,8 @@ def main():
     # TESTING --> A retirer
     # print get_mass_cog(V, F, rho=10.5)
     import hydrostatics as hs
+    # print get_mass_cog(V, F)
+    print get_inertial_properties(V, F)
     hsMesh = hs.HydrostaticsMesh(V, F)
 
     ##

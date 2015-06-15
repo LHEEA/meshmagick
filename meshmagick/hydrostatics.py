@@ -23,7 +23,7 @@ class HydrostaticsMesh:
         self.areas, self.normals, self.centers = mm.get_all_faces_properties(V, F)
 
         # Computing once the volume integrals on faces of the initial mesh to be used by the clipped mesh
-        self._volint = mm._get_volume_integrals(V, F, sum=False)
+        self._surfint = mm._get_surface_integrals(V, F, sum=False)
 
         # Defining the clipping plane Oxy and updating hydrostatics
         self._plane = mm.Plane()
@@ -60,10 +60,10 @@ class HydrostaticsMesh:
         V_update, F_update = mm.extract_faces(self._cV, self._cF, clip_infos['FToUpdateNewID'])
 
         # Updating faces properties for the clipped mesh
-        self._update_faces_properties(V_update, F_update, clip_infos)
+        self._update_faces_properties(V_update, F_update, clip_infos) # FIXME : useless !!!
 
-        # Updating volume integrals for the clipped mesh
-        self._update_volint(V_update, F_update, clip_infos)
+        # Updating surface integrals for underwater faces of the clipped mesh
+        self._update_surfint(V_update, F_update, clip_infos)
 
         # Projecting the boundary polygons into the frame of the clipping plane
         self._boundary_vertices = []
@@ -82,18 +82,18 @@ class HydrostaticsMesh:
 
         return 1
 
-    def _update_volint(self, V_update, F_update, clip_infos):
+    def _update_surfint(self, V_update, F_update, clip_infos):
         """Extraction of volume integrals from the initial mesh to the clipped mesh"""
         # On a besoin ici des informations sur l'extraction du maillage par rapport au maillage initial. Il faut donc
         #  sortir les infos d'extraction, tant au niveau des facettes conservees. Pour les facettes crees ou
         # modifiees, il convient de relancer un calcul d'integrales de volume.
-        up_volint = mm._get_volume_integrals(V_update, F_update)
+        up_surfint = mm._get_surface_integrals(V_update, F_update)
 
-        c_volint = np.zeros((self._cF.shape[0], 10), dtype=np.float)
-        c_volint[clip_infos['FkeptNewID']] = self._volint[clip_infos['FkeptOldID']]
-        c_volint[clip_infos['FToUpdateNewID']] = up_volint
+        c_surfint = np.zeros((self._cF.shape[0], 12), dtype=np.float)
+        c_surfint[clip_infos['FkeptNewID']] = self._surfint[clip_infos['FkeptOldID']]
+        c_surfint[clip_infos['FToUpdateNewID']] = up_surfint
 
-        self._c_volint = c_volint.sum(axis=0)
+        self._c_surfint = c_surfint.sum(axis=0)
 
         return
 
@@ -119,10 +119,10 @@ class HydrostaticsMesh:
 
     def get_vw(self):
 
-        r11 = self._plane.Re0[0, 0]
-        r21 = self._plane.Re0[1, 0]
-        vw = self._c_volint[0] + self._plane.normal[0] * (r11*self._sfint[1] + r21*self._sfint[2] +
-                                                      self._plane.e*self._plane.normal[0]**2*self.sf)
+        r13 = self._plane.Re0[0, 2]
+        r23 = self._plane.Re0[1, 2]
+        vw = self._c_surfint[2] + self._plane.normal[2] * (r13*self._sfint[1] + r23*self._sfint[2] +
+                                                      self._plane.e*self._plane.normal[2]*self.sf)
         return vw
 
     def get_buoyancy_center(self):
@@ -144,12 +144,12 @@ class HydrostaticsMesh:
         e2 = e*e
 
         cw = np.zeros(3, dtype=np.float)
-        cw[0] = self._c_volint[4] + up * (R11**2*s4 + R21**2*s5 + e2*up**2*self.sf +
-                                          2*(R11*R21*s3 + R11*e*up*s1 + R21*e*up*s2))
-        cw[1] = self._c_volint[5] + vp * (R12**2*s4 + R22**2*s5 + e2*vp**2*self.sf +
-                                          2*(R12*R22*s3 + R12*e*vp*s1 + R22*e*vp*s2))
-        cw[2] = self._c_volint[6] + wp * (R13**2*s4 + R23**2*s5 + e2*wp**2*self.sf +
-                                          2*(R13*R23*s3 + R13*e*wp*s1 + R23*e*wp*s2))
+        cw[0] = self._c_surfint[3] + up * (R11**2*s4 + R21**2*s5 + e2*up**2*self.sf +
+                                          2*(R11*R21*s3 + e*up*(R11*s1+R21*s2)))
+        cw[1] = self._c_surfint[4] + vp * (R12**2*s4 + R22**2*s5 + e2*vp**2*self.sf +
+                                          2*(R12*R22*s3 + e*vp*(R12*s1+R22*s2)))
+        cw[2] = self._c_surfint[5] + wp * (R13**2*s4 + R23**2*s5 + e2*wp**2*self.sf +
+                                          2*(R13*R23*s3 + e*wp*(R13*s1+R23*s2)))
 
         cw /= (2*self.vw)
         return cw
