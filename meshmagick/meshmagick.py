@@ -85,12 +85,17 @@ class Plane:
         return dist, position
 
     def coord_in_plane(self, vertices):
-        return np.array([np.dot(self.Re0, vertices[i]) for i in xrange(len(vertices))], dtype=float)
+        new_vertices = np.array([np.dot(self.Re0, vertices[i]) for i in xrange(vertices.shape[0])], dtype=float)
+        new_vertices[:, 2] -= self.e
+        return new_vertices
 
-
-def clip_by_plane(V, F, plane, abs_tol=1e-3, infos=False):
+def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
 
     n_threshold = 5 # devrait etre reglagble, non utilise pour le moment
+
+    # Working on different arrays
+    V = Vinit.copy()
+    F = Finit.copy()
 
     # TODO : gerer les updates de mise a jour a l'aide d'infos sur les facettes conservees tel quel, et les facettes
     # necessitant un update
@@ -482,7 +487,6 @@ def _get_surface_integrals(V, F, sum=True):
     sint_tmp = np.zeros(12)
     for (iface, face) in enumerate(F-1):
         sint_tmp *= 0.
-
         if face[0] == face[-1]:
             nb = 1
         else:
@@ -2394,11 +2398,11 @@ def main():
             import hydrostatics as hs
         except:
             raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
-        vol, cog, inertia = get_inertial_properties(V, F)
-        print 'vol : ', vol
-        print 'cog : ', cog
-        print 'inertia : '
-        print inertia
+        # vol, cog, inertia = get_inertial_properties(V, F)
+        # print 'vol : ', vol
+        # print 'cog : ', cog
+        # print 'inertia : '
+        # print inertia
         cV, cF = hs.get_hydrostatics(V, F)
         show(cV, cF)
 
