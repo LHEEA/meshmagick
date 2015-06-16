@@ -156,10 +156,9 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, infos=False):
 
     clip_infos['FkeptOldID'] = np.arange(nf)[keepF]
 
-    if infos:
-        # Getting the vertices that are already on the boundary
-        boundary_v_mask = np.fabs(positions)<=abs_tol # Vertices that are already on the boundary
+    boundary_v_mask = np.fabs(positions)<=abs_tol # Vertices that are already on the boundary
 
+    if infos:
         # Getting the boundary faces
         nb_V_on_boundary_by_face = np.zeros(nf, dtype=np.int32)
         nb_V_on_boundary_by_face[triangle_mask] = \
@@ -237,6 +236,10 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, infos=False):
                 V0 = V[iV0]
                 V1 = V[iV1]
 
+                if any(boundary_v_mask[[iV0, iV1]]):
+                    # Case where the true vertex is on the boundary --> do not compute any intersection
+                    continue
+
                 # Storing the edge and the vertex
                 if edges.has_key(iV0):
                     if iV1 not in edges[iV0][0]:
@@ -282,7 +285,7 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, infos=False):
             # upward
             for index, ivertex in enumerate(clipped_face):
                 if ivertex >= nv:
-                    if clipped_face[index-1] >= nv:
+                    if clipped_face[index-1] >= nv or boundary_v_mask[clipped_face[index-1]]:
                         boundary_edges[ivertex] = clipped_face[index-1]
                     else:
                         boundary_edges[clipped_face[index+1]] = ivertex
@@ -311,12 +314,13 @@ def clip_by_plane(V, F, plane, abs_tol=1e-3, infos=False):
         F = np.concatenate((F, np.asarray(newF, dtype=np.int32)+1))
 
     extended_nb_V = nv + nb_new_V
+    extended_nb_F = nf + nb_new_F
     new_nb_V = nb_kept_V + nb_new_V
     new_nb_F = nb_kept_F + nb_new_F
 
     # Getting the new IDs of kept faces before concatenation
     if infos:
-        newID_F = np.arange(extended_nb_V)
+        newID_F = np.arange(extended_nb_F)
         newID_F[keepF] = np.arange(new_nb_F)
 
     # extending the masks to comply with the extended mesh
@@ -540,6 +544,8 @@ def get_inertial_properties(V, F, rho=1.,
                             point=np.zeros(3, dtype=np.float),
                             rot = np.eye(3, dtype=np.float)):
 
+    tol = 1e-9
+
     sint = _get_surface_integrals(V, F)
 
     # Appliying multipliers
@@ -563,6 +569,10 @@ def get_inertial_properties(V, F, rho=1.,
             [xz, yz, zz]
         ]
     )
+
+    # Cleaning
+    cog[np.fabs(cog) < tol] = 0.
+    inertia_matrix[np.fabs(inertia_matrix) < tol] = 0.
 
     return mass, cog, inertia_matrix
 
@@ -2183,6 +2193,12 @@ def main():
                         Be careful that symmetry is applied before any rotation so as the plane
                         equation is defined in the initial frame of reference.""")
 
+    parser.add_argument('-hs', '--hydrostatics', action='store_true',
+                        help="""Compute hydrostatics.""") # TODO : completer l'aide avec les options
+
+    # TODO : ajouter les flags suivants : --mass, --cog, --rho_eau
+
+
     parser.add_argument('--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
 
@@ -2372,18 +2388,21 @@ def main():
     if args.info:
         get_info(V, F)
 
+    # Compute hydrostatics
+    if args.hydrostatics:
+        try:
+            import hydrostatics as hs
+        except:
+            raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
+        vol, cog, inertia = get_inertial_properties(V, F)
+        print 'vol : ', vol
+        print 'cog : ', cog
+        print 'inertia : '
+        print inertia
+        cV, cF = hs.get_hydrostatics(V, F)
+        show(cV, cF)
 
-    # TESTING --> A retirer
-    # print get_mass_cog(V, F, rho=10.5)
-    import hydrostatics as hs
-    # print get_mass_cog(V, F)
-    print get_inertial_properties(V, F)
-    hsMesh = hs.HydrostaticsMesh(V, F)
-
-    ##
-
-
-    # No more mesh modification should be released from this point -->
+    # WARNING : No more mesh modification should be released from this point until the end of the main
 
     if args.show:
         show(V, F)

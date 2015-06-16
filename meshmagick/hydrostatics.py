@@ -11,6 +11,7 @@ __status__ = "Development"
 import meshmagick as mm
 import numpy as np
 
+mult_sf = np.array([1/2., 1/6., -1/6., 1/12., 1/12., -1/12.], dtype=float)
 
 class HydrostaticsMesh:
     def __init__(self, V, F, rho_water=1023., g=9.81):
@@ -18,18 +19,6 @@ class HydrostaticsMesh:
         self.F = F
         self.rho_water = rho_water
         self.g = g
-
-        # Computing initial mesh properties
-        self.areas, self.normals, self.centers = mm.get_all_faces_properties(V, F)
-
-        # Computing once the volume integrals on faces of the initial mesh to be used by the clipped mesh
-        self._surfint = mm._get_surface_integrals(V, F, sum=False)
-
-        # Defining the clipping plane Oxy and updating hydrostatics
-        self._plane = mm.Plane()
-        self.update([0., 0., 0.])
-
-        self._has_plane_changed = True
 
         # Defining protected attributes
         self._cV = None
@@ -42,6 +31,19 @@ class HydrostaticsMesh:
         self.sf = 0.
         self.vw = 0.
         self.cw = np.zeros(3, dtype=np.float)
+
+        # Computing initial mesh properties
+        self.areas, self.normals, self.centers = mm.get_all_faces_properties(V, F) # FIXME : pas utile a priori...
+
+        # Computing once the volume integrals on faces of the initial mesh to be used by the clipped mesh
+        self._surfint = mm._get_surface_integrals(V, F, sum=False)
+
+        # Defining the clipping plane Oxy and updating hydrostatics
+        self._plane = mm.Plane()
+        self.update([0., 0., 0.])
+
+        self._has_plane_changed = True # utile ?
+
 
     def update(self, eta):
 
@@ -79,6 +81,8 @@ class HydrostaticsMesh:
 
         # Computing the center of buoyancy
         self.cw = self.get_buoyancy_center()
+
+        # TODO : Computing the hydrostatics stifness matrix
 
         return 1
 
@@ -126,6 +130,9 @@ class HydrostaticsMesh:
         return vw
 
     def get_buoyancy_center(self):
+
+        tol = 1e-9
+
         R11 = self._plane.Re0[0, 0]
         R21 = self._plane.Re0[1, 0]
         R12 = self._plane.Re0[0, 1]
@@ -152,6 +159,7 @@ class HydrostaticsMesh:
                                           2*(R13*R23*s3 + e*wp*(R13*s1+R23*s2)))
 
         cw /= (2*self.vw)
+        cw[np.fabs(cw)<tol] = 0.
         return cw
 
     def get_displacement(self):
@@ -161,8 +169,9 @@ class HydrostaticsMesh:
     def get_wet_surface(self):
         return np.sum(self._c_areas)
 
-mult_sf = np.array([1/2., 1/6., -1/6., 1/12., 1/12., -1/12.], dtype=float)
+
     def _get_floating_surface_integrals(self):
+
 
         sint = np.zeros(6, dtype=float)
 
@@ -201,4 +210,7 @@ def get_hydrostatics(V, F, mass=None, CG=None):
         computed iteratively.
         1) If none of the mass and the center of gravity position are given,
         1) If only the mass of the body is given, the mesh position will be adjusted to comply with the """
-    pass
+
+    hsMesh = HydrostaticsMesh(V, F)
+
+    return hsMesh._cV, hsMesh._cF
