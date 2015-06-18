@@ -40,12 +40,30 @@ import math
 # Classes
 class Plane:
     def __init__(self, normal=np.array([0., 0., 1.]), e=0.):
-        self.normal = normal
+        self.normal = normal / np.linalg.norm(normal)
         self.e = e
-        self.Re0 = np.eye(3, dtype=float)
+
+        self.phi, self.theta = self._get_angles_from_normal()
+
+        self.Re0 = self.get_rotation_matrix(self.phi, self.theta)
 
     def flip(self):
         self.normal = -self.normal
+        #TODO : faire la mise a jour des infos d'angle !!
+
+    def _get_angles_from_normal(self):
+
+        tol = 1e-4
+
+        u, v, w = self.normal
+
+        phi = math.asin(-v)
+        theta = math.atan2(u, w)
+
+        return phi, theta
+
+    def get_position(self):
+        return np.array([self.e, self.phi, self.theta], dtype=np.float)
 
     def set_position(self, z=0., phi=0., theta=0., unit='rad'):
         """Performs the transformation of the plane"""
@@ -58,18 +76,28 @@ class Plane:
             phi *= cor
             theta *= cor
 
+        self.phi = phi
+        self.theta = theta
+        self.Re0 = self.get_rotation_matrix(phi, theta)
+
+        self.normal = self.Re0[2]
+        self.e = z # FIXME : to verify !!!
+
+        return 1
+
+    def get_rotation_matrix(self, phi, theta):
         # Rotation matrix
         cphi = math.cos(phi)
         sphi = math.sin(phi)
         ctheta = math.cos(theta)
         stheta = math.sin(theta)
 
-        self.Re0[0] = [ctheta, 0., -stheta]
-        self.Re0[1] = [sphi*stheta, cphi, sphi*ctheta]
-        self.Re0[2] = [cphi*stheta, -sphi, cphi*ctheta]
+        Re0 = np.zeros((3, 3), dtype=float)
+        Re0[0] = [ctheta, 0., -stheta]
+        Re0[1] = [sphi*stheta, cphi, sphi*ctheta]
+        Re0[2] = [cphi*stheta, -sphi, cphi*ctheta]
 
-        self.normal = self.Re0[2]
-        self.e = z # FIXME : to verify !!!
+        return Re0
 
     def point_distance(self, point, tol=1e-9):
         dist = np.dot(self.normal, point)
@@ -293,7 +321,10 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
                     if clipped_face[index-1] >= nv or boundary_v_mask[clipped_face[index-1]]:
                         boundary_edges[ivertex] = clipped_face[index-1]
                     else:
-                        boundary_edges[clipped_face[index+1]] = ivertex
+                        if index < len(clipped_face)-1:
+                            boundary_edges[clipped_face[index+1]] = ivertex
+                        else:
+                            boundary_edges[clipped_face[0]] = ivertex
                     break
 
         if len(clipped_face) == 3: # We get a triangle
@@ -2481,12 +2512,8 @@ def main():
             import hydrostatics as hs
         except:
             raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
-        # vol, cog, inertia = get_inertial_properties(V, F)
-        # print 'vol : ', vol
-        # print 'cog : ', cog
-        # print 'inertia : '
-        # print inertia
-        cV, cF = hs.get_hydrostatics(V, F)
+
+        cV, cF = hs.get_hydrostatics(V, F, mass=10000e3, verbose=args.verbose)
         show(cV, cF)
 
     # WARNING : No more mesh modification should be released from this point until the end of the main

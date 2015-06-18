@@ -10,6 +10,9 @@ __status__ = "Development"
 
 import meshmagick as mm
 import numpy as np
+import math
+
+import sys
 
 mult_sf = np.array([1/2., 1/6., -1/6., 1/12., 1/12., -1/12.], dtype=float)
 
@@ -134,6 +137,9 @@ class HydrostaticsMesh:
         Khs[Khs<tol] = 0.
         return Khs
 
+    def get_generalized_position(self):
+        return self._plane.e
+
     def _update_faces_properties(self, V_update, F_update, clip_infos):
 
         up_areas, up_normals, up_centers = mm.get_all_faces_properties(V_update, F_update)
@@ -233,9 +239,20 @@ class HydrostaticsMesh:
 
         return sint
 
+# ======================================================================================================================
 
+def _get_residual(rho_water, g, vw, cw, mass, cog):
 
-def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81, mauto=False):
+    rgvw = rho_water*g*vw
+    mg = mass*g
+
+    res = np.array([
+         rgvw - mg,
+         rgvw * vw[2] - mg * cog[2],
+        -rgvw * cw[0] + mg * cog[0]
+    ], dtype=np.float)
+
+def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81, auto=False, verbose=False):
     """Computes the hydrostatics of the mesh and return the clipped mesh.
 
         Computes the hydrostatics properties of the mesh. Depending on the information given, the equilibrium is
@@ -246,28 +263,107 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
     # Instantiation of the hydrostatic mesh object
     hsMesh = HydrostaticsMesh(V, F, rho_water=rho_water, g=g)
 
+    if auto:
+        # mass and center of gravity are computed for the initial mesh as a shell with 1cm thickness in steel
+        mass, cog = mm.get_inertial_properties(V, F, shell=True, verbose=verbose)[:2]
 
-    # mass, cog = mm.get_inertial_properties(V, F, )
+    disp = hsMesh._vw # displacement
+    Cw = hsMesh._cw
+    Sf = hsMesh._sf
+
+    if mass is None:
+        # No equilibrium will be performed
+        mass = rho_water * disp
+        cV = hsMesh._cV
+        cF = hsMesh._cF
+
+        # Chossing wether we return a stiffness in heave only or a stiffness matrix
+        if cog is None:
+            residual = np.zeros(3, dtype=np.float)
+            if zcog is None:
+                # Return only the stiffness in heave
+                K33 = rho_water*g*Sf
+            else:
+                # Computing the stiffness matrix
+                Khs = hsMesh.get_hydrostatic_stiffness_matrix(np.array([0., 0., zcog], dtype=np.float))
+        else:
+            # Computing the stiffness matrix with the cog given
+            Khs = hsMesh.get_hydrostatic_stiffness_matrix(cog, dtype=np.float)
+            residual = _get_residual(rho_water, g, disp, Cw, mass, cog)
+
+    else: # mass is given explicitely
+        # Looking for an equilibrium
+
+        maxiter = 50
+
+        if cog is None:
+            # The equilibrium is searched in heave only
+
+            # TODO : ajouter une tolerance relative rel_tol
+            abs_tol = 1e-3*mass # A mettre en parametre  de la fonction
+
+            # K33 = rho_water*g*Sf
+            rg = rho_water * g
+            niter = 0
+            res = 0.
+
+            zmax = 1. # TODO : choisir cette valeur basee sur les dimensions du maillage en z !! -> tol
+
+            while 1:
+                # Iteration loop
+
+                if niter == maxiter:
+                    status = 0
+                    break
+
+                disp = hsMesh._vw
+                res_old = res
+                res = rg * disp - mass *g # residual
+                print 'disp:%f, sf:%f, res:%e'%(hsMesh._vw*rho_water, hsMesh._sf, res)
+
+                # Convergence criteria
+                if math.fabs(res) < abs_tol:
+                    status = 1
+                    break
+
+                niter += 1
+                stiffness = rg * hsMesh._sf
+                dz = res/stiffness
+
+                # Checking for a sign modification in the residual
+                if res*res_old < 0.:
+                    zmax /=2.
+
+                if math.fabs(dz) > zmax:
+                    dz = math.copysign(zmax, dz)
+
+                zcur = hsMesh._plane.get_position()[0]
+
+                hsMesh.update([zcur-dz, 0., 0.]) # The - sign is here to make the plane move, not the mesh
+
+                filename = 'eq%u.vtu'%niter
+                mm.write_VTU(filename, hsMesh._cV, hsMesh._cF)
+
+            if verbose:
+                if status == 1:
+                    print "Equilibrium has been found in %u iterations" % niter
+                else:
+                    print "Equilibrium has been approached but the mesh is not refined enough to reach convergence"
+
+            sys.exit(0)
+
+            if zcog is None:
+                pass
+            else:
+                # TODO : le faire en fin d'iterations !!
+                Khs = hsMesh.get_hydrostatic_stiffness_matrix(np.array([0., 0., zcog], dtype=np.float))
+        else:
+            pass
 
 
 
+    if verbose:
+        print "sortie a developper"
 
-
-
-
-    # if mauto:
-    #     # Automatically computing the inertial properties of the mesh
-    #     mass, cog = mm.get_inertial_properties(V, F, rho=1., point=None)
-
-    # cog = mm.get_inertial_properties(V, F)[1]
-    cog = np.zeros(3, dtype=np.float)
-
-    mm.get_inertial_properties(V, F, shell=True, verbose=True) # Uniquement si on veut que les pptes inertielles soient
-    # calculees
-    # en auto
-
-    print hsMesh.get_hydrostatic_stiffness_matrix(cog)
-
-
-
-    return hsMesh._cV, hsMesh._cF
+    # TODO : renvoyer egalement les infos hydrostatiques sous forme de dictionnaire -> ou alors sortir un fichier !
+    return cV, cF
