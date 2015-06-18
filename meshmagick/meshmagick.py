@@ -470,21 +470,21 @@ def get_all_faces_properties(V, F):
     F += 1
     return areas, normals, centers
 
-_mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float)
+_mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float)
 def _get_surface_integrals(V, F, sum=True):
     """Based on the work of David Eberly"""
 
     nf = F.shape[0]
 
     if sum:
-        sint = np.zeros(12, dtype=float)
+        sint = np.zeros(15, dtype=float)
     else:
-        sint = np.zeros((nf, 12), dtype=float)
+        sint = np.zeros((nf, 15), dtype=float)
 
     tri1 = [0, 1, 2]
     tri2 = [0, 2, 3]
 
-    sint_tmp = np.zeros(12)
+    sint_tmp = np.zeros(15)
     for (iface, face) in enumerate(F-1):
         sint_tmp *= 0.
         if face[0] == face[-1]:
@@ -502,7 +502,12 @@ def _get_surface_integrals(V, F, sum=True):
                 triangle = tri2
 
             V0, V1, V2 = vertices[triangle]
+            x0, y0, z0 = V0
+            x1, y1, z1 = V1
+            x2, y2, z2 = V2
+
             d0, d1, d2 = np.cross(V1-V0, V2-V0)
+            e1_c_e2 = math.sqrt(d0**2 + d1**2 + d2**2)
 
             temp0 = V0 + V1
             f1 = temp0 + V2
@@ -514,19 +519,28 @@ def _get_surface_integrals(V, F, sum=True):
             g1 = f2 + V1*(f1+V1)
             g2 = f2 + V2*(f1+V2)
 
+            yz = z0*(4*y0 - y1 - y2)  - y0*(z1+z2) + 3*(y1*z1 + y2*z2)
+            xz = x0*(4*z0 - z1 - z2)  - z0*(x1+x2) + 3*(x1*z1 + x2*z2)
+            xy = y0*(4*x0 - x1 - x2)  - x0*(y1+y2) + 3*(x1*y1 + x2*y2)
+
             # Update integrals
             sint_tmp[0] += d0 * f1[0] # order 1 in vol, x in surf
             sint_tmp[1] += d1 * f1[1] # order 1 in vol, y in surf
             sint_tmp[2] += d2 * f1[2] # order 1 in vol, z in surf
-            sint_tmp[3] += d0 * f2[0] # order x in vol, x**2 in surf
-            sint_tmp[4] += d1 * f2[1] # order y in vol, y**2 in surf
-            sint_tmp[5] += d2 * f2[2] # order z in vol, z**2 in surf
-            sint_tmp[6] += d0 * f3[0] # order x**2 in vol, x**3 in surf
-            sint_tmp[7] += d1 * f3[1] # order y**2 in vol, y**3 in surf
-            sint_tmp[8] += d2 * f3[2] # order z**2 in vol, z**3 in surf
-            sint_tmp[9] += d0 * (V0[1]*g0[0] + V1[1]*g1[0] + V2[1]*g2[0]) # order xy in vol, x**2*y in surf
-            sint_tmp[10] += d1 * (V0[2]*g0[1] + V1[2]*g1[1] + V2[2]*g2[1]) # order yz in vol, y**2*z in surf
-            sint_tmp[11] += d2 * (V0[0]*g0[2] + V1[0]*g1[2] + V2[0]*g2[2]) # order zx in vol, z**2*x in surf
+
+            sint_tmp[3] +=  d0 * yz # order yz in surf
+            sint_tmp[4] +=  d1 * xz # order xz in surf
+            sint_tmp[5] +=  d2 * xy # order xy in surf
+
+            sint_tmp[6] += d0 * f2[0] # order x in vol, x**2 in surf
+            sint_tmp[7] += d1 * f2[1] # order y in vol, y**2 in surf
+            sint_tmp[8] += d2 * f2[2] # order z in vol, z**2 in surf
+            sint_tmp[9] += d0 * f3[0] # order x**2 in vol, x**3 in surf
+            sint_tmp[10] += d1 * f3[1] # order y**2 in vol, y**3 in surf
+            sint_tmp[11] += d2 * f3[2] # order z**2 in vol, z**3 in surf
+            sint_tmp[12] += d0 * (y0*g0[0] + y1*g1[0] + y2*g2[0]) # order xy in vol, x**2*y in surf
+            sint_tmp[13] += d1 * (z0*g0[1] + z1*g1[1] + z2*g2[1]) # order yz in vol, y**2*z in surf
+            sint_tmp[14] += d2 * (x0*g0[2] + x1*g1[2] + x2*g2[2]) # order zx in vol, z**2*x in surf
 
             if sum:
                 sint += sint_tmp
@@ -544,39 +558,108 @@ def get_mass_cog(V, F, rho=1.):
     return get_inertial_properties(V, F, rho=rho)[:2]
 
 _mult_vol = np.array([1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.])
-def get_inertial_properties(V, F, rho=1.,
-                            point=np.zeros(3, dtype=np.float),
-                            rot = np.eye(3, dtype=np.float)):
+def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False):
+
+    # The default density rho is that of steel
 
     tol = 1e-9
 
-    sint = _get_surface_integrals(V, F)
+    if shell: # The geometry is a shell with homogeneous thickness and density.
+        areas, normals = get_all_faces_properties(V, F)[:2]
+        St = areas.sum() # Total surface
+        # The geometry is considered as being a shell with thickness given
+        if mass is None:
 
-    # Appliying multipliers
-    sint *= _mult_vol
+            if thickness is None:
+                # Assuming a standard thickness of 1cm
+                thickness = 1e-2
 
-    vol = (sint[0] + sint[1] + sint[2]) / 3.
-    cog = np.array([sint[3]/vol, sint[4]/vol, sint[5]/vol], dtype=float)
+            sigma = thickness * rho
+            mass = St*sigma
 
-    xx = sint[7] + sint[8] - vol*(cog[1]**2 + cog[2]**2)
-    yy = sint[6] + sint[8] - vol*(cog[2]**2 + cog[0]**2)
-    zz = sint[6] + sint[7] - vol*(cog[0]**2 + cog[1]**2)
-    xy = -(sint[9] - vol*cog[0]*cog[1])
-    yz = -(sint[10] - vol*cog[1]*cog[2])
-    xz = -(sint[11] - vol*cog[2]*cog[0])
+        else:# A mass has been specified
+            sigma = mass/St # Surfacic density
 
-    mass = rho * vol
-    inertia_matrix = rho * np.array(
-        [
-            [xx, xy, xz],
-            [xy, yy, yz],
-            [xz, yz, zz]
-        ]
-    )
+            if thickness is None:
+                # Computing the equivalent thickness
+                thickness = sigma / rho
+            else:
+                # thickness has been given, overwriting the density of the medium accordingly
+                rho_tmp = sigma / thickness
+                rho = rho_tmp
+
+        # Getting surface integrals
+        sint = _get_surface_integrals(V, F, sum=False)
+
+        normals[normals==0.] = 1. # To avoid division by zero
+        # Correcting these integrals by normals
+        sint[:, :3] /= normals
+        sint[:, 3:6] /= normals
+        sint[:, 6:9] /= normals
+        sint[:, 9:12] /= normals
+        sint[:, 12:15] /= normals
+
+        nu = sint.sum(axis=0)
+
+        cog = np.array([nu[0], nu[1], nu[2]], dtype=np.float) * sigma / mass
+
+        inertia_matrix = np.array([
+            [nu[7]+nu[8] ,   -nu[5]   ,   -nu[4]],
+            [  -nu[5]    , nu[6]+nu[8],   -nu[3]],
+            [  -nu[4]    ,   -nu[3]   , nu[6]+nu[7]]
+        ], dtype=np.float) * sigma
+
+        if verbose:
+            print 'Total surface         : %f m**2' % St
+            print 'Thickness             : %f m' % thickness
+            print 'Density               : %f kg/m**3' % rho
+            print 'Surface density       : %f kg/m**2' % sigma
+
+    else:
+        # The geometry is full
+        sint = _get_surface_integrals(V, F)
+
+        # Appliying multipliers
+        sint *= _mult_vol
+
+        vol = (sint[0] + sint[1] + sint[2]) / 3.
+        cog = np.array([sint[6]/vol, sint[7]/vol, sint[8]/vol], dtype=float)
+
+        # Inertia matrix is expressed for the moment in O
+        # xx = sint[10] + sint[11] - vol*(cog[1]**2 + cog[2]**2)
+        # yy = sint[9] + sint[11] - vol*(cog[2]**2 + cog[0]**2)
+        # zz = sint[9] + sint[10] - vol*(cog[0]**2 + cog[1]**2)
+        # xy = -(sint[12] - vol*cog[0]*cog[1])
+        # yz = -(sint[13] - vol*cog[1]*cog[2])
+        # xz = -(sint[14] - vol*cog[2]*cog[0])
+
+        # Inertia matrix expressed in cog
+        xx = sint[10] + sint[11]
+        yy = sint[9] + sint[11]
+        zz = sint[9] + sint[10]
+        xy = -sint[12]
+        yz = -sint[13]
+        xz = -sint[14]
+
+        mass = rho * vol
+        # The inertia matrix is expressed in
+        inertia_matrix = rho * np.array(
+            [
+                [xx, xy, xz],
+                [xy, yy, yz],
+                [xz, yz, zz]
+            ], dtype=np.float)
 
     # Cleaning
     cog[np.fabs(cog) < tol] = 0.
     inertia_matrix[np.fabs(inertia_matrix) < tol] = 0.
+
+    if verbose:
+        print 'Mass                  : %f kg' % mass
+        print 'COG                   : (%f, %f, %f) m' % tuple(cog)
+        print 'Inertia matrix in COG : '
+        print inertia_matrix
+
 
     return mass, cog, inertia_matrix
 

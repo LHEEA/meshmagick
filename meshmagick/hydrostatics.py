@@ -96,7 +96,7 @@ class HydrostaticsMesh:
         # modifiees, il convient de relancer un calcul d'integrales de volume.
         up_surfint = mm._get_surface_integrals(V_update, F_update)
 
-        c_surfint = np.zeros((self._cF.shape[0], 12), dtype=np.float)
+        c_surfint = np.zeros((self._cF.shape[0], 15), dtype=np.float)
         c_surfint[clip_infos['FkeptNewID']] = self._surfint[clip_infos['FkeptOldID']]
         c_surfint[clip_infos['FToUpdateNewID']] = up_surfint
 
@@ -184,11 +184,11 @@ class HydrostaticsMesh:
         e2 = e*e
 
         cw = np.zeros(3, dtype=np.float)
-        cw[0] = self._c_surfint[3] + up * (R11**2*s4 + R21**2*s5 + e2*up**2*self._sf +
+        cw[0] = self._c_surfint[6] + up * (R11**2*s4 + R21**2*s5 + e2*up**2*self._sf +
                                           2*(R11*R21*s3 + e*up*(R11*s1+R21*s2)))
-        cw[1] = self._c_surfint[4] + vp * (R12**2*s4 + R22**2*s5 + e2*vp**2*self._sf +
+        cw[1] = self._c_surfint[7] + vp * (R12**2*s4 + R22**2*s5 + e2*vp**2*self._sf +
                                           2*(R12*R22*s3 + e*vp*(R12*s1+R22*s2)))
-        cw[2] = self._c_surfint[5] + wp * (R13**2*s4 + R23**2*s5 + e2*wp**2*self._sf +
+        cw[2] = self._c_surfint[8] + wp * (R13**2*s4 + R23**2*s5 + e2*wp**2*self._sf +
                                           2*(R13*R23*s3 + e*wp*(R13*s1+R23*s2)))
 
         cw /= (2*self._vw)
@@ -203,7 +203,7 @@ class HydrostaticsMesh:
         return np.sum(self._c_areas)
 
     def _get_floating_surface_integrals(self):
-
+        # FIXME : verifier par calcul formel !! (surtout le sigma3)
 
         sint = np.zeros(6, dtype=float)
 
@@ -235,7 +235,7 @@ class HydrostaticsMesh:
 
 
 
-def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81):
+def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81, mauto=False):
     """Computes the hydrostatics of the mesh and return the clipped mesh.
 
         Computes the hydrostatics properties of the mesh. Depending on the information given, the equilibrium is
@@ -243,12 +243,30 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
         1) If none of the mass and the center of gravity position are given,
         1) If only the mass of the body is given, the mesh position will be adjusted to comply with the """
 
+    # Instantiation of the hydrostatic mesh object
     hsMesh = HydrostaticsMesh(V, F, rho_water=rho_water, g=g)
+
+
+    # mass, cog = mm.get_inertial_properties(V, F, )
+
+
+
+
+
+
+
+    # if mauto:
+    #     # Automatically computing the inertial properties of the mesh
+    #     mass, cog = mm.get_inertial_properties(V, F, rho=1., point=None)
 
     # cog = mm.get_inertial_properties(V, F)[1]
     cog = np.zeros(3, dtype=np.float)
 
-    Khs = hsMesh.get_hydrostatic_stiffness_matrix(cog)
+    mm.get_inertial_properties(V, F, shell=True, verbose=True) # Uniquement si on veut que les pptes inertielles soient
+    # calculees
+    # en auto
+
+    print hsMesh.get_hydrostatic_stiffness_matrix(cog)
 
 
 
