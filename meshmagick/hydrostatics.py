@@ -134,7 +134,11 @@ class HydrostaticsMesh:
                 [k34, k44, k45],
                 [k35, k45, k55]
             ], dtype=np.float)
-        Khs[Khs<tol] = 0.
+
+        if any(Khs < 0.):
+            raise RuntimeWarning, 'Some coefficients of the stiffness matrix are negative, this should not happen'
+
+        Khs[Khs < tol] = 0.
         return Khs
 
     def get_generalized_position(self):
