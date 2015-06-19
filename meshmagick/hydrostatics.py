@@ -135,8 +135,8 @@ class HydrostaticsMesh:
                 [k35, k45, k55]
             ], dtype=np.float)
 
-        if any(Khs < 0.):
-            raise RuntimeWarning, 'Some coefficients of the stiffness matrix are negative, this should not happen'
+        # if (Khs < 0.).any():
+        #     raise RuntimeWarning, 'Some coefficients of the stiffness matrix are negative, this should not happen'
 
         Khs[Khs < tol] = 0.
         return Khs
@@ -268,7 +268,7 @@ def print_hysdrostatics_report(hs_data):
         'res'  : 'Residual (kg, Nm, Nm):\n\t%f, %f, %f\n',
         'cog'  : 'Gravity center (m):\n\t%E, %E, %E\n',
         'K33'  : 'Heave stiffness (N/m):\n\t%E\n',
-        'Khs'  : 'Stiffness matrix:\n'
+        'Khs'  : 'Hydrostatic Stiffness matrix:\n'
                  '\t%E, %E, %E\n'
                  '\t%E, %E, %E\n'
                  '\t%E, %E, %E\n',
@@ -287,7 +287,7 @@ def print_hysdrostatics_report(hs_data):
     return 1
 
 
-def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81, auto=False, verbose=False):
+def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81, anim=False, verbose=False):
     """Computes the hydrostatics of the mesh and return the clipped mesh.
 
         Computes the hydrostatics properties of the mesh. Depending on the information given, the equilibrium is
@@ -295,14 +295,12 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
         1) If none of the mass and the center of gravity position are given,
         1) If only the mass of the body is given, the mesh position will be adjusted to comply with the """
 
+    # TODO : recuperer le deplacement total pour verifier que la masse fournie est consistante
+
     # Instantiation of the hydrostatic mesh object
     hsMesh = HydrostaticsMesh(V, F, rho_water=rho_water, g=g)
 
     hs_data = dict()
-
-    if auto:
-        # mass and center of gravity are computed for the initial mesh as a shell with 1cm thickness in steel
-        mass, cog = mm.get_inertial_properties(V, F, shell=True, verbose=verbose)[:2]
 
     if mass is None:
         # No equilibrium is performed if mass is not given
@@ -323,6 +321,8 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
             else:
                 # Computing the stiffness matrix
                 hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(np.array([0., 0., zcog], dtype=np.float))
+                hs_data['cog'] = Cw.copy()
+                hs_data['cog'][2] = zcog
         else:
             # Computing the stiffness matrix with the cog given
             hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(cog, dtype=np.float)
@@ -336,9 +336,9 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
             cV=cV,
             cF=cF,
             res=residual,
-            cog=cog,
             draft=cV[:,2].min()
         )
+
 
     else: # mass is given explicitely
         # Looking for an equilibrium
@@ -366,8 +366,14 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
             res1 = rho_water*hsMesh._vw - mass
             abs_tol = math.fabs(res0-res1)
 
-            # filename = 'eq0.vtu'
-            # mm.write_VTU(filename, hsMesh._cV, hsMesh._cF)
+            if anim:
+                # Removing all files eq*.vtu
+                import os, glob
+                for eqx in glob.glob('eq*.vtu'):
+                    os.remove(eqx)
+
+                filename = 'eq0.vtu'
+                mm.write_VTU(filename, hsMesh._cV, hsMesh._cF)
 
             while 1:
                 # Iteration loop
@@ -409,8 +415,9 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
                 zcur = hsMesh._plane.get_position()[0]
                 hsMesh.update([zcur-dz, 0., 0.]) # The - sign is here to make the plane move, not the mesh
 
-                # filename = 'eq%u.vtu'%niter
-                # mm.write_VTU(filename, hsMesh._cV, hsMesh._cF)
+                if anim:
+                    filename = 'eq%u.vtu'%niter
+                    mm.write_VTU(filename, hsMesh._cV, hsMesh._cF)
 
             hs_data['res'] = np.array([res, 0., 0.], dtype=np.float)
 
@@ -435,14 +442,17 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
 
             if zcog is None:
                 hs_data['K33'] = rg*hsMesh._sf
-                hs_data['cog'] = np.array([0., 0., zcog])
+                # hs_data['cog'] = np.array([0., 0., zcog])
             else:
                 # TODO : le faire en fin d'iterations !!
                 hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(np.array([0., 0., zcog], dtype=np.float))
+                hs_data['cog'] = hsMesh._cw.copy()
+                hs_data['cog'][2] = zcog
+
         else:
+            raise NotImplementedError
+            # 6 dof equilibrium research
             pass
-
-
 
     if verbose:
         print_hysdrostatics_report(hs_data)

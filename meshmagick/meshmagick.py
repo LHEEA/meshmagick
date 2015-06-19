@@ -27,7 +27,7 @@ __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
 __credits__ = "Francois Rongere"
 __licence__ = "CeCILL"
-__version__ = "0.3.1"
+__version__ = "1.0"
 __maintainer__ = "Francois Rongere"
 __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
@@ -149,18 +149,11 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
 
     # If the mesh is totally at one side of the plane, no need to go further !
     nb_kept_V = np.sum(keepV)
-    if nb_kept_V == nv:
-        # TODO : gerer egalement les demandes de polygone et de proprietes de facette
-        polygons = [] # TODO : mettre en oeuvre un calcul des polygones d'intersection si il y en a !!!
-        if infos:
-            return V, F, clip_infos
-        else:
-            return V, F
-    elif nb_kept_V == 0:
-        if infos:
-            return [], [], clip_infos
-        else:
-            return [], []
+    if nb_kept_V == nv or nb_kept_V == 0:
+        if nb_kept_V == nv:
+            # TODO : si nb_kept_V est egal a nv, on devrait pouvoir tester si le maillage n'est pas deja coupe et renvoyer le maillage initial et calculer les polygones d'intersection.
+            pass
+        raise RuntimeError, 'The clipping plane does not cross the mesh'
 
     # Getting triangles and quads masks
     triangle_mask = F[:, 0] == F[:, -1]
@@ -603,9 +596,9 @@ def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=Fa
         # The geometry is considered as being a shell with thickness given
         if mass is None:
 
-            if thickness is None:
-                # Assuming a standard thickness of 1cm
-                thickness = 1e-2
+            # if thickness is None:
+            #     # Assuming a standard thickness of 1cm
+            #     thickness = 1e-2
 
             sigma = thickness * rho
             mass = St*sigma
@@ -643,6 +636,8 @@ def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=Fa
         ], dtype=np.float) * sigma
 
         if verbose:
+            print '\nPrincipal inertia parameters report:'
+            print '------------------------------------\n'
             print 'Total surface         : %f m**2' % St
             print 'Thickness             : %f m' % thickness
             print 'Density               : %f kg/m**3' % rho
@@ -691,8 +686,7 @@ def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=Fa
         print 'Mass                  : %f kg' % mass
         print 'COG                   : (%f, %f, %f) m' % tuple(cog)
         print 'Inertia matrix in COG : '
-        print inertia_matrix
-
+        print '\t%E, %E, %E\n\t%E, %E, %E\n\t%E, %E, %E\n' % tuple(inertia_matrix.flatten())
 
     return mass, cog, inertia_matrix
 
@@ -2168,41 +2162,43 @@ def main():
 
     parser = argparse.ArgumentParser(
         description="""  --  MESHMAGICK --
-                    A python module and a command line utility to manipulate meshes from different
-                    format used in hydrodynamics as well as for visualization.
+                    A python module and a command line utility to manipulate meshes from
+                    different format used in hydrodynamics as well as for visualization.
 
                     The formats currently supported by meshmagick are :
 
-                    *---------------*-------------*-----------------*-----------------------*
-                    | File          | R: Reading  | Software        | Keywords              |
-                    | extension     | W: writing  |                 |                       |
-                    *---------------*-------------*-----------------*-----------------------*
-                    |     .mar      |    R/W      | NEMOH (1)       | nemoh, mar            |
-                    |     .gdf      |    R/W      | WAMIT (2)       | wamit, gdf            |
-                    |     .inp      |    R        | DIODORE (3)     | diodore-inp, inp      |
-                    |     .DAT      |    W        | DIODORE (3)     | diodore-dat
-                    |     .hst      |    R/W      | HYDROSTAR (4)   | hydrostar, hst        |
-                    |     .nat      |    R/W      |    -            | natural, nat          |
-                    |     .msh      |    R        | GMSH (5)        | gmsh, msh             |
-                    |     .stl      |    R/W      |    -            | stl                   |
-                    |     .vtu      |    R/W      | PARAVIEW (6)    | paraview, vtu         |
-                    |     .vtk      |    R/W      | PARAVIEW (6)    | paraview-legacy, vtk  |
-                    |     .tec      |    R/W      | TECPLOT (7)     | tecplot, tec          |
-                    *---------------*-------------------------------------------------------*
+                    *-----------*------------*-----------------*----------------------*
+                    | File      | R: Reading | Software        | Keywords             |
+                    | extension | W: writing |                 |                      |
+                    *-----------*------------*-----------------*----------------------*
+                    |   .mar    |    R/W     | NEMOH (1)       | nemoh, mar           |
+                    |   .gdf    |    R/W     | WAMIT (2)       | wamit, gdf           |
+                    |   .inp    |    R       | DIODORE (3)     | diodore-inp, inp     |
+                    |   .DAT    |    W       | DIODORE (3)     | diodore-dat          |
+                    |   .hst    |    R/W     | HYDROSTAR (4)   | hydrostar, hst       |
+                    |   .nat    |    R/W     |    -            | natural, nat         |
+                    |   .msh    |    R       | GMSH (5)        | gmsh, msh            |
+                    |   .stl    |    R/W     |    -            | stl                  |
+                    |   .vtu    |    R/W     | PARAVIEW (6)    | paraview, vtu        |
+                    |   .vtk    |    R/W     | PARAVIEW (6)    | paraview-legacy, vtk |
+                    |   .tec    |    R/W     | TECPLOT (7)     | tecplot, tec         |
+                    *---------- *-----------------------------------------------------*
 
-                    By default, Meshmagick uses the filename extensions to choose the appropriate
-                    reader/writer. This behaviour might be bypassed using the -ifmt and -ofmt
-                    optional arguments. When using these options, keywords defined in the table
-                    above must be used as format identifiers.
+                    By default, Meshmagick uses the filename extensions to choose the
+                    appropriate reader/writer. This behaviour might be bypassed using the
+                    -ifmt and -ofmt optional arguments. When using these options, keywords
+                    defined in the table above must be used as format identifiers.
 
                     (1) NEMOH is an open source BEM Software for seakeeping developped at
                         Ecole Centrale de Nantes (LHHEA)
                     (2) WAMIT is a BEM Software for seakeeping developped by WAMIT, Inc.
                     (3) DIODORE is a BEM Software for seakeeping developped by PRINCIPIA
-                    (4) HYDROSTAR is a BEM Software for seakeeping developped by BUREAU VERITAS
-                    (5) GMSH is an open source meshing software developped by C. Geuzaine and
-                        J.-F. Remacle
-                    (6) PARAVIEW is an open source visualization software developped by Kitware
+                    (4) HYDROSTAR is a BEM Software for seakeeping developped by
+                        BUREAU VERITAS
+                    (5) GMSH is an open source meshing software developped by C. Geuzaine
+                    and J.-F. Remacle
+                    (6) PARAVIEW is an open source visualization software developped by
+                        Kitware
                     (7) TECPLOT is a visualization software developped by Tecplot
 
 
@@ -2210,7 +2206,7 @@ def main():
         epilog='--  Copyright 2014-2015  -  Francois Rongere  /  Ecole Centrale de Nantes  --',
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument('infilename',
+    parser.add_argument('infilename', # TODO : voir pour un typ=file pour tester l'existence
                         help='path of the input mesh file in any format')
 
     parser.add_argument('-o', '--outfilename',
@@ -2218,10 +2214,12 @@ def main():
                              'this file is determined from the extension given')
 
     parser.add_argument('-ifmt', '--input-format',
-                        help="""Input format. Meshmagick will read the input file considering the INPUT_FORMAT rather than using the extension""")
+                        help="""Input format. Meshmagick will read the input file considering the
+                         INPUT_FORMAT rather than using the extension""")
 
     parser.add_argument('-ofmt', '--output-format',
-                        help="""Output format. Meshmagick will write the output file considering the OUTPUT_FORMAT rather than using the extension""")
+                        help="""Output format. Meshmagick will write the output file considering
+                        the OUTPUT_FORMAT rather than using the extension""")
 
     parser.add_argument('-v', '--verbose',
                         help="""make the program give more informations on the computations""",
@@ -2249,19 +2247,19 @@ def main():
                         help="""translates the mesh following the z direction""")
 
     parser.add_argument('-r', '--rotate',
-                        nargs=3, type=str,
+                        nargs=3, type=float,
                         help="""rotates the mesh in 3D""")
 
     parser.add_argument('-rx', '--rotatex',
-                        nargs=1, type=str,
+                        nargs=1, type=float,
                         help="""rotates the mesh around the x direction""")
 
     parser.add_argument('-ry', '--rotatey',
-                        nargs=1, type=str,
+                        nargs=1, type=float,
                         help="""rotates the mesh around the y direction""")
 
     parser.add_argument('-rz', '--rotatez',
-                        nargs=1, type=str,
+                        nargs=1, type=float,
                         help="""rotates the mesh around the z direction""")
 
     parser.add_argument('-s', '--scale',
@@ -2292,7 +2290,7 @@ def main():
                         0 following the order given in the command line.
                         """)
 
-    parser.add_argument('-clip', '--clip', nargs='*', action='append',
+    parser.add_argument('-c', '--clip', nargs='*', action='append',
                         help="""cuts the mesh with a plane. Is no arguments are given, the Oxy plane
                         is used. If an integer is given, it should correspond to a plane defined with
                         the --plane option. If a key string is given, it should be a valid key (see
@@ -2300,7 +2298,7 @@ def main():
                         also be given for the plane definition just as for the --plane option. Several
                         clipping planes may be defined on the same command line.""")
 
-    parser.add_argument('-m', '--merge-duplicates', nargs='?', const='1e-8', default=None,
+    parser.add_argument('-md', '--merge-duplicates', nargs='?', const='1e-8', default=None,
                         help="""merges the duplicate nodes in the mesh with the absolute tolerance
                         given as argument (default 1e-8)""")
 
@@ -2313,11 +2311,108 @@ def main():
                         Be careful that symmetry is applied before any rotation so as the plane
                         equation is defined in the initial frame of reference.""")
 
+    # Arguments concerning the hydrostatics
+
+    # TODO : permettre de specifier un fichier de sortie
     parser.add_argument('-hs', '--hydrostatics', action='store_true',
-                        help="""Compute hydrostatics.""") # TODO : completer l'aide avec les options
+                        help="""Compute hydrostatics. When used with the --verbose option, hydrostatic
+                        data will be shown on the command line.""") # TODO : completer l'aide avec les options
 
-    # TODO : ajouter les flags suivants : --mass, --cog, --rho_eau
+    parser.add_argument('--mass', default=None, type=float,
+                        help="""Specifies the mass of the device for hydrostatics calculations.
+                        When used, an hydrostatic equilibrium is resolved. Depending on the join
+                        use of --mass, --cog and --zcog options, several behavior may be obtained.
 
+                        1) --mass is given a value:
+
+                            This options trigs an equilibrium resolution.
+
+                            a) No options --cog or --zcog are given:
+                                Equilibrium is searched in z only, no hydrostatic stiffness
+                                matrix is computed but the stiffness in heave.
+                            b) --zcog is given alone:
+                                Equilibrium is searched in z only, the hydrostatics stiffness
+                                matrix is given.
+                            c) --cog is given alone:
+                                Equilibrium is searched in 6 dof and the hydrostatics stiffness
+                                matrix is given
+
+                            Note that if both options --cog and --zcog are given, --zcog will
+                            be ignored but taken from --cog and the result will be the same as c).
+
+                        2) --mass is used:
+
+                            No equilibrium resolution is performed if no mass is specified.
+                            Mesh position is considered as being the equilibrium position and
+                            hydrostatics data are generated as-is. Mass of the device is then
+                            an output and is considered to be the computed displacement * rho_water.
+
+                            a) No options --cog or --zcog are given:
+                                Only the stiffness in heave can be calculated
+                            b) --zcog is given alone:
+                                The full stiffness matrix is calculated and the estimated cog
+                                position is given.
+                            c) --cog is given alone:
+                                Idem b) but the residual may be not identically 0. as the mesh may
+                                not be at equilibrium.
+
+                            Note that if both options --cog and --zcog are given, --zcog will
+                            be ignored but taken from --cog and the result will be the same as c).
+                        """)
+    parser.add_argument('--cog', nargs=3, default=None, type=float,
+                        help="""Specifies the center of gravity to be used along with the
+                        --hydrostatics option. See --mass for more information. See also the
+                        --inertias option for side effects.
+                        """)
+    parser.add_argument('--zcog', default=None, type=float,
+                        help="""Specifies the z position of the center of gravity to be used along
+                        the --hydrostatics option. See --mass for more information. See also the
+                        --inertias option for side effects.
+                        """)
+    parser.add_argument('--rho-water', default=1023., type=float,
+                        help="""Specifies the density of salt water. Default is 1023 kg/m**3.
+                        """)
+    parser.add_argument('-g', '--grav', default=9.81, type=float,
+                        help="""Specifies the acceleration of gravity on the earth surface.
+                        Default is 9.81 m/s**2.
+                        """)
+
+    parser.add_argument('--rho-medium', default=7500., type=float,
+                        help="""Specified the density of the medium used for the device. Default
+                        is steel and is 7500 kg/m**3.
+                        """)
+    parser.add_argument('--thickness', default=0.01, type=float,
+                        help="""Specifies the thickness of the hull. This option is only used if
+                        both the --inertias and --hull are used. Default is 0.01 m.
+                        """)
+
+    # TODO : permettre de rajouter des ballasts
+    parser.add_argument('--inertias', action='store_true', # TODO : specifier un point de calcul
+                        help="""Compute the principal inertia properties of the mesh. By default,
+                        the device is considered to be a hull. Then the --thickness and --rho-medium
+                        options may be used to tune the properties.
+                        If the --no-hull option is used, then the device will be considered to be
+                        filled with the medium of density rho-medium. Be carefull that the default
+                        medium is steel so that you may get a really heavy device. Please consider
+                        to specify an other density with the --rho-medium option.
+
+                        Note that the inertia matrix is expressed at center of gravity
+                        location.
+
+                        A side effect of this option is that for hydrostatics computations, the values
+                        computed by this option will be used instead of other options --mass and --cog
+                        that will be overriden. Be carefull that the device may need some ballast.
+                        """)
+
+    parser.add_argument('--no-hull', action='store_true',
+                        help="""Specifies that the device should be considered as being filled with
+                        the material of density rho-medium.
+                        """)
+
+    parser.add_argument('--anim', action='store_true',
+                        help="""Generates animation files for paraview visualization of the equilibrium
+                        resolution.
+                        """)
 
     parser.add_argument('--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
@@ -2484,17 +2579,17 @@ def main():
     # Mesh rotations
     # FIXME : supprimer le cast angles et ne prendre que des degres
     if args.rotate is not None:
-        V = rotate(V, map(float, args.rotate)*math.pi/180.)
+        V = rotate(V, args.rotate*math.pi/180.)
         write_file = True
 
     if args.rotatex is not None:
-        V = rotate_1D(V, float(args.rotatex[0])*math.pi/180., 'x')
+        V = rotate_1D(V, args.rotatex[0]*math.pi/180., 'x')
         write_file = True
     if args.rotatey is not None:
-        V = rotate_1D(V, float(args.rotatey[0])*math.pi/180., 'y')
+        V = rotate_1D(V, args.rotatey[0]*math.pi/180., 'y')
         write_file = True
     if args.rotatez is not None:
-        V = rotate_1D(V, float(args.rotatez[0])*math.pi/180., 'z')
+        V = rotate_1D(V, args.rotatez[0]*math.pi/180., 'z')
         write_file = True
 
     if args.scale is not None:
@@ -2508,6 +2603,24 @@ def main():
     if args.info:
         get_info(V, F)
 
+    # Compute principal inertia parameters
+    if args.inertias:
+        # TODO : completer l'aide avec la logique de cette fonction !!
+        if args.no_hull:
+            hull = False
+        else:
+            hull = True
+
+        mass, cog, inertia_matrix = get_inertial_properties(V, F,
+                                        mass=args.mass,
+                                        thickness=args.thickness,
+                                        shell=hull,
+                                        verbose=args.verbose)
+        # Replacing values in command line arguments in the eventuality of hydrostatics computations
+        args.mass = mass
+        args.cog = cog
+
+
     # Compute hydrostatics
     if args.hydrostatics:
         try:
@@ -2515,7 +2628,19 @@ def main():
         except:
             raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
 
-        V, F = hs.get_hydrostatics(V, F, mass=2000e3, zcog=1., verbose=args.verbose)
+        if args.anim:
+            anim=True
+        else:
+            anim=False
+
+        V, F = hs.get_hydrostatics(V, F,
+                                   mass=args.mass,
+                                   zcog=args.zcog,
+                                   cog=args.cog,
+                                   rho_water=args.rho_water,
+                                   g=args.grav,
+                                   anim=anim,
+                                   verbose=args.verbose)
 
 
 
