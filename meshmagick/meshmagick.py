@@ -583,12 +583,12 @@ def _get_surface_integrals(V, F, sum=True):
 def get_mass_cog(V, F, rho=1.):
     return get_inertial_properties(V, F, rho=rho)[:2]
 
-_mult_vol = np.array([1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.])
+_mult_vol = np.array([1., 1., 1., 1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.])
 def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False):
 
     # The default density rho is that of steel
 
-    tol = 1e-9
+    tol = 1e-8
 
     if shell: # The geometry is a shell with homogeneous thickness and density.
         areas, normals = get_all_faces_properties(V, F)[:2]
@@ -2612,6 +2612,7 @@ def main():
             hull = True
 
         mass, cog, inertia_matrix = get_inertial_properties(V, F,
+                                        rho=args.rho_medium,
                                         mass=args.mass,
                                         thickness=args.thickness,
                                         shell=hull,

@@ -14,7 +14,7 @@ import math
 
 import sys
 
-mult_sf = np.array([1/2., 1/6., -1/6., 1/12., 1/12., -1/12.], dtype=float)
+mult_sf = np.array([1/2., 1/6., -1/6., 1/24., 1/12., -1/12.], dtype=float)
 
 class HydrostaticsMesh:
     def __init__(self, V, F, rho_water=1023., g=9.81):
@@ -71,6 +71,11 @@ class HydrostaticsMesh:
         # Updating surface integrals for underwater faces of the clipped mesh
         self._update_surfint(V_update, F_update, clip_infos)
 
+        # # FIXME : For testing only!!!!
+        # self._c_surfint = mm._get_surface_integrals(self._cV, self._cF)
+        # # FIXME : A retirer !!!!!
+
+
         # Projecting the boundary polygons into the frame of the clipping plane
         self._boundary_vertices = []
         for polygon in clip_infos['PolygonsNewID']:
@@ -100,6 +105,7 @@ class HydrostaticsMesh:
         up_surfint = mm._get_surface_integrals(V_update, F_update)
 
         c_surfint = np.zeros((self._cF.shape[0], 15), dtype=np.float)
+        # print list(clip_infos['FkeptOldID'])
         c_surfint[clip_infos['FkeptNewID']] = self._surfint[clip_infos['FkeptOldID']]
         c_surfint[clip_infos['FToUpdateNewID']] = up_surfint
 
@@ -109,7 +115,7 @@ class HydrostaticsMesh:
 
     def get_hydrostatic_stiffness_matrix(self, cog):
 
-        tol = 1e-9
+        tol = 1e-8
 
         z_0p = self._plane.Re0[:, 2]
 
@@ -213,31 +219,68 @@ class HydrostaticsMesh:
         return np.sum(self._c_areas)
 
     def _get_floating_surface_integrals(self):
-        # FIXME : verifier par calcul formel !! (surtout le sigma3)
 
         sint = np.zeros(6, dtype=float)
 
         for ring_vertices in self._boundary_vertices:
             nv = len(ring_vertices)-1
+
+            iter = xrange(nv)
+
             x = ring_vertices[:, 0]
             y = ring_vertices[:, 1]
 
+            # Precomputing some patterns for every vertices
+            xjj_xj = np.array([ x[j+1]-x[j] for j in iter], dtype=np.float)
+            yjj_yj = np.array([ y[j+1]-y[j] for j in iter], dtype=np.float)
+            xjpxjj = np.array([ x[j]+x[j+1] for j in iter], dtype=np.float)
+            yjpyjj = np.array([ y[j]+y[j+1] for j in iter], dtype=np.float)
+            xjxjj = np.array([ x[j]*x[j+1] for j in iter], dtype=np.float)
+            yjyjj = np.array([ y[j]*y[j+1] for j in iter], dtype=np.float)
+            xj2 = np.append(np.array([ x[j]*x[j] for j in iter], dtype=np.float), x[0]*x[0])
+            yj2 = np.append(np.array([ y[j]*y[j] for j in iter], dtype=np.float), y[0]*y[0])
+
+
             # int(1)
-            sint[0] += np.array([ y[j+1] * x[j] - y[j] * x[j+1]  for j in xrange(nv) ], dtype=float).sum()
+            sint[0] += np.array([ xjpxjj[j] * yjj_yj[j] for j in iter ], dtype=np.float).sum()
+
             # int(x)
-            sint[1] += np.array([ ((x[j]+x[j+1])**2 - x[j]*x[j+1]) * (y[j+1]-y[j]) for j in xrange(nv) ],dtype=float).sum()
+            sint[1] += np.array([ (xj2[j] + xjxjj[j] + xj2[j+1])*yjj_yj[j] for j in iter], dtype=np.float).sum()
+
             # int(y)
-            sint[2] += np.array([ ((y[j]+y[j+1])**2 - y[j]*y[j+1]) * (x[j+1]-x[j]) for j in xrange(nv) ],dtype=float).sum()
+            sint[2] += np.array([ (yj2[j] + yjyjj[j] + yj2[j+1])*xjj_xj[j] for j in iter], dtype=np.float).sum()
+
             # int(xy)
-            sint[3] += np.array(
-                [(y[j+1]-y[j]) * ( (y[j+1]-y[j]) * (2*x[j]*x[j+1]-x[j]**2) + 2*y[j]*(x[j]**2+x[j+1]**2) +
-                                    2*x[j]*x[j+1]*y[j+1] ) for j in xrange(nv)],dtype=float).sum()
+            sint[3] += np.array([ (xj2[j]*(2*y[j]+yjpyjj[j])
+                                + xj2[j+1]*(2*y[j+1]+yjpyjj[j])
+                                + 2*xjxjj[j]*yjpyjj[j]) * yjj_yj[j] for j in iter], dtype=np.float).sum()
+
             # int(x**2)
-            sint[4] += np.array([(y[j+1]-y[j]) * (x[j]**3 + x[j]**2*x[j+1] + x[j]*x[j+1]**2 + x[j+1]**3)
-                                 for j in xrange(nv)], dtype=float).sum()
+            # sint[4] += np.array([ (   xj2[j]*x[j] + xjxjj[j]*xjpxjj[j] + xj2[j+1]*x[j+1] )
+            #                         * yjj_yj[j] for j in iter], dtype=np.float).sum()
+            sint[4] += np.array([ (xj2[j]+xj2[j+1]) * xjpxjj[j] * yjj_yj[j] for j in iter], dtype=np.float).sum()
+
             # int(y**2)
-            sint[5] += np.array([(x[j+1]-x[j]) * (y[j]**3 + y[j]**2*y[j+1] + y[j]*y[j+1]**2 + y[j+1]**3)
-                                 for j in xrange(nv)], dtype=float).sum()
+            sint[5] += np.array([ (yj2[j]+yj2[j+1]) * yjpyjj[j] * xjj_xj[j] for j in iter], dtype=np.float).sum()
+            # sint[5] += np.array([ (   yj2[j]*y[j] + yjyjj[j]*yjpyjj[j] + yj2[j+1]*y[j+1] )
+            #                         * xjj_xj[j] for j in iter], dtype=np.float).sum()
+
+            # # int(1)
+            # sint[0] += np.array([ y[j+1] * x[j] - y[j] * x[j+1]  for j in xrange(nv) ], dtype=float).sum()
+            # # int(x)
+            # sint[1] += np.array([ ((x[j]+x[j+1])**2 - x[j]*x[j+1]) * (y[j+1]-y[j]) for j in xrange(nv) ],dtype=float).sum()
+            # # int(y)
+            # sint[2] += np.array([ ((y[j]+y[j+1])**2 - y[j]*y[j+1]) * (x[j+1]-x[j]) for j in xrange(nv) ],dtype=float).sum()
+            # # int(xy)
+            # sint[3] += np.array(
+            #     [(y[j+1]-y[j]) * ( (y[j+1]-y[j]) * (2*x[j]*x[j+1]-x[j]**2) + 2*y[j]*(x[j]**2+x[j+1]**2) +
+            #                         2*x[j]*x[j+1]*y[j+1] ) for j in xrange(nv)],dtype=float).sum()
+            # # int(x**2)
+            # sint[4] += np.array([(y[j+1]-y[j]) * (x[j]**3 + x[j]**2*x[j+1] + x[j]*x[j+1]**2 + x[j+1]**3)
+            #                      for j in xrange(nv)], dtype=float).sum()
+            # # int(y**2)
+            # sint[5] += np.array([(x[j+1]-x[j]) * (y[j]**3 + y[j]**2*y[j+1] + y[j]*y[j+1]**2 + y[j+1]**3)
+            #                      for j in xrange(nv)], dtype=float).sum()
 
         sint *= mult_sf
 
@@ -314,7 +357,6 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
 
         # Choosing wether we return a stiffness in heave only or a stiffness matrix
         if cog is None:
-            residual = np.zeros(3, dtype=np.float)
             if zcog is None:
                 # Return only the stiffness in heave
                 hs_data['K33'] = rho_water*g*Sf
@@ -326,19 +368,16 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
         else:
             # Computing the stiffness matrix with the cog given
             hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(cog, dtype=np.float)
-            residual = _get_residual(rho_water, g, disp, Cw, mass, cog)
+            hs_data['res'] = _get_residual(rho_water, g, disp, Cw, mass, cog)
 
-        hs_data = dict(
-            disp=hsMesh._vw,
-            Cw=hsMesh._cw,
-            Sf=hsMesh._sf,
-            mass=mass,
-            cV=cV,
-            cF=cF,
-            res=residual,
-            draft=cV[:,2].min()
-        )
 
+        hs_data['disp'] = hsMesh._vw
+        hs_data['Cw'] = hsMesh._cw
+        hs_data['Sf'] = hsMesh._sf
+        hs_data['cV'] = cV
+        hs_data['cF'] = cF
+        hs_data['mass'] = mass
+        hs_data['draft'] = cV[:,2].min()
 
     else: # mass is given explicitely
         # Looking for an equilibrium
@@ -444,7 +483,6 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
                 hs_data['K33'] = rg*hsMesh._sf
                 # hs_data['cog'] = np.array([0., 0., zcog])
             else:
-                # TODO : le faire en fin d'iterations !!
                 hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(np.array([0., 0., zcog], dtype=np.float))
                 hs_data['cog'] = hsMesh._cw.copy()
                 hs_data['cog'][2] = zcog
