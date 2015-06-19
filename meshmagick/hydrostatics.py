@@ -252,6 +252,37 @@ def _get_residual(rho_water, g, vw, cw, mass, cog):
         -rgvw * cw[0] + mg * cog[0]
     ], dtype=np.float)
 
+def print_hysdrostatics_report(hs_data):
+
+    # TODO : Ajouter les metacentres --> infos sur la stab
+
+    hs_text = {
+        'disp' : 'Displacement (m**3):\n\t%E\n',
+        'Cw'   : 'Buoyancy center (m):\n\t%f, %f, %f\n',
+        'Sf'   : 'Flotation area (m**2):\n\t%E\n',
+        'mass' : 'Mass (kg):\n\t%E\n',
+        'res'  : 'Residual (kg, Nm, Nm):\n\t%f, %f, %f\n',
+        'cog'  : 'Gravity center (m):\n\t%E, %E, %E\n',
+        'K33'  : 'Heave stiffness (N/m):\n\t%E\n',
+        'Khs'  : 'Stiffness matrix:\n'
+                 '\t%E, %E, %E\n'
+                 '\t%E, %E, %E\n'
+                 '\t%E, %E, %E\n',
+        'draft': 'Draft (m):\n\t%f\n'
+    }
+
+    print '\nHydrostatic Report'
+    print '------------------\n'
+    for key in hs_text:
+        if hs_data.has_key(key):
+            repl = hs_data[key]
+            if isinstance(repl, np.ndarray):
+                repl = tuple(repl.flatten())
+            print hs_text[key] % repl
+
+    return 1
+
+
 def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81, auto=False, verbose=False):
     """Computes the hydrostatics of the mesh and return the clipped mesh.
 
@@ -263,33 +294,47 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
     # Instantiation of the hydrostatic mesh object
     hsMesh = HydrostaticsMesh(V, F, rho_water=rho_water, g=g)
 
+    hs_data = dict()
+
     if auto:
         # mass and center of gravity are computed for the initial mesh as a shell with 1cm thickness in steel
         mass, cog = mm.get_inertial_properties(V, F, shell=True, verbose=verbose)[:2]
 
-    disp = hsMesh._vw # displacement
-    Cw = hsMesh._cw
-    Sf = hsMesh._sf
-
     if mass is None:
-        # No equilibrium will be performed
-        mass = rho_water * disp
-        cV = hsMesh._cV
-        cF = hsMesh._cF
+        # No equilibrium is performed if mass is not given
 
-        # Chossing wether we return a stiffness in heave only or a stiffness matrix
+        disp = hsMesh._vw           # displacement
+        Cw = hsMesh._cw             # Center of buoyancy
+        Sf = hsMesh._sf             # Area of the flotation plane
+        mass = rho_water * disp     # Mass of the device
+        cV = hsMesh._cV             # Vertices of the mesh
+        cF = hsMesh._cF             # Faces of the mesh
+
+        # Choosing wether we return a stiffness in heave only or a stiffness matrix
         if cog is None:
             residual = np.zeros(3, dtype=np.float)
             if zcog is None:
                 # Return only the stiffness in heave
-                K33 = rho_water*g*Sf
+                hs_data['K33'] = rho_water*g*Sf
             else:
                 # Computing the stiffness matrix
-                Khs = hsMesh.get_hydrostatic_stiffness_matrix(np.array([0., 0., zcog], dtype=np.float))
+                hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(np.array([0., 0., zcog], dtype=np.float))
         else:
             # Computing the stiffness matrix with the cog given
-            Khs = hsMesh.get_hydrostatic_stiffness_matrix(cog, dtype=np.float)
+            hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(cog, dtype=np.float)
             residual = _get_residual(rho_water, g, disp, Cw, mass, cog)
+
+        hs_data = dict(
+            disp=hsMesh._vw,
+            Cw=hsMesh._cw,
+            Sf=hsMesh._sf,
+            mass=mass,
+            cV=cV,
+            cF=cF,
+            res=residual,
+            cog=cog,
+            draft=cV[:,2].min()
+        )
 
     else: # mass is given explicitely
         # Looking for an equilibrium
@@ -299,15 +344,26 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
         if cog is None:
             # The equilibrium is searched in heave only
 
-            # TODO : ajouter une tolerance relative rel_tol
-            abs_tol = 1e-3*mass # A mettre en parametre  de la fonction
-
             # K33 = rho_water*g*Sf
             rg = rho_water * g
+            mg = mass * g
             niter = 0
             res = 0.
 
-            zmax = 1. # TODO : choisir cette valeur basee sur les dimensions du maillage en z !! -> tol
+            # Computing the characteristic dimension in z
+            height = (V[:, 2].max() - V[:, 2].min())
+
+            zmax = height * 0.1
+            dz = height * 1e-4
+
+            # Testing the sensibility of the mesh
+            res0 = rho_water*hsMesh._vw - mass
+            hsMesh.update([dz, 0., 0.])
+            res1 = rho_water*hsMesh._vw - mass
+            abs_tol = math.fabs(res0-res1)
+
+            # filename = 'eq0.vtu'
+            # mm.write_VTU(filename, hsMesh._cV, hsMesh._cF)
 
             while 1:
                 # Iteration loop
@@ -316,10 +372,13 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
                     status = 0
                     break
 
-                disp = hsMesh._vw
                 res_old = res
-                res = rg * disp - mass *g # residual
-                print 'disp:%f, sf:%f, res:%e'%(hsMesh._vw*rho_water, hsMesh._sf, res)
+                res = rho_water * hsMesh._vw - mass # residual
+
+                if verbose:
+                    print 'Iteration %u:' % niter
+                    print '\t-> Residual = %E (kg)' % res
+                    print '\t-> Target mass: %E (kg); Current: %E (kg)' % (mass, rho_water*hsMesh._vw)
 
                 # Convergence criteria
                 if math.fabs(res) < abs_tol:
@@ -328,42 +387,61 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
 
                 niter += 1
                 stiffness = rg * hsMesh._sf
-                dz = res/stiffness
+                dz = g*res/stiffness
 
                 # Checking for a sign modification in the residual
                 if res*res_old < 0.:
-                    zmax /=2.
+                    if math.fabs(res) > math.fabs(res_old):
+                        reduc = 1/4.
+                    else:
+                        reduc = 1/2.
+                    zmax *= reduc
 
                 if math.fabs(dz) > zmax:
                     dz = math.copysign(zmax, dz)
 
-                zcur = hsMesh._plane.get_position()[0]
+                print '\t-> Correction: %f' % dz
 
+                zcur = hsMesh._plane.get_position()[0]
                 hsMesh.update([zcur-dz, 0., 0.]) # The - sign is here to make the plane move, not the mesh
 
-                filename = 'eq%u.vtu'%niter
-                mm.write_VTU(filename, hsMesh._cV, hsMesh._cF)
+                # filename = 'eq%u.vtu'%niter
+                # mm.write_VTU(filename, hsMesh._cV, hsMesh._cF)
+
+            hs_data['res'] = np.array([res, 0., 0.], dtype=np.float)
+
+            # Moving the mesh
+            cV = hsMesh._cV
+            cF = hsMesh._cF
+            zcur = hsMesh._plane.get_position()[0]
+            cV = mm.translate_1D(cV, -zcur, 'z')
+
+            hs_data['disp'] = hsMesh._vw
+            hs_data['Cw'] = hsMesh._cw
+            hs_data['Sf'] = hsMesh._sf
+            hs_data['mass'] = rho_water * hsMesh._vw
+            hs_data['draft'] = cV[:, 2].min()
 
             if verbose:
                 if status == 1:
-                    print "Equilibrium has been found in %u iterations" % niter
+                    print "\nEquilibrium found in %u iterations" % niter
                 else:
-                    print "Equilibrium has been approached but the mesh is not refined enough to reach convergence"
-
-            sys.exit(0)
+                    print "\nEquilibrium approached but the mesh is not refined enough to reach convergence"
+                print '\nZ translation on the initial mesh : %f (m)' % (-zcur)
 
             if zcog is None:
-                pass
+                hs_data['K33'] = rg*hsMesh._sf
+                hs_data['cog'] = np.array([0., 0., zcog])
             else:
                 # TODO : le faire en fin d'iterations !!
-                Khs = hsMesh.get_hydrostatic_stiffness_matrix(np.array([0., 0., zcog], dtype=np.float))
+                hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(np.array([0., 0., zcog], dtype=np.float))
         else:
             pass
 
 
 
     if verbose:
-        print "sortie a developper"
+        print_hysdrostatics_report(hs_data)
 
     # TODO : renvoyer egalement les infos hydrostatiques sous forme de dictionnaire -> ou alors sortir un fichier !
     return cV, cF

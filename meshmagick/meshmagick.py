@@ -515,6 +515,8 @@ def _get_surface_integrals(V, F, sum=True):
     tri1 = [0, 1, 2]
     tri2 = [0, 2, 3]
 
+    cross = np.cross
+
     sint_tmp = np.zeros(15)
     for (iface, face) in enumerate(F-1):
         sint_tmp *= 0.
@@ -537,7 +539,7 @@ def _get_surface_integrals(V, F, sum=True):
             x1, y1, z1 = V1
             x2, y2, z2 = V2
 
-            d0, d1, d2 = np.cross(V1-V0, V2-V0)
+            d0, d1, d2 = cross(V1-V0, V2-V0)
             e1_c_e2 = math.sqrt(d0**2 + d1**2 + d2**2)
 
             temp0 = V0 + V1
@@ -2513,8 +2515,9 @@ def main():
         except:
             raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
 
-        cV, cF = hs.get_hydrostatics(V, F, mass=10000e3, verbose=args.verbose)
-        show(cV, cF)
+        V, F = hs.get_hydrostatics(V, F, mass=2000e3, zcog=1., verbose=args.verbose)
+
+
 
     # WARNING : No more mesh modification should be released from this point until the end of the main
 
