@@ -81,7 +81,7 @@ class Plane:
         self.Re0 = self.get_rotation_matrix(phi, theta)
 
         self.normal = self.Re0[2]
-        self.e = z # FIXME : to verify !!!
+        self.e = z*self.Re0[2, 2]
 
         return 1
 
@@ -113,8 +113,14 @@ class Plane:
         return dist, position
 
     def coord_in_plane(self, vertices):
-        new_vertices = np.array([np.dot(self.Re0, vertices[i]) for i in xrange(vertices.shape[0])], dtype=float)
-        new_vertices[:, 2] -= self.e
+
+        # FIXME : ne fonctionne pas si on envoie un seul vertex !
+        if vertices.ndim == 1: # Case where only one vertex is given
+            new_vertices = np.dot(self.Re0, vertices)
+            new_vertices[2] -= self.e
+        else:
+            new_vertices = np.array([np.dot(self.Re0, vertices[i]) for i in xrange(vertices.shape[0])], dtype=float)
+            new_vertices[:, 2] -= self.e
         return new_vertices
 
 def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
@@ -513,6 +519,8 @@ def _get_surface_integrals(V, F, sum=True):
     sint_tmp = np.zeros(15)
     for (iface, face) in enumerate(F-1):
         sint_tmp *= 0.
+        # sint_tmp = np.zeros(15) # FIXME : Essai, la version precedente serait mieux !
+
         if face[0] == face[-1]:
             nb = 1
         else:
@@ -2634,10 +2642,12 @@ def main():
         else:
             anim=False
 
+        # TODO : verifier chacune des donnees mass, zcog, cog...
+
         V, F = hs.get_hydrostatics(V, F,
                                    mass=args.mass,
                                    zcog=args.zcog,
-                                   cog=args.cog,
+                                   cog=np.asarray(args.cog, dtype=np.float),
                                    rho_water=args.rho_water,
                                    g=args.grav,
                                    anim=anim,
