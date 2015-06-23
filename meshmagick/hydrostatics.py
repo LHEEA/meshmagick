@@ -36,24 +36,23 @@ class HydrostaticsMesh:
         self._vw = 0.
         self._cw = np.zeros(3, dtype=np.float)
 
-        # Computing initial mesh properties
-        # self.areas, self.normals, self.centers = mm.get_all_faces_properties(V, F) # FIXME : pas utile a priori...
-
-        # Computing once the volume integrals on faces of the initial mesh to be used by the clipped mesh
+        # Computing once the volume integrals on all the faces of the initial mesh to speedup subsequent operations
         self._surfint = mm._get_surface_integrals(V, F, sum=False)
 
         # Defining the clipping plane Oxy and updating hydrostatics
         self._plane = mm.Plane()
-        self.update([0., 0., 0.])
+        self.update(np.zeros(3))
 
         self._has_plane_changed = True # FIXME : utile ?
 
 
-    def update(self, eta):
+    def update(self, eta, rel=True):
 
         # Updating the clipping plane position
-        self._plane.set_position(z=eta[0], phi=eta[1], theta=eta[2])
-        # TODO : ajouter une fonction permettant de recuperer la position du plan
+        if rel:
+            self._plane.update(eta)
+        else:
+            self._plane.set_position(z=eta[0], phi=eta[1], theta=eta[2])
 
         # Clipping the mesh by the plane
         self._cV, self._cF, clip_infos = mm.clip_by_plane(self.V, self.F, self._plane, infos=True)
@@ -65,9 +64,6 @@ class HydrostaticsMesh:
         # TODO : mettre les updates dans des methodes
         # Extracting a mesh composed by only the faces that have to be updated
         V_update, F_update = mm.extract_faces(self._cV, self._cF, clip_infos['FToUpdateNewID'])
-
-        # Updating faces properties for the clipped mesh
-        # self._update_faces_properties(V_update, F_update, clip_infos) # FIXME : useless !!!
 
         # Updating surface integrals for underwater faces of the clipped mesh
         self._update_surfint(clip_infos)
@@ -89,7 +85,7 @@ class HydrostaticsMesh:
         self._sf = self._sfint[0]
 
         # Computing the immersed volume
-        self._vw = self.get_vw()
+        self._vw = self.get_immersed_volume()
 
         # Computing the center of buoyancy
         self._cw = self.get_buoyancy_center()
@@ -121,10 +117,10 @@ class HydrostaticsMesh:
         z_0p = self._plane.Re0[:, 2]
 
         # z of the buoyancy center in the frame of the flotation plane
-        z_c = np.dot(z_0p, self._cw) - self._plane.e # FIXME : devrait etre fait directement dans Plane
+        z_c = np.dot(z_0p, self._cw) - self._plane.c # FIXME : devrait etre fait directement dans Plane
 
         # z of the center of gravity in the frame of the flotation plane
-        z_g = np.dot(z_0p, cog) - self._plane.e
+        z_g = np.dot(z_0p, cog) - self._plane.c
 
         corr = self._vw * (z_c-z_g)
 
@@ -151,8 +147,8 @@ class HydrostaticsMesh:
         Khs[Khs < tol] = 0.
         return Khs
 
-    def get_generalized_position(self):
-        return self._plane.e
+    # def get_generalized_position(self):
+    #     return self._plane.c
 
     def _update_faces_properties(self, V_update, F_update, clip_infos):
 
@@ -174,12 +170,12 @@ class HydrostaticsMesh:
 
         return
 
-    def get_vw(self):
+    def get_immersed_volume(self):
 
         r13 = self._plane.Re0[0, 2]
         r23 = self._plane.Re0[1, 2]
         vw = self._c_surfint[2] + self._plane.normal[2] * (r13*self._sfint[1] + r23*self._sfint[2] +
-                                                      self._plane.e*self._plane.normal[2]*self._sf)
+                                                      self._plane.c*self._plane.normal[2]*self._sf)
         return vw
 
     def get_buoyancy_center(self):
@@ -200,7 +196,7 @@ class HydrostaticsMesh:
         s5 = self._sfint[5]
 
         (up, vp, wp) = self._plane.normal
-        e = self._plane.e
+        e = self._plane.c
         e2 = e*e
 
         cw = np.zeros(3, dtype=np.float)
@@ -215,12 +211,23 @@ class HydrostaticsMesh:
         cw[np.fabs(cw)<tol] = 0.
         return cw
 
+    def get_flotation_center(self):
+        tol = 1e-9
+        Cf = np.asarray([self._sfint[1], self._sfint[2], 0.], dtype=np.float) / self._sf
+        Cf[np.fabs(Cf) < tol] = 0.
+        return Cf
+
     def get_displacement(self):
         # This function should not be used in loops for performance reasons, please inline the code
         return self.rho_water * self._vw
 
+    def get_metacentric_radius(self):
+        rhox = self._sfint[5] / self._vw
+        rhoy = self._sfint[4] / self._vw
+        return np.asarray([rhox, rhoy], dtype=np.float)
+
     def get_wet_surface(self):
-        return np.sum(self._c_areas)
+        return mm.get_all_faces_properties(self._cV, self._cF)[0].sum()
 
     def _get_floating_surface_integrals(self):
 
@@ -260,31 +267,10 @@ class HydrostaticsMesh:
                                 + 2*xjxjj[j]*yjpyjj[j]) * yjj_yj[j] for j in iter], dtype=np.float).sum()
 
             # int(x**2)
-            # sint[4] += np.array([ (   xj2[j]*x[j] + xjxjj[j]*xjpxjj[j] + xj2[j+1]*x[j+1] )
-            #                         * yjj_yj[j] for j in iter], dtype=np.float).sum()
             sint[4] += np.array([ (xj2[j]+xj2[j+1]) * xjpxjj[j] * yjj_yj[j] for j in iter], dtype=np.float).sum()
 
             # int(y**2)
             sint[5] += np.array([ (yj2[j]+yj2[j+1]) * yjpyjj[j] * xjj_xj[j] for j in iter], dtype=np.float).sum()
-            # sint[5] += np.array([ (   yj2[j]*y[j] + yjyjj[j]*yjpyjj[j] + yj2[j+1]*y[j+1] )
-            #                         * xjj_xj[j] for j in iter], dtype=np.float).sum()
-
-            # # int(1)
-            # sint[0] += np.array([ y[j+1] * x[j] - y[j] * x[j+1]  for j in xrange(nv) ], dtype=float).sum()
-            # # int(x)
-            # sint[1] += np.array([ ((x[j]+x[j+1])**2 - x[j]*x[j+1]) * (y[j+1]-y[j]) for j in xrange(nv) ],dtype=float).sum()
-            # # int(y)
-            # sint[2] += np.array([ ((y[j]+y[j+1])**2 - y[j]*y[j+1]) * (x[j+1]-x[j]) for j in xrange(nv) ],dtype=float).sum()
-            # # int(xy)
-            # sint[3] += np.array(
-            #     [(y[j+1]-y[j]) * ( (y[j+1]-y[j]) * (2*x[j]*x[j+1]-x[j]**2) + 2*y[j]*(x[j]**2+x[j+1]**2) +
-            #                         2*x[j]*x[j+1]*y[j+1] ) for j in xrange(nv)],dtype=float).sum()
-            # # int(x**2)
-            # sint[4] += np.array([(y[j+1]-y[j]) * (x[j]**3 + x[j]**2*x[j+1] + x[j]*x[j+1]**2 + x[j+1]**3)
-            #                      for j in xrange(nv)], dtype=float).sum()
-            # # int(y**2)
-            # sint[5] += np.array([(x[j+1]-x[j]) * (y[j]**3 + y[j]**2*y[j+1] + y[j]*y[j+1]**2 + y[j+1]**3)
-            #                      for j in xrange(nv)], dtype=float).sum()
 
         sint *= mult_sf
 
@@ -292,35 +278,27 @@ class HydrostaticsMesh:
 
 # ======================================================================================================================
 
-def _get_residual(rho_water, g, vw, cw, mass, cog):
-
-    rgvw = rho_water*g*vw
-    mg = mass*g
-
-    res = np.array([
-         rgvw - mg,
-         rgvw * cw[1] - mg * cog[1],
-        -rgvw * cw[0] + mg * cog[0]
-    ], dtype=np.float)
-    return res
-
 def print_hysdrostatics_report(hs_data):
 
     # TODO : Ajouter les metacentres --> infos sur la stab
+    # TODO : mettre un ordre d'apparition fixe !
 
     hs_text = {
         'disp' : 'Displacement (m**3):\n\t%E\n',
-        'Cw'   : 'Buoyancy center (m):\n\t%f, %f, %f\n',
-        'Sf'   : 'Flotation area (m**2):\n\t%E\n',
+        'Cw'   : 'Center of Buoyancy (m):\n\t%E, %E, %E\n',
+        'Sf'   : 'Waterplane area (m**2):\n\t%E\n',
         'mass' : 'Mass (kg):\n\t%E\n',
-        'res'  : 'Residual (kg, Nm, Nm):\n\t%f, %f, %f\n',
+        'res'  : 'Residual (kg, Nm, Nm):\n\t%E, %E, %E\n',
         'cog'  : 'Gravity center (m):\n\t%E, %E, %E\n',
         'K33'  : 'Heave stiffness (N/m):\n\t%E\n',
         'Khs'  : 'Hydrostatic Stiffness matrix:\n'
                  '\t%E, %E, %E\n'
                  '\t%E, %E, %E\n'
                  '\t%E, %E, %E\n',
-        'draft': 'Draft (m):\n\t%f\n'
+        'draft': 'Draft (m):\n\t%E\n',
+        'Ws'   : 'Wetted surface:\n\t%E\n',
+        'Cf'   : 'Center of flotation (m):\n\t%E, %E, %E\n',
+        'meta_radius' : 'Initial metacentric radius (m):\n\tx: %f\n\ty: %f\n'
     }
 
     print '\nHydrostatic Report'
@@ -334,6 +312,20 @@ def print_hysdrostatics_report(hs_data):
 
     return 1
 
+
+
+def _get_residual(rho_water, g, vw, cw, mass, cog):
+
+    rgvw = rho_water*g*vw
+    mg = mass*g
+
+    res = np.array([
+         rgvw - mg,
+         rgvw * cw[1] - mg * cog[1],
+        -rgvw * cw[0] + mg * cog[0]
+    ], dtype=np.float)
+    return res
+
 def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81, anim=False, verbose=False):
     """Computes the hydrostatics of the mesh and return the clipped mesh.
 
@@ -344,13 +336,18 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
 
     # TODO : recuperer le deplacement total pour verifier que la masse fournie est consistante
 
+    # TODO : decouper les deux cas principaux en deux fonctions
+
     # Instantiation of the hydrostatic mesh object
     hsMesh = HydrostaticsMesh(V, F, rho_water=rho_water, g=g)
 
     hs_data = dict()
 
-    if mass is None:
-        # No equilibrium is performed if mass is not given
+    #==================================================================
+    if mass is None: # No equilibrium is performed if mass is not given
+    #==================================================================
+        if verbose:
+            print 'Computation of hydrostatics with the given mesh position'
 
         disp = hsMesh._vw           # displacement
         Cw = hsMesh._cw             # Center of buoyancy
@@ -371,22 +368,26 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
                 hs_data['cog'][2] = zcog
         else:
             # Computing the stiffness matrix with the cog given
-            hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(cog, dtype=np.float)
+            hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(cog)
             hs_data['res'] = _get_residual(rho_water, g, disp, Cw, mass, cog)
-
+            hs_data['cog'] = cog
 
         hs_data['disp'] = hsMesh._vw
         hs_data['Cw'] = hsMesh._cw
         hs_data['Sf'] = hsMesh._sf
-        hs_data['cV'] = cV
-        hs_data['cF'] = cF
         hs_data['mass'] = mass
         hs_data['draft'] = cV[:,2].min()
+        hs_data['Ws'] = hsMesh.get_wet_surface()
 
-    else: # mass is given explicitely
-        # Looking for an equilibrium
+        hs_data['Cf'] = hsMesh.get_flotation_center()
 
-        maxiter = 50
+        hs_data['meta_radius'] = hsMesh.get_metacentric_radius()
+
+    #========================================================================
+    else: # mass is given explicitly, iterative resolution of the equilibrium
+    #========================================================================
+
+        maxiter = 100
         rg = rho_water * g
         mg = mass * g
         niter = 0
@@ -395,7 +396,8 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
         height = (V[:, 2].max() - V[:, 2].min())
 
         zmax = height * 0.1
-        dz = height * 1e-4
+        dz = height * 1e-3 # TODO : Tuner plus precisement ce critere !
+        # TODO : ne pas permettre lors des iterations d'appliqier des corrections plus faibles que ce critere
 
         # Testing the sensibility of the mesh
         res0 = rho_water*hsMesh._vw - mass
@@ -404,8 +406,8 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
         abs_tol_pos = math.fabs(res0-res1)
 
         # Remise en etat initial
-        # FIXME : il faudrait pouvoir eviter de faire deux decoupes supplementaires...
-        hsMesh.update([0., 0., 0.])
+        # FIXME : il faudrait pouvoir eviter de faire deux decoupes supplementaires !!!!!
+        hsMesh.update([0., 0., 0.], rel=False)
 
         if anim:
             # Removing all files eq*.vtu
@@ -416,9 +418,11 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
             filename = 'eq0.vtu'
             mm.write_VTU(filename, hsMesh._cV, hsMesh._cF)
 
+        #-----------------------------------------------------
         if cog is None: # Equilibrium resolution in heave only
+        #-----------------------------------------------------
             if verbose:
-                print "Equilibrium resolution knowing only mass --> z only"
+                print "Equilibrium resolution knowing only mass --> iterations on z only"
 
             res = 0.
             while 1:
@@ -442,10 +446,12 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
                     break
 
                 niter += 1
-                stiffness = rg * hsMesh._sf
-                dz = g*res/stiffness
+                stiffness = rg * hsMesh._sf # K33 : stiffness in heave
+                dz = g * res/stiffness
 
                 # Checking for a sign modification in the residual
+                # TODO : play on the sign of the correction instead of the sign of the residual...
+                # TODO : harmoniser ce critere avec celui utilise dans la version 6dof
                 if res*res_old < 0.:
                     if math.fabs(res) > math.fabs(res_old):
                         reduc = 1/4.
@@ -455,10 +461,10 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
 
                 if math.fabs(dz) > zmax:
                     dz = math.copysign(zmax, dz)
+                if verbose:
+                    print '\t-> Correction: %f' % dz
 
-                print '\t-> Correction: %f' % dz
-
-                zcur = hsMesh._plane.get_position()[0]
+                zcur = hsMesh._plane.c
                 hsMesh.update([zcur-dz, 0., 0.]) # The - sign is here to make the plane move, not the mesh
 
                 if anim:
@@ -470,11 +476,11 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
             # Moving the mesh
             cV = hsMesh._cV
             cF = hsMesh._cF
-            zcur = hsMesh._plane.get_position()[0]
+            zcur = hsMesh._plane.c
             cV = mm.translate_1D(cV, -zcur, 'z')
 
             hs_data['disp'] = hsMesh._vw
-            hs_data['Cw'] = hsMesh._cw
+            hs_data['Cw'] = hsMesh._cw # FIXME : Cw doit etre fourni dans le nouveau repere
             hs_data['Sf'] = hsMesh._sf
             hs_data['mass'] = rho_water * hsMesh._vw
             hs_data['draft'] = cV[:, 2].min()
@@ -492,23 +498,15 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
             else:
                 hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(np.array([0., 0., zcog], dtype=np.float))
                 hs_data['cog'] = hsMesh._cw.copy()
-                hs_data['cog'][2] = zcog
+                hs_data['cog'][2] = zcog # FIXME : cog doit etre fourni dans le nouveau repere
 
         # ---------------------------------------------------------
         else: # cog has been specified, 6dof equilibrium resolution
         # ---------------------------------------------------------
             if verbose:
-                print "Equilibrium resolution knowing mass and center of gravity --> 6 dof"
+                print "Equilibrium resolution knowing mass and center of gravity --> iterations on 6dof"
 
-            eta = np.zeros(3, dtype=np.float)
-            res = np.zeros(3, dtype=np.float)
             deta = np.zeros(3, dtype=np.float)
-
-            delta_x = V[:,0].max() - V[:,0].min()
-            phimax = math.atan2(zmax, delta_x)
-
-            delta_y = V[:,1].max() - V[:,1].min()
-            thetamax = math.atan2(zmax, delta_y)
 
             while 1:
                 # Iteration loop
@@ -517,29 +515,20 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
                     status = 0
                     break
 
-                # res_old = res
+                # Projecting cog and buoyancy center in the clipping plane frame
+                # TODO : ajouter une methode dans hsMesh pour ne pas appeler directement les methodes de Plane...
+                cog_e, cw_e = hsMesh._plane.coord_in_plane(np.array([cog, hsMesh._cw]))
 
-                cog_e = hsMesh._plane.coord_in_plane(cog)
-                cw_e = hsMesh._plane.coord_in_plane(hsMesh._cw)
-
-
-                # Essai :
-                # res[0] = rho_water*g*hsMesh._vw - mass*g
-                # res[1] = mass*g*(cw_e[1]-cog_e[1])
-                # res[2] = mass*g*(cog_e[0]-cw_e[0])
-                # Fin essai
-
-                res = _get_residual(rho_water, g, hsMesh._vw, cw_e, mass, cog_e)
-
+                # TODO : faire que _get_residual n'ait pas autant de parametres d'entree
+                res = _get_residual(rho_water, g, hsMesh._vw, cw_e, mass, cog_e) # expressed in the plane frame
 
                 if verbose:
                     print 'Iteration %u: ' % niter
                     print '\t-> Residual (N, Nm, Nm) = %E, %E, %E' % tuple(res.flatten())
                     print '\t-> Target mass: %E (kg); Current: %E (kg)' % (mass, rho_water*hsMesh._vw)
 
-                    # FIXME : on doit avoir un alignement vertical de C et de G dans le repere du plan !!!  --> ce qui suit est faux
-                    print '\t-> Target xc: %E (m); Current: %E (m)' % (cog_e[0], cw_e[0])
-                    print '\t-> Target yc: %E (m); Current: %E (m)' % (cog_e[1], cw_e[1])
+                    print '\t-> Relative x position of cog and B : %E (m)' % (math.fabs(cog_e[0]-cw_e[0]))
+                    print '\t-> Relative y position of cog and B : %E (m)' % (math.fabs(cog_e[1]-cw_e[1]))
 
                 # Convergence criteria
                 if (np.fabs(res) < np.ones(3)*abs_tol_pos).all(): # TODO : travailler sur ce critere (differencier pos et rot)
@@ -549,63 +538,20 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
                 niter += 1
                 Khs = hsMesh.get_hydrostatic_stiffness_matrix(cog)
 
-                # Essai
-                # deta = np.zeros(3, dtype=np.float)
-                # deta[0] = res[0] / Khs[0,0]
-                # deta[1] = res[1] / Khs[1,1]
-                # deta[2] = res[2] / Khs[2,2]
-
-
-                # Fin essai
                 deta_prev = deta
                 deta = np.linalg.solve(Khs, res)
 
-                deta[0] *= hsMesh._plane.Re0[2, 2] # TODO : comprendre pourquoi
-
-                # print deta*[1., 180./math.pi, 180./math.pi]
-
-                # dres = res*res_old
-
                 deta_sign = deta * deta_prev
 
+                # TODO : vectoriser la partie suivante
                 if deta_sign[0] < 0.: # Change sign
-                    # if math.fabs(res[0]) > math.fabs(res_old[0]):
-                    #     reduc = 1/4.
-                    # else:
-                    #     reduc = 1/2.
-                    # zmax *= reduc
-                    zmax = min([math.fabs(deta[0]-deta_prev[0]), zmax/2.])
-
-                if deta_sign[1] < 0.: # Change sign
-                    # if math.fabs(res[1]) > math.fabs(res_old[1]):
-                    #     reduc = 1/4.
-                    # else:
-                    #     reduc = 1/2.
-                    # phimax *= reduc
-                    phimax = min([math.fabs(deta[1]-deta_prev[1]), phimax/2.])
-
-                if deta_sign[0] < 0.: # Change sign
-                    # if math.fabs(res[2]) > math.fabs(res_old[2]):
-                    #     reduc = 1/4.
-                    # else:
-                    #     reduc = 1/2.
-                    # thetamax *= reduc
-                    thetamax = min([math.fabs(deta[1]-deta_prev[1]), thetamax/2.])
-
+                    zmax = min([math.fabs(deta[0]-deta_prev[0])/2., zmax/2.])
 
                 if math.fabs(deta[0]) > zmax:
                     deta[0] = math.copysign(zmax, deta[0])
 
-                if math.fabs(deta[1]) > phimax:
-                    deta[1] = math.copysign(phimax, deta[1])
-
-                if math.fabs(deta[2]) > thetamax:
-                    deta[2] = math.copysign(thetamax, deta[2])
-
-                eta += deta
-
-                # etacur = hsMesh._plane.get_position()
-                hsMesh.update(-eta)
+                # Updating the plane position
+                hsMesh.update(-deta) # The - sign makes the plane move, not the mesh...
 
                 if anim:
                     filename = 'eq%u.vtu'%niter
@@ -616,31 +562,53 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
             # Moving the mesh
             cV = hsMesh._cV
             cF = hsMesh._cF
-            eta = hsMesh._plane.get_position()
-            cV = mm.rotate(cV, eta)
+
+            cV = hsMesh._plane.coord_in_plane(cV)
 
             hs_data['disp'] = hsMesh._vw
-            hs_data['Cw'] = hsMesh._cw
+            hs_data['Cw'] = hsMesh._plane.coord_in_plane(cw_e)
             hs_data['Sf'] = hsMesh._sf
             hs_data['mass'] = rho_water * hsMesh._vw
             hs_data['draft'] = cV[:, 2].min()
+            hs_data['res'] = res
+            hs_data['Khs'] = Khs
+            hs_data['cog'] = cog_e
 
-            # FIXME : comparer a la matrice obtenue a la derniere iteration
-            # FIXME : Transformer les coords de G et de cw !!
-            hs_data['Khs'] = hsMesh.get_hydrostatic_stiffness_matrix(cog)
-            raise NotImplementedError
 
             if verbose:
                 if status == 1:
                     print "\nEquilibrium found in %u iterations" % niter
                 else:
                     print "\nEquilibrium approached but the mesh is not refined enough to reach convergence"
-                print '\nZ translation on the initial mesh : %f (m)' % (-zcur)
-
-
+                z, phi, theta = hsMesh._plane.get_position()
+                print '\nTransformation of the initial mesh '
+                print 'z (m)       : %f' % (-z)
+                print 'phi (deg)   : %f' % (-phi*180./math.pi)
+                print 'theta (deg) : %f' % (-theta*180./math.pi)
 
     if verbose:
         print_hysdrostatics_report(hs_data)
 
     # TODO : renvoyer egalement les infos hydrostatiques sous forme de dictionnaire -> ou alors sortir un fichier !
-    return cV, cF
+    return cV, cF, hs_data
+
+
+    # def get_GZ_curves(V, F, zcog, spacing=2., verbose=False):
+    #
+    #     # Computing hydrostatics for the initial mesh
+    #     cV, cF, hs_data = get_hydrostatics(V, F, zcog=zcog)
+    #
+    #     Cw0 = hs_data['Cw']
+    #     Vw0 = hs_data['disp']
+    #
+    #     G = np.array([Cw0[0], Cw0[1], zcog], dtype=np.float)
+    #
+    #     phi = np.arange(-180., 180., spacing) * math.pi/180.
+    #     theta =
+    #
+    #     for
+
+
+    def get_area_curve(V, F, dir):
+
+        raise NotImplementedError

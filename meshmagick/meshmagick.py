@@ -39,21 +39,44 @@ import math
 
 # Classes
 class Plane:
-    def __init__(self, normal=np.array([0., 0., 1.]), e=0.):
-        self.normal = normal / np.linalg.norm(normal)
-        self.e = e
+    def __init__(self, normal=np.array([0., 0., 1.]), c=0.):
+        self.normal = normal / np.linalg.norm(normal) # Ensuring a unit normal
+        self.c = c
 
-        self.phi, self.theta = self._get_angles_from_normal()
+        phi, theta = self._get_angles_from_normal()
+        self.Re0 = self._get_rotation_matrix(phi, theta)
 
-        self.Re0 = self.get_rotation_matrix(self.phi, self.theta)
+    def set_position(self, z=0., phi=0., theta=0.):
+        """Set the position of the plane form z and phi, theta angles (given in radian)"""
+
+        self.Re0 = self._get_rotation_matrix(phi, theta)
+        self.normal = self.Re0[2]
+        self.c = z
+
+        return 1
+
+    def get_position(self):
+        # FIXME : on ne garde plus les angles en attribut
+        phi, theta = self._get_angles_from_normal()
+        return np.array([self.c, phi, theta], dtype=np.float)
+
+    def update(self, deta):
+        """Update the position of the plane from its current position"""
+
+        # Computing the rotation matrix between current and final position
+        Rpp_p = self._get_rotation_matrix(deta[1], deta[2])
+
+        self.Re0 = np.dot(Rpp_p, self.Re0)
+        self.normal = self.Re0[2]
+        self.c = self.c * Rpp_p[2, 2] + deta[0]
+
+        return 1
 
     def flip(self):
         self.normal = -self.normal
         #TODO : faire la mise a jour des infos d'angle !!
 
     def _get_angles_from_normal(self):
-
-        tol = 1e-4
 
         u, v, w = self.normal
 
@@ -62,30 +85,7 @@ class Plane:
 
         return phi, theta
 
-    def get_position(self):
-        return np.array([self.e, self.phi, self.theta], dtype=np.float)
-
-    def set_position(self, z=0., phi=0., theta=0., unit='rad'):
-        """Performs the transformation of the plane"""
-
-        if unit not in ['deg', 'rad']:
-            raise RuntimeError, 'unit %s is not known for angles'%unit
-
-        if unit == 'deg':
-            cor = math.pi/180.
-            phi *= cor
-            theta *= cor
-
-        self.phi = phi
-        self.theta = theta
-        self.Re0 = self.get_rotation_matrix(phi, theta)
-
-        self.normal = self.Re0[2]
-        self.e = z*self.Re0[2, 2]
-
-        return 1
-
-    def get_rotation_matrix(self, phi, theta):
+    def _get_rotation_matrix(self, phi, theta):
         # Rotation matrix
         cphi = math.cos(phi)
         sphi = math.sin(phi)
@@ -99,28 +99,28 @@ class Plane:
 
         return Re0
 
-    def point_distance(self, point, tol=1e-9):
-        dist = np.dot(self.normal, point)
-        if math.fabs(dist) < tol:
-            # Point on plane
-            position = 0
-        elif dist < self.e:
-            # Point under plane
-            position = -1
-        elif dist > self.e:
-            # Point above plane
-            position = 1
-        return dist, position
+    # def point_distance(self, point, tol=1e-9):
+    #     dist = np.dot(self.normal, point)
+    #     if math.fabs(dist) < tol:
+    #         # Point on plane
+    #         position = 0
+    #     elif dist < self.c:
+    #         # Point under plane
+    #         position = -1
+    #     elif dist > self.c:
+    #         # Point above plane
+    #         position = 1
+    #     return dist, position
 
     def coord_in_plane(self, vertices):
 
         # FIXME : ne fonctionne pas si on envoie un seul vertex !
         if vertices.ndim == 1: # Case where only one vertex is given
             new_vertices = np.dot(self.Re0, vertices)
-            new_vertices[2] -= self.e
+            new_vertices[2] -= self.c
         else:
             new_vertices = np.array([np.dot(self.Re0, vertices[i]) for i in xrange(vertices.shape[0])], dtype=float)
-            new_vertices[:, 2] -= self.e
+            new_vertices[:, 2] -= self.c
         return new_vertices
 
 def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
@@ -148,7 +148,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
     nf = F.shape[0]
 
     # Getting the position of each vertex with respect to the plane (projected distance)
-    positions = np.dot(V, plane.normal)-plane.e
+    positions = np.dot(V, plane.normal)-plane.c
 
     # Getting the vertices we are sure to keep
     keepV = positions <= abs_tol # Vertices we know we will keep
@@ -429,8 +429,8 @@ def extract_faces(V, F, idF):
     return Vring, Fring
 
 def get_edge_intersection_by_plane(plane, V0, V1):
-    d0 = np.dot(plane.normal, V0) - plane.e
-    d1 = np.dot(plane.normal, V1) - plane.e
+    d0 = np.dot(plane.normal, V0) - plane.c
+    d1 = np.dot(plane.normal, V1) - plane.c
     t = d0 / (d0-d1)
     return V0+t*(V1-V0)
 
@@ -2079,7 +2079,7 @@ def symmetrize(V, F, plane):
     nv = V.shape[0]
 
     normal = plane.normal/np.dot(plane.normal, plane.normal)
-    V = np.concatenate((V, V-2*np.outer(np.dot(V, normal)-plane.e, normal)))
+    V = np.concatenate((V, V-2*np.outer(np.dot(V, normal)-plane.c, normal)))
     F = np.concatenate((F, np.fliplr(F.copy()+nv)))
 
     return merge_duplicates(V, F, verbose=False)
@@ -2485,14 +2485,14 @@ def main():
                 # plane is defined by normal and scalar
                 try:
                     planes[iplane].normal = np.array(map(float, plane[:3]), dtype=np.float)
-                    planes[iplane].e = float(plane[3])
+                    planes[iplane].c = float(plane[3])
                 except:
                     raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
 
             elif len(plane) == 1:
                 if plane_str_list.has_key(plane[0]):
                     planes[iplane].normal = np.array(plane_str_list[plane[0]], dtype=np.float)
-                    planes[iplane].e = 0.
+                    planes[iplane].c = 0.
                 else:
                     raise AssertionError, '%s key for plane is not known. Choices are [%s].' % (plane[0], ', '.join(plane_str_list.keys()) )
             else:
@@ -2506,7 +2506,7 @@ def main():
             if len(plane) == 0:
                 # Default clipping plane Oxy
                 clipping_plane.normal = np.array([0., 0., 1.], dtype=np.float)
-                clipping_plane.e = 0.
+                clipping_plane.c = 0.
             elif len(plane) == 1:
                 try:
                     # Plane ID
@@ -2519,14 +2519,14 @@ def main():
                     # A key string
                     if plane_str_list.has_key(plane[0]):
                         clipping_plane.normal = np.asarray(plane_str_list[plane[0]], dtype=np.float)
-                        clipping_plane.e = 0.
+                        clipping_plane.c = 0.
                     else:
                         raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
             elif len(plane) == 4:
                 # Plane defined by a normal and a scalar
                 try:
                     clipping_plane.normal = np.array(map(float, plane[:3]), dtype=np.float)
-                    clipping_plane.e = float(plane[3])
+                    clipping_plane.c = float(plane[3])
                 except:
                     raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
             else:
@@ -2542,7 +2542,7 @@ def main():
             if len(plane) == 0:
                 # Default symmetry by plane Oxz
                 sym_plane.normal = np.array([0., 1., 0.], dtype=np.float)
-                sym_plane.e = 0.
+                sym_plane.c = 0.
             elif len(plane) == 1:
                 try:
                     # Plane ID
@@ -2555,14 +2555,14 @@ def main():
                     # A key string
                     if plane_str_list.has_key(plane[0]):
                         sym_plane.normal = np.asarray(plane_str_list[plane[0]], dtype=np.float)
-                        sym_plane.e = 0.
+                        sym_plane.c = 0.
                     else:
                         raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
             elif len(plane) == 4:
                 # Plane defined by a normal and a scalar
                 try:
                     sym_plane.normal = np.array(map(float, plane[:3]), dtype=np.float)
-                    sym_plane.e = float(plane[3])
+                    sym_plane.c = float(plane[3])
                 except:
                     raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
             else:
@@ -2608,9 +2608,6 @@ def main():
         F = flip_normals(F)
         write_file = True
 
-    if args.info:
-        get_info(V, F)
-
     # Compute principal inertia parameters
     if args.inertias:
         # TODO : completer l'aide avec la logique de cette fonction !!
@@ -2644,18 +2641,26 @@ def main():
 
         # TODO : verifier chacune des donnees mass, zcog, cog...
 
+        if args.cog is None:
+            cog = None
+        else:
+            cog = np.asarray(args.cog, dtype=np.float)
+
         V, F = hs.get_hydrostatics(V, F,
                                    mass=args.mass,
                                    zcog=args.zcog,
-                                   cog=np.asarray(args.cog, dtype=np.float),
+                                   cog=cog,
                                    rho_water=args.rho_water,
                                    g=args.grav,
                                    anim=anim,
-                                   verbose=args.verbose)
+                                   verbose=args.verbose)[:2]
 
 
 
     # WARNING : No more mesh modification should be released from this point until the end of the main
+
+    if args.info:
+        get_info(V, F)
 
     if args.show:
         show(V, F)
