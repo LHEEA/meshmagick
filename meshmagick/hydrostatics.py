@@ -613,7 +613,9 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
         # Setting the plane
         eta = np.array([0., phi, 0.], dtype=np.float)
         hsMesh.update(eta, rel=False)
-        cV, cF, hs_data = get_hydrostatics(hsMesh, mass=mass, verbose=False)
+        # Ensuring iso-displacement
+        hs_data = get_hydrostatics(hsMesh, mass=mass, verbose=False)[2]
+        print 'Target disp : %E ; current disp : %E' % (Vw0, hs_data['disp'])
         Cwj = hs_data['Cw']
 
         # Computing the transverse metacentric point relative to angle phi
@@ -632,7 +634,12 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
         # Setting the plane
         eta = np.array([0., 0., theta], dtype=np.float)
         hsMesh.update(eta, rel=False)
+        # Ensuring iso-displacement
         cV, cF, hs_data = get_hydrostatics(hsMesh, mass=mass, verbose=False)
+        print 'Target disp : %E ; current disp : %E' % (Vw0, hs_data['disp'])
+        filename = 'eq%u.vtu'%(index+1)
+        mm.write_VTU(filename, cV, cF)
+
         Cwj = hs_data['Cw']
 
         # Computing the transverse metacentric point relative to angle phi
@@ -642,24 +649,27 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
         # Metacentric height:
         h =  hz-Cwj[2]
 
-        GZ_theta[index+1] = (h-a)*math.sin(phi)
+        GZ_theta[index+1] = (h-a)*math.sin(theta)
 
 
 
+    try:
+        import matplotlib.pyplot as plt
+        plt.figure(1)
+        plt.subplot(211)
+        plt.plot(np.arange(0., 180.+spacing, spacing), GZ_phi)
+        plt.xlabel('Roll angle (deg)')
+        plt.ylabel('GZ (m)')
+        plt.grid()
 
-    import matplotlib.pyplot as plt
-    plt.plot(np.arange(0., 180.+spacing, spacing), GZ_phi)
-    plt.xlabel('Roll angle (deg)')
-    plt.ylabel('GZ (m)')
-    plt.grid()
-    plt.show()
-
-    plt.plot(np.arange(0., 180.+spacing, spacing), GZ_theta)
-    plt.xlabel('Pitch angle (deg)')
-    plt.ylabel('GZ (m)')
-    plt.grid()
-    plt.show()
-
+        plt.subplot(212)
+        plt.plot(np.arange(0., 180.+spacing, spacing), GZ_theta)
+        plt.xlabel('Pitch angle (deg)')
+        plt.ylabel('GZ (m)')
+        plt.grid()
+        plt.show()
+    except:
+        print 'No visualization of GZ curves from meshmagick as matplotlib is not available'
 
 
     return 1
