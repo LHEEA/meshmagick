@@ -2217,7 +2217,7 @@ def main():
     parser.add_argument('infilename', # TODO : voir pour un typ=file pour tester l'existence
                         help='path of the input mesh file in any format')
 
-    parser.add_argument('-o', '--outfilename',
+    parser.add_argument('-o', '--outfilename', type=str,
                         help='path of the output mesh file. The format of ' +
                              'this file is determined from the extension given')
 
@@ -2320,7 +2320,6 @@ def main():
                         equation is defined in the initial frame of reference.""")
 
     # Arguments concerning the hydrostatics
-
     # TODO : permettre de specifier un fichier de sortie
     parser.add_argument('-hs', '--hydrostatics', action='store_true',
                         help="""Compute hydrostatics. When used with the --verbose option, hydrostatic
@@ -2367,19 +2366,28 @@ def main():
                             Note that if both options --cog and --zcog are given, --zcog will
                             be ignored but taken from --cog and the result will be the same as c).
                         """)
+
     parser.add_argument('--cog', nargs=3, default=None, type=float,
                         help="""Specifies the center of gravity to be used along with the
                         --hydrostatics option. See --mass for more information. See also the
                         --inertias option for side effects.
                         """)
+
     parser.add_argument('--zcog', default=None, type=float,
                         help="""Specifies the z position of the center of gravity to be used along
                         the --hydrostatics option. See --mass for more information. See also the
                         --inertias option for side effects.
                         """)
+
+    parser.add_argument('--anim', action='store_true',
+                        help="""Generates animation files for paraview visualization of the equilibrium
+                        resolution.
+                        """)
+
     parser.add_argument('--rho-water', default=1023., type=float,
                         help="""Specifies the density of salt water. Default is 1023 kg/m**3.
                         """)
+
     parser.add_argument('-g', '--grav', default=9.81, type=float,
                         help="""Specifies the acceleration of gravity on the earth surface.
                         Default is 9.81 m/s**2.
@@ -2389,9 +2397,15 @@ def main():
                         help="""Specified the density of the medium used for the device. Default
                         is steel and is 7500 kg/m**3.
                         """)
+
     parser.add_argument('--thickness', default=0.01, type=float,
                         help="""Specifies the thickness of the hull. This option is only used if
                         both the --inertias and --hull are used. Default is 0.01 m.
+                        """)
+
+    parser.add_argument('-gz', '--gz-curves', nargs='?', const=5., default=None, type=float,
+                        help="""Computes the GZ curves with angle spacing given as argument.
+                        Default is 5 degrees (if no argument given)
                         """)
 
     # TODO : permettre de rajouter des ballasts
@@ -2415,11 +2429,6 @@ def main():
     parser.add_argument('--no-hull', action='store_true',
                         help="""Specifies that the device should be considered as being filled with
                         the material of density rho-medium.
-                        """)
-
-    parser.add_argument('--anim', action='store_true',
-                        help="""Generates animation files for paraview visualization of the equilibrium
-                        resolution.
                         """)
 
     parser.add_argument('--show', action='store_true',
@@ -2646,7 +2655,9 @@ def main():
         else:
             cog = np.asarray(args.cog, dtype=np.float)
 
-        V, F = hs.get_hydrostatics(V, F,
+        # TODO : Revoir la structure afin de ne jouer que sur l'objet !!
+        hsMesh = hs.HydrostaticsMesh(V, F, rho_water=args.rho_water, g=args.grav)
+        V, F = hs.get_hydrostatics(hsMesh,
                                    mass=args.mass,
                                    zcog=args.zcog,
                                    cog=cog,
@@ -2655,7 +2666,26 @@ def main():
                                    anim=anim,
                                    verbose=args.verbose)[:2]
 
+    if args.gz_curves is not None:
+        spacing = args.gz_curves
+        try:
+            import hydrostatics as hs
+        except:
+            raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
 
+        if args.hydrostatics:
+            raise RuntimeError, """GZ computations can not be performed at the same time as a hydrostatics equilibrium
+                                   resolution as it needs a full mesh to perform clipping at different angles"""
+
+        if args.zcog is None:
+            raise RuntimeError, 'For the GZ computations, the --zcog option is mandatory'
+
+        hsMesh = hs.HydrostaticsMesh(V, F, rho_water=args.rho_water, g=args.grav)
+        hs.get_GZ_curves(hsMesh, args.zcog,
+                         spacing=spacing,
+                         rho_water=args.rho_water,
+                         g=args.grav,
+                         verbose=args.verbose)
 
     # WARNING : No more mesh modification should be released from this point until the end of the main
 

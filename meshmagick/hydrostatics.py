@@ -21,15 +21,10 @@ class HydrostaticsMesh:
     def __init__(self, V, F, rho_water=1023., g=9.81):
         self.V = V
         self.F = F
-        self.rho_water = rho_water
+        self.rho_water = rho_water # FIXME : rho_water est en doublon dans les fonctions de module
         self.g = g
 
         # Defining protected attributes
-        self._cV = None
-        self._cF = None
-        # self._c_areas = None
-        # self._c_normals = None
-        # self._c_centers = None
         self._boundary_vertices = None
         self._sfint = np.zeros(6, dtype=float)
         self._sf = 0.
@@ -39,11 +34,27 @@ class HydrostaticsMesh:
         # Computing once the volume integrals on all the faces of the initial mesh to speedup subsequent operations
         self._surfint = mm._get_surface_integrals(V, F, sum=False)
 
+        # Computing the characteristic dimension in z
+        # TODO : voir si on ne peut pas affiner ce critere et le rendre plus general
+        height = V[:, 2].max() - V[:, 2].min()
+        self._zmax = height * 1e-1
+        self._dz = height * 1e-3
+        # TODO : Tuner plus precisement ce critere !
+        # TODO : ne pas permettre lors des iterations d'appliqier des corrections plus faibles que ce critere
+
         # Defining the clipping plane Oxy and updating hydrostatics
         self._plane = mm.Plane()
         self.update(np.zeros(3))
 
-        self._has_plane_changed = True # FIXME : utile ?
+        vw0 = self._vw
+        self.update([self._dz, 0., 0.])
+        vw1 = self._vw
+        self._abs_tol_vol = math.fabs(vw1-vw0)
+
+        # Back to the initial state
+        self.update(np.zeros(3))
+
+
 
 
     def update(self, eta, rel=True):
@@ -67,11 +78,6 @@ class HydrostaticsMesh:
 
         # Updating surface integrals for underwater faces of the clipped mesh
         self._update_surfint(clip_infos)
-
-        # # FIXME : For testing only!!!!
-        # _c_surfint = mm._get_surface_integrals(self._cV, self._cF, sum=False)
-        # # FIXME : A retirer !!!!!
-
 
         # Projecting the boundary polygons into the frame of the clipping plane
         self._boundary_vertices = []
@@ -326,7 +332,7 @@ def _get_residual(rho_water, g, vw, cw, mass, cog):
     ], dtype=np.float)
     return res
 
-def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81, anim=False, verbose=False):
+def get_hydrostatics(hsMesh, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81, anim=False, verbose=False):
     """Computes the hydrostatics of the mesh and return the clipped mesh.
 
         Computes the hydrostatics properties of the mesh. Depending on the information given, the equilibrium is
@@ -338,8 +344,9 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
 
     # TODO : decouper les deux cas principaux en deux fonctions
 
+    # TODO : mettre ces procedures en methodes de la classe HydrostaticMesh
     # Instantiation of the hydrostatic mesh object
-    hsMesh = HydrostaticsMesh(V, F, rho_water=rho_water, g=g)
+    # hsMesh = HydrostaticsMesh(V, F, rho_water=rho_water, g=g)
 
     hs_data = dict()
 
@@ -392,22 +399,8 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
         mg = mass * g
         niter = 0
 
-        # Computing the characteristic dimension in z
-        height = (V[:, 2].max() - V[:, 2].min())
-
-        zmax = height * 0.1
-        dz = height * 1e-3 # TODO : Tuner plus precisement ce critere !
-        # TODO : ne pas permettre lors des iterations d'appliqier des corrections plus faibles que ce critere
-
-        # Testing the sensibility of the mesh
-        res0 = rho_water*hsMesh._vw - mass
-        hsMesh.update([dz, 0., 0.])
-        res1 = rho_water*hsMesh._vw - mass
-        abs_tol_pos = math.fabs(res0-res1)
-
-        # Remise en etat initial
-        # FIXME : il faudrait pouvoir eviter de faire deux decoupes supplementaires !!!!!
-        hsMesh.update([0., 0., 0.], rel=False)
+        zmax = hsMesh._zmax
+        abs_tol_pos = rho_water * hsMesh._abs_tol_vol
 
         if anim:
             # Removing all files eq*.vtu
@@ -423,6 +416,8 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
         #-----------------------------------------------------
             if verbose:
                 print "Equilibrium resolution knowing only mass --> iterations on z only"
+
+            # FIXME : il faut que la mise en equilibre se fasse suivant la normale du plan !!!
 
             res = 0.
             while 1:
@@ -461,11 +456,9 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
 
                 if math.fabs(dz) > zmax:
                     dz = math.copysign(zmax, dz)
-                if verbose:
-                    print '\t-> Correction: %f' % dz
 
                 zcur = hsMesh._plane.c
-                hsMesh.update([zcur-dz, 0., 0.]) # The - sign is here to make the plane move, not the mesh
+                hsMesh.update([-dz, 0., 0.]) # The - sign is here to make the plane move, not the mesh
 
                 if anim:
                     filename = 'eq%u.vtu'%niter
@@ -474,10 +467,9 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
             hs_data['res'] = np.array([res, 0., 0.], dtype=np.float)
 
             # Moving the mesh
-            cV = hsMesh._cV
+            # FIXME : il faut que la mise en equilibre se fasse suivant la normale du plan !!!
+            cV = hsMesh._plane.coord_in_plane(hsMesh._cV)
             cF = hsMesh._cF
-            zcur = hsMesh._plane.c
-            cV = mm.translate_1D(cV, -zcur, 'z')
 
             hs_data['disp'] = hsMesh._vw
             hs_data['Cw'] = hsMesh._cw # FIXME : Cw doit etre fourni dans le nouveau repere
@@ -593,20 +585,40 @@ def get_hydrostatics(V, F, mass=None, cog=None, zcog=None, rho_water=1023, g=9.8
     return cV, cF, hs_data
 
 
-    # def get_GZ_curves(V, F, zcog, spacing=2., verbose=False):
-    #
-    #     # Computing hydrostatics for the initial mesh
-    #     cV, cF, hs_data = get_hydrostatics(V, F, zcog=zcog)
-    #
-    #     Cw0 = hs_data['Cw']
-    #     Vw0 = hs_data['disp']
-    #
-    #     G = np.array([Cw0[0], Cw0[1], zcog], dtype=np.float)
-    #
-    #     phi = np.arange(-180., 180., spacing) * math.pi/180.
-    #     theta =
-    #
-    #     for
+def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=False):
+    # TODO : mettre rho_water et g en variable de module avec les valeurs par defaut !
+    # TODO : verifier que hsMesh est bien du type HydrostaticMesh
+
+    if not isinstance(hsMesh, HydrostaticsMesh):
+        raise RuntimeError, 'hsMesh argument must be an instance of HydrostaticMesh class'
+    # Computing hydrostatics for the initial mesh
+    # hsMesh = HydrostaticsMesh(V, F, rho_water=rho_water, g=g)
+    cV, cF, hs_data = get_hydrostatics(hsMesh, zcog=zcog)
+
+    Cw0 = hs_data['Cw']
+    Vw0 = hs_data['disp']
+    mass = rho_water*Vw0
+
+    G = np.array([Cw0[0], Cw0[1], zcog], dtype=np.float)
+
+    angles = np.arange(0., 180.+spacing, spacing) * math.pi/180.
+    # TODO : voir pour parametrer les bornes
+
+    # Computing the GZ curve in phi
+    for (index, phi) in enumerate(angles):
+        print 'phi: %f (deg)' % (phi*180/math.pi)
+        # Setting the plane
+        # hsMesh._plane.set_position(phi=phi)
+        eta = np.array([0., phi, 0.], dtype=np.float)
+        hsMesh.update(eta, rel=False)
+        cV, cF, hs_data = get_hydrostatics(hsMesh, mass=mass, verbose=False)
+        # mm.show(cV, cF)
+        Cwj = hs_data['Cw']
+
+        filename = 'eq%u.vtu'%index
+        mm.write_VTU(filename, cV, cF)
+
+
 
 
     def get_area_curve(V, F, dir):
