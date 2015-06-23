@@ -593,30 +593,81 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
         raise RuntimeError, 'hsMesh argument must be an instance of HydrostaticMesh class'
     # Computing hydrostatics for the initial mesh
     # hsMesh = HydrostaticsMesh(V, F, rho_water=rho_water, g=g)
-    cV, cF, hs_data = get_hydrostatics(hsMesh, zcog=zcog)
+    hs_data = get_hydrostatics(hsMesh, zcog=zcog)[2]
 
     Cw0 = hs_data['Cw']
     Vw0 = hs_data['disp']
-    mass = rho_water*Vw0
+    mass = hs_data['mass']
+    cog = hs_data['cog']
+    a = cog[2] - Cw0[2]
 
-    G = np.array([Cw0[0], Cw0[1], zcog], dtype=np.float)
-
-    angles = np.arange(0., 180.+spacing, spacing) * math.pi/180.
+    angles = np.arange(spacing, 180.+spacing, spacing)
     # TODO : voir pour parametrer les bornes
+    # TODO : permettre de balayer egalement les angles negatifs
+
+    GZ_phi = np.zeros(angles.shape[0]+1, dtype=np.float)
 
     # Computing the GZ curve in phi
-    for (index, phi) in enumerate(angles):
+    for (index, phi) in enumerate(angles * math.pi/180.):
         print 'phi: %f (deg)' % (phi*180/math.pi)
         # Setting the plane
-        # hsMesh._plane.set_position(phi=phi)
         eta = np.array([0., phi, 0.], dtype=np.float)
         hsMesh.update(eta, rel=False)
         cV, cF, hs_data = get_hydrostatics(hsMesh, mass=mass, verbose=False)
-        # mm.show(cV, cF)
         Cwj = hs_data['Cw']
 
-        filename = 'eq%u.vtu'%index
-        mm.write_VTU(filename, cV, cF)
+        # Computing the transverse metacentric point relative to angle phi
+        t = (cog[1] - Cwj[1]) / hsMesh._plane.normal[1]
+        hz = Cwj[2] + t*hsMesh._plane.normal[2]
+
+        # Metacentric height:
+        h =  hz-Cwj[2]
+
+        GZ_phi[index+1] = (h-a)*math.sin(phi)
+
+
+    GZ_theta = np.zeros(angles.shape[0]+1, dtype=np.float)
+    for (index, theta) in enumerate(angles * math.pi/180.):
+        print 'theta: %f (deg)' % (angles[index])
+        # Setting the plane
+        eta = np.array([0., 0., theta], dtype=np.float)
+        hsMesh.update(eta, rel=False)
+        cV, cF, hs_data = get_hydrostatics(hsMesh, mass=mass, verbose=False)
+        Cwj = hs_data['Cw']
+
+        # Computing the transverse metacentric point relative to angle phi
+        t = (cog[0] - Cwj[0]) / hsMesh._plane.normal[0]
+        hz = Cwj[2] + t*hsMesh._plane.normal[2]
+
+        # Metacentric height:
+        h =  hz-Cwj[2]
+
+        GZ_theta[index+1] = (h-a)*math.sin(phi)
+
+
+
+
+    import matplotlib.pyplot as plt
+    plt.plot(np.arange(0., 180.+spacing, spacing), GZ_phi)
+    plt.xlabel('Roll angle (deg)')
+    plt.ylabel('GZ (m)')
+    plt.grid()
+    plt.show()
+
+    plt.plot(np.arange(0., 180.+spacing, spacing), GZ_theta)
+    plt.xlabel('Pitch angle (deg)')
+    plt.ylabel('GZ (m)')
+    plt.grid()
+    plt.show()
+
+
+
+    return 1
+
+
+
+        # filename = 'eq%u.vtu'%index
+        # mm.write_VTU(filename, cV, cF)
 
 
 
