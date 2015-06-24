@@ -2084,6 +2084,128 @@ def symmetrize(V, F, plane):
 
     return merge_duplicates(V, F, verbose=False)
 
+def generate_lid(V, F):
+
+    from operator import itemgetter
+
+    # Clipping the mesh with Oxy plane
+    V, F, clip_infos = clip_by_plane(V, F, Plane(), infos=True)
+
+    nv = V.shape[0]
+    nf = F.shape[0]
+
+    newV = []
+    newF = []
+
+    nb_new_V = 0
+    nb_new_F = 0
+
+    cross = np.cross
+    dot = np.dot
+    norm = np.linalg.norm
+
+    for polygon in clip_infos['PolygonsNewID']:
+
+        nvp = len(polygon) - 1
+        iterpoly = xrange(nvp)
+
+        # Building the initial front from the boundary polygon, edges sizes and ingoing normals
+        front = [[polygon[j], polygon[j+1]] for j in iterpoly]
+        sizes = [norm(V[front[j][1]][:2] - V[front[j][0]][:2]) for j in iterpoly]
+
+        def get_normal(v):
+            return np.array([v[0, 1]-v[1, 1], v[1, 0]-v[0, 0]], dtype=np.float)
+
+        normals = [   get_normal(V[front[j]]) for j in iterpoly]
+        delta_ref = sum(sizes)/nvp # TODO : mieux definir ce parametre
+        # TODO : delta_ref doit etre specifie pour chaque cellule
+
+
+        while len(front) > 0:
+            iedge, length = min(enumerate(sizes), key=itemgetter(1))
+            sizes.pop(iedge)
+
+            # Extracting the current edge from the front
+            edge = front.pop(iedge)
+
+            # Getting center and normal
+            P0, P1 = V[edge][:, :2]
+            M = (P0+P1) /2.
+            normal = normals.pop(iedge)
+
+            nfr = len(front)
+
+            # Determining delta_1
+            if length*.5 < delta_ref and length > delta_ref:
+                delta1 = delta_ref
+            elif 0.55*length < delta_ref:
+                delta1 = 0.55*delta_ref
+            elif 2*length > delta_ref:
+                delta1 = 2*delta_ref
+            else:
+                raise RuntimeError, 'Unexpected error in computing delta1'
+
+            # Computing Popt
+            dist = math.sqrt((delta1**2+delta_ref**2) / 4.)
+            Popt = M + dist * normal
+
+            # Looking for neighbours of Popt in a delta_ref vicinity
+            front_points = V[list(zip(*front)[0])][:, :2]
+            distances = np.array([norm(front_points[j] - Popt) for j in xrange(nfr)], dtype=np.float)
+
+            neigh_idx = set(np.arange(nfr)[distances < delta_ref]) - set([iedge])
+
+            if len(neigh_idx) == 0:
+                # No neighbour, Popt may become a new vertex
+
+                # Testing if we cross nearby edges of the front
+                neigh_idx = set(np.arange(nfr)[distances < 5*delta_ref]) - set([iedge]) # Nearby edges with point at
+                # 5*delta from Popt
+                inside_front = True
+                for iedge_t in neigh_idx:
+                    edge_t = front[iedge_t]
+                    # position of M wrt edge_t
+                    if dot(M, normals[iedge_t]) * dot(Popt, normals[iedge_t]) < 0:
+                        inside_front = False
+                        break
+
+                if inside_front:
+                    # We can add Popt as a new vertex
+                    V = np.append(V, np.append(Popt, 0.)).reshape((nv+1, 3)) # TODO : voir le plus pratique...
+                    nv += 1
+
+                    # Creating the face
+                    id_new_V = nv - 1
+                    newF.append(edge + [id_new_V])
+
+                    # Adding 2 new edges to the front
+                    front.insert(iedge, [edge[0], id_new_V])
+                    front.insert(iedge+1, [id_new_V, edge[1]])
+
+                    # Computing the sizes and normals
+                    sizes.insert(iedge, norm(P0 - Popt))
+                    sizes.insert(iedge+1, norm(Popt - P1))
+                    normals.insert(iedge, get_normal(np.array([P0, Popt])))
+                    normals.insert(iedge+1, get_normal(np.array([Popt, P1])))
+                else:
+                    raise RuntimeError, 'crossing'
+
+
+            else:
+                # Neighbour, choosing one as Popt
+                neigh_idx = list(neigh_idx)
+                dist_neigh = [ distances[neigh_idx[j]] for j in xrange(len(neigh_idx)) ]
+                i = min(enumerate(dist_neigh), key=itemgetter(1))[0]
+
+                P = front[neigh_idx[i]][0]
+
+                # TODO : il faut maintenant 
+
+
+                print 'coucou'
+
+    show(V, F)
+
 def show(V, F):
     import vtk
 
@@ -2431,6 +2553,10 @@ def main():
                         the material of density rho-medium.
                         """)
 
+    parser.add_argument('--lid', action='store_true',
+                        help="""Generate a triangle mesh lid on the clipped mesh by Oxy plane.
+                        """)
+
     parser.add_argument('--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
 
@@ -2616,6 +2742,10 @@ def main():
     if args.flip_normals:
         F = flip_normals(F)
         write_file = True
+
+    # Lid generation on a clipped mesh by plane Oxy
+    if args.lid:
+        V, F = generate_lid(V, F)
 
     # Compute principal inertia parameters
     if args.inertias:
