@@ -387,12 +387,14 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
             polygon = [initV]
             closed = False
             iV = initV
-            while not closed:
+            while 1:
                 iVtarget = boundary_edges.pop(iV)
                 polygon.append(iVtarget)
                 iV = iVtarget
                 if iVtarget == initV:
                     polygons.append(polygon)
+                    if len(boundary_edges) > 0:
+                        initV = boundary_edges.keys()[0]
                     break
         # Upgrading with the new connectivity
         for (index, polygon) in enumerate(polygons):
@@ -2112,7 +2114,7 @@ def generate_lid(V, F, max_area=1., verbose=False):
         info.set_facets(edges)
 
         # Generating the lid
-        mesh = triangle.build(info, max_volume=max_area)
+        mesh = triangle.build(info, max_volume=max_area, verbose=verbose)
 
         mesh_points = np.array(mesh.points)
         nmp = len(mesh_points)
