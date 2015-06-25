@@ -1,3 +1,5 @@
+# TODO : suppriemr ce fichier a terme et reposer uniquement sur le reader de meshpy
+
 # gmsh reader
 # neu writer
 #

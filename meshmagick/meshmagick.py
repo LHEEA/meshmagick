@@ -343,6 +343,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
         F[clipped_face_id] = clipped_face + 1 # Staying consistent with what is done in F (indexing starting at 1)
 
     # Adding new elements to the initial mesh
+    # TODO : use np.append(V, ..., axis=0) instead of np.concatenate
     if nb_new_V > 0:
         V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
     if nb_new_F > 0:
@@ -438,7 +439,7 @@ def get_face_properties(V):
     nv = V.shape[0]
     if nv == 3: # triangle
         normal = np.cross(V[1]-V[0], V[2]-V[0])
-        area = np.linag.norm(normal)
+        area = np.linalg.norm(normal)
         normal /= area
         area /= 2.
         center = np.sum(V, axis=0) / 3.
@@ -2084,9 +2085,12 @@ def symmetrize(V, F, plane):
 
     return merge_duplicates(V, F, verbose=False)
 
-def generate_lid(V, F):
+def generate_lid(V, F, max_area=1., verbose=False):
 
-    from operator import itemgetter
+    try:
+        import meshpy.triangle as triangle
+    except:
+        raise ImportError, 'Meshpy has to be available to use the generate_lid() function'
 
     # Clipping the mesh with Oxy plane
     V, F, clip_infos = clip_by_plane(V, F, Plane(), infos=True)
@@ -2094,117 +2098,48 @@ def generate_lid(V, F):
     nv = V.shape[0]
     nf = F.shape[0]
 
-    newV = []
-    newF = []
-
-    nb_new_V = 0
-    nb_new_F = 0
-
-    cross = np.cross
-    dot = np.dot
-    norm = np.linalg.norm
-
     for polygon in clip_infos['PolygonsNewID']:
 
-        nvp = len(polygon) - 1
-        iterpoly = xrange(nvp)
+        nvp = len(polygon)
 
-        # Building the initial front from the boundary polygon, edges sizes and ingoing normals
-        front = [[polygon[j], polygon[j+1]] for j in iterpoly]
-        sizes = [norm(V[front[j][1]][:2] - V[front[j][0]][:2]) for j in iterpoly]
+        # Building the loop
+        edges = [(j, j+1) for j in xrange(nvp)]
 
-        def get_normal(v):
-            return np.array([v[0, 1]-v[1, 1], v[1, 0]-v[0, 0]], dtype=np.float)
+        points = map(tuple, list(V[polygon][:, :2]))
 
-        normals = [   get_normal(V[front[j]]) for j in iterpoly]
-        delta_ref = sum(sizes)/nvp # TODO : mieux definir ce parametre
-        # TODO : delta_ref doit etre specifie pour chaque cellule
+        info = triangle.MeshInfo()
+        info.set_points(V[polygon][:, :2])
+        info.set_facets(edges)
 
+        # Generating the lid
+        mesh = triangle.build(info, max_volume=max_area)
 
-        while len(front) > 0:
-            iedge, length = min(enumerate(sizes), key=itemgetter(1))
-            sizes.pop(iedge)
+        mesh_points = np.array(mesh.points)
+        nmp = len(mesh_points)
+        mesh_tri = np.array(mesh.elements, dtype=np.int32)
 
-            # Extracting the current edge from the front
-            edge = front.pop(iedge)
+        # Resizing
+        nmt = mesh_tri.shape[0]
+        mesh_quad = np.zeros((nmt, 4), dtype=np.int32)
+        mesh_quad[:, :-1] = mesh_tri + nv
+        mesh_quad[:, -1] = mesh_quad[:, 0]
 
-            # Getting center and normal
-            P0, P1 = V[edge][:, :2]
-            M = (P0+P1) /2.
-            normal = normals.pop(iedge)
+        mesh_points_3D = np.zeros((nmp, 3))
+        mesh_points_3D[:, :-1] = mesh_points
 
-            nfr = len(front)
+        # Adding the lid to the initial mesh
+        V = np.append(V, mesh_points_3D, axis=0)
+        nv += nmp
+        F = np.append(F-1, mesh_quad, axis=0) + 1
+        nf += nmt
 
-            # Determining delta_1
-            if length*.5 < delta_ref and length > delta_ref:
-                delta1 = delta_ref
-            elif 0.55*length < delta_ref:
-                delta1 = 0.55*delta_ref
-            elif 2*length > delta_ref:
-                delta1 = 2*delta_ref
-            else:
-                raise RuntimeError, 'Unexpected error in computing delta1'
+    # Merging duplicates
+    V, F = merge_duplicates(V, F)
 
-            # Computing Popt
-            dist = math.sqrt((delta1**2+delta_ref**2) / 4.)
-            Popt = M + dist * normal
+    if verbose:
+        print "\tA lid has been added successfully"
 
-            # Looking for neighbours of Popt in a delta_ref vicinity
-            front_points = V[list(zip(*front)[0])][:, :2]
-            distances = np.array([norm(front_points[j] - Popt) for j in xrange(nfr)], dtype=np.float)
-
-            neigh_idx = set(np.arange(nfr)[distances < delta_ref]) - set([iedge])
-
-            if len(neigh_idx) == 0:
-                # No neighbour, Popt may become a new vertex
-
-                # Testing if we cross nearby edges of the front
-                neigh_idx = set(np.arange(nfr)[distances < 5*delta_ref]) - set([iedge]) # Nearby edges with point at
-                # 5*delta from Popt
-                inside_front = True
-                for iedge_t in neigh_idx:
-                    edge_t = front[iedge_t]
-                    # position of M wrt edge_t
-                    if dot(M, normals[iedge_t]) * dot(Popt, normals[iedge_t]) < 0:
-                        inside_front = False
-                        break
-
-                if inside_front:
-                    # We can add Popt as a new vertex
-                    V = np.append(V, np.append(Popt, 0.)).reshape((nv+1, 3)) # TODO : voir le plus pratique...
-                    nv += 1
-
-                    # Creating the face
-                    id_new_V = nv - 1
-                    newF.append(edge + [id_new_V])
-
-                    # Adding 2 new edges to the front
-                    front.insert(iedge, [edge[0], id_new_V])
-                    front.insert(iedge+1, [id_new_V, edge[1]])
-
-                    # Computing the sizes and normals
-                    sizes.insert(iedge, norm(P0 - Popt))
-                    sizes.insert(iedge+1, norm(Popt - P1))
-                    normals.insert(iedge, get_normal(np.array([P0, Popt])))
-                    normals.insert(iedge+1, get_normal(np.array([Popt, P1])))
-                else:
-                    raise RuntimeError, 'crossing'
-
-
-            else:
-                # Neighbour, choosing one as Popt
-                neigh_idx = list(neigh_idx)
-                dist_neigh = [ distances[neigh_idx[j]] for j in xrange(len(neigh_idx)) ]
-                i = min(enumerate(dist_neigh), key=itemgetter(1))[0]
-
-                P = front[neigh_idx[i]][0]
-
-                # TODO : il faut maintenant 
-
-
-                print 'coucou'
-
-    show(V, F)
+    return V, F
 
 def show(V, F):
     import vtk
@@ -2553,8 +2488,8 @@ def main():
                         the material of density rho-medium.
                         """)
 
-    parser.add_argument('--lid', action='store_true',
-                        help="""Generate a triangle mesh lid on the clipped mesh by Oxy plane.
+    parser.add_argument('--lid', nargs='?', const=1., default=None, type=float,
+                        help="""Generate a triangle mesh lid on the mesh clipped by the Oxy plane.
                         """)
 
     parser.add_argument('--show', action='store_true',
@@ -2744,8 +2679,8 @@ def main():
         write_file = True
 
     # Lid generation on a clipped mesh by plane Oxy
-    if args.lid:
-        V, F = generate_lid(V, F)
+    if args.lid is not None:
+        V, F = generate_lid(V, F, max_area=args.lid, verbose=args.verbose)
 
     # Compute principal inertia parameters
     if args.inertias:
