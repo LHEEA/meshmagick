@@ -46,6 +46,7 @@ class Plane:
         phi, theta = self._get_angles_from_normal()
         self.Re0 = self._get_rotation_matrix(phi, theta)
 
+
     def set_position(self, z=0., phi=0., theta=0.):
         """Set the position of the plane form z and phi, theta angles (given in radian)"""
 
@@ -55,10 +56,12 @@ class Plane:
 
         return 1
 
+
     def get_position(self):
         # FIXME : on ne garde plus les angles en attribut
         phi, theta = self._get_angles_from_normal()
         return np.array([self.c, phi, theta], dtype=np.float)
+
 
     def update(self, deta):
         """Update the position of the plane from its current position"""
@@ -72,9 +75,11 @@ class Plane:
 
         return 1
 
+
     def flip(self):
         self.normal = -self.normal
         #TODO : faire la mise a jour des infos d'angle !!
+
 
     def _get_angles_from_normal(self):
 
@@ -84,6 +89,7 @@ class Plane:
         theta = math.atan2(u, w)
 
         return phi, theta
+
 
     def _get_rotation_matrix(self, phi, theta):
         # Rotation matrix
@@ -99,18 +105,6 @@ class Plane:
 
         return Re0
 
-    # def point_distance(self, point, tol=1e-9):
-    #     dist = np.dot(self.normal, point)
-    #     if math.fabs(dist) < tol:
-    #         # Point on plane
-    #         position = 0
-    #     elif dist < self.c:
-    #         # Point under plane
-    #         position = -1
-    #     elif dist > self.c:
-    #         # Point above plane
-    #         position = 1
-    #     return dist, position
 
     def coord_in_plane(self, vertices):
 
@@ -123,21 +117,15 @@ class Plane:
             new_vertices[:, 2] -= self.c
         return new_vertices
 
-def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
 
-    n_threshold = 5 # devrait etre reglagble, non utilise pour le moment
+def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
 
     # Working on different arrays
     V = Vinit.copy()
     F = Finit.copy()
 
-    # TODO : gerer les updates de mise a jour a l'aide d'infos sur les facettes conservees tel quel, et les facettes
-    # necessitant un update
-
     # To store information about extraction
     clip_infos = {'FkeptOldID':[], 'FkeptNewID':[], 'FToUpdateNewID':[], 'PolygonsNewID':[]}
-
-    # TODO : Partir d'un F indice utilisant des indices de vertex commencant a 0 (F -=1)
 
     # Necessary to deal with clipping of quadrangle that give a pentagon
     triangle = [2, 3, 4, 2]
@@ -406,6 +394,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
     else:
         return clipped_V, clipped_F
 
+
 def extract_faces(V, F, idF):
     """
     :param V: Initial vertices array
@@ -431,11 +420,13 @@ def extract_faces(V, F, idF):
 
     return Vring, Fring
 
+
 def get_edge_intersection_by_plane(plane, V0, V1):
     d0 = np.dot(plane.normal, V0) - plane.c
     d1 = np.dot(plane.normal, V1) - plane.c
     t = d0 / (d0-d1)
     return V0+t*(V1-V0)
+
 
 def get_face_properties(V):
     nv = V.shape[0]
@@ -452,12 +443,11 @@ def get_face_properties(V):
         a2 = np.linalg.norm(np.cross(V[2]-V[0], V[3]-V[1])) / 2.
         area = a1 + a2
         C1 = np.sum(V[:3], axis=0) / 3.
-        C2 = (np.sum(V[2:4], axis=0) + V[0])/ 3. # FIXME : A verifier
+        C2 = (np.sum(V[2:4], axis=0) + V[0]) / 3.
         center = (a1*C1 + a2*C2) / area
 
-    # Ne pas oublier de normer la normale
-
     return area, normal, center
+
 
 def get_all_faces_properties(V, F):
 
@@ -502,6 +492,7 @@ def get_all_faces_properties(V, F):
     # Returning to 1 indexing
     F += 1
     return areas, normals, centers
+
 
 _mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float)
 def _get_surface_integrals(V, F, sum=True):
@@ -591,12 +582,14 @@ def _get_surface_integrals(V, F, sum=True):
 
     return sint
 
+
 def get_mass_cog(V, F, rho=1.):
     return get_inertial_properties(V, F, rho=rho)[:2]
 
+
 _mult_vol = np.array([1., 1., 1., 1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.])
 def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False):
-
+    # TODO : allow to specify a reduction point...
     # The default density rho is that of steel
 
     tol = 1e-8
@@ -701,6 +694,7 @@ def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=Fa
 
     return mass, cog, inertia_matrix
 
+
 def transport_inertia_matrix(mass, cog, Ig, point, rot):
 
     point_cog = cog - point
@@ -713,8 +707,10 @@ def transport_inertia_matrix(mass, cog, Ig, point, rot):
 def get_volume(V, F):
     return _get_surface_integrals(V, F)[0]
 
+
 def get_COM(V, F):
     return _get_surface_integrals(V, F)
+
 
 def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'implementation
 
@@ -915,7 +911,7 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
 
 # =======================================================================
 # MESH LOADERS
-#=======================================================================
+# ======================================================================
 # Contains here all functions to load meshes from different file formats
 
 def load_mesh(filename, format):
@@ -1028,8 +1024,10 @@ def load_HST(filename):
 
     return V, F
 
+
 def load_DAT(filename):
     raise NotImplementedError
+
 
 def load_INP(filename):
     """
@@ -1531,6 +1529,8 @@ def write_mesh(filename, V, F, format):
 
     writer(filename, V, F)
 
+    return 1
+
 
 def write_DAT(filename, V, F):
     """
@@ -1585,7 +1585,6 @@ def write_DAT(filename, V, F):
                 )
             )
 
-
         else:
             # Triangle
             nt += 1
@@ -1617,7 +1616,7 @@ def write_DAT(filename, V, F):
 
     print 'File %s written' % filename
 
-    return
+    return 1
 
 
 def write_HST(filename, V, F):
@@ -1774,7 +1773,7 @@ def _build_vtk_mesh_obj(V, F):
     return vtk_mesh
 
 
-def write_NAT(filename, V, F, *args):
+def write_NAT(filename, V, F):
     """
     This function writes mesh to file
     """
@@ -1794,7 +1793,7 @@ def write_NAT(filename, V, F, *args):
     print 'File %s written' % filename
 
 
-def write_GDF(filename, V, F, *args):
+def write_GDF(filename, V, F):
     """
     This function writes mesh data into a GDF file for Wamit computations
     """
@@ -1818,7 +1817,7 @@ def write_GDF(filename, V, F, *args):
     print 'File %s written' % filename
 
 
-def write_MAR(filename, V, F, *args):
+def write_MAR(filename, V, F):
     ofile = open(filename, 'w')
 
     ofile.write('{0:6d}{1:6d}\n'.format(2, 0))  # TODO : mettre les symetries en argument
@@ -1877,8 +1876,10 @@ def write_STL(filename, V, F):
 
     print 'File %s written' % filename
 
+
 def write_INP(filename, V, F):
     raise NotImplementedError
+
 
 def write_MSH(filename, V, F):
     raise NotImplementedError
@@ -2155,7 +2156,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
                 word = 'moonpool has'
             else:
                 word = 'moonpools have'
-            print '%u %s been detected' % (nb_hole, word)
+            print '\n%u %s been detected' % (nb_hole, word)
 
         # TODO : getting a point inside the hole polygon
 
@@ -2237,7 +2238,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
     V, F = merge_duplicates(V, F)
 
     if verbose:
-        print "\tA lid has been added successfully"
+        print "\nA lid has been added successfully\n"
 
     return V, F
 
@@ -2266,17 +2267,6 @@ def show(V, F, normals=False):
         normals_actor = vtk.vtkActor()
         normals_actor.SetMapper(normals_mapper)
 
-        # maskPts = vtk.vtkMaskPoints()
-        # maskPts.SetOnRatio(5)
-        # maskPts.RandomModeOn()
-        # maskPts.SetInput(polydata)
-        # maskPts.SetMaximumNumberOfPoints(5000)
-        # maskPts.Update()
-
-        # maskPts = vtk.vtkCellCenters()
-        # maskPts.SetInput(vtk_mesh)
-        # maskPts.Update()
-
         arrow = vtk.vtkArrowSource()
         arrow.SetTipResolution(16)
         arrow.SetTipLength(0.3)
@@ -2284,7 +2274,6 @@ def show(V, F, normals=False):
 
         glyph = vtk.vtkGlyph3D()
         glyph.SetSourceConnection(arrow.GetOutputPort())
-        # glyph.SetInputConnection(maskPts.GetOutputPort())
         glyph.SetInputConnection(normals.GetOutputPort())
         glyph.SetVectorModeToUseNormal()
         glyph.Update()
@@ -2608,7 +2597,7 @@ def main():
                         """)
 
     parser.add_argument('-gz', '--gz-curves', nargs='?', const=5., default=None, type=float,
-                        help="""Computes the GZ curves with angle spacing given as argument.
+                        help=""" [EXPERIMENTAL] Computes the GZ curves with angle spacing given as argument.
                         Default is 5 degrees (if no argument given)
                         """)
 

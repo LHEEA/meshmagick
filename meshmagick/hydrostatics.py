@@ -3,7 +3,7 @@ __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
 __credits__ = "Francois Rongere"
 __licence__ = "CeCILL"
-__version__ = "0.3.1"
+__version__ = "1.0"
 __maintainer__ = "Francois Rongere"
 __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
@@ -11,9 +11,6 @@ __status__ = "Development"
 import meshmagick as mm
 import numpy as np
 import math
-import warnings
-
-import sys
 
 mult_sf = np.array([1/2., 1/6., -1/6., 1/24., 1/12., -1/12.], dtype=float)
 
@@ -53,8 +50,6 @@ class HydrostaticsMesh:
 
         # Back to the initial state
         self.update(np.zeros(3))
-
-
 
 
     def update(self, eta, rel=True):
@@ -98,6 +93,7 @@ class HydrostaticsMesh:
 
         return 1
 
+
     def _update_surfint(self, clip_infos):
         """Extraction of volume integrals from the initial mesh to the clipped mesh"""
         # On a besoin ici des informations sur l'extraction du maillage par rapport au maillage initial. Il faut donc
@@ -111,6 +107,7 @@ class HydrostaticsMesh:
                           self._surfint[clip_infos['FkeptOldID']].sum(axis=0)
 
         return
+
 
     def get_hydrostatic_stiffness_matrix(self, cog):
 
@@ -154,6 +151,7 @@ class HydrostaticsMesh:
     # def get_generalized_position(self):
     #     return self._plane.c
 
+
     def _update_faces_properties(self, V_update, F_update, clip_infos):
 
         up_areas, up_normals, up_centers = mm.get_all_faces_properties(V_update, F_update)
@@ -174,6 +172,7 @@ class HydrostaticsMesh:
 
         return
 
+
     def get_immersed_volume(self):
 
         r13 = self._plane.Re0[0, 2]
@@ -181,6 +180,7 @@ class HydrostaticsMesh:
         vw = self._c_surfint[2] + self._plane.normal[2] * (r13*self._sfint[1] + r23*self._sfint[2] +
                                                       self._plane.c*self._plane.normal[2]*self._sf)
         return vw
+
 
     def get_buoyancy_center(self):
 
@@ -215,23 +215,28 @@ class HydrostaticsMesh:
         cw[np.fabs(cw)<tol] = 0.
         return cw
 
+
     def get_flotation_center(self):
         tol = 1e-9
         Cf = np.asarray([self._sfint[1], self._sfint[2], 0.], dtype=np.float) / self._sf
         Cf[np.fabs(Cf) < tol] = 0.
         return Cf
 
+
     def get_displacement(self):
         # This function should not be used in loops for performance reasons, please inline the code
         return self.rho_water * self._vw
+
 
     def get_metacentric_radius(self):
         rhox = self._sfint[5] / self._vw
         rhoy = self._sfint[4] / self._vw
         return np.asarray([rhox, rhoy], dtype=np.float)
 
+
     def get_wet_surface(self):
         return mm.get_all_faces_properties(self._cV, self._cF)[0].sum()
+
 
     def _get_floating_surface_integrals(self):
 
@@ -280,6 +285,7 @@ class HydrostaticsMesh:
 
         return sint
 
+
 # ======================================================================================================================
 
 def print_hysdrostatics_report(hs_data):
@@ -317,7 +323,6 @@ def print_hysdrostatics_report(hs_data):
     return 1
 
 
-
 def _get_residual(rho_water, g, vw, cw, mass, cog):
 
     rgvw = rho_water*g*vw
@@ -329,6 +334,7 @@ def _get_residual(rho_water, g, vw, cw, mass, cog):
         -rgvw * cw[0] + mg * cog[0]
     ], dtype=np.float)
     return res
+
 
 def get_hydrostatics(hsMesh, mass=None, cog=None, zcog=None, rho_water=1023, g=9.81, anim=False, verbose=False):
     """Computes the hydrostatics of the mesh and return the clipped mesh.
@@ -649,8 +655,6 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
 
         GZ_theta[index+1] = (h-a)*math.sin(theta)
 
-
-
     try:
         import matplotlib.pyplot as plt
         plt.figure(1)
@@ -683,3 +687,4 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
     def get_area_curve(V, F, dir):
 
         raise NotImplementedError
+
