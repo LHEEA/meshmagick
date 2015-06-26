@@ -98,8 +98,6 @@ class HydrostaticsMesh:
 
         return 1
 
-
-
     def _update_surfint(self, clip_infos):
         """Extraction of volume integrals from the initial mesh to the clipped mesh"""
         # On a besoin ici des informations sur l'extraction du maillage par rapport au maillage initial. Il faut donc

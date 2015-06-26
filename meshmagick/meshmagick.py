@@ -343,6 +343,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
         F[clipped_face_id] = clipped_face + 1 # Staying consistent with what is done in F (indexing starting at 1)
 
     # Adding new elements to the initial mesh
+    # TODO : use np.append(V, ..., axis=0) instead of np.concatenate
     if nb_new_V > 0:
         V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
     if nb_new_F > 0:
@@ -386,12 +387,14 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
             polygon = [initV]
             closed = False
             iV = initV
-            while not closed:
+            while 1:
                 iVtarget = boundary_edges.pop(iV)
                 polygon.append(iVtarget)
                 iV = iVtarget
                 if iVtarget == initV:
                     polygons.append(polygon)
+                    if len(boundary_edges) > 0:
+                        initV = boundary_edges.keys()[0]
                     break
         # Upgrading with the new connectivity
         for (index, polygon) in enumerate(polygons):
@@ -438,7 +441,7 @@ def get_face_properties(V):
     nv = V.shape[0]
     if nv == 3: # triangle
         normal = np.cross(V[1]-V[0], V[2]-V[0])
-        area = np.linag.norm(normal)
+        area = np.linalg.norm(normal)
         normal /= area
         area /= 2.
         center = np.sum(V, axis=0) / 3.
@@ -2084,6 +2087,160 @@ def symmetrize(V, F, plane):
 
     return merge_duplicates(V, F, verbose=False)
 
+def _is_point_inside_polygon(point, poly):
+    """Determine if a point is inside a given polygon or not.
+    This algorithm is a ray casting method
+    """
+
+    x = point[0]
+    y = point[1]
+
+    n = len(poly)
+    inside = False
+
+    p1x, p1y = poly[0]
+    for i in xrange(n):
+        p2x, p2y = poly[i]
+        if y > min(p1y,p2y):
+            if y <= max(p1y,p2y):
+                if x <= max(p1x,p2x):
+                    if p1y != p2y:
+                        xints = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+                    if p1x == p2x or x <= xints:
+                        inside = not inside
+        p1x,p1y = p2x,p2y
+
+    return inside
+
+def generate_lid(V, F, max_area=None, verbose=False):
+
+    try:
+        import meshpy.triangle as triangle
+    except:
+        raise ImportError, 'Meshpy has to be available to use the generate_lid() function'
+
+    # Clipping the mesh with Oxy plane
+    V, F, clip_infos = clip_by_plane(V, F, Plane(), infos=True)
+
+    nv = V.shape[0]
+    nf = F.shape[0]
+
+    if max_area is None:
+        max_area = get_all_faces_properties(V, F)[0].mean()
+
+    # Analysing polygons to find holes
+    polygons = clip_infos['PolygonsNewID']
+    nb_pol = len(polygons)
+
+    holes = []
+    boundaries = []
+    for ipoly, polygon in enumerate(polygons):
+        points = V[polygon][:, :2]
+        n = points.shape[0]
+        # Testing the orientation of each polygon by computing the signed area of it
+        sarea = np.array([points[j][0]*points[j+1][1] - points[j+1][0]*points[j][1] for j in xrange(n-1)],
+                         dtype=np.float).sum()
+        if sarea < 0.:
+            holes.append(polygon)
+        else:
+            boundaries.append(polygon)
+
+    nb_hole = len(holes)
+    nb_bound = len(boundaries)
+
+    hole_dict = dict([(j, []) for j in xrange(nb_bound)])
+    if nb_hole > 0:
+        if verbose:
+            if nb_hole == 1:
+                word = 'moonpool has'
+            else:
+                word = 'moonpools have'
+            print '%u %s been detected' % (nb_hole, word)
+
+        # TODO : getting a point inside the hole polygon
+
+        def pick_point_inside_hole(hole):
+
+            # First testing with the geometric center of the hole
+            point = np.array(hole).sum(axis=0)/len(hole)
+            if not _is_point_inside_polygon(point, hole):
+                # Testing something else
+                raise RuntimeError, 'The algorithm should be refined to more complex polygon topologies... up to you ?'
+
+            return point
+
+
+        # Assigning holes to boundaries
+        if nb_bound == 1 and nb_hole == 1:
+            # Obvious case
+            hole_dict[0].append( ( 0, pick_point_inside_hole(V[holes[0]][:, :2]) ) )
+        else:
+            # We may do a more elaborate search
+            for ihole, hole in enumerate(holes):
+                P0 = V[hole[0]][:2]
+                # Testing against all boundary polygons
+                for ibound, bound in enumerate(boundaries):
+                    if _is_point_inside_polygon(P0, V[bound][:, :2]):
+                        hole_dict[ibound].append( ( ihole, pick_point_inside_hole(V[hole][:, :2]) ) )
+                        break
+
+    def round_trip_connect(start, end):
+        return [(j, j+1) for j in xrange(start, end)] + [(end, start)]
+
+    # Meshing every boundaries, taking into account holes
+    for ibound, bound in enumerate(boundaries):
+
+        nvp = len(bound)-1
+
+        # Building the loop
+        points = map(tuple, list(V[bound][:-1, :2]))
+
+        edges = round_trip_connect(0, nvp-1)
+
+        info = triangle.MeshInfo()
+
+        if len(hole_dict[ibound]) > 0:
+            for ihole, point in hole_dict[ibound]:
+                hole = holes[ihole]
+                points.extend(map(tuple, list(V[hole][:-1, :2])))
+                edges.extend(round_trip_connect(nvp, len(points)-1))
+
+                # Marking the point as a hole
+                info.set_holes([tuple(point)])
+
+        info.set_points(points)
+        info.set_facets(edges)
+
+        # Generating the lid
+        mesh = triangle.build(info, max_volume=max_area, allow_boundary_steiner=False)
+
+        mesh_points = np.array(mesh.points)
+        nmp = len(mesh_points)
+        mesh_tri = np.array(mesh.elements, dtype=np.int32)
+
+        # Resizing
+        nmt = mesh_tri.shape[0]
+        mesh_quad = np.zeros((nmt, 4), dtype=np.int32)
+        mesh_quad[:, :-1] = mesh_tri + nv
+        mesh_quad[:, -1] = mesh_quad[:, 0]
+
+        mesh_points_3D = np.zeros((nmp, 3))
+        mesh_points_3D[:, :-1] = mesh_points
+
+        # Adding the lid to the initial mesh
+        V = np.append(V, mesh_points_3D, axis=0)
+        nv += nmp
+        F = np.append(F-1, mesh_quad, axis=0) + 1
+        nf += nmt
+
+    # Merging duplicates
+    V, F = merge_duplicates(V, F)
+
+    if verbose:
+        print "\tA lid has been added successfully"
+
+    return V, F
+
 def show(V, F):
     import vtk
 
@@ -2431,6 +2588,10 @@ def main():
                         the material of density rho-medium.
                         """)
 
+    parser.add_argument('--lid', nargs='?', const=1., default=None, type=float,
+                        help="""Generate a triangle mesh lid on the mesh clipped by the Oxy plane.
+                        """)
+
     parser.add_argument('--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
 
@@ -2616,6 +2777,10 @@ def main():
     if args.flip_normals:
         F = flip_normals(F)
         write_file = True
+
+    # Lid generation on a clipped mesh by plane Oxy
+    if args.lid is not None:
+        V, F = generate_lid(V, F, max_area=args.lid, verbose=args.verbose)
 
     # Compute principal inertia parameters
     if args.inertias:
