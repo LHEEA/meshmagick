@@ -2087,7 +2087,32 @@ def symmetrize(V, F, plane):
 
     return merge_duplicates(V, F, verbose=False)
 
-def generate_lid(V, F, max_area=1., verbose=False):
+def _is_point_inside_polygon(point, poly):
+    """Determine if a point is inside a given polygon or not.
+    This algorithm is a ray casting method
+    """
+
+    x = point[0]
+    y = point[1]
+
+    n = len(poly)
+    inside = False
+
+    p1x, p1y = poly[0]
+    for i in xrange(n):
+        p2x, p2y = poly[i]
+        if y > min(p1y,p2y):
+            if y <= max(p1y,p2y):
+                if x <= max(p1x,p2x):
+                    if p1y != p2y:
+                        xints = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+                    if p1x == p2x or x <= xints:
+                        inside = not inside
+        p1x,p1y = p2x,p2y
+
+    return inside
+
+def generate_lid(V, F, max_area=None, verbose=False):
 
     try:
         import meshpy.triangle as triangle
@@ -2100,21 +2125,94 @@ def generate_lid(V, F, max_area=1., verbose=False):
     nv = V.shape[0]
     nf = F.shape[0]
 
-    for polygon in clip_infos['PolygonsNewID']:
+    if max_area is None:
+        max_area = get_all_faces_properties(V, F)[0].mean()
 
-        nvp = len(polygon)
+    # Analysing polygons to find holes
+    polygons = clip_infos['PolygonsNewID']
+    nb_pol = len(polygons)
+
+    holes = []
+    boundaries = []
+    for ipoly, polygon in enumerate(polygons):
+        points = V[polygon][:, :2]
+        n = points.shape[0]
+        # Testing the orientation of each polygon by computing the signed area of it
+        sarea = np.array([points[j][0]*points[j+1][1] - points[j+1][0]*points[j][1] for j in xrange(n-1)],
+                         dtype=np.float).sum()
+        if sarea < 0.:
+            holes.append(polygon)
+        else:
+            boundaries.append(polygon)
+
+    nb_hole = len(holes)
+    nb_bound = len(boundaries)
+
+    hole_dict = dict([(j, []) for j in xrange(nb_bound)])
+    if nb_hole > 0:
+        if verbose:
+            if nb_hole == 1:
+                word = 'moonpool has'
+            else:
+                word = 'moonpools have'
+            print '%u %s been detected' % (nb_hole, word)
+
+        # TODO : getting a point inside the hole polygon
+
+        def pick_point_inside_hole(hole):
+
+            # First testing with the geometric center of the hole
+            point = np.array(hole).sum(axis=0)/len(hole)
+            if not _is_point_inside_polygon(point, hole):
+                # Testing something else
+                raise RuntimeError, 'The algorithm should be refined to more complex polygon topologies... up to you ?'
+
+            return point
+
+
+        # Assigning holes to boundaries
+        if nb_bound == 1 and nb_hole == 1:
+            # Obvious case
+            hole_dict[0].append( ( 0, pick_point_inside_hole(V[holes[0]][:, :2]) ) )
+        else:
+            # We may do a more elaborate search
+            for ihole, hole in enumerate(holes):
+                P0 = V[hole[0]][:2]
+                # Testing against all boundary polygons
+                for ibound, bound in enumerate(boundaries):
+                    if _is_point_inside_polygon(P0, V[bound][:, :2]):
+                        hole_dict[ibound].append( ( ihole, pick_point_inside_hole(V[hole][:, :2]) ) )
+                        break
+
+    def round_trip_connect(start, end):
+        return [(j, j+1) for j in xrange(start, end)] + [(end, start)]
+
+    # Meshing every boundaries, taking into account holes
+    for ibound, bound in enumerate(boundaries):
+
+        nvp = len(bound)-1
 
         # Building the loop
-        edges = [(j, j+1) for j in xrange(nvp)]
+        points = map(tuple, list(V[bound][:-1, :2]))
 
-        points = map(tuple, list(V[polygon][:, :2]))
+        edges = round_trip_connect(0, nvp-1)
 
         info = triangle.MeshInfo()
-        info.set_points(V[polygon][:, :2])
+
+        if len(hole_dict[ibound]) > 0:
+            for ihole, point in hole_dict[ibound]:
+                hole = holes[ihole]
+                points.extend(map(tuple, list(V[hole][:-1, :2])))
+                edges.extend(round_trip_connect(nvp, len(points)-1))
+
+                # Marking the point as a hole
+                info.set_holes([tuple(point)])
+
+        info.set_points(points)
         info.set_facets(edges)
 
         # Generating the lid
-        mesh = triangle.build(info, max_volume=max_area, verbose=verbose)
+        mesh = triangle.build(info, max_volume=max_area, allow_boundary_steiner=False)
 
         mesh_points = np.array(mesh.points)
         nmp = len(mesh_points)
