@@ -22,9 +22,14 @@ always start at 1 and do the appropriated conversions on F.
 
 import os, sys
 import numpy as np
+import numpy as np
+import math
+from datetime import datetime
+
+__year__ = datetime.now().year
 
 __author__ = "Francois Rongere"
-__copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
+__copyright__ = "Copyright 2014-%u, Ecole Centrale de Nantes" % __year__
 __credits__ = "Francois Rongere"
 __licence__ = "CeCILL"
 __version__ = "1.0"
@@ -34,8 +39,10 @@ __status__ = "Development"
 
 real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?'
 
-import numpy as np
-import math
+
+
+
+
 
 # Classes
 class Plane:
@@ -1642,8 +1649,6 @@ def write_DAT(filename, V, F):
     print '-------------------------------------------------'
     ofile.close()
 
-    print 'File %s written' % filename
-
     return 1
 
 
@@ -1735,8 +1740,8 @@ def write_TEC(filename, V, F):
     ofile.write(cells_block)
 
     ofile.close()
-    print 'File %s written' % filename
 
+    return 1
 
 def write_VTU(filename, V, F):
     from vtk import vtkXMLUnstructuredGridWriter
@@ -1744,6 +1749,7 @@ def write_VTU(filename, V, F):
     writer.SetDataModeToAscii()
     _write_paraview(filename, V, F, writer)
 
+    return 1
 
 def write_VTK(filename, V, F):
     """ This function writes data in a VTK XML file.
@@ -1754,6 +1760,7 @@ def write_VTK(filename, V, F):
     writer = vtkUnstructuredGridWriter()
     _write_paraview(filename, V, F, writer)
 
+    return 1
 
 def _write_paraview(filename, V, F, writer):
 
@@ -1761,8 +1768,8 @@ def _write_paraview(filename, V, F, writer):
     vtk_mesh = _build_vtk_mesh_obj(V, F)
     writer.SetInput(vtk_mesh)
     writer.Write()
-    print 'File %s written' % filename
 
+    return 1
 
 def _build_vtk_mesh_obj(V, F):
     import vtk
@@ -1818,8 +1825,8 @@ def write_NAT(filename, V, F):
         ofile.write('%10u%10u%10u%10u\n' % (cell[0], cell[1], cell[2], cell[3]))
 
     ofile.close()
-    print 'File %s written' % filename
 
+    return 1
 
 def write_GDF(filename, V, F):
     """
@@ -1842,8 +1849,8 @@ def write_GDF(filename, V, F):
             ofile.write('%16.6E%16.6E%16.6E\n' % (Vcur[0], Vcur[1], Vcur[2]))
 
     ofile.close()
-    print 'File %s written' % filename
 
+    return 1
 
 def write_MAR(filename, V, F):
     ofile = open(filename, 'w')
@@ -1864,8 +1871,8 @@ def write_MAR(filename, V, F):
     ofile.write('%6u%6u%6u%6u\n' % (0, 0, 0, 0))
 
     ofile.close()
-    print 'File %s written' % filename
 
+    return 1
 
 def write_STL(filename, V, F):
     """
@@ -1902,8 +1909,7 @@ def write_STL(filename, V, F):
     ofile.write('endsolid meshmagick\n')
     ofile.close()
 
-    print 'File %s written' % filename
-
+    return 1
 
 def write_INP(filename, V, F):
     raise NotImplementedError
@@ -2148,6 +2154,11 @@ def generate_lid(V, F, max_area=None, verbose=False):
     except:
         raise ImportError, 'Meshpy has to be available to use the generate_lid() function'
 
+    if verbose:
+        print '\n--------------'
+        print 'Lid generation'
+        print '--------------\n'
+
     # Clipping the mesh with Oxy plane
     V, F, clip_infos = clip_by_plane(V, F, Plane(), infos=True)
 
@@ -2184,7 +2195,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
                 word = 'moonpool has'
             else:
                 word = 'moonpools have'
-            print '\n%u %s been detected' % (nb_hole, word)
+            print '\t-> %u %s been detected' % (nb_hole, word)
 
         # TODO : getting a point inside the hole polygon
 
@@ -2197,7 +2208,6 @@ def generate_lid(V, F, max_area=None, verbose=False):
                 raise RuntimeError, 'The algorithm should be refined to more complex polygon topologies... up to you ?'
 
             return point
-
 
         # Assigning holes to boundaries
         if nb_bound == 1 and nb_hole == 1:
@@ -2266,7 +2276,11 @@ def generate_lid(V, F, max_area=None, verbose=False):
     V, F = merge_duplicates(V, F)
 
     if verbose:
-        print "\nA lid has been added successfully\n"
+        if nb_bound == 1:
+            verb = 'lid has'
+        else:
+            verb = 'lids have'
+        print "\n\t-> %u %s been added successfully\n" % (nb_bound, verb)
 
     return V, F
 
@@ -2439,19 +2453,22 @@ def main():
                         help='path of the input mesh file in any format')
 
     parser.add_argument('-o', '--outfilename', type=str,
-                        help='path of the output mesh file. The format of ' +
-                             'this file is determined from the extension given')
+                        help="""path of the output mesh file. The format of
+                         this file is determined from the extension given
+                         """)
 
     parser.add_argument('-ifmt', '--input-format',
                         help="""Input format. Meshmagick will read the input file considering the
-                         INPUT_FORMAT rather than using the extension""")
+                         INPUT_FORMAT rather than using the extension
+                         """)
 
     parser.add_argument('-ofmt', '--output-format',
                         help="""Output format. Meshmagick will write the output file considering
-                        the OUTPUT_FORMAT rather than using the extension""")
+                        the OUTPUT_FORMAT rather than using the extension
+                        """)
 
-    parser.add_argument('-v', '--verbose',
-                        help="""make the program give more informations on the computations""",
+    parser.add_argument('-q', '--quiet',
+                        help="""switch of verbosity of meshmagick""",
                         action='store_true')
 
     parser.add_argument('-i', '--info',
@@ -2463,44 +2480,39 @@ def main():
                         help="""translates the mesh in 3D
                         Usage -translate tx ty tz""")
 
-    parser.add_argument('-tx', '--translatex',
-                        nargs=1, type=float,
+    parser.add_argument('-tx', '--translatex', type=float,
                         help="""translates the mesh following the x direction""")
 
-    parser.add_argument('-ty', '--translatey',
-                        nargs=1, type=float,
+    parser.add_argument('-ty', '--translatey', type=float,
                         help="""translates the mesh following the y direction""")
 
-    parser.add_argument('-tz', '--translatez',
-                        nargs=1, type=float,
+    parser.add_argument('-tz', '--translatez', type=float,
                         help="""translates the mesh following the z direction""")
 
     parser.add_argument('-r', '--rotate',
                         nargs=3, type=float,
                         help="""rotates the mesh in 3D""")
 
-    parser.add_argument('-rx', '--rotatex',
-                        nargs=1, type=float,
+    parser.add_argument('-rx', '--rotatex', type=float,
                         help="""rotates the mesh around the x direction""")
 
-    parser.add_argument('-ry', '--rotatey',
-                        nargs=1, type=float,
+    parser.add_argument('-ry', '--rotatey', type=float,
                         help="""rotates the mesh around the y direction""")
 
-    parser.add_argument('-rz', '--rotatez',
-                        nargs=1, type=float,
+    parser.add_argument('-rz', '--rotatez', type=float,
                         help="""rotates the mesh around the z direction""")
 
-    parser.add_argument('-s', '--scale',
-                        type=float,
+    parser.add_argument('-s', '--scale', type=float,
                         help="""scales the mesh. CAUTION : if used along
                          with a translation option, the scaling is done before
                         the translations. The translation magnitude should be set
-                        accordingly to the newly scaled mesh.""")
+                        accordingly to the newly scaled mesh.
+                        """)
 
     parser.add_argument('-hn', '--heal_normals', action='store_true',
                         help="""Checks and heals the normals consistency and
-                        verify if they are outgoing.""")
+                        verify if they are outgoing.
+                        """)
 
     parser.add_argument('-fn', '--flip-normals', action='store_true',
                         help="""flips the normals of the mesh""")
@@ -2649,7 +2661,7 @@ def main():
 
     parser.add_argument('--no-hull', action='store_true',
                         help="""Specifies that the device should be considered as being filled with
-                        the material of density rho-medium.
+                        the material of density rho-medium. It is only used by the --inertias option.
                         """)
 
     parser.add_argument('--lid', nargs='?', const=1., default=None, type=float,
@@ -2675,9 +2687,15 @@ def main():
 
     args, unknown = parser.parse_known_args()
 
-    write_file = False  # switch to decide if data should be written to outfilename
+    if args.quiet:
+        verbose = False
+    else:
+        verbose = True
 
-    # TODO : supprimer le bloc suivant
+    if verbose:
+        print '\n============================================='
+        print 'meshmagick - version %s\n%s' % (__version__, __copyright__)
+        print '============================================='
 
     # LOADING DATA FROM FILE
     if args.input_format is not None:
@@ -2692,18 +2710,27 @@ def main():
     # Loading mesh elements from file
     if os.path.isfile(args.infilename):
         V, F = load_mesh(args.infilename, format)
+        if verbose:
+            print '%s successfully loaded' % args.infilename
     else:
         raise IOError, 'file %s not found'%args.infilename
 
-
+    # Merge duplicate vertices
     if args.merge_duplicates is not None:
         tol = float(args.merge_duplicates)
-        V, F = merge_duplicates(V, F, verbose=args.verbose, tol=tol)
-        write_file = True
+        if verbose:
+            print '\nOPERATION: Merge duplicate nodes'
+        V, F = merge_duplicates(V, F, verbose=verbose, tol=tol)
+        if verbose:
+            print '\t-> Done.'
 
+    # Heal normals
     if args.heal_normals:
-        F = heal_normals(V, F, verbose=args.verbose)
-
+        if verbose:
+            print '\nOPERATION: heal normals'
+        F = heal_normals(V, F, verbose=verbose)
+        if verbose:
+            print '\t-> Done.'
 
     # TODO : put that dict at the begining of the main function
     plane_str_list = {'Oxy':[0.,0.,1.],
@@ -2715,8 +2742,15 @@ def main():
 
     # Defining planes
     if args.plane is not None:
-
         nb_planes = len(args.plane)
+
+        if verbose:
+            if nb_planes == 1:
+                verb = 'plane has'
+            else:
+                verb = 'planes have'
+            print '\n%u %s been defined' % (nb_planes, verb)
+
         planes = [Plane() for i in xrange(nb_planes)]
         for (iplane, plane) in enumerate(args.plane):
             if len(plane) == 4:
@@ -2740,6 +2774,14 @@ def main():
     if args.clip is not None:
         clipping_plane = Plane()
         nb_clip = len(args.clip)
+
+        if verbose:
+            if nb_clip == 1:
+                verb = 'plane'
+            else:
+                verb = 'planes'
+            print '\nMesh is being clipped by %u %s' % (nb_clip, verb)
+
         for plane in args.clip:
             if len(plane) == 0:
                 # Default clipping plane Oxy
@@ -2770,11 +2812,20 @@ def main():
             else:
                 raise AssertionError, 'Unknown mean to define a plane for clipping'
             V, F = clip_by_plane(V, F, clipping_plane)
-        write_file = True
+            if verbose:
+                print '\t-> Done.'
 
     # Symmetrizing the mesh
     if args.symmetrize is not None:
         nb_sym = len(args.symmetrize)
+
+        if verbose:
+            if nb_sym == 1:
+                verb = 'plane'
+            else:
+                verb = 'planes'
+            print '\nMesh is being symmetrized by %u %s' % (nb_sym, verb)
+
         sym_plane = Plane()
         for plane in args.symmetrize:
             if len(plane) == 0:
@@ -2806,50 +2857,90 @@ def main():
             else:
                 raise AssertionError, 'Unknown mean to define a plane for symmetry'
             V, F = symmetrize(V, F, sym_plane)
-        write_file = True
+            if verbose:
+                print '\t-> Done.'
 
     # Mesh translations
     if args.translate is not None:
+        if verbose:
+            print '\nOPERATION: Translation by [%f, %f, %f]' % tuple(args.translate)
         V = translate(V, args.translate)
-        write_file = True
+        if verbose:
+            print '\t-> Done.'
+
     if args.translatex is not None:
+        if verbose:
+            print '\nOPERATION: Translation by %f along X' % args.translatex
         V = translate_1D(V, args.translatex, 'x')
-        write_file = True
+        if verbose:
+            print '\t-> Done.'
+
     if args.translatey is not None:
+        if verbose:
+            print '\nOPERATION: Translation by %f along Y' % args.translatey
         V = translate_1D(V, args.translatey, 'y')
-        write_file = True
+        if verbose:
+            print '\t-> Done.'
+
     if args.translatez is not None:
+        if verbose:
+            print '\nOPERATION: Translation by %f along Z' % args.translatez
         V = translate_1D(V, args.translatez, 'z')
-        write_file = True
+        if verbose:
+            print '\t-> Done.'
 
     # Mesh rotations
     # FIXME : supprimer le cast angles et ne prendre que des degres
     if args.rotate is not None:
+        if verbose:
+            print '\nOPERATION: Rotation by [%f, %f, %f]' % tuple(args.rotate)
         V = rotate(V, args.rotate*math.pi/180.)
-        write_file = True
+        if verbose:
+            print '\t-> Done.'
 
     if args.rotatex is not None:
+        if verbose:
+            print '\nOPERATION: Rotation by %f around X (Roll)' % args.rotatex
         V = rotate_1D(V, args.rotatex[0]*math.pi/180., 'x')
-        write_file = True
+        if verbose:
+            print '\t-> Done.'
+
     if args.rotatey is not None:
+        if verbose:
+            print '\nOPERATION: Rotation by %f around Y (Pitch)' % args.rotatey
         V = rotate_1D(V, args.rotatey[0]*math.pi/180., 'y')
-        write_file = True
+        if verbose:
+            print '\t-> Done.'
+
     if args.rotatez is not None:
+        if verbose:
+            print '\nOPERATION: Rotation by %f around Z (Yaw)' % args.rotatez
         V = rotate_1D(V, args.rotatez[0]*math.pi/180., 'z')
-        write_file = True
+        if verbose:
+            print '\t-> Done.'
 
     if args.scale is not None:
+        if verbose:
+            print '\nOPERATION: Scaling by %f' % args.scale
         V = scale(V, args.scale)
-        write_file = True
+        if verbose:
+            print '\t-> Done.'
 
     if args.flip_normals:
+        if verbose:
+            print '\nOPERATION: Flipping normals'
         F = flip_normals(F)
-        write_file = True
+        if verbose:
+            print '\t-> Done.'
 
 
     # Compute principal inertia parameters
     if args.inertias:
         # TODO : completer l'aide avec la logique de cette fonction !!
+        if verbose:
+            print '\n------------------'
+            print 'Computing inertias'
+            print '------------------'
         if args.no_hull:
             hull = False
         else:
@@ -2860,10 +2951,40 @@ def main():
                                         mass=args.mass,
                                         thickness=args.thickness,
                                         shell=hull,
-                                        verbose=args.verbose)
+                                        verbose=verbose)
         # Replacing values in command line arguments in the eventuality of hydrostatics computations
         args.mass = mass
         args.cog = cog
+        if verbose:
+            print '\t-> Done.'
+
+    if args.gz_curves is not None:
+        if verbose:
+            print '\n-------------------'
+            print 'Computing GZ curves'
+            print '-------------------'
+
+        spacing = args.gz_curves
+        try:
+            import hydrostatics as hs
+        except:
+            raise ImportError, '--gz-curves option relies on the hydrostatics module that can not be found'
+
+        # if args.hydrostatics:
+        #     raise RuntimeError, """GZ computations can not be performed at the same time as a hydrostatics equilibrium
+        #                            resolution as it needs a full mesh to perform clipping at different angles"""
+
+        if args.zcog is None:
+            raise RuntimeError, 'For the GZ computations, the --zcog option is mandatory'
+
+        hsMesh = hs.HydrostaticsMesh(V, F, rho_water=args.rho_water, g=args.grav)
+        hs.get_GZ_curves(hsMesh, args.zcog,
+                         spacing=spacing,
+                         rho_water=args.rho_water,
+                         g=args.grav,
+                         verbose=verbose)
+        if verbose:
+            print '\t-> Done.'
 
 
     # Compute hydrostatics
@@ -2877,8 +2998,6 @@ def main():
             anim=True
         else:
             anim=False
-
-        # TODO : verifier chacune des donnees mass, zcog, cog...
 
         if args.cog is None:
             cog = None
@@ -2894,34 +3013,13 @@ def main():
                                    rho_water=args.rho_water,
                                    g=args.grav,
                                    anim=anim,
-                                   verbose=args.verbose)[:2]
+                                   verbose=verbose)[:2]
 
 
     # Lid generation on a clipped mesh
     if args.lid is not None:
-        V, F = generate_lid(V, F, max_area=args.lid, verbose=args.verbose)
+        V, F = generate_lid(V, F, max_area=args.lid, verbose=verbose)
 
-
-    if args.gz_curves is not None:
-        spacing = args.gz_curves
-        try:
-            import hydrostatics as hs
-        except:
-            raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
-
-        if args.hydrostatics:
-            raise RuntimeError, """GZ computations can not be performed at the same time as a hydrostatics equilibrium
-                                   resolution as it needs a full mesh to perform clipping at different angles"""
-
-        if args.zcog is None:
-            raise RuntimeError, 'For the GZ computations, the --zcog option is mandatory'
-
-        hsMesh = hs.HydrostaticsMesh(V, F, rho_water=args.rho_water, g=args.grav)
-        hs.get_GZ_curves(hsMesh, args.zcog,
-                         spacing=spacing,
-                         rho_water=args.rho_water,
-                         g=args.grav,
-                         verbose=args.verbose)
 
     # WARNING : No more mesh modification should be released from this point until the end of the main
 
@@ -2934,20 +3032,23 @@ def main():
     if args.shown:
         show(V, F, normals=True)
 
+
     if args.outfilename is None:
         base, ext = os.path.splitext(args.infilename)
-        if write_file:
-            args.outfilename = '%s_modified%s' % (base, ext)
+        write_file = False
+        # if write_file:
+        #     args.outfilename = '%s_modified%s' % (base, ext)
         # Case where only the output format is given
         if args.output_format is not None:
             write_file = True
             args.outfilename = '%s.%s' % (base, args.output_format)
-        # Case where a transformation has been done
     else:
         write_file = True
 
+
     # Writing an output file
     if write_file:
+
         if args.output_format is not None:
             format = args.output_format
         else:
@@ -2962,8 +3063,18 @@ def main():
             else:
                 format = os.path.splitext(args.outfilename)[1][1:].lower()
 
+        if verbose:
+            print 'Writing %s' % args.outfilename
         write_mesh(args.outfilename, V, F, format)
+        if verbose:
+            print '\t-> Done.'
 
+    if verbose:
+        print '\n============================================================='
+        print 'meshmagick - version %s\n%s' % (__version__, __copyright__)
+        print 'Maintainer : %s <%s>' % (__maintainer__, __email__)
+        print 'Good Bye!'
+        print '============================================================='
 
 if __name__ == '__main__':
     main()

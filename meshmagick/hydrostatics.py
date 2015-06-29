@@ -315,7 +315,8 @@ def print_hysdrostatics_report(hs_data):
         'meta_radius' : 'Initial metacentric radius (m):\n\tx: %f\n\ty: %f\n'
     }
 
-    print '\nHydrostatic Report'
+    print '\n------------------'
+    print 'Hydrostatic Report'
     print '------------------\n'
     for key in hs_text:
         if hs_data.has_key(key):
@@ -362,7 +363,9 @@ def get_hydrostatics(hsMesh, mass=None, cog=None, zcog=None, rho_water=1023, g=9
     if mass is None: # No equilibrium is performed if mass is not given
     #==================================================================
         if verbose:
+            print '\n--------------------------------------------------------'
             print 'Computation of hydrostatics with the given mesh position'
+            print '--------------------------------------------------------'
 
         disp = hsMesh._vw           # displacement
         Cw = hsMesh._cw             # Center of buoyancy
@@ -426,9 +429,9 @@ def get_hydrostatics(hsMesh, mass=None, cog=None, zcog=None, rho_water=1023, g=9
         if cog is None: # Equilibrium resolution in heave only
         #-----------------------------------------------------
             if verbose:
-                print "Equilibrium resolution knowing only mass --> iterations on z only"
-
-            # FIXME : il faut que la mise en equilibre se fasse suivant la normale du plan !!!
+                print '\n----------------------------------------------------'
+                print 'Hydrostatic equilibrium resolution knowing only mass'
+                print '----------------------------------------------------'
 
             res = 0.
             while 1:
@@ -444,7 +447,7 @@ def get_hydrostatics(hsMesh, mass=None, cog=None, zcog=None, rho_water=1023, g=9
                 if verbose:
                     print 'Iteration %u:' % niter
                     print '\t-> Residual = %E (kg)' % res
-                    print '\t-> Target mass: %E (kg); Current: %E (kg)' % (mass, rho_water*hsMesh._vw)
+                    print '\t-> Target mass: %E (kg); Current: %E (kg)\n' % (mass, rho_water*hsMesh._vw)
 
                 # Convergence criteria
                 if math.fabs(res) < abs_tol_pos:
@@ -507,7 +510,9 @@ def get_hydrostatics(hsMesh, mass=None, cog=None, zcog=None, rho_water=1023, g=9
         else: # cog has been specified, 6dof equilibrium resolution
         # ---------------------------------------------------------
             if verbose:
-                print "Equilibrium resolution knowing mass and center of gravity --> iterations on 6dof"
+                print '\n---------------------------------------------------------'
+                print "Equilibrium resolution knowing mass and center of gravity"
+                print '---------------------------------------------------------'
 
             deta = np.zeros(3, dtype=np.float)
 
@@ -616,17 +621,21 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
     # TODO : voir pour parametrer les bornes
     # TODO : permettre de balayer egalement les angles negatifs
 
+    # TODO : n'accepter qu'une direction a la fois...
+
     GZ_phi = np.zeros(angles.shape[0]+1, dtype=np.float)
 
     # Computing the GZ curve in phi
     for (index, phi) in enumerate(angles * math.pi/180.):
-        print 'phi: %f (deg)' % (phi*180/math.pi)
+        if verbose:
+            print 'phi: %f (deg)' % (phi*180/math.pi)
         # Setting the plane
         eta = np.array([0., phi, 0.], dtype=np.float)
         hsMesh.update(eta, rel=False)
         # Ensuring iso-displacement
         hs_data = get_hydrostatics(hsMesh, mass=mass, verbose=False)[2]
-        print 'Target disp : %E ; current disp : %E' % (Vw0, hs_data['disp'])
+        if verbose:
+            print 'Target disp : %E ; current disp : %E' % (Vw0, hs_data['disp'])
         Cwj = hs_data['Cw']
 
         # Computing the transverse metacentric point relative to angle phi
@@ -641,13 +650,15 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
 
     GZ_theta = np.zeros(angles.shape[0]+1, dtype=np.float)
     for (index, theta) in enumerate(angles * math.pi/180.):
-        print 'theta: %f (deg)' % (angles[index])
+        if verbose:
+            print 'theta: %f (deg)' % (angles[index])
         # Setting the plane
         eta = np.array([0., 0., theta], dtype=np.float)
         hsMesh.update(eta, rel=False)
         # Ensuring iso-displacement
         cV, cF, hs_data = get_hydrostatics(hsMesh, mass=mass, verbose=False)
-        print 'Target disp : %E ; current disp : %E' % (Vw0, hs_data['disp'])
+        if verbose:
+            print 'Target disp : %E ; obtained disp : %E' % (Vw0, hs_data['disp'])
         filename = 'eq%u.vtu'%(index+1)
         mm.write_VTU(filename, cV, cF)
 
@@ -682,14 +693,6 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
 
 
     return 1
-
-
-
-        # filename = 'eq%u.vtu'%index
-        # mm.write_VTU(filename, cV, cF)
-
-
-
 
     def get_area_curve(V, F, dir):
 
