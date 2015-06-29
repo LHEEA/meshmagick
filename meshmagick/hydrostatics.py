@@ -31,17 +31,19 @@ class HydrostaticsMesh:
         # Computing once the volume integrals on all the faces of the initial mesh to speedup subsequent operations
         self._surfint = mm._get_surface_integrals(V, F, sum=False)
 
-        # Computing the characteristic dimension in z
+        # Defining the clipping plane Oxy and updating hydrostatics
+        self._plane = mm.Plane()
+        self.update(np.zeros(3))
+
+
+    def _init_tolerances(self):
+
         # TODO : voir si on ne peut pas affiner ce critere et le rendre plus general
-        height = V[:, 2].max() - V[:, 2].min()
+        height = self.V[:, 2].max() - self.V[:, 2].min()
         self._zmax = height * 1e-1
         self._dz = height * 1e-3
         # TODO : Tuner plus precisement ce critere !
         # TODO : ne pas permettre lors des iterations d'appliqier des corrections plus faibles que ce critere
-
-        # Defining the clipping plane Oxy and updating hydrostatics
-        self._plane = mm.Plane()
-        self.update(np.zeros(3))
 
         vw0 = self._vw
         self.update([self._dz, 0., 0.])
@@ -53,6 +55,8 @@ class HydrostaticsMesh:
 
 
     def update(self, eta, rel=True):
+
+        # TODO : Make mm.clip_by_plane function to return a code to manage void intersections
 
         # Updating the clipping plane position
         if rel:
@@ -69,7 +73,7 @@ class HydrostaticsMesh:
 
         # TODO : mettre les updates dans des methodes
         # Extracting a mesh composed by only the faces that have to be updated
-        V_update, F_update = mm.extract_faces(self._cV, self._cF, clip_infos['FToUpdateNewID'])
+        # V_update, F_update = mm.extract_faces(self._cV, self._cF, clip_infos['FToUpdateNewID'])
 
         # Updating surface integrals for underwater faces of the clipped mesh
         self._update_surfint(clip_infos)
@@ -397,6 +401,9 @@ def get_hydrostatics(hsMesh, mass=None, cog=None, zcog=None, rho_water=1023, g=9
     #========================================================================
     else: # mass is given explicitly, iterative resolution of the equilibrium
     #========================================================================
+
+        # Initialization of tolerances
+        hsMesh._init_tolerances()
 
         maxiter = 100
         rg = rho_water * g

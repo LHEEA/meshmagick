@@ -138,16 +138,16 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
     # Getting the position of each vertex with respect to the plane (projected distance)
     positions = np.dot(V, plane.normal)-plane.c
 
+    boundary_v_mask = (np.fabs(positions) <= abs_tol) # Vertices that are already on the boundary
+
     # Getting the vertices we are sure to keep
     keepV = positions <= abs_tol # Vertices we know we will keep
 
     # If the mesh is totally at one side of the plane, no need to go further !
     nb_kept_V = np.sum(keepV)
-    if nb_kept_V == nv or nb_kept_V == 0:
-        if nb_kept_V == nv:
-            # TODO : si nb_kept_V est egal a nv, on devrait pouvoir tester si le maillage n'est pas deja coupe et renvoyer le maillage initial et calculer les polygones d'intersection.
-            pass
-        raise RuntimeError, 'The clipping plane does not cross the mesh'
+    if nb_kept_V == 0:
+        # Mesh is totally above the plane, non intersection, nothing to keep --> error
+        raise RuntimeError, 'Mesh is totally above the clipping plane. No cells to keep...'
 
     # Getting triangles and quads masks
     triangle_mask = F[:, 0] == F[:, -1]
@@ -174,9 +174,8 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
     keepF[np.logical_and(triangle_mask, nb_V_kept_by_face == 3)] = True
     keepF[np.logical_and(quad_mask, nb_V_kept_by_face == 4)] = True
 
-    clip_infos['FkeptOldID'] = np.arange(nf)[keepF]
-
-    boundary_v_mask = np.fabs(positions)<=abs_tol # Vertices that are already on the boundary
+    clip_infos['FkeptOldID'] = np.arange(nf)[keepF] # TODO : voir si on ne peut pas mettre cette ligne dans le bloc
+    # infos suivant
 
     if infos:
         # Getting the boundary faces
@@ -210,6 +209,35 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
                     else:
                         boundary_edges[face_w[index+1]] = face_w[index]
                     break
+
+    # All a the faces are kept
+    if nb_kept_V == nv:
+        if infos:
+            # Detecting if the mesh has intersection polygons
+            if boundary_v_mask.sum() > 0:
+                # Computing the boundary polygons
+                initV = boundary_edges.keys()[0]
+                polygons = []
+                while len(boundary_edges) > 0:
+                    polygon = [initV]
+                    closed = False
+                    iV = initV
+                    while 1:
+                        iVtarget = boundary_edges.pop(iV)
+                        polygon.append(iVtarget)
+                        iV = iVtarget
+                        if iVtarget == initV:
+                            polygons.append(polygon)
+                            if len(boundary_edges) > 0:
+                                initV = boundary_edges.keys()[0]
+                            break
+                clip_infos['PolygonsNewID'] = polygons
+            # clip_infos['FkeptOldID'] = np.arange(nf, dtype=np.int32)
+            clip_infos['FkeptNewID'] = clip_infos['FkeptOldID'].copy()
+
+            return V, F, clip_infos
+        else:
+            return V, F
 
     clipped_mask = np.zeros(nf, dtype=bool)
     clipped_mask[triangle_mask] = np.logical_and(nb_V_kept_by_face[triangle_mask] < 3,
@@ -2818,9 +2846,6 @@ def main():
         F = flip_normals(F)
         write_file = True
 
-    # Lid generation on a clipped mesh by plane Oxy
-    if args.lid is not None:
-        V, F = generate_lid(V, F, max_area=args.lid, verbose=args.verbose)
 
     # Compute principal inertia parameters
     if args.inertias:
@@ -2870,6 +2895,12 @@ def main():
                                    g=args.grav,
                                    anim=anim,
                                    verbose=args.verbose)[:2]
+
+
+    # Lid generation on a clipped mesh
+    if args.lid is not None:
+        V, F = generate_lid(V, F, max_area=args.lid, verbose=args.verbose)
+
 
     if args.gz_curves is not None:
         spacing = args.gz_curves
