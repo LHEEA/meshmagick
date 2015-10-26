@@ -6,7 +6,7 @@
 
 """
 This module contains utility function to manipulate, load, save and
-convert mesh files
+convert surface mesh files used by the hydrodynamics community.
 Two numpy arrays are manipulated in this module : V and F.
 V is the array of nodes coordinates. It is an array of shape (nv, 3) where
 nv is the number of nodes in the mesh.
@@ -15,9 +15,10 @@ nf is the number of cells in the mesh. Not that it has 4 columns as we consider
 flat polygonal cells up to 4 edges (quads). Triangles are obtained by repeating
 the first node at the end of the cell node ID list.
 
-ATTENTION : IDs of vertices should always start at 1, which is the usual case in
+WARNING : IDs of vertices should always start at 1, which is the usual case in
 file formats. However, for VTK, it starts at 0. To avoid confusion, we should
 always start at 1 and do the appropriated conversions on F.
+THIS MAY CHANGE IN THE FUTURE !!!
 """
 
 import os, sys
@@ -25,28 +26,52 @@ import numpy as np
 import numpy as np
 import math
 from datetime import datetime
+from numpy.core.multiarray import dtype
 
 __year__ = datetime.now().year
 
-__author__ = "Francois Rongere"
-__copyright__ = "Copyright 2014-%u, Ecole Centrale de Nantes" % __year__
-__credits__ = "Francois Rongere"
-__licence__ = "CeCILL"
-__version__ = "1.0"
+__author__     = "Francois Rongere"
+__copyright__  = "Copyright 2014-%u, Ecole Centrale de Nantes" % __year__
+__credits__    = "Francois Rongere"
+__licence__    = "CeCILL"
+__version__    = "1.0"
 __maintainer__ = "Francois Rongere"
-__email__ = "Francois.Rongere@ec-nantes.fr"
-__status__ = "Development"
-
-real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?'
+__email__      = "Francois.Rongere@ec-nantes.fr"
+__status__     = "Development"
 
 
+real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?' # Regex for floats
 
 
+# MESHMAGICK CLASSES
+# ------------------
 
-
-# Classes
 class Plane:
+    """Class to manipulate planes.
+
+    Planes are used for symmetrizing and clipping meshes. The internal representation
+    of a plane is the equation <N.X> = c where X is a point belonging to the plane,
+    N is the normal to the plane and c is the normal distance of the plane with respect
+    to the coordinate system origin.
+
+    Example:
+        We can define a plane by giving a normal and a scalar.
+
+        >>> my_plane = Plane([1, 0, 0], 0)
+
+        will define the plane 0yz with a normal pointing towards the positive x-axis.
+
+    """
     def __init__(self, normal=np.array([0., 0., 1.]), c=0.):
+        """Plane constructor
+
+        Parameters:
+            normal: ndarray
+                A numpy array of three elements defining the normal to the plane.
+            c: float
+                A float defining the normal distance of the plane with respect to
+                the coordinate system origin.
+        """
         self.normal = normal / np.linalg.norm(normal) # Ensuring a unit normal
         self.c = c
 
@@ -55,7 +80,8 @@ class Plane:
 
 
     def set_position(self, z=0., phi=0., theta=0.):
-        """Set the position of the plane form z and phi, theta angles (given in radian)"""
+        """Set the position of the plane from z and phi, theta angles (given in radian)
+        instead of the normal and scalar convention."""
 
         self.Re0 = self._get_rotation_matrix(phi, theta)
         self.normal = self.Re0[2]
@@ -65,13 +91,15 @@ class Plane:
 
 
     def get_position(self):
+        """Returns the position of the plane as a [z, phi, theta] numpy array
+        """
         # FIXME : on ne garde plus les angles en attribut
         phi, theta = self._get_angles_from_normal()
         return np.array([self.c, phi, theta], dtype=np.float)
 
 
     def update(self, deta):
-        """Update the position of the plane from its current position"""
+        """Update the position of the plane with respect to its current position"""
 
         # Computing the rotation matrix between current and final position
         Rpp_p = self._get_rotation_matrix(deta[1], deta[2])
@@ -84,11 +112,14 @@ class Plane:
 
 
     def flip(self):
+        """Flip the normal orientation"""
         self.normal = -self.normal
         #TODO : faire la mise a jour des infos d'angle !!
 
 
     def _get_angles_from_normal(self):
+        """Internal method returning the orientation of the plane normal
+        with respect to the coordinate system"""
 
         u, v, w = self.normal
 
@@ -99,6 +130,9 @@ class Plane:
 
 
     def _get_rotation_matrix(self, phi, theta):
+        """Internal method returning the rotation matrix associated to the
+        orientation of the plane's normal orientation angles"""
+
         # Rotation matrix
         cphi = math.cos(phi)
         sphi = math.sin(phi)
@@ -114,6 +148,7 @@ class Plane:
 
 
     def coord_in_plane(self, vertices):
+        """Returns the coordinates of vertices in the local plane coordinate system"""
 
         # FIXME : ne fonctionne pas si on envoie un seul vertex !
         if vertices.ndim == 1: # Case where only one vertex is given
@@ -126,12 +161,72 @@ class Plane:
 
 
 def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
+    """clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False)
+
+    Performs a mesh clipping by plane
+
+    Parameters:
+        Vinit: ndarray
+            numpy array of shape (nv, 3) specifying the nodes's coodinates
+            of the initial mesh to be clipped. nv is the number of nodes.
+        Finit: ndarray
+            numpy array of shape (nf, 4) specifying the node connectivity
+            for the faces description of the initial mesh to be clipped.
+            nf is the number of faces in the mesh. Every face is a line of
+            Finit. It specifies 4 nodes ids. In case of a triangle face,
+            the convention is to repeat the first node id as the last element.
+        plane: Plane
+            Plane instance that defines the clipping plane
+        abs_tol: float
+            tolerance under which a node is considered as belonging to the
+            clipping plane
+        infos: boolean
+            if set to True, the function also returns a dictionary named
+            clip_info which embed information on the clipping procedure
+            such as the clipping polygons
+
+    Returns:
+        clipped_V: ndarray
+            numpy array of shape (new_nv, 3) giving the nodes of the clipped
+            mesh. new_nv is the number of vertices in the clipped mesh
+        clipped_F: ndarray
+            numpy array of shape (new_nf, 4) giving the connectivity of faces
+            for the clipped mesh. new_nf is the number of faces in the clipped
+            mesh
+        clip_infos [optional]: dict
+            dictionary giving the following informations:
+                'FkeptOldID':
+                    a numpy array of size new_nf specifying for
+                    each kept face the old ID it had in the initial, non clipped
+                    mesh
+                 'FkeptNewID':
+                    a numpy array of size nf specifying for each old face, in case
+                    it has been kept in the clipped mesh, its new ID in the clipped
+                    mesh
+                 'FToUpdateNewID':
+                    a numpy array of size nm giving the list of face ids that have
+                     been modified in the clipping procedure (following IDs in the
+                     clipped mesh). nm is the number of modified faces. Modified
+                     faces are those faces that have been intersected by the plane
+                     and that potentially have degenerated from triangles to
+                     quadrangles or other modification linked to that kind of
+                     intersection. It also concerns the newly created faces (mainly
+                     those that appeared in qudrangle intersection by plane that
+                     gives a polygon with five edges and that need to be subdivided
+                     into a triangle plus a quadrangle)
+                 'PolygonsNewID':
+                    a list of numpy arrays specifying for each clipping polygon
+                    (generated by the intersection of the mesh with the clipping
+                    plane) the list of node ids of the polygon. The size of this
+                    list gives the number of polygons issued from the intersection
+    """
 
     # Working on different arrays
     V = Vinit.copy()
     F = Finit.copy()
 
     # To store information about extraction
+    # TODO : create a class clip_infos ?
     clip_infos = {'FkeptOldID':[], 'FkeptNewID':[], 'FToUpdateNewID':[], 'PolygonsNewID':[]}
 
     # Necessary to deal with clipping of quadrangle that give a pentagon
@@ -432,11 +527,30 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
 
 def extract_faces(V, F, idF):
     """
-    :param V: Initial vertices array
-    :param F: Initial faces connectivity array
-    :param idF: Ids of faces to extract
-    :return:
+    extract_faces(V, F, idF)
+
+    performs the extraction of a subset of the initial mesh giving the
+    ids of faces that we want to extract.
+
+    Parameters:
+        V: ndarray
+            numpy array that define the coordinates of the initial mesh's
+            nodes
+        F: ndarray
+            numpy array that defines the initial mesh's faces by their node
+            connectivity
+        idF: ndarray
+            numpy array that defines the ids of the faces we want to extract
+            from the initial mesh defined by V, F arrays
+
+    Returns:
+        Vring: ndarray
+            numpy array that defines the nodes coordinates of the extracted mesh
+        Fring: ndarray
+            numpy array that defines the faces of the extracted mesh by their
+            node connectivity
     """
+
     nv = V.shape[0]
     nf = F.shape[0]
 
@@ -457,6 +571,24 @@ def extract_faces(V, F, idF):
 
 
 def get_edge_intersection_by_plane(plane, V0, V1):
+    """get_edge_intersection_by_plane(plane, V0, V1)
+
+    Computes the intersection of an edge with a plane
+
+    Parameters:
+        plane: Plane
+            instance of Plane used as a clipping plane
+        V0: ndarray
+            numpy array of size 3 giving the coordinates of the first
+            edge's end point
+        V1: ndarray
+            numpy array of size 3 giving the coordinates of the second
+            edge's end point
+
+    Returns:
+        VI: ndarray
+            numpy array giving the coordinates of the intersection point
+    """
     d0 = np.dot(plane.normal, V0) - plane.c
     d1 = np.dot(plane.normal, V1) - plane.c
     t = d0 / (d0-d1)
@@ -464,7 +596,30 @@ def get_edge_intersection_by_plane(plane, V0, V1):
 
 
 def get_face_properties(V):
+    """get_face_properties(V)
+
+    Returns the prperties of a face defined by the coordinates of its
+    vertices. The properties are the area, the normal and the center of
+    the face. This function only deals with one face at once. For a
+    boradcast version, see get_all_faces_properties function
+
+    Parameters:
+        V: ndarray
+            numpy array of shape (nv, 3) defining the coordinates of the
+            face's nodes. nv may be 3 of 4 for triangle or quadrangle,
+            respectively
+
+    Returns:
+        area: float
+            area of the face
+        normal: ndarray
+            coordinates of the face's normal
+        center: ndarray
+            coordinates of the face's center
+    """
+
     nv = V.shape[0]
+
     if nv == 3: # triangle
         normal = np.cross(V[1]-V[0], V[2]-V[0])
         area = np.linalg.norm(normal)
@@ -485,6 +640,27 @@ def get_face_properties(V):
 
 
 def get_all_faces_properties(V, F):
+    """get_all_faces_properties(V, F)
+
+    Computes the properties for all the faces of a mesh defined by its
+    V, F arrays. It exploits numpy capabilities for vectorizing computations.
+    For a version dealing with only one face, see get_face_properties function.
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    Returns:
+        areas: ndarray
+            numpy array of the faces areas
+        normals: ndarray
+            numpy array of the faces' normals coordinates
+        centers:
+            numpy arrau of the faces' centers coordinates
+
+    """
 
     nf = F.shape[0]
 
@@ -529,9 +705,52 @@ def get_all_faces_properties(V, F):
     return areas, normals, centers
 
 
-_mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float)
+_mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float) # Defines the array coefficient to compute surface integrals efficiently
 def _get_surface_integrals(V, F, sum=True):
-    """Based on the work of David Eberly"""
+    """_get_surface_integrals(V, F, sum=True)
+
+    Internal function
+    Computes all the faces' integrals that may be used in several computations such
+    as inertial properties of meshes. This function is partly based on the work of
+    David Eberly:
+    ...
+
+    Parameters:
+        V: ndarray
+            numpy array of the mesh's nodes coordinates
+        F: ndarray
+            numpy array of the mesh's faces nodes connectivity
+        sum[optional]: bool
+            if let to True, the results will be summed over all faces.
+            Otherwise, no sum will be performed and individual integral
+            on faces will be returned
+
+    Return:
+        sint: ndarray
+            numpy array of shape (nf, 15) that contains different integrals
+            over the mesh faces. If sum is False, nf is equal to the number
+            of faces in the mesh. Otherwise, nf=1.
+
+            The different integrals that sint contains are:
+
+             sint[0]  = \int x dS
+             sint[1]  = \int y dS
+             sint[2]  = \int z dS
+             sint[3]  = \int yz dS
+             sint[4]  = \int xz dS
+             sint[5]  = \int xy dS
+             sint[6]  = \int x^2 dS
+             sint[7]  = \int y^2 dS
+             sint[8]  = \int z^2 dS
+             sint[9]  = \int x^3 dS
+             sint[10] = \int y^3 dS
+             sint[11] = \int z^3 dS
+             sint[12] = \int x^2y dS
+             sint[13] = \int y^2z dS
+             sint[14] = \int z^2x dS
+    """
+
+    # TODO : put reference to the Eberly's work in the docstring
 
     nf = F.shape[0]
 
@@ -619,21 +838,76 @@ def _get_surface_integrals(V, F, sum=True):
 
 
 def get_mass_cog(V, F, rho=1.):
+    """get_mass_cog(V, F, rho=1.)
+
+    Returns the mass and the center of gravity of a mesh
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+        rho[optional]: float
+            specifies the density of the material enclosed by the mesh
+
+    Returns:
+
+    """
+    # TODO: allow to specify as mush as options as in get_inertial_properties... or remove this function !
+
     return get_inertial_properties(V, F, rho=rho)[:2]
 
 
-_mult_vol = np.array([1., 1., 1., 1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.])
+_mult_vol = np.array([1., 1., 1., 1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.]) # Defines the array coefficient to compute volume integrals on meshes
 def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False):
+    """get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False)
+
+    Returns the inertial properties of a mesh. The mesh may be considred as being
+    filled with homogeneous material or as being a shell.
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+        rho[optional]: float
+            the density of the material. By default, it is the steel density
+            (7500 kg/m**3)
+        mass[optional]: float
+            the mass of the mesh. If it is specified, it will overwrite
+            the density (even if explicitely given)
+        thickness[optional]: float
+            specifies the thickness of the hull. Used if shell is set to True.
+        shell[optional]: bool
+            if set to True, the mesh will be considered as a shell
+        verbose[optional]: bool
+            if set to True, the function will display a report on inertial
+            properties of the mesh
+
+    Returns:
+        mass: float
+            The mass of the mesh (computed or given...)
+        cog: ndarray
+            The coordinates of the center of gravity of the mesh
+        inertia_matrix: ndarray
+            The inertia matrix of the mesh expressed at the center
+             of gravity
+
+    """
     # TODO : allow to specify a reduction point...
     # The default density rho is that of steel
 
     tol = 1e-8
+
+    # FIXME : la gestion des options n'est pas claire ici !!! Remettre les choses a plat
 
     if shell: # The geometry is a shell with homogeneous thickness and density.
         areas, normals = get_all_faces_properties(V, F)[:2]
         St = areas.sum() # Total surface
         # The geometry is considered as being a shell with thickness given
         if mass is None:
+
+            # FIXME : may not work if thickness is not given !!
 
             # if thickness is None:
             #     # Assuming a standard thickness of 1cm
@@ -689,6 +963,7 @@ def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=Fa
         # Appliying multipliers
         sint *= _mult_vol
 
+        # We take the mean of 3 possible computations from surface integrals
         vol = (sint[0] + sint[1] + sint[2]) / 3.
         cog = np.array([sint[6]/vol, sint[7]/vol, sint[8]/vol], dtype=float)
 
@@ -730,7 +1005,31 @@ def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=Fa
     return mass, cog, inertia_matrix
 
 
-def transport_inertia_matrix(mass, cog, Ig, point, rot):
+def transport_inertia_matrix(mass, cog, Ig, point, rot=np.eye(3, dtype=np.float)):
+    """transport_inertia_matrix(mass, cog, Ig, point, rot)
+
+    Performs the transport of the inertia matrix of a mesh at an other
+    reduction point
+
+    Parameters:
+        mass: float
+            The mass of the mesh
+        cog: ndarray
+            The coordinates of the center of gravity
+        Ig: ndarray
+            The 3x3 inertia matrix of the mesh expressed at cog
+        point: ndarray
+            The coordinates of the reduction point
+        rot: ndarray
+            The rotation matrix defining the orientation of the
+            new axis system with respect to the current
+
+    Returns:
+        Ipoint:
+            The 3x3 inertia matrix of the mesh expressed at the
+            new reduction point and in a frame rotated by rot with
+            respect to the initial coordinate system
+    """
 
     point_cog = cog - point
     Ipoint = rot * Ig * rot.T + \
@@ -740,15 +1039,66 @@ def transport_inertia_matrix(mass, cog, Ig, point, rot):
 
 
 def get_volume(V, F):
+    """get_volume(V, F)
+
+    Returns the volume of the mesh
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    Returns:
+        vol: float
+            The volume of the mesh
+    """
     return _get_surface_integrals(V, F)[0]
 
 
 def get_COM(V, F):
+    """get_COM(V, F)
+
+    Returns the center of mass (center of gravity) of the mesh
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    Returns:
+        com: ndarray
+            Coordinates of the center of gravity of the mesh
+    """
+    # FIXME: la sortie est tres etonnante. Ne doit pas faire ce que ca dit !!!
+
     return _get_surface_integrals(V, F)
 
 
-def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'implementation
+def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'implementation -> ???
+    """heal_normals(V, F, verbose=False)
 
+    Returns the mesh with a consistent normal orientiation. Detects if
+    the mesh is closed. If it is closed, it will also makke the normals outgoing.
+    It uses a flood fill algorithm to propagate normal orientations through the
+    unstructured mesh so it first build connectivity information between faces
+    that are not embedded in the {V, F} mesh representation
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+        verbose[optional]:
+            if set to True, displays informations on the procedure
+
+    Returns:
+        F: ndarray
+            numpy array of the faces' nodes connectivities corrected
+            to give a consistent orientation of normals
+
+    """
     F -=1
 
     nv = V.shape[0]
@@ -866,14 +1216,29 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
 
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
-    """
+    """merge_duplicates(V, F, verbose=False, tol=1e-8)
+
     Returns a new node array where close nodes have been merged into one node (following tol). It also returns
     the connectivity array F with the new node IDs.
-    :param V:
-    :param F:
-    :param verbose:
-    :param tol:
-    :return:
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+        verbose[optional]: bool
+            if set to True, displays information on the merge procedure
+        tol[optional]: float
+            the tolerance used to define nodes that are coincident and
+            that have to be merged
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes where
+            every node is different
+        F: ndarray
+            numpy array of the faces' nodes connectivities, accordingly
+            to the new node list that has been merged
     """
 
     # TODO : Set a tolerance option in command line arguments
@@ -950,8 +1315,22 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
 # Contains here all functions to load meshes from different file formats
 
 def load_mesh(filename, format):
-    """
-    Function to load every known mesh file format
+    """load_mesh(filename, format)
+
+    Driver function that loads every mesh file format known by meshmagick
+    and returns the node list and the connectivity array
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+        format: str
+            format of the mesh defined in the extension_dict dictionary
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
     os.path.isfile(filename)
 
@@ -966,10 +1345,20 @@ def load_mesh(filename, format):
 
 
 def load_RAD(filename):
-    """
-    Loads RADIOSS files
-    :param filename:
-    :return:
+    """load_RAD(filename)
+
+    Loads RADIOSS mesh files. This export file format may be chosen in ICEM
+    meshing program.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
 
     import re
@@ -1007,10 +1396,19 @@ def load_RAD(filename):
 
 
 def load_HST(filename):
-    """
-    This function loads data from HYDROSTAR software.
-    :param filename:
-    :return:
+    """load_HST(filename)
+
+    Loads HYDROSTAR (Bureau Veritas (c)) mesh files.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
     ifile = open(filename, 'r')
     data = ifile.read()
@@ -1061,13 +1459,28 @@ def load_HST(filename):
 
 
 def load_DAT(filename):
+    """Not implemented.
+    Intended to load .DAT files used in DIODORE (PRINCIPIA (c))
+    """
     raise NotImplementedError
 
 
 def load_INP(filename):
-    """
-    This function loads data from DIODORE (PRINCIPIA) INP file format.
+    """load_INP(filename)
 
+    Loads DIODORE (PRINCIPIA (c)) configuration file format. It parses
+    the .INP file and extract meshes defined in subsequent .DAT files
+    using the different informations contained in the .INP file.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
     import re
 
@@ -1218,12 +1631,20 @@ def load_INP(filename):
 
 
 def load_TEC(filename):
-    """
-    This function loads data from XML and legacy VTK file format.
-    At that time, only unstructured meshes are supported.
+    """load_TEC(filename)
 
-    Usage:
-        V, F = load_VTK(filename)
+    Loads TECPLOT (Tecplot (c)) mesh files. It relies on the tecplot file
+    reader from the VTK library.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
 
     from vtk import vtkTecplotReader
@@ -1278,11 +1699,20 @@ def load_TEC(filename):
 
 
 def load_VTU(filename):
-    """
-    This function loads data from XML VTK file format.
+    """load_VTU(filename)
 
-    Usage:
-        V, F = load_VTU(filename)
+    Loads VTK file format in the new XML format (vtu file extension for
+    unstructured meshes). It relies on the reader from the VTK library.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
 
     from vtk import vtkXMLUnstructuredGridReader
@@ -1293,12 +1723,20 @@ def load_VTU(filename):
 
 
 def load_VTK(filename):
-    """
-    This function loads data from XML and legacy VTK file format.
-    At that time, only unstructured meshes are supported.
+    """load_VTK(filename)
 
-    Usage:
-        V, F = load_VTK(filename)
+    Loads VTK file format in the legacy format (vtk file extension).
+    It relies on the reader from the VTK library.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
     from vtk import vtkUnstructuredGridReader
     reader = vtkUnstructuredGridReader()
@@ -1308,7 +1746,23 @@ def load_VTK(filename):
 
 
 def _load_paraview(filename, reader):
+    """_load_paraview(filename, reader)
 
+    Internal driver function that uses the VTK library to read VTK related
+    file formats.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+        reader: Reader
+            the reader to use (new XML format ot legacy vtk format)
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+    """
     # Importing the mesh from the file
     reader.SetFileName(filename)
     reader.Update()
@@ -1334,10 +1788,22 @@ def _load_paraview(filename, reader):
 
 
 def load_STL(filename):
-    """
-    This function reads an STL file to extract the mesh
-    :param filename:
-    :return:
+    """load_STL(filename)
+
+    Loads STL file format. It relies on the reader from the VTK library.
+    As STL file format maintains a redundant set of vertices for each faces
+    of the mesh, it returns a merged list of nodes and connectivity array
+    by using the merge_duplicates function.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
 
     from vtk import vtkSTLReader
@@ -1368,7 +1834,8 @@ def load_STL(filename):
 
 
 def load_NAT(filename):
-    """
+    """load_NAT(filename)
+
     This function loads natural file format for meshes.
 
     Format spec :
@@ -1393,6 +1860,17 @@ def load_NAT(filename):
     x1 y1 z1 : cartesian coordinates of node 1
     i1 j1 k1 l1 : counterclock wise Ids of nodes for cell 1
     if cell 1 is a triangle, i1==l1
+
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
 
     ifile = open(filename, 'r')
@@ -1414,8 +1892,21 @@ def load_NAT(filename):
 
 
 def load_GDF(filename):
-    """
-    This function loads GDF files from WAMIT mesh file format.
+    """load_GDF(filename)
+
+    Loads WAMIT (Wamit INC. (c)) GDF mesh files. As GDF file format maintains
+    a redundant set of vertices for each faces of the mesh, it returns a merged
+    list of nodes and connectivity array by using the merge_duplicates function.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
     ifile = open(filename, 'r')
 
@@ -1449,8 +1940,19 @@ def load_GDF(filename):
 
 
 def load_MAR(filename):
-    """
-    This function loads .mar files in memory.
+    """load_MAR(filename)
+
+    Loads Nemoh (Ecole Centrale de Nantes) mesh files.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
     """
 
     ifile = open(filename, 'r')
@@ -1480,46 +1982,62 @@ def load_MAR(filename):
     return V, F
 
 
-def load_STL2(filename):
-    import re
-
-    ifile = open(filename, 'r')
-    text = ifile.read()
-    ifile.close()
-
-    endl = r'(?:\n|\r|\r\n)'
-    patt_str = r"""
-            ^\s*facet\s+normal(.*)""" + endl + """
-            ^\s*outer\sloop""" + endl + """
-            ^\s*vertex\s+(.*)""" + endl + """
-            ^\s*vertex\s+(.*)""" + endl + """
-            ^\s*vertex\s+(.*)""" + endl + """
-            ^\s*endloop""" + endl + """
-            ^\s*endfacet""" + endl + """
-           """
-    pattern = re.compile(patt_str, re.MULTILINE | re.VERBOSE)
-
-    normal = []
-    V = []
-    for match in pattern.finditer(text):
-        normal.append(map(float, match.group(1).split()))
-        V.append(map(float, match.group(2).split()))
-        V.append(map(float, match.group(3).split()))
-        V.append(map(float, match.group(4).split()))
-
-    V = np.array(V, dtype=float, order='fortran')
-
-    nf = np.size(V, 0) / 3
-    F = np.zeros((nf, 4), dtype=np.int32, order='fortran')
-
-    base = np.array([1, 2, 3, 1])
-    for i in range(nf):
-        F[i, :] = base + 3 * i
-
-    return V, F
+# def load_STL2(filename):
+#     import re
+#
+#     ifile = open(filename, 'r')
+#     text = ifile.read()
+#     ifile.close()
+#
+#     endl = r'(?:\n|\r|\r\n)'
+#     patt_str = r"""
+#             ^\s*facet\s+normal(.*)""" + endl + """
+#             ^\s*outer\sloop""" + endl + """
+#             ^\s*vertex\s+(.*)""" + endl + """
+#             ^\s*vertex\s+(.*)""" + endl + """
+#             ^\s*vertex\s+(.*)""" + endl + """
+#             ^\s*endloop""" + endl + """
+#             ^\s*endfacet""" + endl + """
+#            """
+#     pattern = re.compile(patt_str, re.MULTILINE | re.VERBOSE)
+#
+#     normal = []
+#     V = []
+#     for match in pattern.finditer(text):
+#         normal.append(map(float, match.group(1).split()))
+#         V.append(map(float, match.group(2).split()))
+#         V.append(map(float, match.group(3).split()))
+#         V.append(map(float, match.group(4).split()))
+#
+#     V = np.array(V, dtype=float, order='fortran')
+#
+#     nf = np.size(V, 0) / 3
+#     F = np.zeros((nf, 4), dtype=np.int32, order='fortran')
+#
+#     base = np.array([1, 2, 3, 1])
+#     for i in range(nf):
+#         F[i, :] = base + 3 * i
+#
+#     return V, F
 
 
 def load_MSH(filename):
+    """load_MSH(filename)
+
+    Loads GMSH .MSH mesh files. It curretly uses an external module but should rely
+    on a reader written for meshmagick (or on meshpy module but this one is hard to
+    install on Windows...)
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+    """
     import gmsh
 
     myMesh = gmsh.Mesh()
@@ -1553,8 +2071,20 @@ def load_MSH(filename):
 #=======================================================================
 
 def write_mesh(filename, V, F, format):
-    """
-    This function writes mesh data into filename following its extension
+    """write_mesh(filename, format)
+
+    Driver function that writes every mesh file format known by meshmagick
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+        format: str
+            format of the mesh defined in the extension_dict dictionary
+
     """
 
     if not extension_dict.has_key(format):
@@ -1568,12 +2098,20 @@ def write_mesh(filename, V, F, format):
 
 
 def write_DAT(filename, V, F):
-    """
-    Writes DAT files for DIODORE
-    :param filename:
-    :param V:
-    :param F:
-    :return:
+    """write_DAT(filename, V, F)
+
+    Writes .DAT file format for the DIODORE (PRINCIPA (c)) software.
+    It also displays suggestions for inclusion into the .INP configuration
+    file.
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
     """
 
     import time
@@ -1653,12 +2191,18 @@ def write_DAT(filename, V, F):
 
 
 def write_HST(filename, V, F):
-    """
-    This function writes mesh into a HST file format
-    :param filename:
-    :param V:
-    :param F:
-    :return:
+    """write_HST(filename, V, F)
+
+    Writes .HST file format for the HYDROSTAR (Bureau Veritas (c)) software.
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
     """
 
     ofile = open(filename, 'w')
@@ -1706,13 +2250,19 @@ def write_HST(filename, V, F):
 
 
 def write_TEC(filename, V, F):
-    """
-    This function writes data in a tecplot file
+    """write_TEC(filename, V, F)
 
-    :param filename:
-    :param V:
-    :param F:
-    :return:
+    Writes .TEC file format for the TECPLOT (Tecplot (c)) visualisation
+    software. It relies on the VTK library for its writer.
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
     """
     ofile = open(filename, 'w')
 
@@ -1743,7 +2293,23 @@ def write_TEC(filename, V, F):
 
     return 1
 
+
 def write_VTU(filename, V, F):
+    """write_VTU(filename, V, F)
+
+    Writes .vtu file format for the paraview (Kitware (c)) visualisation
+    software. It relies on the VTK library for its writer. VTU files use
+    the last XML file format of the VTK library.
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    """
     from vtk import vtkXMLUnstructuredGridWriter
     writer = vtkXMLUnstructuredGridWriter()
     writer.SetDataModeToAscii()
@@ -1751,9 +2317,22 @@ def write_VTU(filename, V, F):
 
     return 1
 
+
 def write_VTK(filename, V, F):
-    """ This function writes data in a VTK XML file.
-    Currently, it only support writing unstructured grids
+    """write_VTK(filename, V, F)
+
+    Writes .vtk file format for the paraview (Kitware (c)) visualisation
+    software. It relies on the VTK library for its writer. VTK files use
+    the legagy ASCII file format of the VTK library.
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
     """
 
     from vtk import vtkUnstructuredGridWriter
@@ -1762,8 +2341,24 @@ def write_VTK(filename, V, F):
 
     return 1
 
-def _write_paraview(filename, V, F, writer):
 
+def _write_paraview(filename, V, F, writer):
+    """_write_paraview(filename, V, F)
+
+    Internal driver function that writes vtk files to be visualised into
+    the Paraview software. It relies on the VTK library.
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+        writer: Writer
+            The writer to be used
+
+    """
     writer.SetFileName(filename)
     vtk_mesh = _build_vtk_mesh_obj(V, F)
     writer.SetInput(vtk_mesh)
@@ -1771,7 +2366,21 @@ def _write_paraview(filename, V, F, writer):
 
     return 1
 
+
 def _build_vtk_mesh_obj(V, F):
+    """_build_vtk_mesh_obj(V, F)
+
+    Internal function that builds a VTK object for manipulation by the VTK library.
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    Returns: vtkObject
+        the vtk object instance
+    """
     import vtk
 
     nv = max(np.shape(V))
@@ -1809,8 +2418,21 @@ def _build_vtk_mesh_obj(V, F):
 
 
 def write_NAT(filename, V, F):
-    """
-    This function writes mesh to file
+    """write_NAT(filename, V, F)
+
+    Writes .nat file format as defined into the load_NAT function.
+
+    See:
+        load_NAT
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
     """
     ofile = open(filename, 'w')
 
@@ -1828,9 +2450,20 @@ def write_NAT(filename, V, F):
 
     return 1
 
+
 def write_GDF(filename, V, F):
-    """
-    This function writes mesh data into a GDF file for Wamit computations
+    """write_GDF(filename, V, F)
+
+    Writes .gdf file format for the WAMIT (Wamit INC. (c)) BEM software.
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
     """
 
     nf = max(np.shape(F))
@@ -1852,7 +2485,21 @@ def write_GDF(filename, V, F):
 
     return 1
 
+
 def write_MAR(filename, V, F):
+    """write_MAR(filename, V, F)
+
+    Writes mesh files to be used with Nemoh BEM software (Ecole Centrale de Nantes)
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    """
     ofile = open(filename, 'w')
 
     ofile.write('{0:6d}{1:6d}\n'.format(2, 0))  # TODO : mettre les symetries en argument
@@ -1874,9 +2521,20 @@ def write_MAR(filename, V, F):
 
     return 1
 
+
 def write_STL(filename, V, F):
-    """
-    :type filename: str
+    """write_STL(filename, V, F)
+
+    Writes .stl file format. It relies on the VTK library for its writer.
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
     """
 
     # TODO : replace this implementation by using the vtk functionalities
@@ -1928,6 +2586,18 @@ def write_MSH(filename, V, F):
 #                         MESH MANIPULATION HELPERS
 #=======================================================================
 def mesh_quality(V, F):
+    """mesh_quality(V, F)
+
+    Generates the mesh quality informations (aspect ratio...) using the verdict
+    library that is embeded into the VTK library. It displays a quality report.
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    """
     # This function is reproduced from
     # http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py
     import vtk
@@ -2004,6 +2674,18 @@ http://www.vtk.org/Wiki/images/6/6b/VerdictManual-revA.pdf\n"""
 
 
 def get_info(V, F):
+    """get_info(V, F)
+
+    Displays mesh informations such as the number of nodes, faces, triangles,
+    quadrangles... as well as a quality report.
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    """
     nv = np.size(V, 0)
     nf = np.size(F, 0)
     print ''
@@ -2029,11 +2711,19 @@ def get_info(V, F):
 
 
 def translate(V, P):
-    """
-    Translates an array V with respect to translation vector P.
-    :param V:
-    :param P:
-    :return:
+    """translate(V, P)
+
+    Applies a 3D translation on a mesh.
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        P: ndarray
+            coordinates of the translation vector
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the translated mesh's nodes
     """
 
     if not isinstance(P, np.ndarray):
@@ -2049,6 +2739,24 @@ def translate(V, P):
 
 
 def translate_1D(V, t, ddl):
+    """translate_1D(V, t, ddl)
+
+    Applies a 1D translation on a mesh, following a specified cartesian
+    direction
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        t: float
+            magnitude of the translation
+        ddl: 'str'
+            direction to chosen among, 'x', 'y' and 'z'
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the translated mesh's nodes
+
+    """
     if ddl == 'x':
         j = 0
     elif ddl == 'y':
@@ -2062,6 +2770,20 @@ def translate_1D(V, t, ddl):
 
 
 def rotate(V, rot):
+    """rotate(V, rot)
+
+    Applies a 3D rotation on a mesh.
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        rot: ndarray
+            3x3 numpy array specifying the rotation matrix
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the rotated mesh's nodes
+    """
     from math import cos, sin
 
     if not isinstance(rot, np.ndarray):
@@ -2093,7 +2815,23 @@ def rotate(V, rot):
     return np.transpose(np.dot(R, V.T))
 
 
-def rotate_1D(V, rot, ddl):
+def rotate_1D(V, angle, ddl):
+    """rotate_1D(V, angle, ddl)
+
+    Applies a rotation on a mesh around a cartesian axis
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        angle: float
+            specifies the angle of rotation
+        ddl: str
+            axis of rotation to be chosen among 'x', 'y' and 'z'
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the rotated mesh's nodes
+    """
     if ddl == 'x':
         j = 0
     elif ddl == 'y':
@@ -2104,19 +2842,69 @@ def rotate_1D(V, rot, ddl):
         raise IOError, "ddl should be chosen among ('x', 'y', 'z')"
 
     rotvec = np.zeros(3, dtype=float)
-    rotvec[j] = rot
+    rotvec[j] = angle
     return rotate(V, rotvec)
 
 
 def scale(V, alpha):
+    """scale(V, alpha)
+
+    Scales a mesh
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        alpha: float
+            scaling factor
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the rotated mesh's nodes
+
+    """
     return alpha * V
 
 
 def flip_normals(F):
+    """flip_normals(F)
+
+    Reverse the normals of a mesh
+
+    Parameters:
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    Returns:
+        F: ndarray
+            numpy array of the faces' nodes connectivities with
+            reversed normals
+
+    """
     return np.fliplr(F)
 
 
 def symmetrize(V, F, plane):
+    """symmetrize(V, F, plane)
+
+    Symmetrize the mesh against a plane
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+        plane: Plane
+            The symmetry plane
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the symmetrised
+            mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities for
+            the symmetrised mesh
+
+    """
 
     # Symmetrizing the nodes
     nv = V.shape[0]
@@ -2128,9 +2916,21 @@ def symmetrize(V, F, plane):
     return merge_duplicates(V, F, verbose=False)
 
 def _is_point_inside_polygon(point, poly):
-    """Determine if a point is inside a given polygon or not.
-    This algorithm is a ray casting method
+    """_is_point_inside_polygon(point, poly)
+
+    Internal function to Determine if a point is inside a given polygon.
+    This algorithm is a ray casting method.
+
+    Parameters:
+        point: ndarray
+            2D coordinates of the point to be tested
+        poly: ndarray
+            numpy array of shape (nv, 2) of 2D coordinates
+            of the polygon
     """
+
+    # FIXME : Do we have to repeat the first point at the last position
+    # of polygon ???
 
     x = point[0]
     y = point[1]
@@ -2153,6 +2953,28 @@ def _is_point_inside_polygon(point, poly):
     return inside
 
 def generate_lid(V, F, max_area=None, verbose=False):
+    """generate_lid(V, F, max_area=None, verbose=False)
+
+    Meshes the lid of a mesh with triangular faces to be used in irregular frequency
+    removal in BEM softwares. It clips the mesh againt the plane Oxy, extract the intersection
+    polygon and relies on meshpy (that is a wrapper around the TRIANGLE meshing library).
+    It is able to deal with moonpools.
+
+    Parameters:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+        max_area[optional]: float
+            The maximum area of triangles to be generated
+        verbose[optional]: bool
+            If set to True, generates output along the processing
+
+    """
+
+    # TODO: Put the reference of TRIANGLE and meshpy (authors...) in the docstring
+
+    # TODO: remove verbose mode and place it into the main of meshmagick !!!
 
     try:
         import meshpy.triangle as triangle
@@ -2291,9 +3113,20 @@ def generate_lid(V, F, max_area=None, verbose=False):
 
 def triangulate_quadrangles(F, verbose=False):
     """triangulate_quadrangles(V, F)
+
     Return a copy of the V, F mesh where all quadrangles have been triangulated
     in order to obtain a triangle only mesh. A quadrangle is split into two triangles
     following a dummy rule (may be enhanced in the future).
+
+    Parameters:
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+        verbose[optional]: bool
+            If set to True, displays report
+
+    Returns:
+        F: ndarray
+            numpy array of the faces' nodes connectivities for the triangulated mesh
     """
 
     # TODO: Ensure the best quality aspect ratio of generated triangles
@@ -2314,13 +3147,31 @@ def triangulate_quadrangles(F, verbose=False):
 
     F = np.concatenate((F, new_faces))
 
+    if verbose:
+        nquad = len(new_faces)
+        if nquad != 0:
+            print '{:d} quadrangles have been split in triangles'.format(nquad)
+            print '\t-> Done.\n'
+
     return F
 
 def reformat_triangles(F):
     """reformat_triangles(F)
+
     Returns a connectivity array F that ensures that triangles
     are described using the rule that the first node id is equal
-    to the last id"""
+    to the last id
+
+    Parameters:
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    Returns:
+        F: ndarray
+            numpy array of the faces' nodes connectivities with the right rule
+            for triangle description
+
+    """
 
     quads = F[:, 0] != F[:, -1]
 
@@ -2993,7 +3844,7 @@ def main():
             print '\t-> Done.'
 
     if args.triangulate_quadrangles:
-        F = triangulate_quadrangles(F)
+        F = triangulate_quadrangles(F, verbose=verbose)
 
 
     # Compute principal inertia parameters
