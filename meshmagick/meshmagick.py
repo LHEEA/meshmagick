@@ -1537,6 +1537,9 @@ def write_STL(filename, V, F):
 
     # TODO : replace this implementation by using the vtk functionalities
 
+    # Triangulating quads
+    F = triangulate_quadrangles(F, verbose=False)
+
     ofile = open(filename, 'w')
 
     ofile.write('solid meshmagick\n')
@@ -1544,7 +1547,9 @@ def write_STL(filename, V, F):
 
     for facet in F:
         if facet[0] != facet[3]:
-            raise RuntimeError, 'Only full triangle meshes are accepted in STL files'
+            raise RuntimeError, """Only full triangle meshes are accepted in STL files.
+              Please consider using the --triangulate-quadrangles option (-tq) to
+              perform a prior triangulation of the mesh"""
 
         # Computing normal
         v0 = V[facet[0], :]
@@ -1777,6 +1782,51 @@ def symmetrize(V, F, plane):
 
     return merge_duplicates(V, F, verbose=False)
 
+def triangulate_quadrangles(F, verbose=False):
+    """triangulate_quadrangles(V, F)
+    Return a copy of the V, F mesh where all quadrangles have been triangulated
+    in order to obtain a triangle only mesh. A quadrangle is split into two triangles
+    following a dummy rule (may be enhanced in the future).
+    """
+
+    # TODO: Ensure the best quality aspect ratio of generated triangles
+
+    # Defining both triangles id lists to be generated from quadrangles
+    T1 = (0, 1, 2)
+    T2 = (0, 2, 3)
+
+    quad_mask = F[:, 0] != F[:, -1]
+
+    # Triangulation
+    new_faces = F[quad_mask].copy()
+    new_faces[:, :3] = new_faces[:, T1]
+    new_faces[:, -1] = new_faces[:, 0]
+
+    F[quad_mask, :3] = F[:, T2][quad_mask]
+    F[quad_mask, -1] = F[quad_mask, 0]
+
+    F = np.concatenate((F, new_faces))
+
+    return F
+
+def reformat_triangles(F):
+    """reformat_triangles(F)
+    Returns a connectivity array F that ensures that triangles
+    are described using the rule that the first node id is equal
+    to the last id"""
+
+    quads = F[:, 0] != F[:, -1]
+
+    F[quads] = np.roll(F[quads], 1, axis=1)
+    quads = F[:, 0] != F[:, -1]
+
+    F[quads] = np.roll(F[quads], 1, axis=1)
+    quads = F[:, 0] != F[:, -1]
+
+    F[quads] = np.roll(F[quads], 1, axis=1)
+
+    return F
+
 def show(V, F):
     import vtk
 
@@ -1999,6 +2049,12 @@ def main():
                         help="""merges the duplicate nodes in the mesh with the absolute tolerance
                         given as argument (default 1e-8)""")
 
+    parser.add_argument('-tq', '--triangulate_quadrangles', action='store_true',
+                        help="""Triangulate all quadrangle faces by a simple splitting procedure.
+                        Twho triangles are generated and from both solution, the one with the best
+                        aspect ratios is kept. This option may be used in conjunction with a
+                        mesh export in a format that only deal with triangular cells like STL format.""")
+
     parser.add_argument('-sym', '--symmetrize', nargs='*', action='append',
                         help="""Symmetrize the mesh by a plane defined wether by 4 scalars, i.e.
                         the plane normal vector coordinates and a scalar c such as N.X=c is the
@@ -2040,6 +2096,8 @@ def main():
     # Loading mesh elements from file
     V, F = load_mesh(args.infilename, format)
 
+    # Ensuring triangles are following the right convention (last id = first id)
+    F = reformat_triangles(F)
 
     if args.merge_duplicates is not None:
         tol = float(args.merge_duplicates)
@@ -2195,10 +2253,13 @@ def main():
         F = flip_normals(F)
         write_file = True
 
-    if args.info:
-        get_info(V, F)
+    if args.triangulate_quadrangles:
+        F = triangulate_quadrangles(F)
 
     # No more mesh modification should be released from this point -->
+
+    if args.info:
+        get_info(V, F)
 
     if args.show:
         show(V, F)
