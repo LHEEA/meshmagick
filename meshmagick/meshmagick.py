@@ -3155,6 +3155,15 @@ def triangulate_quadrangles(F, verbose=False):
 
     return F
 
+
+def detect_features(V, F):
+
+    
+
+
+    return 0
+
+
 def reformat_triangles(F):
     """reformat_triangles(F)
 
