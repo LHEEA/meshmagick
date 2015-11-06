@@ -1076,6 +1076,65 @@ def get_COM(V, F):
     return _get_surface_integrals(V, F)
 
 
+def generate_connectivity(V, F, verbose=False):
+
+    nv = V.shape[0]
+    nf = F.shape[0]
+
+    mesh_closed = True
+
+    # Building connectivities
+
+    # Establishing VV and VF connectivities
+    VV = dict([(i, set()) for i in xrange(nv)])
+    VF = dict([(i, set()) for i in xrange(nv)])
+    for (iface, face) in enumerate(F):
+        if face[0] == face[-1]:
+            face_w = face[:3]
+        else:
+            face_w = face
+        for (index, iV) in enumerate(face_w):
+            VF[iV].add(iface)
+            VV[face_w[index-1]].add(iV)
+            VV[iV].add(face_w[index-1])
+
+    # Connectivity FF
+    boundary_edges = dict()
+
+    FF = dict([(i, set()) for i in xrange(nf)])
+    for ivertex in xrange(nv):
+        S1 = VF[ivertex]
+        for iadjV in VV[ivertex]:
+            S2 = VF[iadjV]
+            I = list(S1 & S2)
+            if len(I) != 1:
+                FF[I[0]].add(I[1])
+                FF[I[1]].add(I[0])
+            else:
+                boundary_face = F[I[0]]
+                [iV1, iV2] = boundary_face[np.where((boundary_face==ivertex) + (boundary_face==iadjV))[0]]
+                boundary_edges[iV2] = iV1
+
+    # Computing boundaries
+    boundaries = []
+    while len(boundary_edges) > 0:
+        boundary = [boundary_edges.pop(boundary_edges.keys()[0])]
+        while boundary_edges.has_key(boundary[-1]):
+            boundary.append(boundary_edges.pop(boundary[-1]))
+        boundaries.append(boundary)
+
+
+    return VV, VF, FF, boundaries
+
+
+def remove_unused_vertices(V, F):
+    VV, VF, FF, mesh_closed = generate_connectivity(V, F)
+
+    for iV, v_f in enumerate(VF.values()):
+        if len(v_f) == 0:
+            print 'vertex %u not used in the mesh' % iV
+
+
 def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'implementation -> ???
     """heal_normals(V, F, verbose=False)
 
@@ -1104,35 +1163,13 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
     nv = V.shape[0]
     nf = F.shape[0]
 
-    mesh_closed = True
-
     # Building connectivities
+    VV, VF, FF, boundaries = generate_connectivity(V, F, verbose=verbose)
 
-    # Establishing VV and VF connectivities
-    VV = dict([(i, set()) for i in xrange(nv)])
-    VF = dict([(i, set()) for i in xrange(nv)])
-    for (iface, face) in enumerate(F):
-        if face[0] == face[-1]:
-            face_w = face[:3]
-        else:
-            face_w = face
-        for (index, iV) in enumerate(face_w):
-            VF[iV].add(iface)
-            VV[face_w[index-1]].add(iV)
-            VV[iV].add(face_w[index-1])
-
-    # Connectivity FF
-    FF = dict([(i, set()) for i in xrange(nf)])
-    for ivertex in xrange(nv):
-        S1 = VF[ivertex]
-        for iadjV in VV[ivertex]:
-            S2 = VF[iadjV]
-            I = list(S1 & S2)
-            if len(I) != 1:
-                FF[I[0]].add(I[1])
-                FF[I[1]].add(I[0])
-            else:
-                mesh_closed = False
+    if len(boundaries) > 0:
+        mesh_closed = False
+    else:
+        mesh_closed = True
 
     # Flooding the mesh to find inconsistent normals
     type_cell = np.zeros(nf, dtype=np.int32)
@@ -3111,6 +3148,19 @@ def generate_lid(V, F, max_area=None, verbose=False):
 
     return V, F
 
+def remove_degenerated_faces(V, F, rtol=1e-5, verbose=False):
+
+    # First computing the faces properties
+    areas, normals, centers = get_all_faces_properties(V, F)
+
+    area_threshold = areas.mean()*rtol
+
+    # Detecting faces that have null area
+    tol = 1e-5
+    F = F[np.logical_not(areas < area_threshold)]
+
+    return F
+
 def triangulate_quadrangles(F, verbose=False):
     """triangulate_quadrangles(V, F)
 
@@ -3156,11 +3206,169 @@ def triangulate_quadrangles(F, verbose=False):
     return F
 
 
-def detect_features(V, F):
+def detect_features(V, F, verbose=True): # Passer le verbose en False a la fin
 
-    
+    la = np.linalg
+
+    F -=1
+
+    # It is necessary that the mesh has no duplicate vertices
+    V, F = merge_duplicates(V, F, verbose=verbose)
+
+    nv = V.shape[0]
+    nf = F.shape[0]
+
+    # Building connectivities
+    VV, VF, FF, boundaries = generate_connectivity(V, F)
+
+    SharpV = set(sum(boundaries, []))
+
+    # Computing mean edge length
+    n = 0
+    mean_edge_length = 0
+    for iV in xrange(nv):
+        Vcur = V[iV]
+        for iadjV in VV[iV]:
+            Vadj = V[iadjV]
+            mean_edge_length += la.norm(Vadj-Vcur)
+            n+=1
+    mean_edge_length/=n
+
+    # Getting mesh properties
+    areas, normals, centers = get_all_faces_properties(V, F+1)
+
+    # Computing covariance matrix for each face
+    covF = [np.zeros((3,3), dtype=np.float) for i in xrange(nf)]
+    for iface, face in enumerate(F):
+        normal = normals[iface]
+        covF[iface] = np.outer(normal, normal)
 
 
+    # Initial feature vertec detection
+    # alpha = 0.055
+    # beta = 0.025
+    alpha = 0.2
+    beta = 0.08
+
+    FaceV   = set()
+    CornerV = set()
+
+    Omega = np.zeros(nv, dtype=np.float)
+    feature_dir = [np.zeros(3, dtype=np.float) for i in xrange(nv)]
+
+    eigdecomp = [(np.zeros(3, dtype=np.float), np.zeros((3,3), dtype=np.float)) for i in xrange(nv)]
+    Tv = np.ones((3,3), dtype=np.float)
+    for iV, Vcur in enumerate(V):
+        # Getting VF adjacency
+        locVF = list(VF[iV])
+        if len(locVF) == 0:
+            # Case where a vertex is not used in a face definition...
+            continue
+        adjF_areas = areas[locVF]
+
+        # FIXME: ne pas faire le calcul pour les facettes a aire nulle !!!
+
+        Amax = adjF_areas.max()
+        adjF_centers = centers[locVF]
+        dist = la.norm(adjF_centers - Vcur, axis=1)
+        dist_max = dist.max()
+        # weights = adjF_areas * np.exp(-dist/dist_max) / Amax
+
+        Tv[:] = 0.
+        for i, iadjF in enumerate(locVF):
+            if adjF_areas[i] > 0.:
+                weight = adjF_areas[i] * np.exp(-dist[i]/dist_max) / Amax
+                Tv +=  weight * covF[iadjF]
+        # print iV
+        # Eigen decomposition of Tv
+        eigdecomp[iV] = la.eigh(Tv)
+        # (lambda3, lambda2, lambda1), eigvec = la.eigh(Tv)
+        eigval, eigvec = eigdecomp[iV]
+
+        eigval /= la.norm(eigval)
+        (lambda3, lambda2, lambda1) = eigval
+
+        # Data for saliency computations
+        Omega[iV] = eigval.sum()*0.5 - 0.5
+        feature_dir[iV] = eigvec[:, 0]
+
+        # Classification according to eigenvalues
+        if lambda3 <= alpha:
+            if lambda2 <= beta:
+                FaceV.add(iV)
+            else:
+                SharpV.add(iV)
+        else:
+            CornerV.add(iV)
+
+    # print FaceV
+    # print SharpV
+    # print CornerV
+
+    featureV = SharpV | CornerV
+    print featureV
+
+    # Normalizing Omega
+    Omega /= Omega.max()
+
+    # Computing saliency for each Sharp vertex
+    Salient_measure = np.zeros(nv, dtype=np.float)
+
+    alpha_threshold = 15
+    K = 5 # Max number of feature vertices in the supporting neighbors
+
+    den = 2*(mean_edge_length*1.5)**2
+
+    for iV in SharpV:
+        # Building the supporting neighbors of iV
+        stack = [iV]
+        supp_neigh = {iV}
+
+        while 1:
+            if len(stack) == 0:
+                # No more feature vertex has been found
+                break
+            if len(supp_neigh) >= K:
+                # We have enough neighbour vertices
+                break
+            icurV = stack.pop()
+            Vcur = V[icurV]
+            locVV = VV[icurV] - supp_neigh
+            e3 = feature_dir[icurV]
+
+            loc_feature = locVV & SharpV
+
+            for iadjV in loc_feature:
+                edge = V[iadjV] - Vcur
+                edge /= la.norm(edge)
+
+                # Angle between the feture direction e3 and the edge
+                calpha = min(1, max(math.fabs(np.dot(e3, edge)), -1)) # Fix for the cases where we get exactly the
+                # same direction and where the value may be out of bound of acos definition...
+                alpha = math.acos(calpha) * 180./math.pi
+
+
+                if alpha < alpha_threshold:
+                    stack.append(iadjV)
+                    supp_neigh.add(iadjV)
+                    # print '%u --> %u : alpha= %f' % (icurV, iadjV, alpha)
+
+        # Now we have the support neighborhood, we may compute the saliency measure.
+        Vcur = V[iV]
+        for ineigh in supp_neigh:
+            Vneigh = V[ineigh]
+            weight = math.exp(-la.norm(Vcur-Vneigh)/den)
+            Salient_measure[iV] += weight*Omega[ineigh]
+
+
+    # Saliency measure for corner type vertices (mean of the top 20% sharp edge type vertices)
+    Salient_measure[list(CornerV)] = np.sort(Salient_measure)[int(-0.2*len(SharpV)):].mean()
+
+    # Post-processing: extract feature lines
+    # print Salient_measure[list(SharpV)]
+
+
+    F+=1
     return 0
 
 
@@ -3633,6 +3841,13 @@ def main():
 
     # Ensuring triangles are following the right convention (last id = first id)
     F = reformat_triangles(F)
+
+    # FOR TESTING
+
+    F = remove_degenerated_faces(V, F)
+    detect_features(V, F)
+
+    # END FOR TESTING
 
     # Merge duplicate vertices
     if args.merge_duplicates is not None:
