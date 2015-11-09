@@ -160,6 +160,28 @@ class Plane:
         return new_vertices
 
 
+class Mesh:
+    """Class to manipulate surface meshes
+
+    """
+    def __init__(self, V, F):
+        self.V = V
+        self.F = F
+
+        # Connectivity
+        self.VV = None
+        self.VF = None
+        self.FF = None
+
+    def generate_connectivity(self):
+        self.VV, self.VF, self.FF, self.boundaries = generate_connectivity(V, F)
+
+    def generate_HE_connectivity(self):
+        pass
+
+
+
+
 def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
     """clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False)
 
@@ -3245,10 +3267,10 @@ def detect_features(V, F, verbose=True): # Passer le verbose en False a la fin
 
 
     # Initial feature vertec detection
-    # alpha = 0.055
-    # beta = 0.025
-    alpha = 0.2
-    beta = 0.08
+    alpha = 0.055
+    beta = 0.025
+    # alpha = 0.2
+    # beta = 0.08
 
     FaceV   = set()
     CornerV = set()
