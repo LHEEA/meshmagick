@@ -1156,12 +1156,14 @@ def remove_unused_vertices(V, F):
         if len(v_f) == 0:
             print 'vertex %u not used in the mesh' % iV
 
+            # FIXME: finir l'implementation, ne fait rien pour le moment...
+
 
 def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'implementation -> ???
     """heal_normals(V, F, verbose=False)
 
     Returns the mesh with a consistent normal orientiation. Detects if
-    the mesh is closed. If it is closed, it will also makke the normals outgoing.
+    the mesh is closed. If it is closed, it will also makke the normals outward.
     It uses a flood fill algorithm to propagate normal orientations through the
     unstructured mesh so it first build connectivity information between faces
     that are not embedded in the {V, F} mesh representation
@@ -1203,7 +1205,16 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
     FVis[0] = True
     stack = [0]
     nb_reversed = 0
-    while len(stack) > 0:
+    while 1:
+        if len(stack) == 0:
+            not_FVis = np.logical_not(FVis)
+            if np.any(not_FVis):
+                iface = np.where(np.logical_not(FVis))[0][0]
+                stack.append(iface)
+                FVis[iface] = True
+            else:
+                break
+
         iface = stack.pop()
         face = F[iface]
         S1 = set(face)
@@ -1218,7 +1229,13 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
             # Shared vertices
             adjface = F[iadjF]
             S2 = set(adjface)
-            iV1, iV2 = list(S1 & S2)
+            # try:
+            common_vertices = list(S1 & S2)
+            if len(common_vertices) == 2:
+                iV1, iV2 = common_vertices
+            else:
+                print 'faces %u and %u have more than 2 vertices in common !' % (iface, iadjF)
+                continue
 
             # Checking normal consistency
             face_ref = np.roll(face[:type_cell[iface]], -np.where(face == iV1)[0][0])
@@ -1243,7 +1260,7 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
         print '%u faces have been reversed'% nb_reversed
 
 
-    # Checking if the normals are outgoing
+    # Checking if the normals are outward
     if mesh_closed:
         zmax = np.max(V[:,2])
 
@@ -1263,13 +1280,13 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
             flipped = False
 
         if verbose and flipped:
-            print 'normals have been reversed to be outgoing'
+            print 'normals have been reversed to be outward'
 
 
     else:
         if verbose:
             #TODO : adding the possibility to plot normals on visualization
-            print "Mesh is not closed, meshmagick cannot test if the normals are outgoing. Please consider checking visually (with Paraview by e.g.)"
+            print "Mesh is not closed, meshmagick cannot test if the normals are outward. Please consider checking visually (with Paraview by e.g.)"
 
     return F
 
@@ -3265,21 +3282,22 @@ def detect_features(V, F, verbose=True): # Passer le verbose en False a la fin
         normal = normals[iface]
         covF[iface] = np.outer(normal, normal)
 
-
     # Initial feature vertec detection
     alpha = 0.055
     beta = 0.025
     # alpha = 0.2
-    # beta = 0.08
+    # beta = 0.040
 
-    FaceV   = set()
-    CornerV = set()
+    FaceV   = set()  # Set of vertices classified as being on a smooth surface
+    CornerV = set()  # Set of vertices classified as being a corner
+    CuspV   = set()  # Set of vertices classified as being on a sharp cusp
 
     Omega = np.zeros(nv, dtype=np.float)
     feature_dir = [np.zeros(3, dtype=np.float) for i in xrange(nv)]
 
     eigdecomp = [(np.zeros(3, dtype=np.float), np.zeros((3,3), dtype=np.float)) for i in xrange(nv)]
     Tv = np.ones((3,3), dtype=np.float)
+
     for iV, Vcur in enumerate(V):
         # Getting VF adjacency
         locVF = list(VF[iV])
@@ -3294,20 +3312,18 @@ def detect_features(V, F, verbose=True): # Passer le verbose en False a la fin
         adjF_centers = centers[locVF]
         dist = la.norm(adjF_centers - Vcur, axis=1)
         dist_max = dist.max()
-        # weights = adjF_areas * np.exp(-dist/dist_max) / Amax
 
         Tv[:] = 0.
         for i, iadjF in enumerate(locVF):
             if adjF_areas[i] > 0.:
                 weight = adjF_areas[i] * np.exp(-dist[i]/dist_max) / Amax
-                Tv +=  weight * covF[iadjF]
-        # print iV
+                Tv += weight * covF[iadjF]
+
         # Eigen decomposition of Tv
         eigdecomp[iV] = la.eigh(Tv)
-        # (lambda3, lambda2, lambda1), eigvec = la.eigh(Tv)
         eigval, eigvec = eigdecomp[iV]
 
-        eigval /= la.norm(eigval)
+        eigval /= la.norm(eigval) # Normalization of eigen values
         (lambda3, lambda2, lambda1) = eigval
 
         # Data for saliency computations
@@ -3317,78 +3333,156 @@ def detect_features(V, F, verbose=True): # Passer le verbose en False a la fin
         # Classification according to eigenvalues
         if lambda3 <= alpha:
             if lambda2 <= beta:
-                FaceV.add(iV)
+                # The vertex belongs to a flat surface or to a cusp...
+
+                # print 'current : ', iV, ' ; face : ', locVF[0]
+                is_cusp = False
+                ncusp = 0
+                n0 = normals[locVF[0]]
+                for iadjF in locVF[1:]:
+                    cdha = min(1, max(np.dot(n0, normals[iadjF]), -1))
+                    sdha = la.norm(np.cross(n0, normals[iadjF]))
+                    # print cdha
+                    dha = math.atan2(sdha, cdha) * 180./math.pi
+                    if dha > 135:
+                        ncusp += 1
+                    # print 'face : ', iadjF, ' ; dihedral : ', dha
+                if ncusp >=2:
+                    CuspV.add(iV)
+                else:
+                    FaceV.add(iV)
+
             else:
                 SharpV.add(iV)
         else:
             CornerV.add(iV)
 
-    # print FaceV
-    # print SharpV
-    # print CornerV
+    featureV = SharpV | CornerV | CuspV
 
-    featureV = SharpV | CornerV
-    print featureV
+    print 'Corners : '
+    print CornerV
+    print 'Sharp vertices : '
+    print SharpV
+    print 'Cusp vertices : '
+    print CuspV
+
+    # FIXME : Il ne faut pas inclure les boudaries dans les Sharp Features !!!
 
     # Normalizing Omega
     Omega /= Omega.max()
 
-    # Computing saliency for each Sharp vertex
-    Salient_measure = np.zeros(nv, dtype=np.float)
+    # POST-PROCESSING to build feature lines
+    # --------------------------------------
+    alpha_threshold = 30
+    feature_lines = []
 
-    alpha_threshold = 15
-    K = 5 # Max number of feature vertices in the supporting neighbors
+    while len(featureV)>0:
+        istartV = featureV.pop()
+        # print 'starting node: ', istartV
 
-    den = 2*(mean_edge_length*1.5)**2
-
-    for iV in SharpV:
-        # Building the supporting neighbors of iV
-        stack = [iV]
-        supp_neigh = {iV}
+        stack = [istartV] # Front de propagation
+        feature_line = [istartV]
 
         while 1:
             if len(stack) == 0:
-                # No more feature vertex has been found
+                # Le dernier est icurV
+                line = [icurV]
+                # while 1:
+                #
+                #     line.append(feature_line[icurV])
+
+                feature_lines.append(feature_line)
+                # print feature_line
+                # No more feature vertex found
                 break
-            if len(supp_neigh) >= K:
-                # We have enough neighbour vertices
-                break
+
             icurV = stack.pop()
             Vcur = V[icurV]
-            locVV = VV[icurV] - supp_neigh
+            locVV = VV[icurV] - set(feature_line)
             e3 = feature_dir[icurV]
 
-            loc_feature = locVV & SharpV
+
+            loc_feature = locVV & featureV
+
+            # print 'icurV : ', icurV, '  ; local features : ', loc_feature
 
             for iadjV in loc_feature:
                 edge = V[iadjV] - Vcur
                 edge /= la.norm(edge)
 
-                # Angle between the feture direction e3 and the edge
-                calpha = min(1, max(math.fabs(np.dot(e3, edge)), -1)) # Fix for the cases where we get exactly the
-                # same direction and where the value may be out of bound of acos definition...
+                # Angle between the edge and the feature direction
+                calpha = min(1, max(math.fabs(np.dot(e3, edge)), -1))
                 alpha = math.acos(calpha) * 180./math.pi
 
-
                 if alpha < alpha_threshold:
+                    # print iadjV, alpha
                     stack.append(iadjV)
-                    supp_neigh.add(iadjV)
-                    # print '%u --> %u : alpha= %f' % (icurV, iadjV, alpha)
-
-        # Now we have the support neighborhood, we may compute the saliency measure.
-        Vcur = V[iV]
-        for ineigh in supp_neigh:
-            Vneigh = V[ineigh]
-            weight = math.exp(-la.norm(Vcur-Vneigh)/den)
-            Salient_measure[iV] += weight*Omega[ineigh]
+                    feature_line.append(iadjV)
+                    featureV.remove(iadjV)
 
 
-    # Saliency measure for corner type vertices (mean of the top 20% sharp edge type vertices)
-    Salient_measure[list(CornerV)] = np.sort(Salient_measure)[int(-0.2*len(SharpV)):].mean()
+    for feature_line in feature_lines:
+        print feature_line
+    # print 'ok'
 
-    # Post-processing: extract feature lines
-    # print Salient_measure[list(SharpV)]
 
+
+    # # Computing saliency for each Sharp vertex
+    # Salient_measure = np.zeros(nv, dtype=np.float)
+    #
+    # alpha_threshold = 15
+    # K = 5 # Max number of feature vertices in the supporting neighbors
+    #
+    # den = 2*(mean_edge_length*1.5)**2
+    #
+    # for iV in SharpV:
+    #     # Building the supporting neighbors of iV
+    #     stack = [iV]
+    #     supp_neigh = {iV}
+    #
+    #     while 1:
+    #         if len(stack) == 0:
+    #             # No more feature vertex has been found
+    #             break
+    #         if len(supp_neigh) >= K:
+    #             # We have enough neighbour vertices
+    #             break
+    #         icurV = stack.pop()
+    #         Vcur = V[icurV]
+    #         locVV = VV[icurV] - supp_neigh
+    #         e3 = feature_dir[icurV]
+    #
+    #         loc_feature = locVV & SharpV
+    #
+    #         for iadjV in loc_feature:
+    #             edge = V[iadjV] - Vcur
+    #             edge /= la.norm(edge)
+    #
+    #             # Angle between the feture direction e3 and the edge
+    #             calpha = min(1, max(math.fabs(np.dot(e3, edge)), -1)) # Fix for the cases where we get exactly the
+    #             # same direction and where the value may be out of bound of acos definition...
+    #             alpha = math.acos(calpha) * 180./math.pi
+    #
+    #
+    #             if alpha < alpha_threshold:
+    #                 stack.append(iadjV)
+    #                 supp_neigh.add(iadjV)
+    #                 # print '%u --> %u : alpha= %f' % (icurV, iadjV, alpha)
+    #
+    #     # Now we have the support neighborhood, we may compute the saliency measure.
+    #     Vcur = V[iV]
+    #     for ineigh in supp_neigh:
+    #         Vneigh = V[ineigh]
+    #         weight = math.exp(-la.norm(Vcur-Vneigh)/den)
+    #         Salient_measure[iV] += weight*Omega[ineigh]
+    #
+    #
+    # # Saliency measure for corner type vertices (mean of the top 20% sharp edge type vertices)
+    # Salient_measure[list(CornerV)] = np.sort(Salient_measure)[int(-0.2*len(SharpV)):].mean()
+    #
+    # # Post-processing: extract feature lines
+    # # print Salient_measure[list(SharpV)]
+    #
 
     F+=1
     return 0
@@ -3651,7 +3745,7 @@ def main():
 
     parser.add_argument('-hn', '--heal_normals', action='store_true',
                         help="""Checks and heals the normals consistency and
-                        verify if they are outgoing.
+                        verify if they are outward.
                         """)
 
     parser.add_argument('-fn', '--flip-normals', action='store_true',
