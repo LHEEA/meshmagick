@@ -164,22 +164,187 @@ class Mesh:
     """Class to manipulate surface meshes
 
     """
-    def __init__(self, V, F):
-        self.V = V
-        self.F = F
+    def __init__(self, V, F, verbose=False):
+
+        # Verifications on input arrays
+        if V.shape[1] != 3:
+            raise RuntimeError, 'V must be a nv x 3 array'
+        if F.shape[1] != 4:
+            raise RuntimeError, 'F must be a nf x 4 array'
+
+        self.nv = V.shape[0]
+        self.nf = F.shape[0]
+
+        # Ensuring proper type (ndarrays)
+        V = np.asarray(V,   dtype=np.float)
+        F = np.asarray(F-1, dtype=np.int)
+
+        # Ensuring a correct triangle definition
+        F = reformat_triangles(F) # TODO: en faire une methode enforce_triangle_rule
+
+        # Partitionning faces array with triangles first and quadrangles last
+        self.faces = np.zeros((self.nf, 4), dtype=np.int)
+
+        # NOTE: Here we modify the order of faces. See in the future if it is a problem.
+        # It is of practical interest when it comes to generate the half-edge data structure
+        # But it could be possible to order faces like that temporarily, perform fast generation
+        # of the half-edge data structure and then get back to the initial faces ordering...
+
+        triangle_mask = F[:, 0] == F[:, -1]
+        self.nb_tri = sum(triangle_mask)
+        self.nb_quad = self.nf - self.nb_tri
+
+        self.faces[:self.nb_tri] = F[triangle_mask]
+        self.faces[self.nb_tri:]  = F[np.logical_not(triangle_mask)]
+
+        # Removing unused vertices if any
+        usedV = np.zeros(self.nv, dtype=np.bool)
+        usedV[sum(map(list, self.faces), [])] = True
+        nb_usedV = len(np.where(usedV)[0])
+        if nb_usedV < self.nv:
+            newID_V = np.arange(self.nv)
+            newID_V[usedV] = np.arange(nb_usedV)
+            self.faces = newID_V[self.faces]
+            self.nv = nb_usedV
+            V = V[usedV]
+
+        self.vertices = V
 
         # Connectivity
         self.VV = None
         self.VF = None
         self.FF = None
 
+        # properties
+        self.areas   = None
+        self.normals = None
+        self.centers = None
+
+        # Half-edge data structure
+        self.nhe    = None # Number of half-edges in the mesh
+        self.F_1HE  = None # One half-edge of the face
+        self.HE_F   = None # The face of the half-edge
+        self.HE_nHE = None # The next half-edge of the current half-edge
+        self.HE_pHE = None # The previous half-edge of the current half-edge
+        self.HE_tHE = None # The twin half-edge of the current half-edge
+        self.HE_iV  = None # The incident vertex of the current half-edge
+        self.HE_tV  = None # The target vertex of the current half-edge
+        self.V_1iHE = None # One half-edge having V as incident vertex
+
+        self.HE_bound = None # Tells if the half-edge is a boundary one
+        self.edges  = None # Dictionary that maps edges to halfedges couples
+
+
+    def show(self):
+        show(self.vertices, self.faces+1)
+        return 1
+
+    def shown(self):
+        show(self.vertices, self.faces+1, normals=True)
+        return 1
+
+
     def generate_connectivity(self):
-        self.VV, self.VF, self.FF, self.boundaries = generate_connectivity(V, F)
+        self.VV, self.VF, self.FF, self.boundaries = generate_connectivity(self.vertices, self.faces)
 
     def generate_HE_connectivity(self):
+
+        nbHE_tri = 3*self.nb_tri
+        nbHE_quad = 4*self.nb_quad
+        self.nhe = nbHE_tri + nbHE_quad
+
+        # Filling HE_F
+        self.HE_F = np.concatenate((
+            np.repeat(np.arange(self.nb_tri), 3),
+            np.repeat(np.arange(self.nb_tri, self.nf), 4)
+        ))
+
+        # Filling HE_iV
+        self.HE_iV = np.zeros(self.nhe, dtype=np.int)
+        self.HE_iV[:nbHE_tri] = np.roll(self.faces[:self.nb_tri, :3], 1, axis=1).flatten()
+        self.HE_iV[nbHE_tri:] = np.roll(self.faces[self.nb_tri:, :4], 1, axis=1).flatten()
+
+        # Filling HE_tV
+        self.HE_tV = np.zeros(self.nhe, dtype=np.int)
+        self.HE_tV[:nbHE_tri] = self.faces[:self.nb_tri, :3].flatten()
+        self.HE_tV[nbHE_tri:] = self.faces[self.nb_tri:, :4].flatten()
+
+        # Filling HE_nHE
+        self.HE_nHE = np.zeros(self.nhe, dtype=np.int)
+        self.HE_nHE[:nbHE_tri] = np.roll(np.arange(nbHE_tri).reshape((self.nb_tri, 3)), -1, axis=1).flatten()
+        self.HE_nHE[nbHE_tri:] = np.roll(np.arange(nbHE_tri, self.nhe).reshape((self.nb_quad, 4)), -1, axis=1).flatten()
+
+        # Filling HE_pHE
+        self.HE_pHE = np.zeros(self.nhe, dtype=np.int)
+        self.HE_pHE[:nbHE_tri] = np.roll(np.arange(nbHE_tri).reshape((self.nb_tri, 3)), 1, axis=1).flatten()
+        self.HE_pHE[nbHE_tri:] = np.roll(np.arange(nbHE_tri, self.nhe).reshape((self.nb_quad, 4)), 1, axis=1).flatten()
+
+        # Filling F_1HE
+        self.F_1HE = np.concatenate((
+            np.arange(nbHE_tri, step=3),
+            np.arange(nbHE_tri, self.nhe, step=4)
+        ))
+
+        # Filling V_1iHE
+        self.V_1iHE = np.zeros(self.nv, dtype=np.int)
+        self.V_1iHE[self.faces[:self.nb_tri, :3]] = np.roll(np.arange(nbHE_tri).reshape((self.nb_tri, 3)), -1, axis=1)
+        self.V_1iHE[self.faces[self.nb_tri:, :4]] = np.roll(np.arange(nbHE_tri, self.nhe).reshape((self.nb_quad, 4)),
+                                                            -1, axis=1)
+
+        # Filling HE_tHE
+
+        edge_dst = dict([(i, dict()) for i in xrange(self.nv)])
+        for iHE in xrange(self.nhe):
+            iVmin, iVmax = sorted([self.HE_iV[iHE], self.HE_tV[iHE]])
+            if edge_dst[iVmin].has_key(iVmax):
+                edge_dst[iVmin][iVmax].append(iHE)
+            else:
+                edge_dst[iVmin][iVmax] = [iHE,]
+
+        self.HE_tHE = np.ones(self.nhe, dtype=np.int) * self.nhe
+        self.HE_bound = np.zeros(self.nhe, dtype=np.bool)
+
+        # FIXME: mettre aussi des half edges aux frontières pour pouvoir les parcourir... --> en ajouter
+        for iV1 in edge_dst.keys():
+            for iV2 in edge_dst[iV1].keys():
+                helist = edge_dst[iV1][iV2]
+                if len(helist) == 2:
+                    self.HE_tHE[helist[0]] = helist[1]
+                    self.HE_tHE[helist[1]] = helist[0]
+                else:
+                    self.HE_bound[helist[0]] = True
+
+        sys.exit(0)
+
+        print 'coucou'
+        return True
+
+    def half_edge_to_mesh_arrays(self):
+        if self.F_1HE is None:
+            raise RuntimeError, 'No half-edge data structure'
+
+        F = []
+        for initHE in self.F_1HE:
+            face = [self.HE_iV[initHE]]
+            iHE = self.HE_nHE[initHE]
+            while iHE != initHE:
+                face.append(self.HE_iV[iHE])
+                iHE = self.HE_nHE[iHE]
+            if len(face) == 3:
+                face.append(face[0])
+            F.append(face)
+
+        return self.vertices, np.asarray(F, dtype=np.int)+1
+
+    def apply_new_numbering_vertices(self, new_V_ids):
         pass
 
+    def apply_new_numbering_faces(self, new_F_ids):
+        pass
 
+    def plus(self):
+        """Pour implementer une operation de concatenation de maillage"""
+        pass
 
 
 def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
@@ -1182,6 +1347,9 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
             to give a consistent orientation of normals
 
     """
+
+    # TODO: return the different groups of a mesh in case it is made of several unrelated groups
+
     F -=1
 
     nv = V.shape[0]
@@ -3245,7 +3413,16 @@ def triangulate_quadrangles(F, verbose=False):
     return F
 
 
-def detect_features(V, F, verbose=True): # Passer le verbose en False a la fin
+def detect_features_expert(V, F, verbose=True):
+
+    mesh = Mesh(V, F, verbose=verbose)
+    mesh.generate_HE_connectivity()
+
+
+
+
+
+def detect_features_basic(V, F, verbose=True): # Passer le verbose en False a la fin
 
     la = np.linalg
 
@@ -3961,7 +4138,7 @@ def main():
     # FOR TESTING
 
     F = remove_degenerated_faces(V, F)
-    detect_features(V, F)
+    detect_features_expert(V, F)
 
     # END FOR TESTING
 
