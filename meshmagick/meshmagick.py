@@ -172,43 +172,33 @@ class Mesh:
         if F.shape[1] != 4:
             raise RuntimeError, 'F must be a nf x 4 array'
 
-        self.nv = V.shape[0]
-        self.nf = F.shape[0]
+
 
         # Ensuring proper type (ndarrays)
         V = np.asarray(V,   dtype=np.float)
         F = np.asarray(F-1, dtype=np.int)
 
-        # Ensuring a correct triangle definition
-        F = reformat_triangles(F) # TODO: en faire une methode enforce_triangle_rule
+        # Cleaning data
+        V, F = clean_mesh(V, F, verbose=verbose)
+
+        self.vertices = V
+
+        self.nv = V.shape[0]
+        self.nf = F.shape[0]
 
         # Partitionning faces array with triangles first and quadrangles last
-        self.faces = np.zeros((self.nf, 4), dtype=np.int)
 
         # NOTE: Here we modify the order of faces. See in the future if it is a problem.
         # It is of practical interest when it comes to generate the half-edge data structure
         # But it could be possible to order faces like that temporarily, perform fast generation
         # of the half-edge data structure and then get back to the initial faces ordering...
-
         triangle_mask = F[:, 0] == F[:, -1]
         self.nb_tri = sum(triangle_mask)
         self.nb_quad = self.nf - self.nb_tri
 
+        self.faces = np.zeros((self.nf, 4), dtype=np.int)
         self.faces[:self.nb_tri] = F[triangle_mask]
-        self.faces[self.nb_tri:]  = F[np.logical_not(triangle_mask)]
-
-        # Removing unused vertices if any
-        usedV = np.zeros(self.nv, dtype=np.bool)
-        usedV[sum(map(list, self.faces), [])] = True
-        nb_usedV = len(np.where(usedV)[0])
-        if nb_usedV < self.nv:
-            newID_V = np.arange(self.nv)
-            newID_V[usedV] = np.arange(nb_usedV)
-            self.faces = newID_V[self.faces]
-            self.nv = nb_usedV
-            V = V[usedV]
-
-        self.vertices = V
+        self.faces[self.nb_tri:] = F[np.logical_not(triangle_mask)]
 
         # Connectivity
         self.VV = None
@@ -232,8 +222,9 @@ class Mesh:
         self.V_1iHE = None # One half-edge having V as incident vertex
 
         self.HE_bound = None # Tells if the half-edge is a boundary one
-        self.edges  = None # Dictionary that maps edges to halfedges couples
+        # self.edges  = None # Dictionary that maps edges to halfedges couples
 
+        # TODO : regarder la lib pyACVD
 
     def show(self):
         show(self.vertices, self.faces+1)
@@ -314,6 +305,10 @@ class Mesh:
                 else:
                     self.HE_bound[helist[0]] = True
 
+        # Building the edges
+
+
+
         sys.exit(0)
 
         print 'coucou'
@@ -335,6 +330,17 @@ class Mesh:
             F.append(face)
 
         return self.vertices, np.asarray(F, dtype=np.int)+1
+
+    def get_incident_HE_from_V(self, iV):
+        """Returns an ordered list of half-edges that are incident to V"""
+
+        initHE = self.V_1iHE[iV]
+        helist = [initHE,]
+        iHE = self.HE_nHE[self.HE_tHE[initHE]]
+        while iHE != initHE:
+            helist.append(iHE)
+            iHE = self.HE_nHE[self.HE_tHE[iHE]]
+        return helist
 
     def apply_new_numbering_vertices(self, new_V_ids):
         pass
@@ -1314,14 +1320,27 @@ def generate_connectivity(V, F, verbose=False):
     return VV, VF, FF, boundaries
 
 
-def remove_unused_vertices(V, F):
-    VV, VF, FF, mesh_closed = generate_connectivity(V, F)
-
-    for iV, v_f in enumerate(VF.values()):
-        if len(v_f) == 0:
-            print 'vertex %u not used in the mesh' % iV
-
-            # FIXME: finir l'implementation, ne fait rien pour le moment...
+def remove_unused_vertices(V, F, verbose=False):
+    if verbose:
+        print "* Removing unused vertices in the mesh:"
+    nv = V.shape[0]
+    usedV = np.zeros(nv, dtype=np.bool)
+    usedV[sum(map(list, F), [])] = True
+    nb_usedV = sum(usedV)
+    if nb_usedV < nv:
+        newID_V = np.arange(nv)
+        newID_V[usedV] = np.arange(nb_usedV)
+        F = newID_V[F]
+        V = V[usedV]
+    if verbose:
+        if nb_usedV < nv:
+            unusedV = np.where(np.logical_not(usedV))[0]
+            vlist_str = '[' + ', '.join(str(iV) for iV in unusedV) + ']'
+            print "\t -> The %u following vertices were unused in the mesh and have been removed: \n\t\t%s" \
+                  % (nv -nb_usedV, vlist_str)
+        else:
+            print "\t -> Everything is good :)"
+    return V, F
 
 
 def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'implementation -> ???
@@ -1347,7 +1366,8 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
             to give a consistent orientation of normals
 
     """
-
+    if verbose:
+        print "* Healing normals to make them consistent and if possible outward:"
     # TODO: return the different groups of a mesh in case it is made of several unrelated groups
 
     F -=1
@@ -1402,7 +1422,7 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
             if len(common_vertices) == 2:
                 iV1, iV2 = common_vertices
             else:
-                print 'faces %u and %u have more than 2 vertices in common !' % (iface, iadjF)
+                print 'WARNING: faces %u and %u have more than 2 vertices in common !' % (iface, iadjF)
                 continue
 
             # Checking normal consistency
@@ -1425,7 +1445,10 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
     F += 1
 
     if verbose:
-        print '%u faces have been reversed'% nb_reversed
+        if nb_reversed > 0:
+            print '\t -> %u faces have been reversed to make normals consistent across the mesh' % (nb_reversed)
+        else:
+            print "\t -> Everything is good :)"
 
 
     # Checking if the normals are outward
@@ -1439,7 +1462,7 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
         tol = 1e-9
         if math.fabs(hs[0]) > tol or math.fabs(hs[1]) > tol:
             if verbose:
-                print "Warning, the mesh seems not watertight"
+                print "WARNING: the mesh does not seem watertight althought marked as closed..."
 
         if hs[2] < 0:
             flipped = True
@@ -1448,16 +1471,38 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
             flipped = False
 
         if verbose and flipped:
-            print 'normals have been reversed to be outward'
+            print '\t -> Every normals have been reversed to be outward'
 
 
     else:
         if verbose:
             #TODO : adding the possibility to plot normals on visualization
-            print "Mesh is not closed, meshmagick cannot test if the normals are outward. Please consider checking visually (with Paraview by e.g.)"
+            print "\t -> Mesh is not closed, meshmagick cannot test if the normals are outward. Please consider " \
+                  "checking it visually (e.g. by using --shown option of meshmagick)"
 
     return F
 
+def clean_mesh(V, F, verbose=False):
+
+    if verbose:
+        print "\n-----------------"
+        print "Cleaning the mesh"
+        print "-----------------"
+    # Ensuring a correct triangle definition
+    F = reformat_triangles(F, verbose=verbose) # TODO: en faire une methode enforce_triangle_rule
+
+    # Removing unused vertices if any
+    V, F = remove_unused_vertices(V, F, verbose=verbose)
+
+    # Removing duplicate vertices
+    V, F = merge_duplicates(V, F, verbose=verbose)
+
+    # Healing normals
+    F = heal_normals(V, F+1, verbose=verbose)
+
+    if verbose:
+        print "-----------------"
+    return V, F-1
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
     """merge_duplicates(V, F, verbose=False, tol=1e-8)
@@ -1486,6 +1531,8 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
     """
 
     # TODO : Set a tolerance option in command line arguments
+    if verbose:
+        print "* Removing duplicate vertices:"
     nv, nbdim = V.shape
 
     levels = [0, nv]
@@ -1523,8 +1570,8 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
                 levels_tmp.append(levels[ilevel])
         if len(levels_tmp) == nv:
             # No duplicate vertices
-            if verbose:  # TODO : verify it with SEAREV mesh
-                print "The mesh has no duplicate vertices"
+            if verbose:
+                print "\t -> No duplicate vertices detected :)"
             break
 
         levels_tmp.append(nv)
@@ -1546,9 +1593,9 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
 
         if verbose:
             nv_new = V.shape[0]
-            print "Initial number of nodes : {:d}".format(nv)
-            print "New number of nodes     : {:d}".format(nv_new)
-            print "{:d} nodes have been merged".format(nv-nv_new)
+            print "\t -> Initial number of nodes : {:d}".format(nv)
+            print "\t -> New number of nodes     : {:d}".format(nv_new)
+            print "\t -> {:d} nodes have been merged".format(nv-nv_new)
 
     return V, F
 
@@ -3665,7 +3712,7 @@ def detect_features_basic(V, F, verbose=True): # Passer le verbose en False a la
     return 0
 
 
-def reformat_triangles(F):
+def reformat_triangles(F, verbose=False):
     """reformat_triangles(F)
 
     Returns a connectivity array F that ensures that triangles
@@ -3683,7 +3730,10 @@ def reformat_triangles(F):
 
     """
 
+    if verbose:
+        print "* Ensuring consistent definition of triangles:"
     quads = F[:, 0] != F[:, -1]
+    nquads_init = sum(quads)
 
     F[quads] = np.roll(F[quads], 1, axis=1)
     quads = F[:, 0] != F[:, -1]
@@ -3692,6 +3742,13 @@ def reformat_triangles(F):
     quads = F[:, 0] != F[:, -1]
 
     F[quads] = np.roll(F[quads], 1, axis=1)
+    quads = F[:, 0] != F[:, -1]
+    nquads_final = sum(quads)
+    if verbose:
+        if nquads_final < nquads_init:
+            print "\t -> %u triangles were described the wrong way and have been corrected" % (nquads_init-nquads_final)
+        else:
+            print "\t -> Everything is good :)"
 
     return F
 
