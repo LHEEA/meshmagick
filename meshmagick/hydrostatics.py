@@ -367,12 +367,12 @@ def get_hydrostatics(hsMesh, mass=None, cog=None, zcog=None, rho_water=1023, g=9
             print 'Computation of hydrostatics with the given mesh position'
             print '--------------------------------------------------------'
 
-        disp = hsMesh._vw           # displacement
-        Cw = hsMesh._cw             # Center of buoyancy
-        Sf = hsMesh._sf             # Area of the flotation plane
-        mass = rho_water * disp     # Mass of the device
-        cV = hsMesh._cV             # Vertices of the mesh
-        cF = hsMesh._cF             # Faces of the mesh
+        disp = hsMesh._vw             # displacement
+        Cw   = hsMesh._cw             # Center of buoyancy
+        Sf   = hsMesh._sf             # Area of the flotation plane
+        mass = rho_water * disp       # Mass of the device
+        cV   = hsMesh._cV             # Vertices of the mesh
+        cF   = hsMesh._cF             # Faces of the mesh
 
         # Choosing wether we return a stiffness in heave only or a stiffness matrix
         if cog is None:
@@ -390,12 +390,12 @@ def get_hydrostatics(hsMesh, mass=None, cog=None, zcog=None, rho_water=1023, g=9
             hs_data['res'] = _get_residual(rho_water, g, disp, Cw, mass, cog)
             hs_data['cog'] = cog
 
-        hs_data['disp'] = hsMesh._vw
-        hs_data['Cw'] = hsMesh._cw
-        hs_data['Sf'] = hsMesh._sf
-        hs_data['mass'] = mass
+        hs_data['disp']  = hsMesh._vw
+        hs_data['Cw']    = hsMesh._cw
+        hs_data['Sf']    = hsMesh._sf
+        hs_data['mass']  = mass
         hs_data['draft'] = cV[:,2].min()
-        hs_data['Ws'] = hsMesh.get_wet_surface()
+        hs_data['Ws']    = hsMesh.get_wet_surface()
 
         hs_data['Cf'] = hsMesh.get_flotation_center()
 

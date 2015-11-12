@@ -15,10 +15,10 @@ nf is the number of cells in the mesh. Not that it has 4 columns as we consider
 flat polygonal cells up to 4 edges (quads). Triangles are obtained by repeating
 the first node at the end of the cell node ID list.
 
-WARNING : IDs of vertices should always start at 1, which is the usual case in
-file formats. However, for VTK, it starts at 0. To avoid confusion, we should
-always start at 1 and do the appropriated conversions on F.
-THIS MAY CHANGE IN THE FUTURE !!!
+IMPORTANT NOTE:
+IDs of vertices are internally idexed from 0 in meshmagick. However, several mesh
+file format use indexing starting at 1. This different convention might be transparent
+to user and 1-indexing may not be present outside the I/O functions
 """
 
 import os, sys
@@ -172,11 +172,11 @@ class Mesh:
         if F.shape[1] != 4:
             raise RuntimeError, 'F must be a nf x 4 array'
 
-
+        self.verbose = verbose
 
         # Ensuring proper type (ndarrays)
         V = np.asarray(V,   dtype=np.float)
-        F = np.asarray(F-1, dtype=np.int)
+        F = np.asarray(F, dtype=np.int)
 
         # Cleaning data
         V, F = clean_mesh(V, F, verbose=verbose)
@@ -222,18 +222,21 @@ class Mesh:
         self.V_1iHE = None # One half-edge having V as incident vertex
 
         self.HE_bound = None # Tells if the half-edge is a boundary one
-        # self.edges  = None # Dictionary that maps edges to halfedges couples
+        self.edges  = []   # Dictionary that maps edges to halfedges couples
 
         # TODO : regarder la lib pyACVD
 
     def show(self):
-        show(self.vertices, self.faces+1)
+        show(self.vertices, self.faces)
         return 1
 
     def shown(self):
-        show(self.vertices, self.faces+1, normals=True)
+        show(self.vertices, self.faces, normals=True)
         return 1
 
+    def switch_verbosity(self):
+        self.verbose = not self.verbose
+        return 1
 
     def generate_connectivity(self):
         self.VV, self.VF, self.FF, self.boundaries = generate_connectivity(self.vertices, self.faces)
@@ -283,7 +286,6 @@ class Mesh:
                                                             -1, axis=1)
 
         # Filling HE_tHE
-
         edge_dst = dict([(i, dict()) for i in xrange(self.nv)])
         for iHE in xrange(self.nhe):
             iVmin, iVmax = sorted([self.HE_iV[iHE], self.HE_tV[iHE]])
@@ -292,21 +294,29 @@ class Mesh:
             else:
                 edge_dst[iVmin][iVmax] = [iHE,]
 
-        self.HE_tHE = np.ones(self.nhe, dtype=np.int) * self.nhe
+        self.HE_tHE   = np.ones(self.nhe, dtype=np.int) * self.nhe
         self.HE_bound = np.zeros(self.nhe, dtype=np.bool)
 
         # FIXME: mettre aussi des half edges aux frontières pour pouvoir les parcourir... --> en ajouter
+        nhe_bound = 0
         for iV1 in edge_dst.keys():
             for iV2 in edge_dst[iV1].keys():
                 helist = edge_dst[iV1][iV2]
-                if len(helist) == 2:
+                n_helist = len(helist)
+                if n_helist == 2:
                     self.HE_tHE[helist[0]] = helist[1]
                     self.HE_tHE[helist[1]] = helist[0]
+                elif n_helist >2:
+                    print "WARNING: The mesh is not manifold !!!"
                 else:
                     self.HE_bound[helist[0]] = True
+                    nhe_bound += 1
+
+                # Populating edges
+                self.edges.append(helist[0])
 
         # Building the edges
-
+        print nhe_bound
 
 
         sys.exit(0)
@@ -329,7 +339,7 @@ class Mesh:
                 face.append(face[0])
             F.append(face)
 
-        return self.vertices, np.asarray(F, dtype=np.int)+1
+        return self.vertices, np.asarray(F, dtype=np.int)
 
     def get_incident_HE_from_V(self, iV):
         """Returns an ordered list of half-edges that are incident to V"""
@@ -453,16 +463,16 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
     # Getting the number of kept vertex by face
     nb_V_kept_by_face = np.zeros(nf, dtype=np.int32)
     nb_V_kept_by_face[triangle_mask] = \
-        np.sum(keepV[(F[triangle_mask,:3]-1).flatten()].reshape((nb_triangles, 3)), axis=1)
+        np.sum(keepV[(F[triangle_mask,:3]).flatten()].reshape((nb_triangles, 3)), axis=1)
     nb_V_kept_by_face[quad_mask] = \
-        np.sum(keepV[(F[quad_mask]-1).flatten()].reshape((nb_quads, 4)), axis=1)
+        np.sum(keepV[(F[quad_mask]).flatten()].reshape((nb_quads, 4)), axis=1)
 
     # Getting the number of vertex below the plane by face
     nb_V_below_by_face = np.zeros(nf, dtype=np.int32)
     V_below_mask = positions < -abs_tol
-    nb_V_below_by_face[triangle_mask] = np.sum(V_below_mask[(F[triangle_mask, :3]-1).flatten()].reshape(nb_triangles,
+    nb_V_below_by_face[triangle_mask] = np.sum(V_below_mask[(F[triangle_mask, :3]).flatten()].reshape(nb_triangles,
                                                                                                        3), axis=1)
-    nb_V_below_by_face[quad_mask] = np.sum(V_below_mask[(F[quad_mask]-1).flatten()].reshape(nb_quads, 4), axis=1)
+    nb_V_below_by_face[quad_mask] = np.sum(V_below_mask[(F[quad_mask]).flatten()].reshape(nb_quads, 4), axis=1)
 
     # Getting the faces that are kept as every of their vertices are kept
     keepF = np.zeros(nf, dtype=bool)
@@ -476,9 +486,9 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
         # Getting the boundary faces
         nb_V_on_boundary_by_face = np.zeros(nf, dtype=np.int32)
         nb_V_on_boundary_by_face[triangle_mask] = \
-            np.sum(boundary_v_mask[(F[triangle_mask, :3]-1).flatten()].reshape((nb_triangles, 3)), axis=1)
+            np.sum(boundary_v_mask[(F[triangle_mask, :3]).flatten()].reshape((nb_triangles, 3)), axis=1)
         nb_V_on_boundary_by_face[quad_mask] = \
-            np.sum(boundary_v_mask[(F[quad_mask]-1).flatten()].reshape((nb_quads, 4)), axis=1)
+            np.sum(boundary_v_mask[(F[quad_mask]).flatten()].reshape((nb_quads, 4)), axis=1)
 
         # Faces that are at the boundary but that have to be clipped, sharing an edge with the boundary
         boundary_faces_mask = np.zeros(nf, dtype=bool)
@@ -491,7 +501,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
         # boundary_faces = np.array([i for i in xrange(nf)])[boundary_faces_mask]
         boundary_faces = np.arange(nf)[boundary_faces_mask]
         boundary_edges = {}
-        for face in F[boundary_faces]-1:
+        for face in F[boundary_faces]:
             if face[0] == face[-1]:
                 face_w = face[:3]
             else:
@@ -556,7 +566,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
 
 
     # Loop on the faces to clip
-    for (iface, face) in enumerate(F[clipped_faces]-1):
+    for (iface, face) in enumerate(F[clipped_faces]):
         # face is a copy (not a reference) of the line of F
         clipped_face_id = clipped_faces[iface]
 
@@ -651,14 +661,14 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
             clipped_face = clipped_face[triangle] # Modified face
 
         # Updating the initial face with the clipped face
-        F[clipped_face_id] = clipped_face + 1 # Staying consistent with what is done in F (indexing starting at 1)
+        F[clipped_face_id] = clipped_face
 
     # Adding new elements to the initial mesh
     # TODO : use np.append(V, ..., axis=0) instead of np.concatenate
     if nb_new_V > 0:
         V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
     if nb_new_F > 0:
-        F = np.concatenate((F, np.asarray(newF, dtype=np.int32)+1))
+        F = np.concatenate((F, np.asarray(newF, dtype=np.int32)))
 
     extended_nb_V = nv + nb_new_V
     extended_nb_F = nf + nb_new_F
@@ -681,7 +691,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
     # Upgrading connectivity array with new indexing
     newID_V = np.arange(extended_nb_V)
     newID_V[keepV] = np.arange(new_nb_V)
-    clipped_F = newID_V[(F[keepF]-1).flatten()].reshape((new_nb_F, 4))+1
+    clipped_F = newID_V[(F[keepF]).flatten()].reshape((new_nb_F, 4)) # modif ici
 
     if infos:
         # Grabing faces that have been modified or added
@@ -749,7 +759,7 @@ def extract_faces(V, F, idF):
 
     # Determination of the vertices to keep
     Vmask = np.zeros(nv, dtype=bool)
-    Vmask[F[idF].flatten()-1] = True
+    Vmask[F[idF].flatten()] = True
     idV = np.arange(nv)[Vmask]
 
     # Building up the vertex array
@@ -758,7 +768,7 @@ def extract_faces(V, F, idF):
     newID_V[idV] = np.arange(len(idV))
 
     Fring = F[idF]
-    Fring = newID_V[Fring.flatten()-1].reshape((len(idF), 4))+1
+    Fring = newID_V[Fring.flatten()].reshape((len(idF), 4))
 
     return Vring, Fring
 
@@ -857,8 +867,6 @@ def get_all_faces_properties(V, F):
 
     nf = F.shape[0]
 
-    F -= 1
-
     triangle_mask = F[:,0] == F[:,-1]
     nb_triangles = np.sum(triangle_mask)
     quads_mask = np.invert(triangle_mask)
@@ -893,8 +901,6 @@ def get_all_faces_properties(V, F):
     centers[quads_mask] = ( np.array(([a1,]*3)).T * C1 +
           np.array(([a2,]*3)).T * C2 ) /  np.array(([areas[quads_mask],]*3)).T
 
-    # Returning to 1 indexing
-    F += 1
     return areas, normals, centers
 
 
@@ -958,7 +964,7 @@ def _get_surface_integrals(V, F, sum=True):
     cross = np.cross
 
     sint_tmp = np.zeros(15)
-    for (iface, face) in enumerate(F-1):
+    for (iface, face) in enumerate(F):
         sint_tmp *= 0.
         # sint_tmp = np.zeros(15) # FIXME : Essai, la version precedente serait mieux !
 
@@ -1316,7 +1322,6 @@ def generate_connectivity(V, F, verbose=False):
             boundary.append(boundary_edges.pop(boundary[-1]))
         boundaries.append(boundary)
 
-
     return VV, VF, FF, boundaries
 
 
@@ -1369,8 +1374,6 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
     if verbose:
         print "* Healing normals to make them consistent and if possible outward:"
     # TODO: return the different groups of a mesh in case it is made of several unrelated groups
-
-    F -=1
 
     nv = V.shape[0]
     nf = F.shape[0]
@@ -1442,8 +1445,6 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
             # Appending to the stack
             stack.append(iadjF)
 
-    F += 1
-
     if verbose:
         if nb_reversed > 0:
             print '\t -> %u faces have been reversed to make normals consistent across the mesh' % (nb_reversed)
@@ -1498,11 +1499,11 @@ def clean_mesh(V, F, verbose=False):
     V, F = merge_duplicates(V, F, verbose=verbose)
 
     # Healing normals
-    F = heal_normals(V, F+1, verbose=verbose)
+    F = heal_normals(V, F, verbose=verbose)
 
     if verbose:
         print "-----------------"
-    return V, F-1
+    return V, F
 
 def merge_duplicates(V, F, verbose=False, tol=1e-8):
     """merge_duplicates(V, F, verbose=False, tol=1e-8)
@@ -1586,10 +1587,10 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
 
             Vtmp.append(V[iperm[istart]])
             newID[iperm[range(istart, istop)]] = ilevel
-        V = np.array(Vtmp, dtype=float, order='F')
+        V = np.array(Vtmp, dtype=float)
         # Applying renumbering to cells
         for cell in F:
-            cell[:] = newID[cell-1]+1
+            cell[:] = newID[cell]
 
         if verbose:
             nv_new = V.shape[0]
@@ -1650,6 +1651,8 @@ def load_RAD(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: RAD files have a 1-indexing
     """
 
     import re
@@ -1675,13 +1678,13 @@ def load_RAD(filename):
     node_section = pattern_node_section.search(data).group(1)
     for node in pattern_node_line.finditer(node_section):
         V.append(map(float, list(node.groups())))
-    V = np.asarray(V, dtype=float, order='F')
+    V = np.asarray(V, dtype=float)
 
     F = []
     elem_section = pattern_elem_section.search(data).group(1)
     for elem in pattern_elem_line.findall(elem_section):
         F.append(map(int, elem.strip().split()[3:]))
-    F = np.asarray(F, dtype=np.int32, order='F')
+    F = np.asarray(F, dtype=np.int) - 1
 
     return V, F
 
@@ -1700,6 +1703,8 @@ def load_HST(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: HST files have a 1-indexing
     """
     ifile = open(filename, 'r')
     data = ifile.read()
@@ -1724,7 +1729,7 @@ def load_HST(filename):
         for node in pattern_node_line.findall(node_section):
             Vtmp.append(map(float, node.split()[1:]))
         nvtmp = len(Vtmp)
-        Vtmp = np.asarray(Vtmp, dtype=float, order='F')
+        Vtmp = np.asarray(Vtmp, dtype=np.float)
         if nv == 0:
             V = Vtmp.copy()
             nv = nvtmp
@@ -1738,7 +1743,7 @@ def load_HST(filename):
         for elem in pattern_elem_line.findall(elem_section):
             Ftmp.append(map(int, elem.split()))
         nftmp = len(Ftmp)
-        Ftmp = np.asarray(Ftmp, dtype=np.int32, order='F')
+        Ftmp = np.asarray(Ftmp, dtype=np.int)
         if nf == 0:
             F = Ftmp.copy()
             nf = nftmp
@@ -1746,7 +1751,7 @@ def load_HST(filename):
             F = np.concatenate((F, Ftmp))
             nf += nftmp
 
-    return V, F
+    return V, F-1
 
 
 def load_DAT(filename):
@@ -1772,6 +1777,8 @@ def load_INP(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: INP/DAT files use a 1-indexing
     """
     import re
 
@@ -1787,7 +1794,7 @@ def load_INP(filename):
     for match in pattern_FRAME.finditer(text):
         framename = match.group(1).strip()
         framevector = re.split(r'[, ]', match.group(2).strip())
-        frames[framename] = np.asarray(map(float, framevector), order='F')
+        frames[framename] = np.asarray(map(float, framevector))
 
     # Storing the inp layout into a list of dictionnary
     pattern_NODE_ELEMENTS = re.compile(r'^\s*\*(NODE|ELEMENT),(.*)', re.MULTILINE)
@@ -1828,7 +1835,7 @@ def load_INP(filename):
 
     for file in meshfiles:
         try:
-            meshfile = open(file + '.DAT', 'r')
+            meshfile = open(os.path.join(os.path.dirname(filename), file + '.DAT'), 'r')
         except:
             raise IOError, u'File {0:s} not found'.format(file + '.DAT')
         data = meshfile.read()
@@ -1853,11 +1860,10 @@ def load_INP(filename):
         # Detecting renumberings to do
         real_idx = 0
         # renumberings = []
-        id_new = - np.ones(max(idx_array) + 1, dtype=int)
-        for idx in idx_array:
-            real_idx += 1
-            if real_idx != idx:  # Node number and line number in the array are not consistant...
-                id_new[idx] = real_idx
+        id_new = - np.ones(max(idx_array) + 1, dtype=np.int)
+        # FIXME: cette partie est tres buggee !!!
+        for i, idx in enumerate(idx_array):
+            id_new[idx] = i+1
 
         meshfiles[file]['ELEM_SECTIONS'] = []
         for elem_section in pattern_elem_section.findall(data):
@@ -1881,25 +1887,26 @@ def load_INP(filename):
     for field in layout:
         file = field['INPUT']
         if field['type'] == 'NODE':
-            nodes = np.asarray(meshfiles[file]['NODE_SECTION'])
+            nodes = np.asarray(meshfiles[file]['NODE_SECTION'], dtype=np.float)
             # Translation of nodes according to frame option id any
             nodes = translate(nodes, frames[field['FRAME']])  # TODO: s'assurer que frame est une options obligatoire...
 
             if nbNodes == 0:
-                V = nodes.copy(order='F')
+                V = nodes.copy()
                 nbNodes = V.shape[0]
                 increment = False
                 continue
 
             if field['INCREMENT'] == 'NO':
-                V[idx, :] = nodes.copy(order='F')
+                V[idx, :] = nodes.copy()
                 increment = False
             else:
                 V = np.concatenate((V, nodes))
                 nbNodes = V.shape[0]
                 increment = True
         else:  # this is an ELEMENT section
-            elem_section = np.asarray(meshfiles[file]['ELEM_SECTIONS'][meshfiles[file]['nb_elem_sections_used']])
+            elem_section = np.asarray(meshfiles[file]['ELEM_SECTIONS'][meshfiles[file]['nb_elem_sections_used']],
+                                      dtype=np.int)
 
             meshfiles[file]['nb_elem_sections_used'] += 1
             if meshfiles[file]['nb_elem_sections_used'] == meshfiles[file]['nb_elem_sections']:
@@ -1911,14 +1918,14 @@ def load_INP(filename):
                 elems += nbNodes
 
             if nbElems == 0:
-                F = elems.copy(order='F')
+                F = elems.copy()
                 nbElems = F.shape[0]
                 continue
             else:
                 F = np.concatenate((F, elems))
                 nbElems = F.shape[0]
 
-    return V, F
+    return V, F-1
 
 
 def load_TEC(filename):
@@ -1936,6 +1943,8 @@ def load_TEC(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: TEC files have a 0-indexing
     """
 
     from vtk import vtkTecplotReader
@@ -1957,7 +1966,7 @@ def load_TEC(filename):
         nvblock = block.GetNumberOfPoints()
         nfblock = block.GetNumberOfCells()
 
-        Vtmp = np.zeros((nvblock, 3), dtype=float, order='F')
+        Vtmp = np.zeros((nvblock, 3), dtype=np.float)
         for k in range(nvblock):
             Vtmp[k] = np.array(block.GetPoint(k))
 
@@ -1969,7 +1978,7 @@ def load_TEC(filename):
         nv += nvblock
 
         # Facet extraction
-        Ftmp = np.zeros((nfblock, 4), dtype=np.int32, order='F')
+        Ftmp = np.zeros((nfblock, 4), dtype=np.int)
         for k in range(nfblock):
             cell = block.GetCell(k)
             nv_facet = cell.GetNumberOfPoints()
@@ -1985,7 +1994,6 @@ def load_TEC(filename):
 
         nf += nfblock
 
-    F += 1
     return V, F
 
 
@@ -2004,6 +2012,8 @@ def load_VTU(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: VTU files have a 0-indexing
     """
 
     from vtk import vtkXMLUnstructuredGridReader
@@ -2028,6 +2038,8 @@ def load_VTK(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: VTU files have a 0-indexing
     """
     from vtk import vtkUnstructuredGridReader
     reader = vtkUnstructuredGridReader()
@@ -2060,12 +2072,12 @@ def _load_paraview(filename, reader):
     vtk_mesh = reader.GetOutput()
 
     nv = vtk_mesh.GetNumberOfPoints()
-    V = np.zeros((nv, 3), dtype=float, order='fortran')
+    V = np.zeros((nv, 3), dtype=np.float)
     for k in range(nv):
         V[k] = np.array(vtk_mesh.GetPoint(k))
 
     nf = vtk_mesh.GetNumberOfCells()
-    F = np.zeros((nf, 4), dtype=np.int32, order='fortran')
+    F = np.zeros((nf, 4), dtype=np.int)
     for k in range(nf):
         cell = vtk_mesh.GetCell(k)
         nv_facet = cell.GetNumberOfPoints()
@@ -2074,7 +2086,6 @@ def _load_paraview(filename, reader):
         if nv_facet == 3:
             F[k][3] = F[k][0]
 
-    F += 1
     return V, F
 
 
@@ -2095,6 +2106,8 @@ def load_STL(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: STL files have a 0-indexing
     """
 
     from vtk import vtkSTLReader
@@ -2106,19 +2119,19 @@ def load_STL(filename):
     data = reader.GetOutputDataObject(0)
 
     nv = data.GetNumberOfPoints()
-    V = np.zeros((nv, 3), dtype=float, order='F')
+    V = np.zeros((nv, 3), dtype=np.float)
     for k in range(nv):
         V[k] = np.array(data.GetPoint(k))
     nf = data.GetNumberOfCells()
-    F = np.zeros((nf, 4), dtype=np.int32, order='F')
+    F = np.zeros((nf, 4), dtype=np.int)
     for k in range(nf):
         cell = data.GetCell(k)
         if cell is not None:
             for l in range(3):
                 F[k][l] = cell.GetPointId(l)
                 F[k][3] = F[k][0]  # always repeating the first node as stl is triangle only
-    F += 1
 
+    # Merging duplicates nodes
     V, F = merge_duplicates(V, F)
 
     return V, F
@@ -2162,6 +2175,8 @@ def load_NAT(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: NAT files have a 1-indexing
     """
 
     ifile = open(filename, 'r')
@@ -2171,15 +2186,15 @@ def load_NAT(filename):
     V = []
     for i in range(nv):
         V.append(map(float, ifile.readline().split()))
-    V = np.array(V, dtype=float, order='fortran')
+    V = np.array(V, dtype=np.float)
 
     F = []
     for i in range(nf):
         F.append(map(int, ifile.readline().split()))
-    F = np.array(F, dtype=np.int32, order='fortran')
+    F = np.array(F, dtype=np.int)
 
     ifile.close()
-    return V, F
+    return V, F-1
 
 
 def load_GDF(filename):
@@ -2198,6 +2213,8 @@ def load_GDF(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: GDF files have a 1-indexing
     """
     ifile = open(filename, 'r')
 
@@ -2213,8 +2230,8 @@ def load_GDF(filename):
     line = ifile.readline().split()
     nf = int(line[0])
 
-    V = np.zeros((4 * nf, 3), dtype=float, order='fortran')
-    F = np.zeros((nf, 4), dtype=np.int32, order='fortran')
+    V = np.zeros((4 * nf, 3), dtype=np.float)
+    F = np.zeros((nf, 4), dtype=np.int)
 
     iv = -1
     for icell in range(nf):
@@ -2222,7 +2239,7 @@ def load_GDF(filename):
         for k in range(4):
             iv += 1
             V[iv, :] = np.array(ifile.readline().split())
-            F[icell, k] = iv + 1
+            F[icell, k] = iv
 
     ifile.close()
     V, F = merge_duplicates(V, F, verbose=True)
@@ -2244,6 +2261,8 @@ def load_MAR(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: MAR files have a 1-indexing
     """
 
     ifile = open(filename, 'r')
@@ -2257,7 +2276,7 @@ def load_MAR(filename):
             break
         V.append(map(float, line[1:]))
 
-    V = np.array(V, dtype=float, order='fortran')
+    V = np.array(V, dtype=np.float)
     F = []
     while 1:
         line = ifile.readline()
@@ -2266,11 +2285,11 @@ def load_MAR(filename):
             break
         F.append(map(int, line))
 
-    F = np.array(F, dtype=np.int32, order='fortran')
+    F = np.array(F, dtype=np.int)
 
     ifile.close()
 
-    return V, F
+    return V, F-1
 
 
 # def load_STL2(filename):
@@ -2328,12 +2347,14 @@ def load_MSH(filename):
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
             numpy array of the faces' nodes connectivities
+
+    Note: MSH files have a 0-indexing
     """
     import gmsh
 
     myMesh = gmsh.Mesh()
     myMesh.read_msh(filename)
-    V = np.array(myMesh.Verts, dtype=float, order='fortran')
+    V = np.array(myMesh.Verts, dtype=np.float)
 
     ntri = myMesh.nElmts.get(2)
     nquad = myMesh.nElmts.get(3)
@@ -2344,7 +2365,7 @@ def load_MSH(filename):
 
     nel = ntri + nquad
 
-    F = np.zeros((nel, 4), dtype=np.int32, order='fortran')
+    F = np.zeros((nel, 4), dtype=np.int)
 
     if ntri != 0:
         F[:ntri, :3] = myMesh.Elmts.get(2)[1]
@@ -2353,7 +2374,6 @@ def load_MSH(filename):
     if nquad != 0:
         F[ntri:, :] = myMesh.Elmts.get(3)[1]
 
-    F += 1
     return V, F
 
 
@@ -2437,7 +2457,7 @@ def write_DAT(filename, V, F):
     tri_block  = '$\n$ ELEMENT,TYPE=T3C000,ELSTRUCTURE={0}'.format(rootfilename.upper())
     nq = 0
     nt = 0
-    for (idx, cell) in enumerate(F):
+    for (idx, cell) in enumerate(F+1):
         if cell[0] != cell[-1]:
             # quadrangle
             nq += 1
@@ -2526,7 +2546,7 @@ def write_HST(filename, V, F):
         '\n'.join(  # line
             ''.join(
                 '{:10d}'.format(node_idx) for node_idx in cell
-            ) for cell in F
+            ) for cell in F+1
         ),
         '\nENDPANEL\n\n'
     ))
@@ -2576,7 +2596,7 @@ def write_TEC(filename, V, F):
     cells_block = '\n'.join(  # block
         ''.join(
             ''.join('{:10d}'.format(node_id) for node_id in cell)
-        ) for cell in F
+        ) for cell in F+1
     ) + '\n'
     ofile.write(cells_block)
 
@@ -2691,7 +2711,6 @@ def _build_vtk_mesh_obj(V, F):
     vtk_mesh.SetPoints(vtk_points)  # Storing the points into vtk_mesh
 
     # Building the vtkCell data structure
-    F = F - 1
     for cell in F:
         if cell[-1] in cell[:-1]:
             vtk_cell = vtk.vtkTriangle()
@@ -2734,7 +2753,7 @@ def write_NAT(filename, V, F):
     ofile.write('%6u%6u\n' % (nv, nf))
     for vertex in V:
         ofile.write('%15.6E%15.6E%15.6E\n' % (vertex[0], vertex[1], vertex[2]))
-    for cell in F:
+    for cell in F+1:
         ofile.write('%10u%10u%10u%10u\n' % (cell[0], cell[1], cell[2], cell[3]))
 
     ofile.close()
@@ -2769,7 +2788,7 @@ def write_GDF(filename, V, F):
 
     for cell in F:
         for k in range(4):
-            Vcur = V[cell[k] - 1, :]
+            Vcur = V[cell[k], :]
             ofile.write('%16.6E%16.6E%16.6E\n' % (Vcur[0], Vcur[1], Vcur[2]))
 
     ofile.close()
@@ -2803,7 +2822,7 @@ def write_MAR(filename, V, F):
 
     cell_block = '\n'.join(
         ''.join(u'{0:10d}'.format(elt) for elt in cell)
-        for cell in F
+        for cell in F+1
     ) + '\n'
     ofile.write(cell_block)
     ofile.write('%6u%6u%6u%6u\n' % (0, 0, 0, 0))
@@ -2812,6 +2831,8 @@ def write_MAR(filename, V, F):
 
     return 1
 
+def write_RAD(filename, V, F):
+    raise NotImplementedError
 
 def write_STL(filename, V, F):
     """write_STL(filename, V, F)
@@ -2836,7 +2857,6 @@ def write_STL(filename, V, F):
     ofile = open(filename, 'w')
 
     ofile.write('solid meshmagick\n')
-    F -= 1  # STL format specifications tells that numerotation starts at 0
 
     for facet in F:
         if facet[0] != facet[3]:
@@ -3204,6 +3224,8 @@ def symmetrize(V, F, plane):
     V = np.concatenate((V, V-2*np.outer(np.dot(V, normal)-plane.c, normal)))
     F = np.concatenate((F, np.fliplr(F.copy()+nv)))
 
+    # TODO: be more fine and detect vertices that are duplicated, avoiding using the general merge_duplicates()
+    # function
     return merge_duplicates(V, F, verbose=False)
 
 def _is_point_inside_polygon(point, poly):
@@ -3387,7 +3409,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
         # Adding the lid to the initial mesh
         V = np.append(V, mesh_points_3D, axis=0)
         nv += nmp
-        F = np.append(F-1, mesh_quad, axis=0) + 1
+        F = np.append(F, mesh_quad, axis=0) + 1
         nf += nmt
 
     # Merging duplicates
@@ -3461,9 +3483,9 @@ def triangulate_quadrangles(F, verbose=False):
 
 
 def detect_features_expert(V, F, verbose=True):
-
-    mesh = Mesh(V, F, verbose=verbose)
-    mesh.generate_HE_connectivity()
+    pass
+    # mesh = Mesh(V, F, verbose=verbose)
+    # mesh.generate_HE_connectivity()
 
 
 
@@ -3472,8 +3494,6 @@ def detect_features_expert(V, F, verbose=True):
 def detect_features_basic(V, F, verbose=True): # Passer le verbose en False a la fin
 
     la = np.linalg
-
-    F -=1
 
     # It is necessary that the mesh has no duplicate vertices
     V, F = merge_duplicates(V, F, verbose=verbose)
@@ -3708,7 +3728,6 @@ def detect_features_basic(V, F, verbose=True): # Passer le verbose en False a la
     # # print Salient_measure[list(SharpV)]
     #
 
-    F+=1
     return 0
 
 
@@ -3850,6 +3869,8 @@ extension_dict = { #keyword           reader,   writer
                   'nat':             (load_NAT, write_NAT),
                   'gmsh':            (load_MSH, write_MSH),
                   'msh':             (load_MSH, write_MSH),
+                  'rad':             (load_RAD, write_RAD),
+                  'radioss':         (load_RAD, write_RAD),
                   'stl':             (load_STL, write_STL),# FIXME: Verifier que ce n'est pas load_STL2
                   'paraview':        (load_VTU, write_VTU),# VTU
                   'vtu':             (load_VTU, write_VTU),
@@ -3889,6 +3910,7 @@ def main():
                     |   .hst    |    R/W     | HYDROSTAR (4)   | hydrostar, hst       |
                     |   .nat    |    R/W     |    -            | natural, nat         |
                     |   .msh    |    R       | GMSH (5)        | gmsh, msh            |
+                    |   .rad    |    R       | RADIOSS         | rad, radioss         |
                     |   .stl    |    R/W     |    -            | stl                  |
                     |   .vtu    |    R/W     | PARAVIEW (6)    | paraview, vtu        |
                     |   .vtk    |    R/W     | PARAVIEW (6)    | paraview-legacy, vtk |
@@ -4194,8 +4216,8 @@ def main():
 
     # FOR TESTING
 
-    F = remove_degenerated_faces(V, F)
-    detect_features_expert(V, F)
+    # F = remove_degenerated_faces(V, F)
+    # detect_features_expert(V, F)
 
     # END FOR TESTING
 
@@ -4205,14 +4227,6 @@ def main():
         if verbose:
             print '\nOPERATION: Merge duplicate nodes'
         V, F = merge_duplicates(V, F, verbose=verbose, tol=tol)
-        if verbose:
-            print '\t-> Done.'
-
-    # Heal normals
-    if args.heal_normals:
-        if verbose:
-            print '\nOPERATION: heal normals'
-        F = heal_normals(V, F, verbose=verbose)
         if verbose:
             print '\t-> Done.'
 
@@ -4343,6 +4357,14 @@ def main():
             V, F = symmetrize(V, F, sym_plane)
             if verbose:
                 print '\t-> Done.'
+
+    # Heal normals
+    if args.heal_normals:
+        if verbose:
+            print '\nOPERATION: heal normals'
+        F = heal_normals(V, F, verbose=verbose)
+        if verbose:
+            print '\t-> Done.'
 
     # Mesh translations
     if args.translate is not None:
