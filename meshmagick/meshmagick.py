@@ -211,6 +211,7 @@ class Mesh:
         self.centers = None
 
         # Half-edge data structure
+        self.has_HE_connectivity = False
         self.nhe    = None # Number of half-edges in the mesh
         self.F_1HE  = None # One half-edge of the face
         self.HE_F   = None # The face of the half-edge
@@ -221,27 +222,18 @@ class Mesh:
         self.HE_tV  = None # The target vertex of the current half-edge
         self.V_1iHE = None # One half-edge having V as incident vertex
 
-        self.HE_bound = None # Tells if the half-edge is a boundary one
-        self.edges  = []   # Dictionary that maps edges to halfedges couples
+        self.HE_edge  = None # Stores the edge that is associated with the half-edge
+        self.nb_edges = None
+        self.edges  = None   # Dictionary that maps edges to halfedges couples
+        self.is_boundary_edge = None
+        self.is_boundaryV = None # flag telling if a vertex is a boundary vertex
 
         # TODO : regarder la lib pyACVD
 
-    def show(self):
-        show(self.vertices, self.faces)
-        return 1
-
-    def shown(self):
-        show(self.vertices, self.faces, normals=True)
-        return 1
-
-    def switch_verbosity(self):
-        self.verbose = not self.verbose
-        return 1
-
-    def generate_connectivity(self):
-        self.VV, self.VF, self.FF, self.boundaries = generate_connectivity(self.vertices, self.faces)
-
     def generate_HE_connectivity(self):
+
+        if self.verbose:
+            print "\nGenerating half-edge data structure..."
 
         nbHE_tri = 3*self.nb_tri
         nbHE_quad = 4*self.nb_quad
@@ -294,35 +286,409 @@ class Mesh:
             else:
                 edge_dst[iVmin][iVmax] = [iHE,]
 
-        self.HE_tHE   = np.ones(self.nhe, dtype=np.int) * self.nhe
-        self.HE_bound = np.zeros(self.nhe, dtype=np.bool)
+        self.HE_tHE   = np.zeros(self.nhe, dtype=np.int)
 
-        # FIXME: mettre aussi des half edges aux frontières pour pouvoir les parcourir... --> en ajouter
-        nhe_bound = 0
+        self.is_boundaryV = np.zeros(self.nv, dtype=np.bool)
+        self.HE_edge = np.zeros(self.nhe, dtype=np.int)
+
+        nb_edges = -1
+        self.edges = []
+        self.is_boundary_edge = []
+        # nb_edges = 0
         for iV1 in edge_dst.keys():
             for iV2 in edge_dst[iV1].keys():
                 helist = edge_dst[iV1][iV2]
                 n_helist = len(helist)
-                if n_helist == 2:
-                    self.HE_tHE[helist[0]] = helist[1]
-                    self.HE_tHE[helist[1]] = helist[0]
-                elif n_helist >2:
-                    print "WARNING: The mesh is not manifold !!!"
-                else:
-                    self.HE_bound[helist[0]] = True
-                    nhe_bound += 1
 
                 # Populating edges
                 self.edges.append(helist[0])
+                nb_edges += 1
 
-        # Building the edges
-        print nhe_bound
+                if n_helist == 2:
+                    self.HE_tHE[helist[0]] = helist[1]
+                    self.HE_tHE[helist[1]] = helist[0]
+                    self.HE_edge[helist[0]] = nb_edges
+                    self.HE_edge[helist[1]] = nb_edges
+                    self.is_boundary_edge.append(False)
+                elif n_helist >2:
+                    print "WARNING: The mesh is not manifold !!!"
+                else:
+                    # The half-edge is on a boundary
+                    self.is_boundaryV[iV1] = True
+                    self.is_boundaryV[iV2] = True
+                    self.HE_edge[helist[0]] = nb_edges
+                    self.is_boundary_edge.append(True)
+
+        self.edges = np.asarray(self.edges, dtype=np.int)
+        self.is_boundary_edge = np.asarray(self.is_boundary_edge, dtype=np.bool)
+        self.nb_edges = nb_edges+1
+
+        # Generating half-edges for boundaries
+        boundary_HE = self.edges[self.is_boundary_edge]
+        nb_boundary_HE = len(boundary_HE)
+        HE_F = self.HE_F[boundary_HE]
+        HE_tHE = boundary_HE
+        self.HE_tHE[boundary_HE] = np.arange(self.nhe, self.nhe+nb_boundary_HE)
+        HE_iV  = self.HE_tV[boundary_HE]
+        HE_tV  = self.HE_iV[boundary_HE]
+
+        HE_nHE = self.HE_tHE[self.HE_pHE[self.HE_tHE[self.HE_pHE[boundary_HE]]]]
+        HE_pHE = self.HE_tHE[self.HE_nHE[self.HE_tHE[self.HE_nHE[boundary_HE]]]]
+
+        HE_edge = self.HE_edge[boundary_HE]
+
+        self.nhe += nb_boundary_HE
+        self.HE_F = np.concatenate((self.HE_F, HE_F))
+        self.HE_tHE = np.concatenate((self.HE_tHE, HE_tHE))
+        self.HE_iV = np.concatenate((self.HE_iV, HE_iV))
+        self.HE_tV = np.concatenate((self.HE_tV, HE_tV))
+        self.HE_nHE = np.concatenate((self.HE_nHE, HE_nHE))
+        self.HE_pHE = np.concatenate((self.HE_pHE, HE_pHE))
+        self.HE_edge = np.concatenate((self.HE_edge, HE_edge))
+
+
+        self.has_HE_connectivity = True
+        if self.verbose:
+            print "\t -> Done !\n"
+
+        return 1
+
+    def detect_features(self,
+                        thetaf=10, # The main parameter to tune !!
+                        thetaF=65,
+                        thetaD=60,
+                        thetat=20,
+                        thetaT=40,
+                        thetae=25,
+                        thetak=50,
+                        k=5,
+                        verbose=False):
+
+        if verbose:
+            print "Detecting features of the mesh"
+
+        la = np.linalg
+        epsilon = math.tan(thetaf*math.pi/180/2)**2
+        pi = math.pi
+        acos = math.acos
+
+        # generating faces properties
+        if self.areas is None:
+            self.generate_faces_properties()
+
+        if not self.has_HE_connectivity:
+            self.generate_HE_connectivity()
+
+
+        # Computing Dihedral Angle (DA) of each edge
+        dihedral_angle_edge = np.zeros(self.nb_edges, dtype=np.float)
+        for iedge, iHE1 in enumerate(self.edges):
+            if self.is_boundary_edge[iedge]:
+                dihedral_angle_edge[iedge] = pi
+            else:
+                iface1 = self.HE_F[iHE1]
+                n1 = self.normals[iface1]
+                iHE2 = self.HE_tHE[iHE1]
+                iface2 = self.HE_F[iHE2]
+                n2 = self.normals[iface2]
+                cosn1n2 = max(-1, min(1, np.dot(n1, n2)))
+                dihedral_angle_edge[iedge] = acos(cosn1n2)
+
+        # For each face, computing the covariance matrix, needed to compute
+        # the medial quadric of each vertex (giving the ridge direction)
+        covF = [np.zeros((3,3), dtype=np.float) for i in xrange(self.nf)]
+        for iface, face in enumerate(self.faces):
+            normal = self.normals[iface]
+            covF[iface] = np.outer(normal, normal)
+
+
+        # Computing data for each vertex
+        angle_defect_V    = np.zeros(self.nv, dtype=np.float)
+        medial_quadric    = np.zeros((3,3), dtype=np.float)
+        ridge_direction_V = np.zeros((self.nv, 3), dtype=np.float)
+        sharp_corner      = np.zeros(self.nv, dtype=np.bool)
+        ambiguous_vertex  = np.zeros(self.nv, dtype=np.bool)
+
+        OSTA = np.zeros(self.nhe, dtype=np.float)
+
+        for iV, vertex in enumerate(self.vertices):
+
+            # Getting list of incident half-edges
+            iHE_list = self.get_incident_HE_from_V(iV)
+
+            if self.is_boundaryV[iV]:
+                # ridge direction is here undefined, we evaluate it differently
+                i1, i2 = list(np.where(self.is_boundary_edge[self.HE_edge[iHE_list]])[0])
+                iHE1 = iHE_list[i1]
+                iHE2 = iHE_list[i2]
+                HE1 = vertex - self.vertices[self.HE_tV[iHE1]]
+                HE1 /= la.norm(HE1)
+                HE2 = self.vertices[self.HE_tV[iHE2]] - vertex
+                HE2 /= la.norm(HE2)
+                ridge_dir = HE1 + HE2
+                ridge_dir /= la.norm(ridge_dir)
+                ridge_direction_V[iV] = ridge_dir
+                # Computing the one-sided turning angle of incident half-edges
+                for iHE in iHE_list:
+                    HE = self.vertices[self.HE_tV[iHE]] - vertex
+                    HE /= la.norm(HE)
+                    cHE = max(-1, min(1, np.dot(HE, ridge_dir)))
+                    OSTA[iHE] = acos(cHE)
+
+                continue
+
+            # Computing angle defect
+            HE1 = self.vertices[self.HE_tV[iHE_list[-1]]] - vertex
+            HE1 /= la.norm(HE1)
+            for iHE in iHE_list:
+                HE2 = self.vertices[self.HE_tV[iHE]] - vertex
+                HE2 /= la.norm(HE2)
+                angle_defect_V[iV] -= acos(np.dot(HE1, HE2))
+                HE1 = HE2
+
+            if self.is_boundaryV[iV]:
+                angle_defect_V[iV] *= 2
+
+            angle_defect_V[iV] += 2*pi
+
+            # Is the vertex u-strong in AD (Angle Defect) <=> is a sharp vertex ?
+            if angle_defect_V[iV] > thetaD*pi/180:
+                sharp_corner[iV] = True
+
+            # Computing ridge direction
+            iface_list = self.HE_F[iHE_list]
+
+            adjF_areas = self.areas[iface_list]
+            max_area = adjF_areas.max()
+            adjF_centers = self.centers[iface_list]
+            dist = la.norm(adjF_centers - vertex, axis=1)
+            dist_max = dist.max()
+            weights = dist/dist_max * np.exp(- dist/dist_max)
+
+            medial_quadric[:] = 0.
+            for i, iface in enumerate(iface_list):
+                medial_quadric += weights[i] * covF[iface]
+
+            eigval, eigvec = la.eigh(medial_quadric)
+            (lambda3, lambda2, lambda1) = eigval
+
+            if lambda2/lambda1 >= epsilon and lambda3/lambda2 <= 0.7:
+                # Ridge direction is defined, we are not on a flat surface
+                ridge_direction_V[iV] = eigvec[:, 0] / la.norm(eigvec[:, 0])
+
+                # Computing the one-sided turning angle of each incident half-edge
+                for iHE in iHE_list:
+                    HE = self.vertices[self.HE_tV[iHE]] - vertex
+                    HE /= la.norm(HE)
+                    cHE = max(-1, min(1, np.dot(HE, ridge_direction_V[iV])))
+                    OSTA[iHE] = acos(cHE)
+            else:
+                ambiguous_vertex[iV] = True
+
+        # Building u-strongness and e-strongness
+        sharp_edge = np.zeros(self.nb_edges, dtype=np.bool)
+        e_strong_DA_edge = np.zeros(self.nb_edges, dtype=np.bool)
+
+        sharp_edge[dihedral_angle_edge > thetaF*pi/180] = True
+        e_strong_DA_edge[dihedral_angle_edge > thetae*pi/180] = True
+
+        # Each vertex, determining l-strongness in OSTA and DA
+        l_strong_OSTA_HE = np.zeros(self.nhe, dtype=np.bool)
+        l_strong_DA_HE   = np.zeros(self.nhe, dtype=np.bool)
+        for iV in xrange(self.nv):
+            if ambiguous_vertex[iV]:
+                continue
+
+            # Getting list of incident half-edges
+            iHE_list = self.get_incident_HE_from_V(iV)
+
+            # Getting half-edges whose DA is greater than thetaf
+            iHE_DA_gt_thetaf = iHE_list[dihedral_angle_edge[self.HE_edge[iHE_list]] > thetaf*pi/180]
+
+            iHE = iHE_DA_gt_thetaf[np.argmin(OSTA[iHE_DA_gt_thetaf])]
+            if OSTA[iHE] < thetat*pi/180:
+                l_strong_OSTA_HE[iHE] = True
+            iHE = iHE_DA_gt_thetaf[np.argmax(OSTA[iHE_DA_gt_thetaf])]
+            if OSTA[iHE] > pi-thetat*pi/180:
+                l_strong_OSTA_HE[iHE] = True
+
+            iHE_OSTA_lt_pi_2 = iHE_list[OSTA[iHE_DA_gt_thetaf] < pi/2]
+            edges = self.HE_edge[iHE_OSTA_lt_pi_2]
+            iedge_maxDA = edges[np.argmax(dihedral_angle_edge[edges])]
+            iHE = self.edges[iedge_maxDA]
+            if self.HE_iV[iHE] == iV:
+                l_strong_DA_HE[iHE] = True
+            else:
+                l_strong_DA_HE[self.HE_tHE[iHE]] = True
+
+            iHE_OSTA_gt_pi_2 = iHE_list[OSTA[iHE_DA_gt_thetaf] > pi/2]
+            edges = self.HE_edge[iHE_OSTA_gt_pi_2]
+            iedge_maxDA = edges[np.argmax(dihedral_angle_edge[edges])]
+            iHE = self.edges[iedge_maxDA]
+            if self.HE_iV[iHE] == iV:
+                l_strong_DA_HE[iHE] = True
+            else:
+                l_strong_DA_HE[self.HE_tHE[iHE]] = True
+
+            # Dealing with border edges
+            edges = self.HE_edge[iHE_list]
+            iedges = edges[self.is_boundary_edge[edges]]
+            l_strong_OSTA_HE[self.edges[iedges]] = True
+            l_strong_OSTA_HE[self.HE_tHE[self.edges[iedges]]] = True
+            l_strong_DA_HE[self.edges[iedges]] = True
+            l_strong_DA_HE[self.HE_tHE[self.edges[iedges]]] = True
+
+        # Determining attachment of half-edges
+        attached_HE          = np.zeros(self.nhe, dtype=np.bool)
+        strongly_attached_HE = np.zeros(self.nhe, dtype=np.bool)
+        strongly_attached_V  = np.zeros(self.nv, dtype=np.bool)
+        for iHE in xrange(self.nhe):
+            iedge = self.HE_edge[iHE]
+            iV = self.HE_iV[iHE] # Incident vertex of the iHE half-edge
+            # List of other half-edges incident to iV
+            iHE_list = self.get_incident_HE_from_V(iV)
+            edges = self.HE_edge[iHE_list] # Associated edge list
+            has_sharp_edge = np.any(sharp_edge[edges])
+            if dihedral_angle_edge[iedge] > thetaf*pi/180:
+                # Attached
+                if l_strong_DA_HE[iHE] or \
+                    l_strong_OSTA_HE[iHE] or \
+                    has_sharp_edge:
+
+                    attached_HE[iHE] = True
+
+                # Strongly attached
+                if l_strong_DA_HE[iHE] and l_strong_OSTA_HE[iHE]:
+                    strongly_attached_HE[iHE] = True
+                if sharp_edge[iedge] or \
+                    sharp_corner[iV] or \
+                    ambiguous_vertex[iV]:
+
+                    attached_HE[iHE] = True
+                    strongly_attached_HE[iHE] = True
+
+                # Strongly attached vertex
+                if strongly_attached_HE[iHE]:
+                    strongly_attached_V[iV] = True
+
+        # Quasi-strong half-edges
+        quasi_strong_HE   = np.zeros(self.nhe, dtype=np.bool)
+        for iHE in xrange(self.nhe):
+            iV = self.HE_iV[iHE]
+            tV = self.HE_tV[iHE]
+            if attached_HE[iHE] and \
+                strongly_attached_V[iV] and \
+                strongly_attached_V[tV]:
+
+                quasi_strong_HE[iHE] = True
+
+        # Quasi-strong edges
+        quasi_strong_edge = np.zeros(self.nb_edges, dtype=np.bool)
+        for iedge in xrange(self.nb_edges):
+            iHE1 = self.edges[iedge]
+            iHE2 = self.HE_tHE[iHE1]
+            if quasi_strong_HE[iHE1] and quasi_strong_HE[iHE2]:
+                quasi_strong_edge[iedge] = True
+
+        # Candidate vertices
+        candidate_edges = np.where(quasi_strong_edge)[0]
+        nb_candidate_edges = len(candidate_edges)
+        candidate_vertices = set()
+        for iedge in candidate_edges:
+            iHE = self.edges[iedge]
+            candidate_vertices.add(self.HE_iV[iHE])
+            candidate_vertices.add(self.HE_tV[iHE])
+        sharp_corner_ids = np.where(sharp_corner)[0]
+        for iV in sharp_corner_ids:
+            candidate_vertices.add(iV)
+
+        candidate_vertices = np.asarray(list(candidate_vertices), dtype=np.int)
+
+        # Generating candidate half-edges
+        is_candidate_HE = np.zeros(self.nhe, dtype=np.bool)
+        iHE_list = self.edges[candidate_edges]
+        is_candidate_HE[iHE_list] = True
+        is_candidate_HE[self.HE_tHE[iHE_list]] = True
+        candidate_HE = np.where(is_candidate_HE)[0]
+
+        # Classification and filtration of candidate edges and candidate vertices
+        nb_candidate_HE = len(candidate_HE)
+        singleton_HE = np.zeros(nb_candidate_HE, dtype=np.bool)
+        dangling_HE = np.zeros(nb_candidate_HE, dtype=np.bool)
+        semi_joint_HE = np.zeros(nb_candidate_HE, dtype=np.bool)
+        disjoint_HE = np.zeros(nb_candidate_HE, dtype=np.bool)
+        for i, iHE in enumerate(candidate_HE):
+            iV = self.HE_iV[iHE]
+            iHE_list = self.get_incident_HE_from_V(iV)
+            iHE_candidate = is_candidate_HE[iHE_list]
+            n_candidate = sum(iHE_candidate)
+            iedge = self.HE_edge[iHE]
+            # singleton and dangling
+            if n_candidate == 1:
+                singleton_HE[i] = True
+                if not sharp_edge[iedge] or not sharp_corner[iV]:
+                    dangling_HE[iHE]
+
+            # semi-joint
+            if n_candidate == 2:
+                iHE1, iHE2 = list(iHE_candidate[np.where(iHE_candidate)[0]])
+                vertex = self.vertices[iV]
+                v1 = self.vertices[self.HE_tV[iHE1]]
+                v2 = self.vertices[self.HE_tV[iHE2]]
+                HE1 = vertex-v1
+                HE1 /= la.norm(HE1)
+                HE2 = v2-vertex
+                HE2 /= la.norm(HE2)
+                cta = min(1, max(-1, np.dot(HE1, HE2)))
+                turning_angle = acos(cta)
+                if sharp_corner[iV] or turning_angle > thetaT*pi/180:
+                    semi_joint_HE[i] = True
+
+            # disjoint
+            if n_candidate == 3:
+                if not l_strong_DA_HE[iHE] and \
+                    not l_strong_OSTA_HE[iHE] and \
+                    not sharp_edge[iedge] and \
+                    not sharp_corner[iV] and \
+                    not ambiguous_vertex[iV]:
+
+                    disjoint_HE[i] = True
+                # if
+
+
+
 
 
         sys.exit(0)
 
-        print 'coucou'
-        return True
+
+        return 1
+
+    def get_HE_vertices(self, iHE):
+        return self.HE_iV[iHE], self.HE_tV[iHE]
+
+    def get_HE_vector(self, iHE):
+        return self.vertices[self.HE_tV[iHE]] - self.vertices[self.HE_iV[iHE]]
+
+
+    def generate_faces_properties(self):
+        self.areas, self.normals, self.centers = get_all_faces_properties(self.vertices, self.faces)
+        return 1
+
+    def show(self):
+        show(self.vertices, self.faces)
+        return 1
+
+    def shown(self):
+        show(self.vertices, self.faces, normals=True)
+        return 1
+
+    def switch_verbosity(self):
+        self.verbose = not self.verbose
+        return 1
+
+    def generate_connectivity(self):
+        self.VV, self.VF, self.FF, self.boundaries = generate_connectivity(self.vertices, self.faces)
 
     def half_edge_to_mesh_arrays(self):
         if self.F_1HE is None:
@@ -346,11 +712,11 @@ class Mesh:
 
         initHE = self.V_1iHE[iV]
         helist = [initHE,]
-        iHE = self.HE_nHE[self.HE_tHE[initHE]]
+        iHE = self.HE_tHE[self.HE_pHE[initHE]]
         while iHE != initHE:
             helist.append(iHE)
-            iHE = self.HE_nHE[self.HE_tHE[iHE]]
-        return helist
+            iHE = self.HE_tHE[self.HE_pHE[iHE]]
+        return np.asarray(helist, dtype=np.int)
 
     def apply_new_numbering_vertices(self, new_V_ids):
         pass
@@ -2810,6 +3176,9 @@ def write_MAR(filename, V, F):
             numpy array of the faces' nodes connectivities
 
     """
+
+    # TODO: detecter la symetrie de plan Oxz
+
     ofile = open(filename, 'w')
 
     ofile.write('{0:6d}{1:6d}\n'.format(2, 0))  # TODO : mettre les symetries en argument
@@ -3483,11 +3852,9 @@ def triangulate_quadrangles(F, verbose=False):
 
 
 def detect_features_expert(V, F, verbose=True):
-    pass
-    # mesh = Mesh(V, F, verbose=verbose)
-    # mesh.generate_HE_connectivity()
 
-
+    mesh = Mesh(V, F, verbose=verbose)
+    mesh.detect_features(verbose=verbose)
 
 
 
@@ -3526,7 +3893,7 @@ def detect_features_basic(V, F, verbose=True): # Passer le verbose en False a la
         normal = normals[iface]
         covF[iface] = np.outer(normal, normal)
 
-    # Initial feature vertec detection
+    # Initial feature vertex detection
     alpha = 0.055
     beta = 0.025
     # alpha = 0.2
@@ -4216,8 +4583,7 @@ def main():
 
     # FOR TESTING
 
-    # F = remove_degenerated_faces(V, F)
-    # detect_features_expert(V, F)
+    detect_features_expert(V, F)
 
     # END FOR TESTING
 
