@@ -360,7 +360,7 @@ class Mesh:
                         thetat=20,
                         thetaT=40,
                         thetae=25,
-                        thetak=50,
+                        thetak=40,
                         k=5,
                         verbose=False):
 
@@ -402,12 +402,14 @@ class Mesh:
             covF[iface] = np.outer(normal, normal)
 
 
+
         # Computing data for each vertex
         angle_defect_V    = np.zeros(self.nv, dtype=np.float)
         medial_quadric    = np.zeros((3,3), dtype=np.float)
         ridge_direction_V = np.zeros((self.nv, 3), dtype=np.float)
         sharp_corner      = np.zeros(self.nv, dtype=np.bool)
         ambiguous_vertex  = np.zeros(self.nv, dtype=np.bool)
+        incident_HE_list  = []
 
         OSTA = np.zeros(self.nhe, dtype=np.float)
 
@@ -415,6 +417,9 @@ class Mesh:
 
             # Getting list of incident half-edges
             iHE_list = self.get_incident_HE_from_V(iV)
+
+            # Building lists of incident half-edges for each vertex, once for all
+            incident_HE_list.append(iHE_list)
 
             if self.is_boundaryV[iV]:
                 # ridge direction is here undefined, we evaluate it differently
@@ -500,7 +505,7 @@ class Mesh:
                 continue
 
             # Getting list of incident half-edges
-            iHE_list = self.get_incident_HE_from_V(iV)
+            iHE_list = incident_HE_list[iV]
 
             # Getting half-edges whose DA is greater than thetaf
             iHE_DA_gt_thetaf = iHE_list[dihedral_angle_edge[self.HE_edge[iHE_list]] > thetaf*pi/180]
@@ -546,7 +551,7 @@ class Mesh:
             iedge = self.HE_edge[iHE]
             iV = self.HE_iV[iHE] # Incident vertex of the iHE half-edge
             # List of other half-edges incident to iV
-            iHE_list = self.get_incident_HE_from_V(iV)
+            iHE_list = incident_HE_list[iV]
             edges = self.HE_edge[iHE_list] # Associated edge list
             has_sharp_edge = np.any(sharp_edge[edges])
             if dihedral_angle_edge[iedge] > thetaf*pi/180:
@@ -588,80 +593,213 @@ class Mesh:
             iHE1 = self.edges[iedge]
             iHE2 = self.HE_tHE[iHE1]
             if quasi_strong_HE[iHE1] and quasi_strong_HE[iHE2]:
+                # iedge is quasi-strong edge and then, it is a candidate edge
+                # Associated half-edges may be added to the ICH list
                 quasi_strong_edge[iedge] = True
 
-        # Candidate vertices
-        candidate_edges = np.where(quasi_strong_edge)[0]
-        nb_candidate_edges = len(candidate_edges)
-        candidate_vertices = set()
-        for iedge in candidate_edges:
-            iHE = self.edges[iedge]
-            candidate_vertices.add(self.HE_iV[iHE])
-            candidate_vertices.add(self.HE_tV[iHE])
-        sharp_corner_ids = np.where(sharp_corner)[0]
-        for iV in sharp_corner_ids:
-            candidate_vertices.add(iV)
+        # candidate_edges = list(np.where(quasi_strong_edge)[0])
 
-        candidate_vertices = np.asarray(list(candidate_vertices), dtype=np.int)
+        # Building ICH (Incident Candidate Half-edge list for each vertex)
+        ICH = dict()
+        for iV in xrange(self.nv):
+            iHE_list = incident_HE_list[iV]
+            iedges = self.HE_edge[iHE_list]
+            iHE_candidate = iHE_list[quasi_strong_edge[iedges]]
+            if len(iHE_candidate) > 0:
+                ICH[iV] = list(iHE_candidate)
 
-        # Generating candidate half-edges
-        is_candidate_HE = np.zeros(self.nhe, dtype=np.bool)
-        iHE_list = self.edges[candidate_edges]
-        is_candidate_HE[iHE_list] = True
-        is_candidate_HE[self.HE_tHE[iHE_list]] = True
-        candidate_HE = np.where(is_candidate_HE)[0]
+        # Candidate vertices are ICH.keys()...
+        # print ICH
+        # Filtration procedure starts here
+        end_edge_type     = ['SG', 'DG', 'SJ', 'DJ', 'MJ']
+        obscure_edge_type = ['DG', 'SJ', 'DJ']
+        while 1:
 
-        # Classification and filtration of candidate edges and candidate vertices
-        nb_candidate_HE = len(candidate_HE)
-        singleton_HE = np.zeros(nb_candidate_HE, dtype=np.bool)
-        dangling_HE = np.zeros(nb_candidate_HE, dtype=np.bool)
-        semi_joint_HE = np.zeros(nb_candidate_HE, dtype=np.bool)
-        disjoint_HE = np.zeros(nb_candidate_HE, dtype=np.bool)
-        for i, iHE in enumerate(candidate_HE):
-            iV = self.HE_iV[iHE]
-            iHE_list = self.get_incident_HE_from_V(iV)
-            iHE_candidate = is_candidate_HE[iHE_list]
-            n_candidate = sum(iHE_candidate)
-            iedge = self.HE_edge[iHE]
-            # singleton and dangling
-            if n_candidate == 1:
-                singleton_HE[i] = True
-                if not sharp_edge[iedge] or not sharp_corner[iV]:
-                    dangling_HE[iHE]
+            obscure_curve_found = False
+            # Collecting obscure end-edges
+            print 'Collecting obscure end edges'
+            # Those are dangling, semi-joint and disjoint
+            obscure_end_edges = []
+            end_HE = []
+            edge_candidate_type = dict()
+            for iV in ICH.keys():
+                iHE_list = ICH[iV]
+                nb_iHE = len(ICH[iV])
+                iedge = self.HE_edge[iHE_list]
 
-            # semi-joint
-            if n_candidate == 2:
-                iHE1, iHE2 = list(iHE_candidate[np.where(iHE_candidate)[0]])
-                vertex = self.vertices[iV]
-                v1 = self.vertices[self.HE_tV[iHE1]]
-                v2 = self.vertices[self.HE_tV[iHE2]]
-                HE1 = vertex-v1
-                HE1 /= la.norm(HE1)
-                HE2 = v2-vertex
-                HE2 /= la.norm(HE2)
-                cta = min(1, max(-1, np.dot(HE1, HE2)))
-                turning_angle = acos(cta)
-                if sharp_corner[iV] or turning_angle > thetaT*pi/180:
-                    semi_joint_HE[i] = True
+                if nb_iHE == 1:
+                    iHE = iHE_list[0]
+                    print iHE, ' is an singleton'
+                    edge_candidate_type[self.HE_edge[iHE]] = 'SG'
+                    end_HE.append(iHE)
 
-            # disjoint
-            if n_candidate == 3:
-                if not l_strong_DA_HE[iHE] and \
-                    not l_strong_OSTA_HE[iHE] and \
-                    not sharp_edge[iedge] and \
-                    not sharp_corner[iV] and \
-                    not ambiguous_vertex[iV]:
+                    if not sharp_edge[iedge[0]] or not sharp_corner[iV]:
+                        obscure_end_edges.append(iHE)
+                        print iHE, ' is dangling'
+                        edge_candidate_type[self.HE_edge[iHE]] = 'DG'
 
-                    disjoint_HE[i] = True
-                # if
+                elif nb_iHE == 2:
+                    iHE1 = iHE_list[0]
+                    iHE2 = iHE_list[1]
+
+                    # Computing the Turning angle
+                    vertex = self.vertices[iV]
+                    HE1 = vertex - self.vertices[self.HE_tV[iHE1]]
+                    HE1 /= la.norm(HE1)
+                    HE2 = self.vertices[self.HE_tV[iHE2]] - vertex
+                    HE2 /= la.norm(HE2)
+                    cHE = min(1, max(-1, np.dot(HE1, HE2)))
+                    turning_angle = acos(cHE)
+
+                    nb_sharp_edges = len(sharp_edge[iedge])
+
+                    if sharp_corner[iV] or turning_angle > thetaT*pi/180:
+                        if nb_iHE != nb_sharp_edges:
+                            obscure_end_edges.append(iHE1)
+                            obscure_end_edges.append(iHE2)
+                            print iHE1, ' and ', iHE2, ' are semi-joint'
+                            edge_candidate_type[self.HE_edge[iHE1]] = 'SJ'
+                            edge_candidate_type[self.HE_edge[iHE2]] = 'SJ'
+                            end_HE.append(iHE1)
+                            end_HE.append(iHE2)
+
+                elif nb_iHE > 2:
+                    iedge_list = self.HE_edge[iHE_list]
+                    nb_sharp_edges = len(sharp_edge[iedge_list])
+                    dihedral_angles = dihedral_angle_edge[iedge_list]
+                    acute_edge = np.logical_and(
+                        np.logical_not(self.is_boundary_edge[iedge_list]),
+                        dihedral_angles > pi/2.
+                    )
+                    nb_acute_edge = sum(acute_edge)
+                    for iHE, iedge in zip(iHE_list, iedge_list):
+
+                        if not l_strong_DA_HE[iHE] and not l_strong_OSTA_HE[iHE]:
+                            if not sharp_corner[iV] and not ambiguous_vertex[iV]:
+                                if not sharp_edge[iedge] or not e_strong_DA_edge[iedge]:
+                                    is_disjoint = True
+
+                        elif nb_sharp_edges > 0 and not e_strong_DA_edge[iedge]:
+                            is_disjoint = True
+
+                        elif nb_acute_edge > 0 and not sharp_edge[iedge]:
+                            is_disjoint = True
+
+                        else:
+                            print iHE, ' is multi-joint'
+                            edge_candidate_type[self.HE_edge[iHE]] = 'MJ'
+                            is_disjoint = False
+                            end_HE.append(iHE)
+
+                        if is_disjoint:
+                            obscure_end_edges.append(iHE)
+                            print iHE, ' is disjoint'
+                            edge_candidate_type[self.HE_edge[iHE]] = 'DJ'
+                            end_HE.append(iHE)
+
+            print 'Obscure end half-edges are: ', obscure_end_edges
+            if len(obscure_end_edges) == 0:
+                break
+
+            # Traversing candidate curves starting from obscure end-edges
+            while len(obscure_end_edges) > 0:
+                is_curve_closed = False
+                iHE_init = obscure_end_edges.pop()
+
+                iedge_init = self.HE_edge[iHE_init]
+                iedge_init_type = edge_candidate_type[iedge_init]
+
+                curve = [iHE_init, ]
+                iHE = iHE_init
+                print iHE, '-->', self.get_HE_vertices(iHE)
+
+                while 1:
+                    he_list = set(ICH[self.HE_tV[iHE]])
+                    # Looking for the next half-edge
+                    next_candidate_HE = list(he_list - set([self.HE_tHE[iHE], ]))
+                    if len(next_candidate_HE) > 1:
+                        print "WARNING, we do not know how to choose !!"
+                    iHE = next_candidate_HE[0]
+
+                    print iHE, '-->', self.get_HE_vertices(iHE)
+
+                    if iHE == iHE_init:
+                        print 'closed curve'
+                        is_curve_closed = True
+
+                        iedge_end = iedge_init
+                        iedge_end_type = iedge_init_type
+                        break
+                    # curve.append(iHE)
+
+                    iedge = self.HE_edge[iHE]
+                    if edge_candidate_type.has_key(iedge):
+                        edge_type = edge_candidate_type[iedge]
+                        if edge_type in end_edge_type:
+                            print 'Curve traversal finished with type %s'%edge_type
+                            iHE_end = iHE
+                            iedge_init = iedge
+                            iedge_end_type = edge_candidate_type[iedge_init]
+                            curve.append(iHE)
+                            break
+                    else:
+                        # This is a no junction edge that is part of the curve
+                        curve.append(iHE)
+
+                # Determining the type of the curve
+                # iHE_init, iHE_end
+                is_curve_obscure = False
+
+                if not is_curve_closed:
+                    curve_dihedral_angles = dihedral_angle_edge[self.HE_edge[curve]]
+                    nb_edge_DA_gt_thetak = sum(curve_dihedral_angles > thetak*pi/180.)
+
+                    if ( (iedge_init_type in end_edge_type) and (iedge_end_type in end_edge_type) ) or \
+                            ( iedge_init_type == 'DG' or iedge_end_type == 'DG' ):
+                        # Counting the number of edges of the curve whose dihedral angle is greater than thetak
+                        if nb_edge_DA_gt_thetak < k:
+                            is_curve_obscure = True
+
+                    elif (iedge_init_type in obscure_edge_type) != (iedge_end_type in obscure_edge_type):
+                        he_list = incident_HE_list[self.HE_iV[iHE_init]]
+                        is_any_sharp_edge = np.any(sharp_edge[self.HE_edge[he_list]])
+                        he_list = incident_HE_list[self.HE_tV[iHE_end]]
+                        is_any_sharp_edge *= np.any(sharp_edge[self.HE_edge[he_list]])
+
+                        if is_any_sharp_edge and nb_edge_DA_gt_thetak == 0:
+                            is_curve_obscure = True
+                    else:
+                        is_curve_obscure = False
+
+                    if is_curve_obscure:
+                        obscure_curve_found = True
+                        print "The curve is marked as obscure"
+                        # We remove every halfedge from the curve from ICH connectivity table and from candidate edge
+                        #  list
+                        for iHE in curve:
+                            iV = self.HE_iV[iHE]
+                            ICH[iV].remove(iHE)
+                            if len(ICH[iV]) == 0:
+                                ICH.pop(iV)
+                    else:
+                        print "Non obscure curve was found"
+            if not obscure_curve_found:
+                break
+
+        # Obscure curves have been removed, we now build other curves starting by end_edges type
+        print "Sharp corners are : ", np.where(sharp_corner)[0]
+        print "End half-edges are: ", end_HE
+        for iHE in end_HE:
+            print iHE, self.get_HE_vertices(iHE)
+
+
+
 
 
 
 
 
         sys.exit(0)
-
-
         return 1
 
     def get_HE_vertices(self, iHE):
