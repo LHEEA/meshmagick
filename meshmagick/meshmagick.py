@@ -16,7 +16,7 @@ flat polygonal cells up to 4 edges (quads). Triangles are obtained by repeating
 the first node at the end of the cell node ID list.
 
 IMPORTANT NOTE:
-IDs of vertices are internally idexed from 0 in meshmagick. However, several mesh
+IDs of vertices are internally indexed from 0 in meshmagick. However, several mesh
 file format use indexing starting at 1. This different convention might be transparent
 to user and 1-indexing may not be present outside the I/O functions
 """
@@ -840,8 +840,10 @@ class Mesh:
                 if iHE == iHE_init:
                     # closed curve
                     print 'closed curve'
-                    is_curve_closed = True
-                    curves.append(self.HE_iV[curve])
+                    is_curve_closed = True # FIXME: utile ? non utilise par la suite... --> a retirer ?
+                    # Removing the last half-edge
+                    curve.pop()
+                    curves.append(curve)
                     # On en registre la courbe
                     break
 
@@ -851,29 +853,200 @@ class Mesh:
                     if edge_type in end_edge_type:
                         print 'Curve_traversal finished with type %s'%edge_type
                         print 'Ending at %u'%self.HE_tHE[iHE], '-->', self.get_HE_vertices(iHE)
-                        end_HE.remove(self.HE_tHE[iHE])
+                        # end_HE.remove(self.HE_tHE[iHE])
                         # curve_tmp = list()
-                        curves.append(np.append(self.HE_iV[curve], self.HE_tV[iHE]))
+                        # curves.append(np.append(self.HE_iV[curve], self.HE_tV[iHE]))
+                        curves.append(curve)
                         break
+
+        for icurve, curve in enumerate(curves):
+            print icurve, ' : ', self.HE_iV[curve[0]], ' --> ', self.HE_tV[curve[-1]]
+
+        # sys.exit(0)
 
         # Post_processing curves
         # ----------------------
 
-        # Building a curve graph
-        curve_graph = dict()
+        # Using a flood-fill algorithm to find out surface patches
+        # --------------------------------------------------------
+
+        visited_faces_mask = np.zeros(self.nf, dtype=np.bool)
+        feature_half_edges_mask = np.zeros(self.nhe, dtype=np.bool)
+        feature_HE_to_curve = dict()
         for icurve, curve in enumerate(curves):
+            # visited_faces_mask[self.HE_F[curve]] = True
+            feature_half_edges_mask[curve] = True
+            feature_HE_to_curve.update(
+                zip(
+                    curve,
+                    [icurve for i in xrange(len(curve))]
+                )
+            )
+        # print feature_HE_to_curve
 
-            # FIXME: Attention, si curve est fermée...
-            node1, node2 = curve[0], curve[-1]
-            if not curve_graph.has_key(node1):
-                curve_graph[node1] = set()
-            if not curve_graph.has_key(node2):
-                curve_graph[node2] = set()
-            curve_graph[node1].add(icurve)
-            curve_graph[node2].add(icurve)
 
 
-        print curve_graph
+        surfaces = []
+        surface = []
+        boundary_curves = []
+
+        F_stack = []
+        while 1:
+            if len(F_stack) == 0: # TODO : voir si le else de while peut servir pour rerentrer dans la boucle
+                # Looking for a remaining unvisited face
+                unvisited_faces_ids = np.where(np.logical_not(visited_faces_mask))[0]
+                if len(surface) > 0:
+                    surfaces.append(surface)
+                    boundary_curves.append(boundary_curve)
+                if len(unvisited_faces_ids) == 0:
+                    # We're done, every faces have been visited :)
+                    print "Every faces have been visited"
+                    break
+                else:
+                    F_stack = [unvisited_faces_ids[0]]
+                    visited_faces_mask[F_stack[0]] = True
+                    surface = [F_stack[0]]
+                    boundary_curve = set()
+                    print 'Initializing with %u' % F_stack[0]
+                    continue
+
+            iface = F_stack.pop()
+            # surface.append(iface)
+
+            face_he_list = self.get_face_half_edges(iface)
+
+            twin_he_list = self.HE_tHE[face_he_list]
+
+            # TODO: extraire ici les courbes qui sotn touchées dans un set...
+            feature_half_edges_list = face_he_list[feature_half_edges_mask[face_he_list]]
+            for iHE in feature_half_edges_list:
+                boundary_curve.add(feature_HE_to_curve[iHE])
+
+            # On recherche les half-edges qui ne sont pas des features et dont le twin ne correspond pas a une
+            # facette visitee
+            propagation_half_edges = twin_he_list[np.logical_and(
+                np.logical_not(feature_half_edges_mask[face_he_list]),
+                np.logical_not(visited_faces_mask[self.HE_F[twin_he_list]])
+            )]
+
+            propagation_faces = list(self.HE_F[propagation_half_edges])
+            # print propagation_faces
+            if len(propagation_faces) > 0:
+                surface += propagation_faces
+                F_stack += propagation_faces
+                visited_faces_mask[propagation_faces] = True
+
+        # print boundary_curves
+        for boundary_curve in boundary_curves:
+
+            # Building a graph
+            graph = dict()
+            for icurve in boundary_curve:
+                curve = curves[icurve]
+                graph[self.HE_iV[curve[0]]] = (self.HE_tV[curve[-1]], icurve)
+            # print graph
+
+            # Using the graph to build the closed curve
+            iV, (iV2, icurve) = graph.popitem()
+            closed_curve_ids = [icurve, ]
+            while graph:
+                (iV2, icurve) = graph.pop(iV2)
+                closed_curve_ids.append(icurve)
+
+            closed_curve_vertices = []
+            for icurve in closed_curve_ids:
+                closed_curve_vertices += list(self.HE_iV[curves[icurve]])
+            closed_curve_vertices.append(closed_curve_vertices[0])
+            print closed_curve_vertices
+
+
+
+        # Building graph for linking curves (nodes are end vertices and edges are curves)
+        # curve_graph = dict()
+        # for icurve, curve in enumerate(curves):
+        #     iV1 = self.HE_iV[curve[0]]
+        #     iV2 = self.HE_tV[curve[-1]]
+        #     if not curve_graph.has_key(iV1):
+        #         curve_graph[iV1] = set()
+        #     if not curve_graph.has_key(iV2):
+        #         curve_graph[iV2] = set()
+        #
+        #     curve_graph[iV1].add(icurve)
+        #     curve_graph[iV2].add(icurve)
+        # print curve_graph
+        #
+        #
+        # # Linking boundary curves
+        # for boundary_curve in boundary_curves:
+        #     print boundary_curve
+
+
+        # print len(surfaces)
+        # # On peut créer ici une visualisation de creation du maillage
+        # surface = surfaces[0]
+        # print surface
+        # for i, iface in enumerate(surface):
+        #     V, F = extract_faces(self.vertices, self.faces, surface[:i+1])
+        #     write_VTU('SEAREV/flood_fill/SEAREV_%u.vtu'%i, V, F)
+
+        # for i, surface in enumerate(surfaces):
+        #     V, F = extract_faces(self.vertices, self.faces, surface)
+        #     write_VTU('SEAREV/SEAREV_%u.vtu'%i, V, F)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        # HE_visited = np.zeros(self.nhe, dtype=np.bool)
+        # # Marking feature curves half-edges as visited
+        # for curve in curves:
+        #     HE_visited[curve] = True
+        #
+        #
+        #
+        # iHE_init = curves[0][0]
+        # F_stack = [iHE_init, ]
+        # while F_stack:
+        #     iHE = F_stack.pop()
+        #     iface = self.HE_F[iHE]
+        #     faces_list = self.get_adjacent_faces_to_face(iface)
+        #     for iadj_face in faces_list:
+        #
+        #
+        #
+        #
+        #
+        #
+        # sys.exit(0)
+        # # Building a curve graph
+        # curve_graph = dict()
+        # for icurve, curve in enumerate(curves):
+        #
+        #     # FIXME: Attention, si curve est fermée...
+        #     node1, node2 = curve[0], curve[-1]
+        #     if not curve_graph.has_key(node1):
+        #         curve_graph[node1] = set()
+        #     if not curve_graph.has_key(node2):
+        #         curve_graph[node2] = set()
+        #     curve_graph[node1].add(icurve)
+        #     curve_graph[node2].add(icurve)
+        #
+        #
+        # print curve_graph
         # for i, curve in enumerate(curves):
         #     print 'Curve ', i, curve[:2], ' ... ', curve[-2:]
         #
@@ -906,6 +1079,20 @@ class Mesh:
 
         sys.exit(0)
         return 1
+
+    def get_face_half_edges(self, iface):
+        iHE_init = self.F_1HE[iface]
+        HE_list = [iHE_init, ]
+        iHE = self.HE_nHE[iHE_init]
+        while iHE != iHE_init:
+            HE_list.append(iHE)
+            iHE = self.HE_nHE[iHE]
+        return np.asarray(HE_list, dtype=np.int)
+
+    def get_adjacent_faces_to_face(self, iface):
+        HE_list = self.get_face_half_edges(iface)
+        twin_HE_list = self.HE_tHE[HE_list]
+        return self.HE_F[twin_HE_list]
 
     def get_HE_vertices(self, iHE):
         return self.HE_iV[iHE], self.HE_tV[iHE]
@@ -1060,7 +1247,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
     # If the mesh is totally at one side of the plane, no need to go further !
     nb_kept_V = np.sum(keepV)
     if nb_kept_V == 0:
-        # Mesh is totally above the plane, non intersection, nothing to keep --> error
+        # Mesh is totally above the plane, no intersection, nothing to keep --> error
         raise RuntimeError, 'Mesh is totally above the clipping plane. No cells to keep...'
 
     # Getting triangles and quads masks
@@ -1124,7 +1311,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
                         boundary_edges[face_w[index+1]] = face_w[index]
                     break
 
-    # All a the faces are kept
+    # All the faces are kept, the mesh is totally under the plane
     if nb_kept_V == nv:
         if infos:
             # Detecting if the mesh has intersection polygons
@@ -1171,7 +1358,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
     newV = []
     nb_new_F = 0
     newF = []
-    edges = {} # keys are ID of vertices that are above the plane
+    edges = dict() # keys are ID of vertices that are above the plane
 
 
     # Loop on the faces to clip
