@@ -3385,12 +3385,12 @@ def show(V, F, normals=False):
     renderer.AddActor(mesh_actor)
 
     if normals:
-        polydata = surface.GetOutput()
+        # polydata = surface.GetOutput()
 
         normals = vtk.vtkPolyDataNormals()
         normals.SetConsistency(0)
         normals.ComputeCellNormalsOn()
-        normals.SetInput(polydata)
+        normals.SetInput(polyDataMesh)
         normals.Update()
 
         normals_mapper = vtk.vtkPolyDataMapper()
