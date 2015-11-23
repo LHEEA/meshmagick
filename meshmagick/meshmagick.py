@@ -442,7 +442,7 @@ class Mesh:
 
             # Is the vertex u-strong in AD (Angle Defect) <=> is a sharp vertex ?
             if angle_defect_V[iV] > thetaD*pi/180:
-                print iV, ' is a sharp corner'
+                # print iV, ' is a sharp corner'
                 sharp_corner[iV] = True
 
             # Computing the ridge direction
@@ -524,31 +524,33 @@ class Mesh:
 
             # Getting half-edges whose DA is greater than thetaf
             iHE_DA_gt_thetaf = iHE_list[dihedral_angle_edge[self.HE_edge[iHE_list]] > thetaf*pi/180]
-
-            iHE = iHE_DA_gt_thetaf[np.argmin(OSTA[iHE_DA_gt_thetaf])]
-            if OSTA[iHE] < thetat*pi/180:
-                l_strong_OSTA_HE[iHE] = True
-            iHE = iHE_DA_gt_thetaf[np.argmax(OSTA[iHE_DA_gt_thetaf])]
-            if OSTA[iHE] > pi-thetat*pi/180:
-                l_strong_OSTA_HE[iHE] = True
+            if len(iHE_DA_gt_thetaf) > 0:
+                iHE = iHE_DA_gt_thetaf[np.argmin(OSTA[iHE_DA_gt_thetaf])]
+                if OSTA[iHE] < thetat*pi/180:
+                    l_strong_OSTA_HE[iHE] = True
+                iHE = iHE_DA_gt_thetaf[np.argmax(OSTA[iHE_DA_gt_thetaf])]
+                if OSTA[iHE] > pi-thetat*pi/180:
+                    l_strong_OSTA_HE[iHE] = True
 
             iHE_OSTA_lt_pi_2 = iHE_list[OSTA[iHE_DA_gt_thetaf] < pi/2]
-            edges = self.HE_edge[iHE_OSTA_lt_pi_2]
-            iedge_maxDA = edges[np.argmax(dihedral_angle_edge[edges])]
-            iHE = self.edges[iedge_maxDA]
-            if self.HE_iV[iHE] == iV:
-                l_strong_DA_HE[iHE] = True
-            else:
-                l_strong_DA_HE[self.HE_tHE[iHE]] = True
+            if len(iHE_OSTA_lt_pi_2) > 0:
+                edges = self.HE_edge[iHE_OSTA_lt_pi_2]
+                iedge_maxDA = edges[np.argmax(dihedral_angle_edge[edges])]
+                iHE = self.edges[iedge_maxDA]
+                if self.HE_iV[iHE] == iV:
+                    l_strong_DA_HE[iHE] = True
+                else:
+                    l_strong_DA_HE[self.HE_tHE[iHE]] = True
 
             iHE_OSTA_gt_pi_2 = iHE_list[OSTA[iHE_DA_gt_thetaf] > pi/2]
-            edges = self.HE_edge[iHE_OSTA_gt_pi_2]
-            iedge_maxDA = edges[np.argmax(dihedral_angle_edge[edges])]
-            iHE = self.edges[iedge_maxDA]
-            if self.HE_iV[iHE] == iV:
-                l_strong_DA_HE[iHE] = True
-            else:
-                l_strong_DA_HE[self.HE_tHE[iHE]] = True
+            if len(iHE_OSTA_gt_pi_2) > 0:
+                edges = self.HE_edge[iHE_OSTA_gt_pi_2]
+                iedge_maxDA = edges[np.argmax(dihedral_angle_edge[edges])]
+                iHE = self.edges[iedge_maxDA]
+                if self.HE_iV[iHE] == iV:
+                    l_strong_DA_HE[iHE] = True
+                else:
+                    l_strong_DA_HE[self.HE_tHE[iHE]] = True
 
             # Dealing with border edges
             edges = self.HE_edge[iHE_list]
@@ -613,6 +615,8 @@ class Mesh:
                 quasi_strong_edge[iedge] = True
 
         # candidate_edges = list(np.where(quasi_strong_edge)[0])
+        # print list(self.HE_iV[self.edges[candidate_edges]])
+        # sys.exit(0)
 
         # Building ICH (Incident Candidate Half-edge list for each vertex)
         ICH = dict()
@@ -624,7 +628,9 @@ class Mesh:
                 ICH[iV] = list(iHE_candidate)
 
         # Candidate vertices are ICH.keys()...
-        # print ICH
+
+        multi_joint_HE = []
+
         # Filtration procedure starts here
         end_edge_type     = ['SG', 'DG', 'SJ', 'DJ', 'MJ']
         obscure_edge_type = ['DG', 'SJ', 'DJ']
@@ -634,9 +640,11 @@ class Mesh:
             # ----------------------------
             # Collecting obscure end-edges
             # ----------------------------
+            print '\n----------------------------'
             print 'Collecting obscure end edges'
+            print '----------------------------'
             # Those are dangling, semi-joint and disjoint
-            obscure_end_edges = []
+            obscure_end_HE = []
             end_HE = []
             edge_candidate_type = dict()
             for iV in ICH.keys():
@@ -646,13 +654,13 @@ class Mesh:
 
                 if nb_iHE == 1:
                     iHE = iHE_list[0]
-                    print iHE, '-->', self.get_HE_vertices(iHE), ' is an singleton'
+                    # print iHE, '-->', self.get_HE_vertices(iHE), ' is an singleton'
                     edge_candidate_type[self.HE_edge[iHE]] = 'SG'
                     end_HE.append(iHE)
 
                     if not sharp_edge[iedge[0]] or not sharp_corner[iV]:
-                        obscure_end_edges.append(iHE)
-                        print iHE, '-->', self.get_HE_vertices(iHE), ' is dangling'
+                        obscure_end_HE.append(iHE)
+                        # print iHE, '-->', self.get_HE_vertices(iHE), ' is dangling'
                         edge_candidate_type[self.HE_edge[iHE]] = 'DG'
 
                 elif nb_iHE == 2:
@@ -672,9 +680,9 @@ class Mesh:
 
                     if sharp_corner[iV] or turning_angle > thetaT*pi/180:
                         if nb_iHE != nb_sharp_edges:
-                            obscure_end_edges.append(iHE1)
-                            obscure_end_edges.append(iHE2)
-                            print iHE1, ' and ', iHE2, ' are semi-joint'
+                            obscure_end_HE.append(iHE1)
+                            obscure_end_HE.append(iHE2)
+                            # print iHE1, ' and ', iHE2, ' are semi-joint'
                             edge_candidate_type[self.HE_edge[iHE1]] = 'SJ'
                             edge_candidate_type[self.HE_edge[iHE2]] = 'SJ'
                             end_HE.append(iHE1)
@@ -706,26 +714,36 @@ class Mesh:
                             is_disjoint = True
 
                         if is_disjoint:
-                            obscure_end_edges.append(iHE)
-                            print iHE, '-->', self.get_HE_vertices(iHE), ' is disjoint'
+                            obscure_end_HE.append(iHE)
+                            # print iHE, '-->', self.get_HE_vertices(iHE), ' is disjoint'
                             edge_candidate_type[self.HE_edge[iHE]] = 'DJ'
                             end_HE.append(iHE)
                         else:
-                            print iHE, '-->', self.get_HE_vertices(iHE), ' is multi-joint'
+                            # print iHE, '-->', self.get_HE_vertices(iHE), ' is multi-joint'
                             edge_candidate_type[self.HE_edge[iHE]] = 'MJ'
+                            multi_joint_HE.append(iHE)
                             is_disjoint = False
                             end_HE.append(iHE)
 
-            print 'Obscure end half-edges are: ', obscure_end_edges
-            if len(obscure_end_edges) == 0:
+            print 'Multi-joint half-edges iV are :'
+            print list(self.HE_iV[multi_joint_HE])
+
+            sys.exit(0)
+
+            print 'Obscure end half-edges are: ', obscure_end_HE
+            if len(obscure_end_HE) == 0:
                 break
+
+            print "Associated vertices:"
+            print list(self.HE_iV[obscure_end_HE])
 
             # -----------------------------------------------------------
             # Traversing candidate curves starting from obscure end-edges
             # -----------------------------------------------------------
-            while len(obscure_end_edges) > 0:
+            print "\tTraversing candidate curves to determine if they are obscure"
+            while len(obscure_end_HE) > 0:
                 is_curve_closed = False
-                iHE_init = obscure_end_edges.pop()
+                iHE_init = obscure_end_HE.pop()
 
                 iedge_init = self.HE_edge[iHE_init]
                 iedge_init_type = edge_candidate_type[iedge_init]
@@ -739,8 +757,13 @@ class Mesh:
 
                     # Looking for the next half-edge
                     next_candidate_HE = list(he_list - set([self.HE_tHE[iHE], ]))
-                    if len(next_candidate_HE) > 1:
-                        print "WARNING, we do not know how to choose !!"
+                    if len(next_candidate_HE) != 1:
+                        iHE_end = iHE
+                        iedge_end = self.HE_edge[iHE]
+                        iedge_end_type = edge_candidate_type[iedge_end]
+                        break
+                        # print "WARNING, we do not know how to choose !!"
+
                     iHE = next_candidate_HE[0]
 
                     curve.append(iHE)
@@ -750,7 +773,7 @@ class Mesh:
                         # closed curve
                         print 'closed curve'
                         is_curve_closed = True
-
+                        iHE_end = iHE
                         iedge_end = iedge_init
                         iedge_end_type = iedge_init_type
                         break
@@ -761,16 +784,12 @@ class Mesh:
                         if edge_type in end_edge_type:
                             print 'Curve traversal finished with type %s'%edge_type
                             iHE_end = iHE
-                            iedge_init = iedge
+                            iedge_end = iedge
                             iedge_end_type = edge_candidate_type[iedge_init]
                             # curve.append(iHE)
                             break
-                    # else:
-                    #     # This is a no junction edge that is part of the curve
-                    #     curve.append(iHE)
 
                 # Determining the type of the curve
-                # iHE_init, iHE_end
                 is_curve_obscure = False
 
                 if not is_curve_closed:
@@ -807,23 +826,30 @@ class Mesh:
                             if len(ICH[iV]) == 0:
                                 ICH.pop(iV)
                         # Attention si le HE final est dans la liste des HE obscures, il faut le supprimer !!
-                        if self.HE_tHE[iHE_end] in obscure_end_edges:
-                            obscure_end_edges.remove(self.HE_tHE[iHE_end])
+                        if self.HE_tHE[iHE_end] in obscure_end_HE:
+                            obscure_end_HE.remove(self.HE_tHE[iHE_end])
+                        # end_HE.remove(iHE_init)
+                        # end_HE.remove(iHE_end)
+
 
                     else:
-                        print "Non obscure curve was found"
+                        print "This is not an obscure curve"
                         # Non obscure curve was found
             if not obscure_curve_found:
+                print "No more obscure curves"
                 break
 
         # Building feature curves from ICH list, starting from each end half_edge
         # print "Sharp corners are : ", np.where(sharp_corner)[0]
         print "End half-edges are: ", end_HE
+        print list(self.HE_iV[end_HE])
+        sys.exit(0)
+
         curves = []
         while len(end_HE) > 0:
             is_curve_closed = False
             iHE_init = end_HE.pop()
-            print "Starting from %u"%iHE_init, '-->', self.get_HE_vertices(iHE_init)
+            # print "Starting from %u"%iHE_init, '-->', self.get_HE_vertices(iHE_init)
 
             curve = [iHE_init, ]
             iHE = iHE_init
@@ -852,16 +878,18 @@ class Mesh:
                 if edge_candidate_type.has_key(iedge):
                     edge_type = edge_candidate_type[iedge]
                     if edge_type in end_edge_type:
-                        print 'Curve_traversal finished with type %s'%edge_type
-                        print 'Ending at %u'%self.HE_tHE[iHE], '-->', self.get_HE_vertices(iHE)
+                        # print 'Curve_traversal finished with type %s'%edge_type
+                        # print 'Ending at %u'%self.HE_tHE[iHE], '-->', self.get_HE_vertices(iHE)
+
                         # end_HE.remove(self.HE_tHE[iHE])
                         # curve_tmp = list()
                         # curves.append(np.append(self.HE_iV[curve], self.HE_tV[iHE]))
                         curves.append(curve)
                         break
 
-        for icurve, curve in enumerate(curves):
-            print icurve, ' : ', self.HE_iV[curve[0]], ' --> ', self.HE_tV[curve[-1]]
+        # for icurve, curve in enumerate(curves):
+        #     print list(self.HE_iV[curve])
+            # print icurve, ' : ', self.HE_iV[curve[0]], ' --> ', self.HE_tV[curve[-1]]
 
         # sys.exit(0)
 
@@ -936,6 +964,12 @@ class Mesh:
                 surface += propagation_faces
                 F_stack += propagation_faces
                 visited_faces_mask[propagation_faces] = True
+
+        print "Surfaces :"
+        for surface in surfaces:
+            print list(surface)
+
+        sys.exit(0)
 
         # print boundary_curves
         for boundary_curve in boundary_curves:
@@ -5079,7 +5113,7 @@ def main():
 
     # FOR TESTING
 
-    # detect_features_expert(V, F)
+    detect_features_expert(V, F)
 
     # END FOR TESTING
 
