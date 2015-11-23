@@ -3363,24 +3363,15 @@ def reformat_triangles(F, verbose=False):
 def show(V, F, normals=False):
     import vtk
 
-    vtk_mesh = _build_vtkUnstructuredGrid(V, F)
-
-    surface = vtk.vtkDataSetSurfaceFilter()
+    polyDataMesh = _build_vtkPolyData(V, F)
+    mesh_mapper = vtk.vtkPolyDataMapper()
     if vtk.VTK_MAJOR_VERSION <= 5:
-        surface.SetInput(vtk_mesh)
+        mesh_mapper.SetInput(polyDataMesh)
     else:
-        surface.SetInputData(vtk_mesh)
-
-    surface.Update()
-
-    surface_mapper = vtk.vtkDataSetMapper()
-    if vtk.VTK_MAJOR_VERSION <= 5:
-        surface_mapper.SetInput(surface.GetOutput())
-    else:
-        surface_mapper.SetInputData(surface.GetOutput())
+        mesh_mapper.SetInputData(polyDataMesh)
 
     mesh_actor = vtk.vtkActor()
-    mesh_actor.SetMapper(surface_mapper)
+    mesh_actor.SetMapper(mesh_mapper)
     mesh_actor.GetProperty().SetColor(1, 1, 0)
     mesh_actor.GetProperty().EdgeVisibilityOn()
     mesh_actor.GetProperty().SetEdgeColor(0, 0, 0)
