@@ -16,7 +16,7 @@ flat polygonal cells up to 4 edges (quads). Triangles are obtained by repeating
 the first node at the end of the cell node ID list.
 
 IMPORTANT NOTE:
-IDs of vertices are internally indexed from 0 in meshmagick. However, several mesh
+IDs of vertices are internally idexed from 0 in meshmagick. However, several mesh
 file format use indexing starting at 1. This different convention might be transparent
 to user and 1-indexing may not be present outside the I/O functions
 """
@@ -42,6 +42,7 @@ __status__     = "Development"
 
 real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?' # Regex for floats
 
+# TODO: for vtk usage, replace vtkUnstructuredGrid by vtkPolyData --> .vtp files...
 
 # MESHMAGICK CLASSES
 # ------------------
@@ -3467,14 +3468,14 @@ def _write_paraview(filename, V, F, writer):
 
     """
     writer.SetFileName(filename)
-    vtk_mesh = _build_vtk_mesh_obj(V, F)
+    vtk_mesh = _build_vtkUnstructuredGrid(V, F)
     writer.SetInput(vtk_mesh)
     writer.Write()
 
     return 1
 
 
-def _build_vtk_mesh_obj(V, F):
+def _build_vtkUnstructuredGrid(V, F):
     """_build_vtk_mesh_obj(V, F)
 
     Internal function that builds a VTK object for manipulation by the VTK library.
@@ -3499,9 +3500,7 @@ def _build_vtk_mesh_obj(V, F):
     # Building the vtkPoints data structure
     vtk_points = vtk.vtkPoints()
     vtk_points.SetNumberOfPoints(nv)
-    idx = -1
-    for vertex in V:
-        idx += 1
+    for idx, vertex in enumerate(V):
         vtk_points.SetPoint(idx, vertex)
 
     vtk_mesh.SetPoints(vtk_points)  # Storing the points into vtk_mesh
@@ -3522,6 +3521,36 @@ def _build_vtk_mesh_obj(V, F):
         vtk_mesh.InsertNextCell(vtk_cell.GetCellType(), vtk_cell.GetPointIds())
     return vtk_mesh
 
+def _build_vtkPolyData(V, F):
+    import vtk
+
+    # Create a vtkPoints object and store the points in it --> utile ?
+    points = vtk.vtkPoints()
+    for point in V:
+        points.InsertNextPoint(point)
+
+    # Create a vtkCellArray to store faces
+    faces = vtk.vtkCellArray()
+    for face_ids in F:
+        if face_ids[0] == face_ids[-1]:
+            # Triangle
+            curface = face_ids[:3]
+            vtk_face = vtk.vtkTriangle()
+        else:
+            # Quadrangle
+            curface = face_ids[:4]
+            vtk_face = vtk.vtkQuad()
+
+        for idx, id in enumerate(curface):
+            vtk_face.GetPointIds().SetId(idx, id)
+
+        faces.InsertNextCell(vtk_face)
+
+    polyDataMesh = vtk.vtkPolyData()
+    polyDataMesh.SetPoints(points)
+    polyDataMesh.SetPolys(faces)
+
+    return polyDataMesh
 
 def write_NAT(filename, V, F):
     """write_NAT(filename, V, F)
@@ -3713,7 +3742,7 @@ def mesh_quality(V, F):
     import vtk
     import math
 
-    vtk_mesh = _build_vtk_mesh_obj(V, F)
+    vtk_mesh = _build_vtkUnstructuredGrid(V, F)
     quality = vtk.vtkMeshQuality()
     quality.SetInput(vtk_mesh)
 
@@ -4568,23 +4597,51 @@ def reformat_triangles(F, verbose=False):
 
     return F
 
+# def show2(V, F, normals=False):
+#     # import vtk
+#     import vtkviewer as vtkv
+#
+#     polyDataMesh = _build_vtkPolyData(V, F)
+#     # ESSAI
+#     viewer = vtkv.VTKViewer()
+#     viewer.AddPolyData(polyDataMesh)
+#     viewer.AxesOn()
+#     viewer.Start()
+#
+#     sys.exit(0)
+
+
 def show(V, F, normals=False):
     import vtk
 
-    vtk_mesh = _build_vtk_mesh_obj(V, F)
+    polyDataMesh = _build_vtkPolyData(V, F)
+    mesh_mapper = vtk.vtkPolyDataMapper()
+    if vtk.VTK_MAJOR_VERSION <= 5:
+        mesh_mapper.SetInput(polyDataMesh)
+    else:
+        mesh_mapper.SetInputData(polyDataMesh)
 
-    surface = vtk.vtkDataSetSurfaceFilter()
-    surface.SetInput(vtk_mesh)
-    surface.Update()
+    mesh_actor = vtk.vtkActor()
+    mesh_actor.SetMapper(mesh_mapper)
+    mesh_actor.GetProperty().SetColor(1, 1, 0)
+    mesh_actor.GetProperty().EdgeVisibilityOn()
+    mesh_actor.GetProperty().SetEdgeColor(0, 0, 0)
+    mesh_actor.GetProperty().SetLineWidth(1)
+
+    axes_actor = vtk.vtkAxesActor()
+    axes = vtk.vtkOrientationMarkerWidget()
+    axes.SetOrientationMarker(axes_actor)
+
+    renderer = vtk.vtkRenderer()
+    renderer.AddActor(mesh_actor)
 
     if normals:
-
-        polydata = surface.GetOutput()
+        # polydata = surface.GetOutput()
 
         normals = vtk.vtkPolyDataNormals()
         normals.SetConsistency(0)
         normals.ComputeCellNormalsOn()
-        normals.SetInput(polydata)
+        normals.SetInput(polyDataMesh)
         normals.Update()
 
         normals_mapper = vtk.vtkPolyDataMapper()
@@ -4610,43 +4667,52 @@ def show(V, F, normals=False):
         glyphActor = vtk.vtkActor()
         glyphActor.SetMapper(glyphMapper)
 
-
-    surface_mapper = vtk.vtkDataSetMapper()
-    surface_mapper.SetInput(surface.GetOutput())
-
-    mesh_actor = vtk.vtkActor()
-    mesh_actor.SetMapper(surface_mapper)
-    mesh_actor.AddPosition(0, 0, 0)
-    mesh_actor.GetProperty().SetColor(1, 1, 0)
-    mesh_actor.GetProperty().SetOpacity(1)
-    mesh_actor.GetProperty().EdgeVisibilityOn()
-    mesh_actor.GetProperty().SetEdgeColor(0, 0, 0)
-    mesh_actor.GetProperty().SetLineWidth(1)
-
-    axes_actor = vtk.vtkAxesActor()
-    axes = vtk.vtkOrientationMarkerWidget()
-    axes.SetOrientationMarker(axes_actor)
-
-    renderer = vtk.vtkRenderer()
-    renderer.AddActor(mesh_actor)
-    if normals:
         renderer.AddActor(glyphActor)
     renderer.SetBackground(0.7706, 0.8165, 1.0)
 
-    renderWindow = vtk.vtkRenderWindow()
-    renderWindow.AddRenderer(renderer)
+    renWin = vtk.vtkRenderWindow()
+    renWin.SetSize(1024, 769)
+    renWin.SetWindowName("Meshmagick viewer")
+    renWin.AddRenderer(renderer)
 
-    interactor = vtk.vtkRenderWindowInteractor()
-    interactor.SetDesiredUpdateRate(100)
-    interactor.SetRenderWindow(renderWindow)
+    iren = vtk.vtkRenderWindowInteractor()
+    # iren.SetDesiredUpdateRate(100)
+    iren.SetRenderWindow(renWin)
 
-    axes.SetInteractor(interactor)
+    iren.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
+
+    axes.SetInteractor(iren)
     axes.EnabledOn()
     axes.InteractiveOn()
 
-    renderWindow.Render()
+    # Creating text
+    # text_actor = vtk.vtkTextActor()
+    # text_actor.GetTextProperty().SetFontSize(12)
+    # text_actor.GetTextProperty().SetColor(0.,0.,0.)
+    # text_actor.SetPosition(0,0)
+    # renderer.AddActor2D(text_actor)
+    command_text = "left mouse : rotate\n"+\
+                    "right mouse : zoom\n"+\
+                    "middle mouse : pan\n"+\
+                    "ctrl+left mouse : spin\n"+\
+                    "3 : stereo\n"+\
+                    "f : fly to the picked point\n"+\
+                    "r : reset view\n"+\
+                    "s : surface representation\n"+\
+                    "w : wire representation\n"+\
+                    "e : quit"
+    # text_actor.SetInput(command_text)
 
-    interactor.Start()
+    corner_annotation = vtk.vtkCornerAnnotation()
+    corner_annotation.SetLinearFontScaleFactor(2)
+    corner_annotation.SetNonlinearFontScaleFactor(1)
+    corner_annotation.SetMaximumFontSize(20)
+    corner_annotation.SetText(3, command_text)
+    corner_annotation.GetTextProperty().SetColor(0,0,0)
+    renderer.AddViewProp(corner_annotation)
+
+    renWin.Render()
+    iren.Start()
 
 
 # =======================================================================
@@ -4681,7 +4747,7 @@ def main():
 
     import argparse
     import sys
-	
+
     try:
         import argcomplete
 
@@ -5013,7 +5079,7 @@ def main():
 
     # FOR TESTING
 
-    detect_features_expert(V, F)
+    # detect_features_expert(V, F)
 
     # END FOR TESTING
 
