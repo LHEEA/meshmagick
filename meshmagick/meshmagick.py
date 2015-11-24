@@ -1277,7 +1277,7 @@ def heal_normals(V, F, verbose=False): # TODO : mettre le flag a 0 en fin d'impl
         if verbose:
             #TODO : adding the possibility to plot normals on visualization
             print "\t -> Mesh is not closed, meshmagick cannot test if the normals are outward. Please consider " \
-                  "checking it visually (e.g. by using --shown option of meshmagick)"
+                  "checking it visually (e.g. by using --show option of meshmagick)"
 
     return F
 
@@ -3371,14 +3371,14 @@ def _build_polyline(curve):
     return polydata
 
 def show(V, F, normals=False):
-    import viewer
+    import MMviewer
     polydata = _build_vtkPolyData(V, F)
-    my_viewer = viewer.mmViewer()
+    my_viewer = MMviewer.MMViewer()
     if normals:
         my_viewer.normals_on()
     my_viewer.add_polydata(polydata)
     my_viewer.show()
-
+    my_viewer.finalize()
 
 # =======================================================================
 #                         COMMAND LINE USAGE
@@ -3694,10 +3694,6 @@ def main():
 
     parser.add_argument('--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
-
-    parser.add_argument('--shown', action='store_true',
-                        help="""Shows the input mesh in an interactive window
-                        along with normals""")
 
     parser.add_argument('--version', action='version',
                         version='meshmagick - version %s\n%s'%(__version__, __copyright__),
@@ -4058,10 +4054,6 @@ def main():
 
     if args.show:
         show(V, F)
-
-    if args.shown:
-        show(V, F, normals=True)
-
 
     if args.outfilename is None:
         base, ext = os.path.splitext(args.infilename)
