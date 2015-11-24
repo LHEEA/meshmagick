@@ -33,14 +33,14 @@ class mmViewer:
         self.widget = widget
 
         # Building command annotations
-        command_text = "left mouse : rotate\n"+\
-                        "right mouse : zoom\n"+\
-                        "middle mouse : pan\n"+\
-                        "ctrl+left mouse : spin\n"+\
-                        "f : focus on the mouse cursor\n"+\
-                        "r : reset view\n"+\
-                        "s : surface representation\n"+\
-                        "w : wire representation\n"+\
+        command_text = "left mouse : rotate\n" + \
+                        "right mouse : zoom\n" + \
+                        "middle mouse : pan\n" + \
+                        "ctrl+left mouse : spin\n" + \
+                        "f : focus on the mouse cursor\n" + \
+                        "r : reset view\n" + \
+                        "s : surface representation\n" + \
+                        "w : wire representation\n" + \
                         "e : quit"
 
         corner_annotation = vtk.vtkCornerAnnotation()
@@ -100,7 +100,8 @@ class mmViewer:
 
             normals_mapper = vtk.vtkPolyDataMapper()
             if vtk.VTK_MAJOR_VERSION <= 5:
-                normals_mapper.SetInput(normals.GetOuput())
+                normals_output = normals.GetOutput()
+                normals_mapper.SetInput(normals_output)
             else:
                 normals_mapper.SetInputData(normals.GetOutput())
             normals_actor = vtk.vtkActor()
@@ -117,15 +118,15 @@ class mmViewer:
             glyph.SetVectorModeToUseNormal()
             glyph.Update()
 
-            glyphMapper = vtk.vtkPolyDataMapper()
-            glyphMapper.SetInputConnection(glyph.GetOutputPort())
+            glyph_mapper = vtk.vtkPolyDataMapper()
+            glyph_mapper.SetInputConnection(glyph.GetOutputPort())
 
-            glyphActor = vtk.vtkActor()
-            glyphActor.SetMapper(glyphMapper)
+            glyph_actor = vtk.vtkActor()
+            glyph_actor.SetMapper(glyph_mapper)
 
-            self.renderer.AddActor(glyphActor)
+            self.renderer.AddActor(glyph_actor)
 
-    def Start(self):
+    def show(self):
 
         self.widget.SetInteractor(self.iren)
         self.widget.SetEnabled(1)

@@ -3377,7 +3377,7 @@ def show(V, F, normals=False):
     if normals:
         my_viewer.normals_on()
     my_viewer.add_polydata(polydata)
-    my_viewer.Start()
+    my_viewer.show()
 
 
 # =======================================================================
