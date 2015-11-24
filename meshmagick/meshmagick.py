@@ -365,8 +365,15 @@ class Mesh:
                         k=5,
                         verbose=False):
 
+        # For testing
+        import MMviewer
+        _tmp_viewer = MMviewer.MMViewer()
+        polydata = _build_vtkPolyData(self.vertices, self.faces)
+        _tmp_viewer.add_polydata(polydata)
+        # End for testing
+
         if verbose:
-            print "Detecting features of the mesh"
+            print "\nDetecting features of the mesh"
 
         la = np.linalg
         epsilon = math.tan(thetaf*math.pi/180/2)**2
@@ -401,8 +408,6 @@ class Mesh:
         for iface, face in enumerate(self.faces):
             normal = self.normals[iface]
             covF[iface] = np.outer(normal, normal)
-
-
 
         # Computing data for each vertex
         angle_defect_V    = np.zeros(self.nv, dtype=np.float)
@@ -503,7 +508,6 @@ class Mesh:
             else:
                 ambiguous_vertex[iV] = True
 
-        # print 'rank 3 vertices are:', rank_three_vertices
 
         # Building u-strongness and e-strongness
         sharp_edge = np.zeros(self.nb_edges, dtype=np.bool)
@@ -614,7 +618,10 @@ class Mesh:
                 # Associated half-edges may be added to the ICH list
                 quasi_strong_edge[iedge] = True
 
-        # candidate_edges = list(np.where(quasi_strong_edge)[0])
+
+
+        _tmp_candidate_HE = self.edges[list(np.where(quasi_strong_edge)[0])]
+        self._write_HE('candidate_HE.vtp', _tmp_candidate_HE)
         # print list(self.HE_iV[self.edges[candidate_edges]])
         # sys.exit(0)
 
@@ -629,7 +636,11 @@ class Mesh:
 
         # Candidate vertices are ICH.keys()...
 
-        multi_joint_HE = []
+        _tmp_singleton_HE = []
+        _tmp_dangling_HE = []
+        _tmp_semi_joint = []
+        _tmp_disjoint = []
+        _tmp_multi_joint_HE = []
 
         # Filtration procedure starts here
         end_edge_type     = ['SG', 'DG', 'SJ', 'DJ', 'MJ']
@@ -649,6 +660,10 @@ class Mesh:
             edge_candidate_type = dict()
             for iV in ICH.keys():
                 iHE_list = ICH[iV]
+                if iV == 1693:
+                    print iHE_list
+                    print self.HE_tV[iHE_list]
+
                 nb_iHE = len(ICH[iV])
                 iedge = self.HE_edge[iHE_list]
 
@@ -656,11 +671,13 @@ class Mesh:
                     iHE = iHE_list[0]
                     # print iHE, '-->', self.get_HE_vertices(iHE), ' is an singleton'
                     edge_candidate_type[self.HE_edge[iHE]] = 'SG'
+                    _tmp_singleton_HE.append(iHE)
                     end_HE.append(iHE)
 
                     if not sharp_edge[iedge[0]] or not sharp_corner[iV]:
                         obscure_end_HE.append(iHE)
                         # print iHE, '-->', self.get_HE_vertices(iHE), ' is dangling'
+                        _tmp_dangling_HE.append(iHE)
                         edge_candidate_type[self.HE_edge[iHE]] = 'DG'
 
                 elif nb_iHE == 2:
@@ -685,6 +702,8 @@ class Mesh:
                             # print iHE1, ' and ', iHE2, ' are semi-joint'
                             edge_candidate_type[self.HE_edge[iHE1]] = 'SJ'
                             edge_candidate_type[self.HE_edge[iHE2]] = 'SJ'
+                            _tmp_semi_joint.append(iHE1)
+                            _tmp_semi_joint.append(iHE2)
                             end_HE.append(iHE1)
                             end_HE.append(iHE2)
 
@@ -717,16 +736,42 @@ class Mesh:
                             obscure_end_HE.append(iHE)
                             # print iHE, '-->', self.get_HE_vertices(iHE), ' is disjoint'
                             edge_candidate_type[self.HE_edge[iHE]] = 'DJ'
+                            _tmp_disjoint.append(iHE)
                             end_HE.append(iHE)
                         else:
                             # print iHE, '-->', self.get_HE_vertices(iHE), ' is multi-joint'
                             edge_candidate_type[self.HE_edge[iHE]] = 'MJ'
-                            multi_joint_HE.append(iHE)
+                            _tmp_multi_joint_HE.append(iHE)
                             is_disjoint = False
                             end_HE.append(iHE)
 
-            print 'Multi-joint half-edges iV are :'
-            print list(self.HE_iV[multi_joint_HE])
+
+
+            # print 'Multi-joint half-edges iV are :'
+            # print list(self.HE_iV[_tmp_multi_joint_HE])
+            self._write_HE('multi_joint.vtp', _tmp_multi_joint_HE)
+
+            # print 'Dangling half-edges iV are :'
+            # print list(self.HE_iV[_tmp_dangling_HE])
+            self._write_HE('dangling.vtp', _tmp_dangling_HE)
+
+            # print 'Singleton half-edges iV are :'
+            # print list(self.HE_iV[_tmp_singleton_HE])
+            self._write_HE('singleton.vtp', _tmp_singleton_HE)
+
+            # print 'Semi-joint half-edges iV are :'
+            # print list(self.HE_iV[_tmp_semi_joint])
+            self._write_HE('semi-joint.vtp', _tmp_semi_joint)
+
+            # print 'Disjoint half-edges iV are :'
+            # print list(self.HE_iV[_tmp_disjoint])
+            self._write_HE('disjoint.vtp', _tmp_disjoint)
+
+            sharp_HE = self.edges[np.where(sharp_edge)[0]]
+            self._write_HE('sharp_HE.vtp', sharp_HE)
+
+            print 'sharp vertices are :'
+            print list(np.where(sharp_corner)[0])
 
             sys.exit(0)
 
@@ -736,6 +781,10 @@ class Mesh:
 
             print "Associated vertices:"
             print list(self.HE_iV[obscure_end_HE])
+
+            sys.exit(0)
+            print 'End half_edges vertices are :'
+
 
             # -----------------------------------------------------------
             # Traversing candidate curves starting from obscure end-edges
@@ -1114,6 +1163,53 @@ class Mesh:
 
         sys.exit(0)
         return 1
+
+    def _write_HE(self, filename, iHE_list):
+        import vtk
+
+        nhe = len(iHE_list)
+
+        iV = self.HE_iV[iHE_list]
+        tV = self.HE_tV[iHE_list]
+
+        half_edges = vtk.vtkPolyData()
+
+        points = vtk.vtkPoints()
+        # for vertex in self.vertices:
+        #     points.InsertNextPoint(vertex)
+
+        for iV1, iV2 in zip(iV, tV):
+            points.InsertNextPoint(self.vertices[iV1])
+            points.InsertNextPoint(self.vertices[iV2])
+
+        half_edges.SetPoints(points)
+
+        # # Building color data array
+        # colors = vtk.vtkUnsignedCharArray()
+        # colors.SetNumberOfComponents(3)
+        # colors.SetName('color')
+
+        lines = vtk.vtkCellArray()
+        for iHE in xrange(nhe):
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0, 2*iHE)
+            line.GetPointIds().SetId(1, 2*iHE+1)
+            lines.InsertNextCell(line)
+
+            # colors.InsertNextTupleValue(color)
+
+
+        half_edges.SetLines(lines)
+
+        # half_edges.GetCellData().SetScalars(colors)
+
+
+        writer = vtk.vtkXMLPolyDataWriter()
+        writer.SetFileName(filename)
+        writer.SetInput(half_edges)
+        writer.Write()
+
+        return 0
 
     def get_face_half_edges(self, iface):
         iHE_init = self.F_1HE[iface]
