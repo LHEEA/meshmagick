@@ -2849,8 +2849,40 @@ def load_VTU(filename):
 
     from vtk import vtkXMLUnstructuredGridReader
     reader = vtkXMLUnstructuredGridReader()
+    reader.SetFileName(filename)
+    reader.Update()
+    vtk_mesh = reader.GetOutput()
 
-    V, F = _load_paraview(filename, reader)
+    V, F = _dump_vtk(vtk_mesh)
+    return V, F
+
+
+def load_VTP(filename):
+    """load_VTP(filename)
+
+    Loads VTK file format in the new XML format (vtp file extension for
+    polydata meshes). It relies on the reader from the VTK library.
+
+    Parameters:
+        filename: str
+            name of the meh file on disk
+
+    Returns:
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    Note: VTP files have a 0-indexing
+    """
+
+    from vtk import vtkXMLPolyDataReader
+    reader = vtkXMLPolyDataReader()
+    reader.SetFileName(filename)
+    reader.Update()
+    vtk_mesh = reader.GetOutput()
+
+    V, F = _dump_vtk(vtk_mesh)
     return V, F
 
 
@@ -2874,16 +2906,19 @@ def load_VTK(filename):
     """
     from vtk import vtkUnstructuredGridReader
     reader = vtkUnstructuredGridReader()
+    reader.SetFileName(filename)
+    reader.Update()
+    vtk_mesh = reader.GetOutput()
 
-    V, F = _load_paraview(filename, reader)
+    V, F = _dump_vtk(vtk_mesh)
     return V, F
 
 
-def _load_paraview(filename, reader):
-    """_load_paraview(filename, reader)
+def _dump_vtk(vtk_mesh):
+    """_dump_vtk(vtk_mesh)
 
-    Internal driver function that uses the VTK library to read VTK related
-    file formats.
+    Internal driver function that uses the VTK library to read VTK polydata
+    or vtk unstructured grid data structures
 
     Parameters:
         filename: str
@@ -2898,9 +2933,9 @@ def _load_paraview(filename, reader):
             numpy array of the faces' nodes connectivities
     """
     # Importing the mesh from the file
-    reader.SetFileName(filename)
-    reader.Update()
-    vtk_mesh = reader.GetOutput()
+    # reader.SetFileName(filename)
+    # reader.Update()
+    # vtk_mesh = reader.GetOutput()
 
     nv = vtk_mesh.GetNumberOfPoints()
     V = np.zeros((nv, 3), dtype=np.float)
@@ -3455,7 +3490,39 @@ def write_VTU(filename, V, F):
     from vtk import vtkXMLUnstructuredGridWriter
     writer = vtkXMLUnstructuredGridWriter()
     writer.SetDataModeToAscii()
-    _write_paraview(filename, V, F, writer)
+    writer.SetFileName(filename)
+
+    unstructured_grid = _build_vtkUnstructuredGrid(V, F)
+    writer.SetInput(unstructured_grid)
+    writer.Write()
+
+    return 1
+
+
+def write_VTP(filename, V, F):
+    """write_VTP(filename, V, F)
+
+    Writes .vtp file format for the paraview (Kitware (c)) visualisation
+    software. It relies on the VTK library for its writer. VTP files use
+    the last XML file format of the VTK library and correspond to polydata.
+
+    Parameters:
+        filename: str
+            name of the mesh file to be written on disk
+        V: ndarray
+            numpy array of the coordinates of the mesh's nodes
+        F: ndarray
+            numpy array of the faces' nodes connectivities
+
+    """
+    from vtk import vtkXMLPolyDataWriter
+    writer = vtkXMLPolyDataWriter()
+    writer.SetDataModeToAscii()
+    writer.SetFileName(filename)
+
+    polydata = _build_vtkPolyData(V, F)
+    writer.SetInput(polydata)
+    writer.Write()
 
     return 1
 
@@ -3479,7 +3546,11 @@ def write_VTK(filename, V, F):
 
     from vtk import vtkUnstructuredGridWriter
     writer = vtkUnstructuredGridWriter()
-    _write_paraview(filename, V, F, writer)
+    writer.SetFileName(filename)
+
+    unstructured_grid = _build_vtkUnstructuredGrid(V, F)
+    writer.SetInput(unstructured_grid)
+    writer.Write()
 
     return 1
 
@@ -4286,6 +4357,34 @@ def generate_lid(V, F, max_area=None, verbose=False):
 
     return V, F
 
+def fill_holes(V, F, verbose=False):
+
+    import vtk
+
+    if verbose:
+        print "Filling holes"
+
+    polydata = _build_vtkPolyData(V, F)
+
+    fillHolesFilter = vtk.vtkFillHolesFilter()
+
+    if vtk.VTK_MAJOR_VERSION <= 5:
+        fillHolesFilter.SetInputConnection(polydata.GetProducerPort())
+    else:
+        fillHolesFilter.SetInputData(polydata)
+
+    fillHolesFilter.Update()
+
+    polydata_filled = fillHolesFilter.GetOutput()
+
+    V, F = _dump_vtk(polydata_filled)
+
+    if verbose:
+        print "\t--> Done!"
+
+    return V, F
+
+
 def remove_degenerated_faces(V, F, rtol=1e-5, verbose=False):
 
     # First computing the faces properties
@@ -4685,8 +4784,8 @@ extension_dict = { #keyword           reader,   writer
                   'rad':             (load_RAD, write_RAD),
                   'radioss':         (load_RAD, write_RAD),
                   'stl':             (load_STL, write_STL),# FIXME: Verifier que ce n'est pas load_STL2
-                  'paraview':        (load_VTU, write_VTU),# VTU
                   'vtu':             (load_VTU, write_VTU),
+                  'vtp':             (load_VTP, write_VTP),
                   'paraview-legacy': (load_VTK, write_VTK),# VTK
                   'vtk':             (load_VTK, write_VTK),
                   'tecplot':         (load_TEC, write_TEC),
@@ -4725,7 +4824,8 @@ def main():
                     |   .msh    |    R       | GMSH (5)        | gmsh, msh            |
                     |   .rad    |    R       | RADIOSS         | rad, radioss         |
                     |   .stl    |    R/W     |    -            | stl                  |
-                    |   .vtu    |    R/W     | PARAVIEW (6)    | paraview, vtu        |
+                    |   .vtu    |    R/W     | PARAVIEW (6)    | vtu                  |
+                    |   .vtp    |    R/W     | PARAVIEW (6)    | vtp                  |
                     |   .vtk    |    R/W     | PARAVIEW (6)    | paraview-legacy, vtk |
                     |   .tec    |    R/W     | TECPLOT (7)     | tecplot, tec         |
                     *---------- *-----------------------------------------------------*
@@ -4975,6 +5075,10 @@ def main():
 
     parser.add_argument('--lid', nargs='?', const=1., default=None, type=float,
                         help="""Generate a triangle mesh lid on the mesh clipped by the Oxy plane.
+                        """)
+
+    parser.add_argument('--fill-holes', '-fh', action='store_true',
+                        help="""Fill little holes by triangulation if any.
                         """)
 
     parser.add_argument('--show', action='store_true',
@@ -5337,6 +5441,8 @@ def main():
     if args.lid is not None:
         V, F = generate_lid(V, F, max_area=args.lid, verbose=verbose)
 
+    if args.fill_holes:
+        V, F = fill_holes(V, F, verbose=verbose)
 
     # WARNING : No more mesh modification should be released from this point until the end of the main
 
