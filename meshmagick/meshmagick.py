@@ -3786,7 +3786,7 @@ def main():
                         """)
 
     parser.add_argument('--fill-holes', '-fh', action='store_true',
-                        help="""Generate a triangle mesh lid on the mesh clipped by the Oxy plane.
+                        help="""Fill little holes by triangulation if any.
                         """)
 
     parser.add_argument('--show', action='store_true',
@@ -4143,7 +4143,7 @@ def main():
     if args.lid is not None:
         V, F = generate_lid(V, F, max_area=args.lid, verbose=verbose)
 
-    if args.fill_holes is not None:
+    if args.fill_holes:
         V, F = fill_holes(V, F)
 
     # WARNING : No more mesh modification should be released from this point until the end of the main
