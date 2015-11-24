@@ -3320,8 +3320,12 @@ def generate_lid(V, F, max_area=None, verbose=False):
 
     return V, F
 
-def fill_holes(V, F):
+def fill_holes(V, F, verbose=False):
+
     import vtk
+
+    if verbose:
+        print "Filling holes"
 
     polydata = _build_vtkPolyData(V, F)
 
@@ -3337,6 +3341,9 @@ def fill_holes(V, F):
     polydata_filled = fillHolesFilter.GetOutput()
 
     V, F = _dump_vtk(polydata_filled)
+
+    if verbose:
+        print "\t--> Done!"
 
     return V, F
 
@@ -4144,7 +4151,7 @@ def main():
         V, F = generate_lid(V, F, max_area=args.lid, verbose=verbose)
 
     if args.fill_holes:
-        V, F = fill_holes(V, F)
+        V, F = fill_holes(V, F, verbose=verbose)
 
     # WARNING : No more mesh modification should be released from this point until the end of the main
 
