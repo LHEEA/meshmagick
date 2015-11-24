@@ -2525,7 +2525,7 @@ def _build_vtkUnstructuredGrid(V, F):
 def _build_vtkPolyData(V, F):
     import vtk
 
-    # Create a vtkPoints object and store the points in it --> utile ?
+    # Create a vtkPoints object and store the points in it
     points = vtk.vtkPoints()
     for point in V:
         points.InsertNextPoint(point)
@@ -3346,122 +3346,38 @@ def reformat_triangles(F, verbose=False):
 
     return F
 
-# def show2(V, F, normals=False):
-#     # import vtk
-#     import vtkviewer as vtkv
-#
-#     polyDataMesh = _build_vtkPolyData(V, F)
-#     # ESSAI
-#     viewer = vtkv.VTKViewer()
-#     viewer.AddPolyData(polyDataMesh)
-#     viewer.AxesOn()
-#     viewer.Start()
-#
-#     sys.exit(0)
-
-
-def show(V, F, normals=False):
+def _build_polyline(curve):
     import vtk
 
-    polyDataMesh = _build_vtkPolyData(V, F)
-    mesh_mapper = vtk.vtkPolyDataMapper()
-    if vtk.VTK_MAJOR_VERSION <= 5:
-        mesh_mapper.SetInput(polyDataMesh)
-    else:
-        mesh_mapper.SetInputData(polyDataMesh)
+    npoints = len(curve)
 
-    mesh_actor = vtk.vtkActor()
-    mesh_actor.SetMapper(mesh_mapper)
-    mesh_actor.GetProperty().SetColor(1, 1, 0)
-    mesh_actor.GetProperty().EdgeVisibilityOn()
-    mesh_actor.GetProperty().SetEdgeColor(0, 0, 0)
-    mesh_actor.GetProperty().SetLineWidth(1)
+    points = vtk.vtkPoints()
+    for point in curve:
+        points.InsertNextPoint(point)
 
-    axes_actor = vtk.vtkAxesActor()
-    axes = vtk.vtkOrientationMarkerWidget()
-    axes.SetOrientationMarker(axes_actor)
+    polyline = vtk.vtkPolyLine()
+    polyline.GetPointIds().SetNumberOfIds(npoints)
 
-    renderer = vtk.vtkRenderer()
-    renderer.AddActor(mesh_actor)
+    for id in xrange(npoints):
+        polyline.GetPointIds().SetId(i, i)
 
+    cells = vtk.vtkCellArray()
+    cells.InsertNextCell(polyline)
+
+    polydata = vtk.vtkPolyData()
+    polydata.SetPoints(points)
+    polydata.SetLines(cells)
+
+    return polydata
+
+def show(V, F, normals=False):
+    import viewer
+    polydata = _build_vtkPolyData(V, F)
+    my_viewer = viewer.mmViewer()
     if normals:
-        # polydata = surface.GetOutput()
-
-        normals = vtk.vtkPolyDataNormals()
-        normals.SetConsistency(0)
-        normals.ComputeCellNormalsOn()
-        normals.SetInput(polyDataMesh)
-        normals.Update()
-
-        normals_mapper = vtk.vtkPolyDataMapper()
-        normals_mapper.SetInput(normals.GetOutput())
-
-        normals_actor = vtk.vtkActor()
-        normals_actor.SetMapper(normals_mapper)
-
-        arrow = vtk.vtkArrowSource()
-        arrow.SetTipResolution(16)
-        arrow.SetTipLength(0.3)
-        arrow.SetTipRadius(0.1)
-
-        glyph = vtk.vtkGlyph3D()
-        glyph.SetSourceConnection(arrow.GetOutputPort())
-        glyph.SetInputConnection(normals.GetOutputPort())
-        glyph.SetVectorModeToUseNormal()
-        glyph.Update()
-
-        glyphMapper = vtk.vtkPolyDataMapper()
-        glyphMapper.SetInputConnection(glyph.GetOutputPort())
-
-        glyphActor = vtk.vtkActor()
-        glyphActor.SetMapper(glyphMapper)
-
-        renderer.AddActor(glyphActor)
-    renderer.SetBackground(0.7706, 0.8165, 1.0)
-
-    renWin = vtk.vtkRenderWindow()
-    renWin.SetSize(1024, 769)
-    renWin.SetWindowName("Meshmagick viewer")
-    renWin.AddRenderer(renderer)
-
-    iren = vtk.vtkRenderWindowInteractor()
-    # iren.SetDesiredUpdateRate(100)
-    iren.SetRenderWindow(renWin)
-
-    iren.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
-
-    axes.SetInteractor(iren)
-    axes.EnabledOn()
-    axes.InteractiveOn()
-
-    # Creating text
-    # text_actor = vtk.vtkTextActor()
-    # text_actor.GetTextProperty().SetFontSize(12)
-    # text_actor.GetTextProperty().SetColor(0.,0.,0.)
-    # text_actor.SetPosition(0,0)
-    # renderer.AddActor2D(text_actor)
-    command_text = "left mouse : rotate\n"+\
-                    "right mouse : zoom\n"+\
-                    "middle mouse : pan\n"+\
-                    "ctrl+left mouse : spin\n"+\
-                    "3 : stereo\n"+\
-                    "f : fly to the picked point\n"+\
-                    "r : reset view\n"+\
-                    "s : surface representation\n"+\
-                    "w : wire representation\n"+\
-                    "e : quit"
-    # text_actor.SetInput(command_text)
-
-    corner_annotation = vtk.vtkCornerAnnotation()
-    corner_annotation.SetLinearFontScaleFactor(2)
-    corner_annotation.SetNonlinearFontScaleFactor(1)
-    corner_annotation.SetMaximumFontSize(20)
-    corner_annotation.SetText(3, command_text)
-    corner_annotation.GetTextProperty().SetColor(0,0,0)
-    renderer.AddViewProp(corner_annotation)
-
-    renWin.Render()
-    iren.Start()
+        my_viewer.normals_on()
+    my_viewer.add_polydata(polydata)
+    my_viewer.Start()
 
 
 # =======================================================================
