@@ -355,21 +355,21 @@ class Mesh:
         return 1
 
     def detect_features(self,
-                        thetaf=10, # The main parameter to tune !!
-                        thetaF=65,
-                        thetaD=40,
-                        thetat=20,
-                        thetaT=40,
-                        thetae=25,
-                        thetak=50,
-                        k=5,
+                        thetaf=10, # Threshold for l-strongness in DA of half-edges
+                        thetaF=65, # Threshold for u-strongness in DA of edges
+                        thetaD=40, # Threshold for u-strongness in AD of vertices (sharpness)
+                        thetat=20, # Threshold for u-strongness in OSTA of edges
+                        thetaT=40, # Threshold for u-strongness in TA of vertices
+                        thetae=25, # Threshold for e-strongness in DA of edges
+                        thetak=50, # Threshold for obsurity of curves
+                        k=5,       # Minimum length of curves for not being obscure
                         verbose=False):
 
         # For testing
+        from colour import Color
         import MMviewer
         _tmp_viewer = MMviewer.MMViewer()
-        polydata = _build_vtkPolyData(self.vertices, self.faces)
-        _tmp_viewer.add_polydata(polydata)
+
         # End for testing
 
         if verbose:
@@ -476,11 +476,6 @@ class Mesh:
             iface_list = self.HE_F[iHE_list]
 
             adjF_areas = self.areas[iface_list]
-            # max_area = adjF_areas.max()
-            # adjF_centers = self.centers[iface_list]
-            # dist = la.norm(adjF_centers - vertex, axis=1)
-            # dist_max = dist.max()
-            # weights = adjF_areas/max_area * np.exp(- dist/dist_max)
 
             medial_quadric[:] = 0.
             for i, iface in enumerate(iface_list):
@@ -489,11 +484,6 @@ class Mesh:
 
             eigval, eigvec = la.eigh(medial_quadric)
             (lambda3, lambda2, lambda1) = eigval
-
-            # rank = la.matrix_rank(medial_quadric)
-            # if rank == 3:
-            #     print iV, '-->', angle_defect_V[iV]*180/pi
-                # rank_three_vertices.append(iV)
 
             if lambda2/lambda1 >= epsilon and lambda3/lambda2 <= 0.7:
                 # Ridge direction is defined, we are not on a flat surface
@@ -618,12 +608,11 @@ class Mesh:
                 # Associated half-edges may be added to the ICH list
                 quasi_strong_edge[iedge] = True
 
+        candidate_edges = list(np.where(quasi_strong_edge)[0])
+        candidate_HE  = list(self.edges[candidate_edges])
+        candidate_HE += list(self.HE_tHE[candidate_HE])
 
 
-        _tmp_candidate_HE = self.edges[list(np.where(quasi_strong_edge)[0])]
-        self._write_HE('candidate_HE.vtp', _tmp_candidate_HE)
-        # print list(self.HE_iV[self.edges[candidate_edges]])
-        # sys.exit(0)
 
         # Building ICH (Incident Candidate Half-edge list for each vertex)
         ICH = dict()
@@ -652,7 +641,7 @@ class Mesh:
             # Collecting obscure end-edges
             # ----------------------------
             print '\n----------------------------'
-            print 'Collecting obscure end edges'
+            print 'Classifying end edges'
             print '----------------------------'
             # Those are dangling, semi-joint and disjoint
             obscure_end_HE = []
@@ -660,9 +649,9 @@ class Mesh:
             edge_candidate_type = dict()
             for iV in ICH.keys():
                 iHE_list = ICH[iV]
-                if iV == 1693:
-                    print iHE_list
-                    print self.HE_tV[iHE_list]
+                # if iV == 1693:
+                #     print iHE_list
+                #     print self.HE_tV[iHE_list]
 
                 nb_iHE = len(ICH[iV])
                 iedge = self.HE_edge[iHE_list]
@@ -745,46 +734,27 @@ class Mesh:
                             is_disjoint = False
                             end_HE.append(iHE)
 
-
-
-            # print 'Multi-joint half-edges iV are :'
-            # print list(self.HE_iV[_tmp_multi_joint_HE])
+            print "WRITING FILES"
+            self._write_HE('candidate_HE.vtp', candidate_HE)
+            self._write_HE('end_HE.vtp', end_HE)
             self._write_HE('multi_joint.vtp', _tmp_multi_joint_HE)
-
-            # print 'Dangling half-edges iV are :'
-            # print list(self.HE_iV[_tmp_dangling_HE])
             self._write_HE('dangling.vtp', _tmp_dangling_HE)
-
-            # print 'Singleton half-edges iV are :'
-            # print list(self.HE_iV[_tmp_singleton_HE])
             self._write_HE('singleton.vtp', _tmp_singleton_HE)
-
-            # print 'Semi-joint half-edges iV are :'
-            # print list(self.HE_iV[_tmp_semi_joint])
             self._write_HE('semi-joint.vtp', _tmp_semi_joint)
-
-            # print 'Disjoint half-edges iV are :'
-            # print list(self.HE_iV[_tmp_disjoint])
             self._write_HE('disjoint.vtp', _tmp_disjoint)
 
             sharp_HE = self.edges[np.where(sharp_edge)[0]]
             self._write_HE('sharp_HE.vtp', sharp_HE)
 
-            print 'sharp vertices are :'
-            print list(np.where(sharp_corner)[0])
-
-            sys.exit(0)
-
             print 'Obscure end half-edges are: ', obscure_end_HE
             if len(obscure_end_HE) == 0:
                 break
 
-            print "Associated vertices:"
-            print list(self.HE_iV[obscure_end_HE])
+            self._write_HE('obscure_end_HE.vtp', obscure_end_HE)
 
-            sys.exit(0)
-            print 'End half_edges vertices are :'
 
+            # return
+            # A GARDER EN BACKUP CE QUI SUIT !!!
 
             # -----------------------------------------------------------
             # Traversing candidate curves starting from obscure end-edges
@@ -871,19 +841,20 @@ class Mesh:
                             tV = self.HE_tV[iHE]
                             ICH[iV].remove(iHE)
                             ICH[tV].remove(self.HE_tHE[iHE])
-                            # ICH[self.HE_tV[iHE]].remove(self.HE_tHE[iV])
                             if len(ICH[iV]) == 0:
                                 ICH.pop(iV)
+                                print 'removing %u from candidates'%iHE
+                            candidate_HE.remove(iHE)
+                            candidate_HE.remove(self.HE_tHE[iHE])
                         # Attention si le HE final est dans la liste des HE obscures, il faut le supprimer !!
                         if self.HE_tHE[iHE_end] in obscure_end_HE:
                             obscure_end_HE.remove(self.HE_tHE[iHE_end])
-                        # end_HE.remove(iHE_init)
-                        # end_HE.remove(iHE_end)
-
 
                     else:
                         print "This is not an obscure curve"
                         # Non obscure curve was found
+
+
             if not obscure_curve_found:
                 print "No more obscure curves"
                 break
@@ -892,7 +863,7 @@ class Mesh:
         # print "Sharp corners are : ", np.where(sharp_corner)[0]
         print "End half-edges are: ", end_HE
         print list(self.HE_iV[end_HE])
-        sys.exit(0)
+        # sys.exit(0)
 
         curves = []
         while len(end_HE) > 0:
@@ -950,23 +921,25 @@ class Mesh:
 
         visited_faces_mask = np.zeros(self.nf, dtype=np.bool)
         feature_half_edges_mask = np.zeros(self.nhe, dtype=np.bool)
-        feature_HE_to_curve = dict()
-        for icurve, curve in enumerate(curves):
+        feature_half_edges_mask[candidate_HE] = True
+
+        # feature_HE_to_curve = dict()
+        # for icurve, curve in enumerate(curves):
             # visited_faces_mask[self.HE_F[curve]] = True
-            feature_half_edges_mask[curve] = True
-            feature_HE_to_curve.update(
-                zip(
-                    curve,
-                    [icurve for i in xrange(len(curve))]
-                )
-            )
+            # feature_half_edges_mask[curve] = True
+            # feature_HE_to_curve.update(
+            #     zip(
+            #         curve,
+            #         [icurve for i in xrange(len(curve))]
+            #     )
+            # )
         # print feature_HE_to_curve
 
 
 
         surfaces = []
         surface = []
-        boundary_curves = []
+        # boundary_curves = []
 
         F_stack = []
         while 1:
@@ -975,7 +948,7 @@ class Mesh:
                 unvisited_faces_ids = np.where(np.logical_not(visited_faces_mask))[0]
                 if len(surface) > 0:
                     surfaces.append(surface)
-                    boundary_curves.append(boundary_curve)
+                    # boundary_curves.append(boundary_curve)
                 if len(unvisited_faces_ids) == 0:
                     # We're done, every faces have been visited :)
                     print "Every faces have been visited"
@@ -984,7 +957,7 @@ class Mesh:
                     F_stack = [unvisited_faces_ids[0]]
                     visited_faces_mask[F_stack[0]] = True
                     surface = [F_stack[0]]
-                    boundary_curve = set()
+                    # boundary_curve = set()
                     print 'Initializing with %u' % F_stack[0]
                     continue
 
@@ -997,8 +970,8 @@ class Mesh:
 
             # TODO: extraire ici les courbes qui sotn touchées dans un set...
             feature_half_edges_list = face_he_list[feature_half_edges_mask[face_he_list]]
-            for iHE in feature_half_edges_list:
-                boundary_curve.add(feature_HE_to_curve[iHE])
+            # for iHE in feature_half_edges_list:
+            #     boundary_curve.add(feature_HE_to_curve[iHE])
 
             # On recherche les half-edges qui ne sont pas des features et dont le twin ne correspond pas a une
             # facette visitee
@@ -1014,9 +987,23 @@ class Mesh:
                 F_stack += propagation_faces
                 visited_faces_mask[propagation_faces] = True
 
-        print "Surfaces :"
+
         for surface in surfaces:
-            print list(surface)
+            V, F = extract_faces(self.vertices, self.faces, surface)
+            polydata = _build_vtkPolyData(V, F)
+            _tmp_viewer.add_polydata(polydata, color=Color(pick_for=polydata).get_rgb())
+        _tmp_viewer.show()
+        _tmp_viewer.finalize()
+
+
+        sys.exit(0)
+        # print "Surfaces :"
+        long_surface = []
+        for i, surface in enumerate(surfaces):
+            long_surface += surface
+            V, F = extract_faces(self.vertices, self.faces, long_surface)
+            write_VTP('surf%u.vtp'%i, V, F)
+
 
         sys.exit(0)
 
@@ -1164,7 +1151,7 @@ class Mesh:
         sys.exit(0)
         return 1
 
-    def _write_HE(self, filename, iHE_list):
+    def _write_HE(self, filename, iHE_list, color=None):
         import vtk
 
         nhe = len(iHE_list)
@@ -1175,8 +1162,6 @@ class Mesh:
         half_edges = vtk.vtkPolyData()
 
         points = vtk.vtkPoints()
-        # for vertex in self.vertices:
-        #     points.InsertNextPoint(vertex)
 
         for iV1, iV2 in zip(iV, tV):
             points.InsertNextPoint(self.vertices[iV1])
@@ -1184,10 +1169,11 @@ class Mesh:
 
         half_edges.SetPoints(points)
 
-        # # Building color data array
-        # colors = vtk.vtkUnsignedCharArray()
-        # colors.SetNumberOfComponents(3)
-        # colors.SetName('color')
+        if color is not None:
+            # Building color data array
+            colors = vtk.vtkUnsignedCharArray()
+            colors.SetNumberOfComponents(3)
+            colors.SetName('color')
 
         lines = vtk.vtkCellArray()
         for iHE in xrange(nhe):
@@ -1195,13 +1181,14 @@ class Mesh:
             line.GetPointIds().SetId(0, 2*iHE)
             line.GetPointIds().SetId(1, 2*iHE+1)
             lines.InsertNextCell(line)
-
-            # colors.InsertNextTupleValue(color)
+            if color is not None:
+                colors.InsertNextTupleValue(color)
 
 
         half_edges.SetLines(lines)
 
-        # half_edges.GetCellData().SetScalars(colors)
+        if color is not None:
+            half_edges.GetCellData().SetScalars(colors)
 
 
         writer = vtk.vtkXMLPolyDataWriter()
