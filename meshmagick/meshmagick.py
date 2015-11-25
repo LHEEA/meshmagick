@@ -363,14 +363,8 @@ class Mesh:
                         thetae=25, # Threshold for e-strongness in DA of edges
                         thetak=50, # Threshold for obsurity of curves
                         k=5,       # Minimum length of curves for not being obscure
-                        verbose=False):
-
-        # For testing
-        from colour import Color
-        import MMviewer
-        _tmp_viewer = MMviewer.MMViewer()
-
-        # End for testing
+                        verbose=False,
+                        debug=False):
 
         if verbose:
             print "\nDetecting features of the mesh"
@@ -419,8 +413,6 @@ class Mesh:
 
         OSTA = np.zeros(self.nhe, dtype=np.float)
 
-        # rank_three_vertices = []
-
         for iV, vertex in enumerate(self.vertices):
 
             # Getting list of incident half-edges
@@ -439,11 +431,7 @@ class Mesh:
                 angle_defect_V[iV] -= acos(np.dot(HE1, HE2))
                 HE1 = HE2
 
-            # if self.is_boundaryV[iV]:
-            #     angle_defect_V[iV] *= 2
-
             angle_defect_V[iV] += 2*pi
-            # print iV, angle_defect_V[iV]
 
             # Is the vertex u-strong in AD (Angle Defect) <=> is a sharp vertex ?
             if angle_defect_V[iV] > thetaD*pi/180:
@@ -470,7 +458,6 @@ class Mesh:
                     HE /= la.norm(HE)
                     cHE = max(-1, min(1, np.dot(HE, ridge_dir)))
                     OSTA[iHE] = acos(cHE)
-
                 continue
 
             iface_list = self.HE_F[iHE_list]
@@ -479,7 +466,6 @@ class Mesh:
 
             medial_quadric[:] = 0.
             for i, iface in enumerate(iface_list):
-                # medial_quadric += weights[i] * covF[iface]
                 medial_quadric += adjF_areas[i] * covF[iface]
 
             eigval, eigvec = la.eigh(medial_quadric)
@@ -561,11 +547,14 @@ class Mesh:
         for iHE in xrange(self.nhe):
             iedge = self.HE_edge[iHE]
             iV = self.HE_iV[iHE] # Incident vertex of the iHE half-edge
+
             # List of other half-edges incident to iV
             iHE_list = incident_HE_list[iV]
             edges = self.HE_edge[iHE_list] # Associated edge list
             has_sharp_edge = np.any(sharp_edge[edges])
+
             if dihedral_angle_edge[iedge] > thetaf*pi/180:
+
                 # Attached
                 if l_strong_DA_HE[iHE] or \
                     l_strong_OSTA_HE[iHE] or \
@@ -576,6 +565,7 @@ class Mesh:
                 # Strongly attached
                 if l_strong_DA_HE[iHE] and l_strong_OSTA_HE[iHE]:
                     strongly_attached_HE[iHE] = True
+
                 if sharp_edge[iedge] or \
                     sharp_corner[iV] or \
                     ambiguous_vertex[iV]:
@@ -608,11 +598,10 @@ class Mesh:
                 # Associated half-edges may be added to the ICH list
                 quasi_strong_edge[iedge] = True
 
+        # quasi-strong edges are candidate edges
         candidate_edges = list(np.where(quasi_strong_edge)[0])
         candidate_HE  = list(self.edges[candidate_edges])
         candidate_HE += list(self.HE_tHE[candidate_HE])
-
-
 
         # Building ICH (Incident Candidate Half-edge list for each vertex)
         ICH = dict()
@@ -625,11 +614,13 @@ class Mesh:
 
         # Candidate vertices are ICH.keys()...
 
-        _tmp_singleton_HE = []
-        _tmp_dangling_HE = []
-        _tmp_semi_joint = []
-        _tmp_disjoint = []
-        _tmp_multi_joint_HE = []
+        # This is for debug of the algorithm
+        if debug:
+            _tmp_singleton_HE = []
+            _tmp_dangling_HE = []
+            _tmp_semi_joint = []
+            _tmp_disjoint = []
+            _tmp_multi_joint_HE = []
 
         # Filtration procedure starts here
         end_edge_type     = ['SG', 'DG', 'SJ', 'DJ', 'MJ']
@@ -640,33 +631,31 @@ class Mesh:
             # ----------------------------
             # Collecting obscure end-edges
             # ----------------------------
-            print '\n----------------------------'
-            print 'Classifying end edges'
-            print '----------------------------'
+            # print '\n----------------------------'
+            # print 'Classifying end edges'
+            # print '----------------------------'
+
             # Those are dangling, semi-joint and disjoint
             obscure_end_HE = []
             end_HE = []
             edge_candidate_type = dict()
             for iV in ICH.keys():
                 iHE_list = ICH[iV]
-                # if iV == 1693:
-                #     print iHE_list
-                #     print self.HE_tV[iHE_list]
 
                 nb_iHE = len(ICH[iV])
                 iedge = self.HE_edge[iHE_list]
 
                 if nb_iHE == 1:
                     iHE = iHE_list[0]
-                    # print iHE, '-->', self.get_HE_vertices(iHE), ' is an singleton'
                     edge_candidate_type[self.HE_edge[iHE]] = 'SG'
-                    _tmp_singleton_HE.append(iHE)
+                    if debug:
+                        _tmp_singleton_HE.append(iHE)
                     end_HE.append(iHE)
 
                     if not sharp_edge[iedge[0]] or not sharp_corner[iV]:
                         obscure_end_HE.append(iHE)
-                        # print iHE, '-->', self.get_HE_vertices(iHE), ' is dangling'
-                        _tmp_dangling_HE.append(iHE)
+                        if debug:
+                            _tmp_dangling_HE.append(iHE)
                         edge_candidate_type[self.HE_edge[iHE]] = 'DG'
 
                 elif nb_iHE == 2:
@@ -688,11 +677,11 @@ class Mesh:
                         if nb_iHE != nb_sharp_edges:
                             obscure_end_HE.append(iHE1)
                             obscure_end_HE.append(iHE2)
-                            # print iHE1, ' and ', iHE2, ' are semi-joint'
                             edge_candidate_type[self.HE_edge[iHE1]] = 'SJ'
                             edge_candidate_type[self.HE_edge[iHE2]] = 'SJ'
-                            _tmp_semi_joint.append(iHE1)
-                            _tmp_semi_joint.append(iHE2)
+                            if debug:
+                                _tmp_semi_joint.append(iHE1)
+                                _tmp_semi_joint.append(iHE2)
                             end_HE.append(iHE1)
                             end_HE.append(iHE2)
 
@@ -700,6 +689,7 @@ class Mesh:
                     iedge_list = self.HE_edge[iHE_list]
                     nb_sharp_edges = len(sharp_edge[iedge_list])
                     dihedral_angles = dihedral_angle_edge[iedge_list]
+
                     # acute edges are not border edge that have a DA > 90°
                     acute_edge = np.logical_and(
                         np.logical_not(self.is_boundary_edge[iedge_list]),
@@ -723,43 +713,38 @@ class Mesh:
 
                         if is_disjoint:
                             obscure_end_HE.append(iHE)
-                            # print iHE, '-->', self.get_HE_vertices(iHE), ' is disjoint'
                             edge_candidate_type[self.HE_edge[iHE]] = 'DJ'
-                            _tmp_disjoint.append(iHE)
+                            if debug:
+                                _tmp_disjoint.append(iHE)
                             end_HE.append(iHE)
                         else:
-                            # print iHE, '-->', self.get_HE_vertices(iHE), ' is multi-joint'
                             edge_candidate_type[self.HE_edge[iHE]] = 'MJ'
-                            _tmp_multi_joint_HE.append(iHE)
+                            if debug:
+                                _tmp_multi_joint_HE.append(iHE)
                             is_disjoint = False
                             end_HE.append(iHE)
 
-            print "WRITING FILES"
-            self._write_HE('candidate_HE.vtp', candidate_HE)
-            self._write_HE('end_HE.vtp', end_HE)
-            self._write_HE('multi_joint.vtp', _tmp_multi_joint_HE)
-            self._write_HE('dangling.vtp', _tmp_dangling_HE)
-            self._write_HE('singleton.vtp', _tmp_singleton_HE)
-            self._write_HE('semi-joint.vtp', _tmp_semi_joint)
-            self._write_HE('disjoint.vtp', _tmp_disjoint)
+            if debug:
+                self._write_HE('candidate_HE.vtp', candidate_HE)
+                self._write_HE('end_HE.vtp', end_HE)
+                self._write_HE('multi_joint.vtp', _tmp_multi_joint_HE)
+                self._write_HE('dangling.vtp', _tmp_dangling_HE)
+                self._write_HE('singleton.vtp', _tmp_singleton_HE)
+                self._write_HE('semi-joint.vtp', _tmp_semi_joint)
+                self._write_HE('disjoint.vtp', _tmp_disjoint)
 
-            sharp_HE = self.edges[np.where(sharp_edge)[0]]
-            self._write_HE('sharp_HE.vtp', sharp_HE)
+                sharp_HE = self.edges[np.where(sharp_edge)[0]]
+                self._write_HE('sharp_HE.vtp', sharp_HE)
+                self._write_HE('obscure_end_HE.vtp', obscure_end_HE)
 
-            print 'Obscure end half-edges are: ', obscure_end_HE
             if len(obscure_end_HE) == 0:
                 break
 
-            self._write_HE('obscure_end_HE.vtp', obscure_end_HE)
-
-
-            # return
-            # A GARDER EN BACKUP CE QUI SUIT !!!
-
             # -----------------------------------------------------------
             # Traversing candidate curves starting from obscure end-edges
+            # in order to determine obscure curves and remove them from
+            # ICH list and candidate half-edges
             # -----------------------------------------------------------
-            print "\tTraversing candidate curves to determine if they are obscure"
             while len(obscure_end_HE) > 0:
                 is_curve_closed = False
                 iHE_init = obscure_end_HE.pop()
@@ -769,7 +754,6 @@ class Mesh:
 
                 curve = [iHE_init, ]
                 iHE = iHE_init
-                print iHE, '-->', self.get_HE_vertices(iHE)
 
                 while 1:
                     he_list = set(ICH[self.HE_tV[iHE]])
@@ -781,16 +765,13 @@ class Mesh:
                         iedge_end = self.HE_edge[iHE]
                         iedge_end_type = edge_candidate_type[iedge_end]
                         break
-                        # print "WARNING, we do not know how to choose !!"
 
                     iHE = next_candidate_HE[0]
 
                     curve.append(iHE)
-                    # print iHE, '-->', self.get_HE_vertices(iHE)
 
                     if iHE == iHE_init:
                         # closed curve
-                        print 'closed curve'
                         is_curve_closed = True
                         iHE_end = iHE
                         iedge_end = iedge_init
@@ -801,11 +782,10 @@ class Mesh:
                     if edge_candidate_type.has_key(iedge):
                         edge_type = edge_candidate_type[iedge]
                         if edge_type in end_edge_type:
-                            print 'Curve traversal finished with type %s'%edge_type
+                            # print 'Curve traversal finished with type %s'%edge_type
                             iHE_end = iHE
                             iedge_end = iedge
                             iedge_end_type = edge_candidate_type[iedge_init]
-                            # curve.append(iHE)
                             break
 
                 # Determining the type of the curve
@@ -817,6 +797,7 @@ class Mesh:
 
                     if ( (iedge_init_type in end_edge_type) and (iedge_end_type in end_edge_type) ) or \
                             ( iedge_init_type == 'DG' or iedge_end_type == 'DG' ):
+
                         # Counting the number of edges of the curve whose dihedral angle is greater than thetak
                         if nb_edge_DA_gt_thetak < k:
                             is_curve_obscure = True
@@ -833,8 +814,9 @@ class Mesh:
                         is_curve_obscure = False
 
                     if is_curve_obscure:
+                        # The curve is obscure
                         obscure_curve_found = True
-                        print "The curve is marked as obscure"
+
                         # Removing half-edges of the curve from the ICH connectivity table
                         for iHE in curve:
                             iV = self.HE_iV[iHE]
@@ -843,33 +825,22 @@ class Mesh:
                             ICH[tV].remove(self.HE_tHE[iHE])
                             if len(ICH[iV]) == 0:
                                 ICH.pop(iV)
-                                print 'removing %u from candidates'%iHE
                             candidate_HE.remove(iHE)
                             candidate_HE.remove(self.HE_tHE[iHE])
-                        # Attention si le HE final est dans la liste des HE obscures, il faut le supprimer !!
+
+                        # Removing also end half-edge if it is in the obscure half-edges list
                         if self.HE_tHE[iHE_end] in obscure_end_HE:
                             obscure_end_HE.remove(self.HE_tHE[iHE_end])
 
-                    else:
-                        print "This is not an obscure curve"
-                        # Non obscure curve was found
-
-
             if not obscure_curve_found:
-                print "No more obscure curves"
+                # We're done, every obscure curve has been removed
                 break
 
         # Building feature curves from ICH list, starting from each end half_edge
-        # print "Sharp corners are : ", np.where(sharp_corner)[0]
-        print "End half-edges are: ", end_HE
-        print list(self.HE_iV[end_HE])
-        # sys.exit(0)
-
         curves = []
         while len(end_HE) > 0:
             is_curve_closed = False
             iHE_init = end_HE.pop()
-            # print "Starting from %u"%iHE_init, '-->', self.get_HE_vertices(iHE_init)
 
             curve = [iHE_init, ]
             iHE = iHE_init
@@ -880,108 +851,78 @@ class Mesh:
                 # Looking for the next half-edge
                 next_candidate_HE = list(he_list - set([self.HE_tHE[iHE], ]))
                 if len(next_candidate_HE) > 1:
-                    print 'WARNING, does not know what to do'
+                    curves.append(curve)
+                    break
+
                 iHE = next_candidate_HE[0]
                 curve.append(iHE)
 
                 if iHE == iHE_init:
                     # closed curve
-                    print 'closed curve'
                     is_curve_closed = True # FIXME: utile ? non utilise par la suite... --> a retirer ?
                     # Removing the last half-edge
                     curve.pop()
                     curves.append(curve)
-                    # On en registre la courbe
                     break
 
                 iedge = self.HE_edge[iHE]
                 if edge_candidate_type.has_key(iedge):
                     edge_type = edge_candidate_type[iedge]
                     if edge_type in end_edge_type:
-                        # print 'Curve_traversal finished with type %s'%edge_type
-                        # print 'Ending at %u'%self.HE_tHE[iHE], '-->', self.get_HE_vertices(iHE)
-
-                        # end_HE.remove(self.HE_tHE[iHE])
-                        # curve_tmp = list()
-                        # curves.append(np.append(self.HE_iV[curve], self.HE_tV[iHE]))
+                        # Curve traversal is finished with an end edge
                         curves.append(curve)
                         break
 
-        # for icurve, curve in enumerate(curves):
-        #     print list(self.HE_iV[curve])
-            # print icurve, ' : ', self.HE_iV[curve[0]], ' --> ', self.HE_tV[curve[-1]]
-
-        # sys.exit(0)
-
+        # ----------------------
         # Post_processing curves
         # ----------------------
 
         # Using a flood-fill algorithm to find out surface patches
         # --------------------------------------------------------
 
+        # Here, we only use the remaining candidate half-edges list...
+        # Precedent curve traversal is not used...
+
         visited_faces_mask = np.zeros(self.nf, dtype=np.bool)
         feature_half_edges_mask = np.zeros(self.nhe, dtype=np.bool)
         feature_half_edges_mask[candidate_HE] = True
 
-        # feature_HE_to_curve = dict()
-        # for icurve, curve in enumerate(curves):
-            # visited_faces_mask[self.HE_F[curve]] = True
-            # feature_half_edges_mask[curve] = True
-            # feature_HE_to_curve.update(
-            #     zip(
-            #         curve,
-            #         [icurve for i in xrange(len(curve))]
-            #     )
-            # )
-        # print feature_HE_to_curve
-
-
-
         surfaces = []
         surface = []
-        # boundary_curves = []
 
         F_stack = []
         while 1:
             if len(F_stack) == 0: # TODO : voir si le else de while peut servir pour rerentrer dans la boucle
+
                 # Looking for a remaining unvisited face
                 unvisited_faces_ids = np.where(np.logical_not(visited_faces_mask))[0]
                 if len(surface) > 0:
                     surfaces.append(surface)
-                    # boundary_curves.append(boundary_curve)
+
                 if len(unvisited_faces_ids) == 0:
                     # We're done, every faces have been visited :)
-                    print "Every faces have been visited"
                     break
                 else:
                     F_stack = [unvisited_faces_ids[0]]
                     visited_faces_mask[F_stack[0]] = True
                     surface = [F_stack[0]]
-                    # boundary_curve = set()
-                    print 'Initializing with %u' % F_stack[0]
                     continue
 
             iface = F_stack.pop()
-            # surface.append(iface)
-
             face_he_list = self.get_face_half_edges(iface)
-
             twin_he_list = self.HE_tHE[face_he_list]
 
             # TODO: extraire ici les courbes qui sotn touchées dans un set...
             feature_half_edges_list = face_he_list[feature_half_edges_mask[face_he_list]]
-            # for iHE in feature_half_edges_list:
-            #     boundary_curve.add(feature_HE_to_curve[iHE])
 
-            # On recherche les half-edges qui ne sont pas des features et dont le twin ne correspond pas a une
-            # facette visitee
+            # Looking for half-edges that are not feature and whose twin half-edge does not
+            # own to a visited face
             propagation_half_edges = twin_he_list[np.logical_and(
                 np.logical_not(feature_half_edges_mask[face_he_list]),
                 np.logical_not(visited_faces_mask[self.HE_F[twin_he_list]])
             )]
 
             propagation_faces = list(self.HE_F[propagation_half_edges])
-            # print propagation_faces
             if len(propagation_faces) > 0:
                 surface += propagation_faces
                 F_stack += propagation_faces
@@ -991,164 +932,19 @@ class Mesh:
         for surface in surfaces:
             V, F = extract_faces(self.vertices, self.faces, surface)
             polydata = _build_vtkPolyData(V, F)
-            _tmp_viewer.add_polydata(polydata, color=Color(pick_for=polydata).get_rgb())
-        _tmp_viewer.show()
-        _tmp_viewer.finalize()
+            if debug:
+                _tmp_viewer.add_polydata(polydata, color=Color(pick_for=polydata).get_rgb())
+        if debug:
+            _tmp_viewer.show()
+            _tmp_viewer.finalize()
 
 
-        sys.exit(0)
-        # print "Surfaces :"
-        long_surface = []
-        for i, surface in enumerate(surfaces):
-            long_surface += surface
-            V, F = extract_faces(self.vertices, self.faces, long_surface)
-            write_VTP('surf%u.vtp'%i, V, F)
-
-
-        sys.exit(0)
-
-        # print boundary_curves
-        for boundary_curve in boundary_curves:
-
-            # Building a graph
-            graph = dict()
-            for icurve in boundary_curve:
-                curve = curves[icurve]
-                graph[self.HE_iV[curve[0]]] = (self.HE_tV[curve[-1]], icurve)
-            # print graph
-
-            # Using the graph to build the closed curve
-            iV, (iV2, icurve) = graph.popitem()
-            closed_curve_ids = [icurve, ]
-            while graph:
-                (iV2, icurve) = graph.pop(iV2)
-                closed_curve_ids.append(icurve)
-
-            closed_curve_vertices = []
-            for icurve in closed_curve_ids:
-                closed_curve_vertices += list(self.HE_iV[curves[icurve]])
-            closed_curve_vertices.append(closed_curve_vertices[0])
-            print closed_curve_vertices
-
-
-
-        # Building graph for linking curves (nodes are end vertices and edges are curves)
-        # curve_graph = dict()
-        # for icurve, curve in enumerate(curves):
-        #     iV1 = self.HE_iV[curve[0]]
-        #     iV2 = self.HE_tV[curve[-1]]
-        #     if not curve_graph.has_key(iV1):
-        #         curve_graph[iV1] = set()
-        #     if not curve_graph.has_key(iV2):
-        #         curve_graph[iV2] = set()
-        #
-        #     curve_graph[iV1].add(icurve)
-        #     curve_graph[iV2].add(icurve)
-        # print curve_graph
-        #
-        #
-        # # Linking boundary curves
-        # for boundary_curve in boundary_curves:
-        #     print boundary_curve
-
-
-        # print len(surfaces)
-        # # On peut créer ici une visualisation de creation du maillage
-        # surface = surfaces[0]
-        # print surface
-        # for i, iface in enumerate(surface):
-        #     V, F = extract_faces(self.vertices, self.faces, surface[:i+1])
-        #     write_VTU('SEAREV/flood_fill/SEAREV_%u.vtu'%i, V, F)
-
+        # long_surface = []
         # for i, surface in enumerate(surfaces):
-        #     V, F = extract_faces(self.vertices, self.faces, surface)
-        #     write_VTU('SEAREV/SEAREV_%u.vtu'%i, V, F)
+        #     long_surface += surface
+        #     V, F = extract_faces(self.vertices, self.faces, long_surface)
+        #     write_VTP('surf%u.vtp'%i, V, F)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        # HE_visited = np.zeros(self.nhe, dtype=np.bool)
-        # # Marking feature curves half-edges as visited
-        # for curve in curves:
-        #     HE_visited[curve] = True
-        #
-        #
-        #
-        # iHE_init = curves[0][0]
-        # F_stack = [iHE_init, ]
-        # while F_stack:
-        #     iHE = F_stack.pop()
-        #     iface = self.HE_F[iHE]
-        #     faces_list = self.get_adjacent_faces_to_face(iface)
-        #     for iadj_face in faces_list:
-        #
-        #
-        #
-        #
-        #
-        #
-        # sys.exit(0)
-        # # Building a curve graph
-        # curve_graph = dict()
-        # for icurve, curve in enumerate(curves):
-        #
-        #     # FIXME: Attention, si curve est fermée...
-        #     node1, node2 = curve[0], curve[-1]
-        #     if not curve_graph.has_key(node1):
-        #         curve_graph[node1] = set()
-        #     if not curve_graph.has_key(node2):
-        #         curve_graph[node2] = set()
-        #     curve_graph[node1].add(icurve)
-        #     curve_graph[node2].add(icurve)
-        #
-        #
-        # print curve_graph
-        # for i, curve in enumerate(curves):
-        #     print 'Curve ', i, curve[:2], ' ... ', curve[-2:]
-        #
-        # # Finding all simple cycles into the curve graph
-        # try:
-        #     import networkx as nx
-        #     nx_found = True
-        # except:
-        #     print "Generation of closed curves froom features requires the networkx module that has not been found"
-        #     nx_found = False
-        #
-        # if nx_found:
-        #     curve_graph = nx.Graph()
-        #     for curve in curves:
-        #         curve_graph.add_edge(curve[0], curve[-1])
-        #     # nx.draw(curve_graph)
-        #     curve_graph = curve_graph.to_directed()
-        #     for cycle in nx.simple_cycles(curve_graph):
-        #         print cycle
-        # # nb_curve = len(curves)
-        # # end_vertices = np.array([set() for i in xrange(nb_curve)])
-        # # for i, curve in enumerate(curves):
-        # #     end_vertices[i].update([curve[0], curve[-1]])
-        # # print np.unique(end_vertices)
-
-
-
-
-
-
-        sys.exit(0)
         return 1
 
     def _write_HE(self, filename, iHE_list, color=None):
