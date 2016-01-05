@@ -13,3 +13,6 @@ syntax: glob
 tests/**
 .idea/**
 meshmagick.egg*
+doc/**
+dist/**
+build/**
