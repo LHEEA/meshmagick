@@ -4221,10 +4221,13 @@ def generate_lid(V, F, max_area=None, verbose=False):
         mesh_points_3D = np.zeros((nmp, 3))
         mesh_points_3D[:, :-1] = mesh_points
 
+        # show(V, F)
+        # return
+
         # Adding the lid to the initial mesh
         V = np.append(V, mesh_points_3D, axis=0)
         nv += nmp
-        F = np.append(F, mesh_quad, axis=0) + 1
+        F = np.append(F, mesh_quad, axis=0)
         nf += nmt
 
     # Merging duplicates
@@ -4817,50 +4820,7 @@ def main():
             else:
                 raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
 
-    # Clipping the mesh
-    if args.clip is not None:
-        clipping_plane = Plane()
-        nb_clip = len(args.clip)
 
-        if verbose:
-            if nb_clip == 1:
-                verb = 'plane'
-            else:
-                verb = 'planes'
-            print '\nMesh is being clipped by %u %s' % (nb_clip, verb)
-
-        for plane in args.clip:
-            if len(plane) == 0:
-                # Default clipping plane Oxy
-                clipping_plane.normal = np.array([0., 0., 1.], dtype=np.float)
-                clipping_plane.c = 0.
-            elif len(plane) == 1:
-                try:
-                    # Plane ID
-                    plane_id = int(plane[0])
-                    if plane_id < nb_planes:
-                        clipping_plane = planes[plane_id]
-                    else:
-                        raise AssertionError, 'Plane with ID %u has not been defined with option --plane' % plane_id
-                except:
-                    # A key string
-                    if plane_str_list.has_key(plane[0]):
-                        clipping_plane.normal = np.asarray(plane_str_list[plane[0]], dtype=np.float)
-                        clipping_plane.c = 0.
-                    else:
-                        raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
-            elif len(plane) == 4:
-                # Plane defined by a normal and a scalar
-                try:
-                    clipping_plane.normal = np.array(map(float, plane[:3]), dtype=np.float)
-                    clipping_plane.c = float(plane[3])
-                except:
-                    raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
-            else:
-                raise AssertionError, 'Unknown mean to define a plane for clipping'
-            V, F = clip_by_plane(V, F, clipping_plane)
-            if verbose:
-                print '\t-> Done.'
 
     # Symmetrizing the mesh
     if args.symmetrize is not None:
@@ -4956,21 +4916,21 @@ def main():
     if args.rotatex is not None:
         if verbose:
             print '\nOPERATION: Rotation by %f around X (Roll)' % args.rotatex
-        V = rotate_1D(V, args.rotatex[0]*math.pi/180., 'x')
+        V = rotate_1D(V, args.rotatex*math.pi/180., 'x')
         if verbose:
             print '\t-> Done.'
 
     if args.rotatey is not None:
         if verbose:
             print '\nOPERATION: Rotation by %f around Y (Pitch)' % args.rotatey
-        V = rotate_1D(V, args.rotatey[0]*math.pi/180., 'y')
+        V = rotate_1D(V, args.rotatey*math.pi/180., 'y')
         if verbose:
             print '\t-> Done.'
 
     if args.rotatez is not None:
         if verbose:
             print '\nOPERATION: Rotation by %f around Z (Yaw)' % args.rotatez
-        V = rotate_1D(V, args.rotatez[0]*math.pi/180., 'z')
+        V = rotate_1D(V, args.rotatez*math.pi/180., 'z')
         if verbose:
             print '\t-> Done.'
 
@@ -4991,6 +4951,50 @@ def main():
     if args.triangulate_quadrangles:
         F = triangulate_quadrangles(F, verbose=verbose)
 
+    # Clipping the mesh
+    if args.clip is not None:
+        clipping_plane = Plane()
+        nb_clip = len(args.clip)
+
+        if verbose:
+            if nb_clip == 1:
+                verb = 'plane'
+            else:
+                verb = 'planes'
+            print '\nMesh is being clipped by %u %s' % (nb_clip, verb)
+
+        for plane in args.clip:
+            if len(plane) == 0:
+                # Default clipping plane Oxy
+                clipping_plane.normal = np.array([0., 0., 1.], dtype=np.float)
+                clipping_plane.c = 0.
+            elif len(plane) == 1:
+                try:
+                    # Plane ID
+                    plane_id = int(plane[0])
+                    if plane_id < nb_planes:
+                        clipping_plane = planes[plane_id]
+                    else:
+                        raise AssertionError, 'Plane with ID %u has not been defined with option --plane' % plane_id
+                except:
+                    # A key string
+                    if plane_str_list.has_key(plane[0]):
+                        clipping_plane.normal = np.asarray(plane_str_list[plane[0]], dtype=np.float)
+                        clipping_plane.c = 0.
+                    else:
+                        raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
+            elif len(plane) == 4:
+                # Plane defined by a normal and a scalar
+                try:
+                    clipping_plane.normal = np.array(map(float, plane[:3]), dtype=np.float)
+                    clipping_plane.c = float(plane[3])
+                except:
+                    raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
+            else:
+                raise AssertionError, 'Unknown mean to define a plane for clipping'
+            V, F = clip_by_plane(V, F, clipping_plane)
+            if verbose:
+                print '\t-> Done.'
 
     # Compute principal inertia parameters
     if args.inertias:
