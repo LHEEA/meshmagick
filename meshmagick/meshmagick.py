@@ -3657,6 +3657,9 @@ def write_MAR(filename, V, F):
 
     ofile.close()
 
+    print 'WARNING: if you described only one part of the mesh using symmetry for Nemoh, you may manually modify the ' \
+          'file header accordingly'
+
     return 1
 
 def write_RAD(filename, V, F):
