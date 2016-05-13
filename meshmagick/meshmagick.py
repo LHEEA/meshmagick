@@ -2313,6 +2313,19 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
 
     return V, F
 
+def concatenate(V1, F1, V2, F2):
+    """
+    Concatenates two meshes
+
+    """
+    nv1 = V1.shape[0]
+    nv2 = V2.shape[0]
+
+    V = np.concatenate((V1, V2), axis=0)
+    F = np.concatenate((F1, F2+nv1), axis=0)
+
+    return V, F
+
 
 # =======================================================================
 # MESH LOADERS
