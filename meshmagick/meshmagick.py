@@ -5081,8 +5081,9 @@ def main():
         if args.zcog is None:
             raise ValueError, 'The hydrostatics option shall be used along with the --zcog option for the hydrostatic stiffness matrix to be computed'
 
-        hs.compute_hydrostatics(V, F, args.zcog, verbose=verbose)
-
+        outputHS = hs.compute_hydrostatics(V, F, args.zcog, verbose=verbose)
+        V = outputHS['Vc']
+        F = outputHS['Fc']
 
     # if args.hydrostatics:
     #     try:

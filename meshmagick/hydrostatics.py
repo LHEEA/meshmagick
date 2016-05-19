@@ -816,5 +816,7 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     output['r'] = r
     output['R'] = R
     output['KH'] = KH
+    output['Vc'] = Vc
+    output['Fc'] = Fc
     return output
 
