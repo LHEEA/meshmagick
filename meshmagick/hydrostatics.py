@@ -698,3 +698,123 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
 
         raise NotImplementedError
 
+
+
+
+
+
+
+
+
+# Implementation of the formulae based on integrations on the mesh faces and not only on the intersections
+# Taken from Delhommeau and for validation purposes
+def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., verbose=False):
+    # Decoupe du maillage par un plan
+    plane = mm.Plane() # Plan Oxy
+    Vc, Fc, clip_infos = mm.clip_by_plane(Vw, F, plane, infos=True)
+
+    nv = Vc.shape[0]
+    nf = Fc.shape[0]
+
+    # Calculs des pptes des facettes
+    areas, normals, centers = mm.get_all_faces_properties(Vc, Fc)
+
+    # Calcul surface mouillee
+    Sw = areas.sum()
+
+    # Calcul volume de carene
+    Vw = areas * normals[:, 2] * centers[:, 2]
+    Vw = Vw.sum()
+
+    # Calcul du centre de carene
+    xb = areas * normals[:, 1] * centers[:, 1] * centers[:, 0]
+    yb = areas * normals[:, 2] * centers[:, 2] * centers[:, 1]
+    zb = areas * normals[:, 1] * centers[:, 1] * centers[:, 2]
+    xb = xb.sum() / Vw
+    yb = yb.sum() / Vw
+    zb = zb.sum() / Vw
+
+    # Surface de flottaison
+    polygon = clip_infos['PolygonsNewID'][0]
+    polyverts = Vc [polygon]
+    x = polyverts[:,0]
+    y = polyverts[:, 1]
+    xd = np.roll(x, 1)
+    yd = np.roll(y, 1)
+    Sf = (y+yd) * (xd-x)
+    Sf = Sf.sum() * 0.5
+
+    x0 = 0.
+    y0 = 0.
+    S34 = 0.
+    S35 = 0.
+    S45 = 0.
+    r = 0.
+    R = 0.
+    for xi, yi, xii, yii in zip(xd[1:], yd[1:], x[1:], y[1:]):
+        xiimxi = xii-xi
+        if math.fabs(xiimxi) > 1e-3:
+            a = (yii-yi) / xiimxi
+        else:
+            continue
+        b = (yi-y0) - a*(xi-x0)
+        Ui = xi-x0
+        Vi = xii-x0
+        X1 = Vi-Ui
+        X2 = Vi**2 - Ui**2
+        X3 = Vi**3 - Ui**3
+        X4 = Vi**4 - Ui**4
+
+        S34 += a**2*X3/6 + 2*a*b*X2/4 + b**2*X1/2
+        S35 += a*X3/3 + b*X2/2
+        S45 += a**2*X4/8 - 2*a*b*X3/6 - b**2*X2/4
+
+        R += a*X4/4 + b*X3/3
+        r += a**3*X4/12 + 3*a**2*b*X3/9 + 3*a*b**2*X2/6 + b**3*X1/3
+
+    rhog = rho_water * grav
+    S34 *= rhog
+    S35 *= -rhog
+    S45 *= -rhog
+    R /= Vw
+    r /= r
+    S33 = rhog * Sf
+    S44 = rhog * Vw * (r + (zb - zg))
+    S55 = rhog * Vw * (R + (zb - zg))
+
+    KH = np.zeros((6, 6))
+    KH[2, 2] = S33
+    KH[3, 3] = S44
+    KH[4, 4] = S55
+    KH[2, 3] = S34
+    KH[3, 2] = S34
+    KH[2, 4] = S35
+    KH[4, 2] = S35
+    KH[3, 4] = S45
+    KH[4, 3] = S45
+
+    disp = rho_water * Vw * 1e-3
+
+    if verbose:
+        print '\nWet surface = %f (m**2)\n' % Sw
+        print 'Immersed volume = %f (m**3)\n' % Vw
+        print 'Displacement = %f (tons)\n' % disp
+        print 'Buoyancy center (m): xb=%f, yb=%f, zb=%f\n' % (xb, yb, zb)
+        print 'Flottation surface = %f (m**2)\n' % Sf
+        print 'Transverse metacentric height = %f (m)\n' % r
+        print 'Longitudinal metacentric height = %f (m)\n' % R
+        print 'Hydrostatic stiffness matrix:'
+        for line in KH:
+            print '%.4E\t%.4E\t%.4E\t%.4E\t%.4E\t%.4E' % (line[0], line[1], line[2], line[3], line[4], line[5])
+
+    output = dict()
+    output['Sw'] = Sw
+    output['Vw'] = Vw
+    output['disp'] = disp
+    output['B'] = np.array([xb, yb, zb], dtype=np.float)
+    output['Sf'] = Sf
+    output['r'] = r
+    output['R'] = R
+    output['KH'] = KH
+    return output
+

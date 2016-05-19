@@ -4629,64 +4629,69 @@ def main():
                         help="""Compute hydrostatics. When used with the --verbose option, hydrostatic
                         data will be shown on the command line.""") # TODO : completer l'aide avec les options
 
-    parser.add_argument('--mass', default=None, type=float,
-                        help="""Specifies the mass of the device for hydrostatics calculations.
-                        When used, an hydrostatic equilibrium is resolved. Depending on the join
-                        use of --mass, --cog and --zcog options, several behavior may be obtained.
+    # parser.add_argument('--mass', default=None, type=float,
+    #                     help="""Specifies the mass of the device for hydrostatics calculations.
+    #                     When used, an hydrostatic equilibrium is resolved. Depending on the join
+    #                     use of --mass, --cog and --zcog options, several behavior may be obtained.
+    #
+    #                     1) --mass is given a value:
+    #
+    #                         This options trigs an equilibrium resolution.
+    #
+    #                         a) No options --cog or --zcog are given:
+    #                             Equilibrium is searched in z only, no hydrostatic stiffness
+    #                             matrix is computed but the stiffness in heave.
+    #                         b) --zcog is given alone:
+    #                             Equilibrium is searched in z only, the hydrostatics stiffness
+    #                             matrix is given.
+    #                         c) --cog is given alone:
+    #                             Equilibrium is searched in 6 dof and the hydrostatics stiffness
+    #                             matrix is given
+    #
+    #                         Note that if both options --cog and --zcog are given, --zcog will
+    #                         be ignored but taken from --cog and the result will be the same as c).
+    #
+    #                     2) --mass is used:
+    #
+    #                         No equilibrium resolution is performed if no mass is specified.
+    #                         Mesh position is considered as being the equilibrium position and
+    #                         hydrostatics data are generated as-is. Mass of the device is then
+    #                         an output and is considered to be the computed displacement * rho_water.
+    #
+    #                         a) No options --cog or --zcog are given:
+    #                             Only the stiffness in heave can be calculated
+    #                         b) --zcog is given alone:
+    #                             The full stiffness matrix is calculated and the estimated cog
+    #                             position is given.
+    #                         c) --cog is given alone:
+    #                             Idem b) but the residual may be not identically 0. as the mesh may
+    #                             not be at equilibrium.
+    #
+    #                         Note that if both options --cog and --zcog are given, --zcog will
+    #                         be ignored but taken from --cog and the result will be the same as c).
+    #                     """)
 
-                        1) --mass is given a value:
-
-                            This options trigs an equilibrium resolution.
-
-                            a) No options --cog or --zcog are given:
-                                Equilibrium is searched in z only, no hydrostatic stiffness
-                                matrix is computed but the stiffness in heave.
-                            b) --zcog is given alone:
-                                Equilibrium is searched in z only, the hydrostatics stiffness
-                                matrix is given.
-                            c) --cog is given alone:
-                                Equilibrium is searched in 6 dof and the hydrostatics stiffness
-                                matrix is given
-
-                            Note that if both options --cog and --zcog are given, --zcog will
-                            be ignored but taken from --cog and the result will be the same as c).
-
-                        2) --mass is used:
-
-                            No equilibrium resolution is performed if no mass is specified.
-                            Mesh position is considered as being the equilibrium position and
-                            hydrostatics data are generated as-is. Mass of the device is then
-                            an output and is considered to be the computed displacement * rho_water.
-
-                            a) No options --cog or --zcog are given:
-                                Only the stiffness in heave can be calculated
-                            b) --zcog is given alone:
-                                The full stiffness matrix is calculated and the estimated cog
-                                position is given.
-                            c) --cog is given alone:
-                                Idem b) but the residual may be not identically 0. as the mesh may
-                                not be at equilibrium.
-
-                            Note that if both options --cog and --zcog are given, --zcog will
-                            be ignored but taken from --cog and the result will be the same as c).
-                        """)
-
-    parser.add_argument('--cog', nargs=3, default=None, type=float,
-                        help="""Specifies the center of gravity to be used along with the
-                        --hydrostatics option. See --mass for more information. See also the
-                        --inertias option for side effects.
-                        """)
+    # parser.add_argument('--cog', nargs=3, default=None, type=float,
+    #                     help="""Specifies the center of gravity to be used along with the
+    #                     --hydrostatics option. See --mass for more information. See also the
+    #                     --inertias option for side effects.
+    #                     """)
 
     parser.add_argument('--zcog', default=None, type=float,
                         help="""Specifies the z position of the center of gravity to be used along
-                        the --hydrostatics option. See --mass for more information. See also the
-                        --inertias option for side effects.
+                        the --hydrostatics option.
                         """)
 
-    parser.add_argument('--anim', action='store_true',
-                        help="""Generates animation files for paraview visualization of the equilibrium
-                        resolution.
-                        """)
+    # parser.add_argument('--zcog', default=None, type=float,
+    #                     help="""Specifies the z position of the center of gravity to be used along
+    #                     the --hydrostatics option. See --mass for more information. See also the
+    #                     --inertias option for side effects.
+    #                     """)
+
+    # parser.add_argument('--anim', action='store_true',
+    #                     help="""Generates animation files for paraview visualization of the equilibrium
+    #                     resolution.
+    #                     """)
 
     parser.add_argument('--rho-water', default=1023., type=float,
                         help="""Specifies the density of salt water. Default is 1023 kg/m**3.
@@ -4697,43 +4702,43 @@ def main():
                         Default is 9.81 m/s**2.
                         """)
 
-    parser.add_argument('--rho-medium', default=7500., type=float,
-                        help="""Specified the density of the medium used for the device. Default
-                        is steel and is 7500 kg/m**3.
-                        """)
+    # parser.add_argument('--rho-medium', default=7500., type=float,
+    #                     help="""Specified the density of the medium used for the device. Default
+    #                     is steel and is 7500 kg/m**3.
+    #                     """)
 
-    parser.add_argument('--thickness', default=0.01, type=float,
-                        help="""Specifies the thickness of the hull. This option is only used if
-                        both the --inertias and --hull are used. Default is 0.01 m.
-                        """)
+    # parser.add_argument('--thickness', default=0.01, type=float,
+    #                     help="""Specifies the thickness of the hull. This option is only used if
+    #                     both the --inertias and --hull are used. Default is 0.01 m.
+    #                     """)
 
-    parser.add_argument('-gz', '--gz-curves', nargs='?', const=5., default=None, type=float,
-                        help=""" [EXPERIMENTAL] Computes the GZ curves with angle spacing given as argument.
-                        Default is 5 degrees (if no argument given)
-                        """)
+    # parser.add_argument('-gz', '--gz-curves', nargs='?', const=5., default=None, type=float,
+    #                     help=""" [EXPERIMENTAL] Computes the GZ curves with angle spacing given as argument.
+    #                     Default is 5 degrees (if no argument given)
+    #                     """)
 
     # TODO : permettre de rajouter des ballasts
-    parser.add_argument('--inertias', action='store_true', # TODO : specifier un point de calcul
-                        help="""Compute the principal inertia properties of the mesh. By default,
-                        the device is considered to be a hull. Then the --thickness and --rho-medium
-                        options may be used to tune the properties.
-                        If the --no-hull option is used, then the device will be considered to be
-                        filled with the medium of density rho-medium. Be carefull that the default
-                        medium is steel so that you may get a really heavy device. Please consider
-                        to specify an other density with the --rho-medium option.
+    # parser.add_argument('--inertias', action='store_true', # TODO : specifier un point de calcul
+    #                     help="""Compute the principal inertia properties of the mesh. By default,
+    #                     the device is considered to be a hull. Then the --thickness and --rho-medium
+    #                     options may be used to tune the properties.
+    #                     If the --no-hull option is used, then the device will be considered to be
+    #                     filled with the medium of density rho-medium. Be carefull that the default
+    #                     medium is steel so that you may get a really heavy device. Please consider
+    #                     to specify an other density with the --rho-medium option.
+    #
+    #                     Note that the inertia matrix is expressed at center of gravity
+    #                     location.
+    #
+    #                     A side effect of this option is that for hydrostatics computations, the values
+    #                     computed by this option will be used instead of other options --mass and --cog
+    #                     that will be overriden. Be carefull that the device may need some ballast.
+    #                     """)
 
-                        Note that the inertia matrix is expressed at center of gravity
-                        location.
-
-                        A side effect of this option is that for hydrostatics computations, the values
-                        computed by this option will be used instead of other options --mass and --cog
-                        that will be overriden. Be carefull that the device may need some ballast.
-                        """)
-
-    parser.add_argument('--no-hull', action='store_true',
-                        help="""Specifies that the device should be considered as being filled with
-                        the material of density rho-medium. It is only used by the --inertias option.
-                        """)
+    # parser.add_argument('--no-hull', action='store_true',
+    #                     help="""Specifies that the device should be considered as being filled with
+    #                     the material of density rho-medium. It is only used by the --inertias option.
+    #                     """)
 
     parser.add_argument('--lid', nargs='?', const=1., default=None, type=float,
                         help="""Generate a triangle mesh lid on the mesh clipped by the Oxy plane.
@@ -5013,85 +5018,98 @@ def main():
                 print '\t-> Done.'
 
     # Compute principal inertia parameters
-    if args.inertias:
-        # TODO : completer l'aide avec la logique de cette fonction !!
-        if verbose:
-            print '\n------------------'
-            print 'Computing inertias'
-            print '------------------'
-        if args.no_hull:
-            hull = False
-        else:
-            hull = True
+    # if args.inertias:
+    #     # TODO : completer l'aide avec la logique de cette fonction !!
+    #     if verbose:
+    #         print '\n------------------'
+    #         print 'Computing inertias'
+    #         print '------------------'
+    #     if args.no_hull:
+    #         hull = False
+    #     else:
+    #         hull = True
+    #
+    #     mass, cog, inertia_matrix = get_inertial_properties(V, F,
+    #                                     rho=args.rho_medium,
+    #                                     mass=args.mass,
+    #                                     thickness=args.thickness,
+    #                                     shell=hull,
+    #                                     verbose=verbose)
+    #     # Replacing values in command line arguments in the eventuality of hydrostatics computations
+    #     args.mass = mass
+    #     args.cog = cog
+    #     if verbose:
+    #         print '\t-> Done.'
 
-        mass, cog, inertia_matrix = get_inertial_properties(V, F,
-                                        rho=args.rho_medium,
-                                        mass=args.mass,
-                                        thickness=args.thickness,
-                                        shell=hull,
-                                        verbose=verbose)
-        # Replacing values in command line arguments in the eventuality of hydrostatics computations
-        args.mass = mass
-        args.cog = cog
-        if verbose:
-            print '\t-> Done.'
-
-    if args.gz_curves is not None:
-        if verbose:
-            print '\n-------------------'
-            print 'Computing GZ curves'
-            print '-------------------'
-
-        spacing = args.gz_curves
-        try:
-            import hydrostatics as hs
-        except:
-            raise ImportError, '--gz-curves option relies on the hydrostatics module that can not be found'
-
-        # if args.hydrostatics:
-        #     raise RuntimeError, """GZ computations can not be performed at the same time as a hydrostatics equilibrium
-        #                            resolution as it needs a full mesh to perform clipping at different angles"""
-
-        if args.zcog is None:
-            raise RuntimeError, 'For the GZ computations, the --zcog option is mandatory'
-
-        hsMesh = hs.HydrostaticsMesh(V, F, rho_water=args.rho_water, g=args.grav)
-        hs.get_GZ_curves(hsMesh, args.zcog,
-                         spacing=spacing,
-                         rho_water=args.rho_water,
-                         g=args.grav,
-                         verbose=verbose)
-        if verbose:
-            print '\t-> Done.'
+    # if args.gz_curves is not None:
+    #     if verbose:
+    #         print '\n-------------------'
+    #         print 'Computing GZ curves'
+    #         print '-------------------'
+    #
+    #     spacing = args.gz_curves
+    #     try:
+    #         import hydrostatics as hs
+    #     except:
+    #         raise ImportError, '--gz-curves option relies on the hydrostatics module that can not be found'
+    #
+    #     # if args.hydrostatics:
+    #     #     raise RuntimeError, """GZ computations can not be performed at the same time as a hydrostatics equilibrium
+    #     #                            resolution as it needs a full mesh to perform clipping at different angles"""
+    #
+    #     if args.zcog is None:
+    #         raise RuntimeError, 'For the GZ computations, the --zcog option is mandatory'
+    #
+    #     hsMesh = hs.HydrostaticsMesh(V, F, rho_water=args.rho_water, g=args.grav)
+    #     hs.get_GZ_curves(hsMesh, args.zcog,
+    #                      spacing=spacing,
+    #                      rho_water=args.rho_water,
+    #                      g=args.grav,
+    #                      verbose=verbose)
+    #     if verbose:
+    #         print '\t-> Done.'
 
 
     # Compute hydrostatics
+    # ESSAI
     if args.hydrostatics:
         try:
             import hydrostatics as hs
         except:
             raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
 
-        if args.anim:
-            anim=True
-        else:
-            anim=False
+        if args.zcog is None:
+            raise ValueError, 'The hydrostatics option shall be used along with the --zcog option for the hydrostatic stiffness matrix to be computed'
 
-        if args.cog is None:
-            cog = None
-        else:
-            cog = np.asarray(args.cog, dtype=np.float)
+        hs.compute_hydrostatics(V, F, args.zcog, verbose=verbose)
 
-        # TODO : Revoir la structure afin de ne jouer que sur l'objet !!
-        hsMesh = hs.HydrostaticsMesh(V, F, rho_water=args.rho_water, g=args.grav)
-        V, F = hs.get_hydrostatics(hsMesh,
-                                   mass=args.mass,
-                                   zcog=args.zcog,
-                                   cog=cog,
-                                   rho_water=args.rho_water,
-                                   g=args.grav,
-                                   anim=anim,
-                                   verbose=verbose)[:2]
+
+    # if args.hydrostatics:
+    #     try:
+    #         import hydrostatics as hs
+    #     except:
+    #         raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
+    #
+    #     if args.anim:
+    #         anim=True
+    #     else:
+    #         anim=False
+    #
+    #     if args.cog is None:
+    #         cog = None
+    #     else:
+    #         cog = np.asarray(args.cog, dtype=np.float)
+    #
+    #     # TODO : Revoir la structure afin de ne jouer que sur l'objet !!
+    #     hsMesh = hs.HydrostaticsMesh(V, F, rho_water=args.rho_water, g=args.grav)
+    #     V, F = hs.get_hydrostatics(hsMesh,
+    #                                mass=args.mass,
+    #                                zcog=args.zcog,
+    #                                cog=cog,
+    #                                rho_water=args.rho_water,
+    #                                g=args.grav,
+    #                                anim=anim,
+    #                                verbose=verbose)[:2]
 
 
     # Lid generation on a clipped mesh
@@ -5100,6 +5118,7 @@ def main():
 
     if args.fill_holes:
         V, F = fill_holes(V, F, verbose=verbose)
+
 
     # WARNING : No more mesh modification should be released from this point until the end of the main
 
