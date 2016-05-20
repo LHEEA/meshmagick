@@ -744,43 +744,49 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     Sf = (y+yd) * (xd-x)
     Sf = Sf.sum() * 0.5
 
-    x0 = 0.
-    y0 = 0.
-    S34 = 0.
-    S35 = 0.
-    S45 = 0.
-    r = 0.
-    R = 0.
+    sigma0 = 0.
+    sigma1 = 0.
+    sigma2 = 0.
+    sigma3 = 0.
+    sigma4 = 0.
+    sigma5 = 0.
+    # TODO : changer la boucle --> calcul de Sf dedans... sigma0
     for xi, yi, xii, yii in zip(xd[1:], yd[1:], x[1:], y[1:]):
-        xiimxi = xii-xi
-        if math.fabs(xiimxi) > 1e-3:
-            a = (yii-yi) / xiimxi
-        else:
-            continue
-        b = (yi-y0) - a*(xi-x0)
-        Ui = xi-x0
-        Vi = xii-x0
-        X1 = Vi-Ui
-        X2 = Vi**2 - Ui**2
-        X3 = Vi**3 - Ui**3
-        X4 = Vi**4 - Ui**4
 
-        S34 += a**2*X3/6 + 2*a*b*X2/4 + b**2*X1/2
-        S35 += a*X3/3 + b*X2/2
-        S45 += a**2*X4/8 - 2*a*b*X3/6 - b**2*X2/4
+        dx = xii - xi
+        dy = yii - yi
+        px = xi + xii
+        py = yi + yii
+        a = xi*xi + xii*xii
 
-        R += a*X4/4 + b*X3/3
-        r += a**3*X4/12 + 3*a**2*b*X3/9 + 3*a*b**2*X2/6 + b**3*X1/3
+        sigma0 += dy*px
+        sigma1 += dy * (px*px-xi*xii)
+        sigma2 += dx * (py*py-yi*yii)
+        sigma3 += dy * ( py*a + 2*px*(xi*yi + xii*yii) )
+        sigma4 += dy * a * px
+        sigma5 += dx * (yi*yi + yii*yii) * py
+
+    sigma0 /= 2
+    sigma1 /= 6
+    sigma2 /= -6
+    sigma3 /= 24
+    sigma4 /= 12
+    sigma5 /= -12
+
+    Sf = sigma0
 
     rhog = rho_water * grav
-    S34 *= rhog
-    S35 *= -rhog
-    S45 *= -rhog
-    R /= Vw
-    r /= r
+
     S33 = rhog * Sf
-    S44 = rhog * Vw * (r + (zb - zg))
-    S55 = rhog * Vw * (R + (zb - zg))
+    S34 = rhog * sigma2
+    S35 = -rhog * sigma1
+    S45 = -rhog * sigma3
+    # Metacentric heights (Bouguer formulae)
+    r = sigma5 / Vw # Around Ox
+    R = sigma4 / Vw # Around Oy
+
+    S44 = rhog*Vw * (r + zb-zg)
+    S55 = rhog*Vw * (R + zb-zg)
 
     KH = np.zeros((6, 6))
     KH[2, 2] = S33
@@ -793,7 +799,10 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     KH[3, 4] = S45
     KH[4, 3] = S45
 
-    disp = rho_water * Vw * 1e-3
+    # Zeroing tiny coefficients
+    KH[np.fabs(KH) < 1e-4] = 0.
+
+    disp = rho_water * Vw * 1e-3 # in tons
 
     if verbose:
         print '\nWet surface = %f (m**2)\n' % Sw
