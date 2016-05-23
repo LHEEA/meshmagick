@@ -723,8 +723,8 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     Sw = areas.sum()
 
     # Calcul volume de carene
-    Vw = areas * normals[:, 2] * centers[:, 2]
-    Vw = Vw.sum()
+    # TODO: verifier que cette formule donne de bons resultats !! --> semble etre une formule approchee
+    Vw = (areas*(normals*centers).sum(axis=1)).sum()/3.
 
     # Calcul du centre de carene
     xb = areas * normals[:, 1] * centers[:, 1] * centers[:, 0]
@@ -734,37 +734,39 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     yb = yb.sum() / Vw
     zb = zb.sum() / Vw
 
-    # Surface de flottaison
-    polygon = clip_infos['PolygonsNewID'][0]
-    polyverts = Vc [polygon]
-    x = polyverts[:,0]
-    y = polyverts[:, 1]
-    xd = np.roll(x, 1)
-    yd = np.roll(y, 1)
-    Sf = (y+yd) * (xd-x)
-    Sf = Sf.sum() * 0.5
+    # Computing quantities from intersection polygons
+    sigma0 = 0. # \int_{Sf} dS = Sf
+    sigma1 = 0. # \int_{Sf} x dS
+    sigma2 = 0. # \int_{Sf} y dS
+    sigma3 = 0. # \int_{Sf} xy dS
+    sigma4 = 0. # \int_{Sf} x^2 dS
+    sigma5 = 0. # \int_{Sf} y^2 dS
 
-    sigma0 = 0.
-    sigma1 = 0.
-    sigma2 = 0.
-    sigma3 = 0.
-    sigma4 = 0.
-    sigma5 = 0.
-    # TODO : changer la boucle --> calcul de Sf dedans... sigma0
-    for xi, yi, xii, yii in zip(xd[1:], yd[1:], x[1:], y[1:]):
+    polygons = clip_infos['PolygonsNewID']
+    for polygon in polygons:
+        polyverts = Vc [polygon]
 
-        dx = xii - xi
-        dy = yii - yi
-        px = xi + xii
-        py = yi + yii
-        a = xi*xi + xii*xii
+        # TODO: voir si on conserve ce test...
+        if np.any(np.fabs(polyverts[:, 2]) > 1e-6):
+            print 'The intersection polygon is not on the plane z=0'
 
-        sigma0 += dy*px
-        sigma1 += dy * (px*px-xi*xii)
-        sigma2 += dx * (py*py-yi*yii)
-        sigma3 += dy * ( py*a + 2*px*(xi*yi + xii*yii) )
-        sigma4 += dy * a * px
-        sigma5 += dx * (yi*yi + yii*yii) * py
+        xi, yi = polyverts[0, :2]
+        for (xii, yii) in polyverts[1:, :2]:
+
+            dx = xii - xi
+            dy = yii - yi
+            px = xi + xii
+            py = yi + yii
+            a = xi*xi + xii*xii
+
+            sigma0 += dy*px
+            sigma1 += dy * (px*px-xi*xii)
+            sigma2 += dx * (py*py-yi*yii)
+            sigma3 += dy * ( py*a + 2*px*(xi*yi + xii*yii) )
+            sigma4 += dy * a * px
+            sigma5 += dx * (yi*yi + yii*yii) * py
+
+            xi, yi = xii, yii
 
     sigma0 /= 2
     sigma1 /= 6
@@ -773,10 +775,12 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     sigma4 /= 12
     sigma5 /= -12
 
+    # Flotation surface
     Sf = sigma0
 
     rhog = rho_water * grav
 
+    # Stiffness matrix coefficients that do not depend on the position of the gravity center
     S33 = rhog * Sf
     S34 = rhog * sigma2
     S35 = -rhog * sigma1
@@ -787,13 +791,15 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     R = sigma4 / Vw # Around Oy
 
     # Metacentric height
-    a = zg - zb
+    a = zg - zb # BG
     GMx = r - a
     GMy = R - a
 
+    # Stiffness matrix coefficients that depend on the position of the gravity center
     S44 = rhog*Vw * GMx
     S55 = rhog*Vw * GMy
 
+    # Assembling matrix
     KH = np.zeros((6, 6))
     KH[2, 2] = S33
     KH[3, 3] = S44
@@ -812,6 +818,7 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     xF = -S35/S33
     yF =  S34/S33
 
+    #Displacement
     disp = rho_water * Vw * 1e-3 # in tons
 
     if verbose:
@@ -847,6 +854,7 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
         for line in KH:
             print '%.4E\t%.4E\t%.4E\t%.4E\t%.4E\t%.4E' % (line[0], line[1], line[2], line[3], line[4], line[5])
 
+    # Output data
     output = dict()
     output['Sw'] = Sw
     output['Vw'] = Vw
