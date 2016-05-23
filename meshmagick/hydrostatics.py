@@ -711,7 +711,10 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
 def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., verbose=False):
     # Decoupe du maillage par un plan
     plane = mm.Plane() # Plan Oxy
-    Vc, Fc, clip_infos = mm.clip_by_plane(Vw, F, plane, infos=True)
+    try:
+        Vc, Fc, clip_infos = mm.clip_by_plane(Vw, F, plane, infos=True)
+    except:
+        raise Exception, 'Hydrostatic module only work with watertight hull. Please consider using the --sym option.'
 
     nv = Vc.shape[0]
     nf = Fc.shape[0]
@@ -726,13 +729,10 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     # TODO: verifier que cette formule donne de bons resultats !! --> semble etre une formule approchee
     Vw = (areas*(normals*centers).sum(axis=1)).sum()/3.
 
-    # Calcul du centre de carene
-    xb = areas * normals[:, 1] * centers[:, 1] * centers[:, 0]
-    yb = areas * normals[:, 2] * centers[:, 2] * centers[:, 1]
-    zb = areas * normals[:, 1] * centers[:, 1] * centers[:, 2]
-    xb = xb.sum() / Vw
-    yb = yb.sum() / Vw
-    zb = zb.sum() / Vw
+    # Buoyancy center calculation
+    xb = (areas * normals[:, 1] * centers[:, 1] * centers[:, 0]).sum() / Vw
+    yb = (areas * normals[:, 2] * centers[:, 2] * centers[:, 1]).sum() / Vw
+    zb = (areas * normals[:, 1] * centers[:, 1] * centers[:, 2]).sum() / Vw
 
     # Computing quantities from intersection polygons
     sigma0 = 0. # \int_{Sf} dS = Sf
