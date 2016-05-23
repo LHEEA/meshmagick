@@ -781,12 +781,18 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     S34 = rhog * sigma2
     S35 = -rhog * sigma1
     S45 = -rhog * sigma3
-    # Metacentric heights (Bouguer formulae)
+
+    # Metacentric radius (Bouguer formulae)
     r = sigma5 / Vw # Around Ox
     R = sigma4 / Vw # Around Oy
 
-    S44 = rhog*Vw * (r + zb-zg)
-    S55 = rhog*Vw * (R + zb-zg)
+    # Metacentric height
+    a = zg - zb
+    GMx = r - a
+    GMy = R - a
+
+    S44 = rhog*Vw * GMx
+    S55 = rhog*Vw * GMy
 
     KH = np.zeros((6, 6))
     KH[2, 2] = S33
@@ -802,16 +808,41 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     # Zeroing tiny coefficients
     KH[np.fabs(KH) < 1e-4] = 0.
 
+    # Flotation center F:
+    xF = -S35/S33
+    yF =  S34/S33
+
     disp = rho_water * Vw * 1e-3 # in tons
 
     if verbose:
+        # Data for DNV standards
+        GM_min = 0.15
+
         print '\nWet surface = %f (m**2)\n' % Sw
         print 'Immersed volume = %f (m**3)\n' % Vw
         print 'Displacement = %f (tons)\n' % disp
         print 'Buoyancy center (m): xb=%f, yb=%f, zb=%f\n' % (xb, yb, zb)
         print 'Flottation surface = %f (m**2)\n' % Sf
-        print 'Transverse metacentric height = %f (m)\n' % r
-        print 'Longitudinal metacentric height = %f (m)\n' % R
+        print 'Flotation center (m): xf=%f, yf=%f\n' % (xF, yF)
+        print 'Transverse metacentric radius = %f (m)\n' % r
+        print 'Longitudinal metacentric radius = %f (m)\n' % R
+
+        print 'Transverse metacentric height GMx = %f (m)' % GMx
+        if GMx < 0.:
+            print '\t --> Unstable in roll !'
+            print '\t     To be stable, you should have at least zg < %f (m)' % (r+zb)
+            print '\t     DNV Standards say : zg < %f (m) to get GMx > %f m\n' % (r+zb-GM_min, GM_min)
+        else:
+            print '\t --> Stable in roll\n'
+
+        print 'Longitudinal metacentric height GMy = %f (m)' % GMy
+        if GMy < 0.:
+            print '\t --> Unstable in pitch !'
+            print '\t     To be stable, you should have at least zg < %f (m)' % (R+zb)
+            print '\t     DNV Standards say : zg < %f (m) to get GMy > %f m\n' % (R+zb-GM_min, GM_min)
+        else:
+            print '\t --> Stable in pitch\n'
+
         print 'Hydrostatic stiffness matrix:'
         for line in KH:
             print '%.4E\t%.4E\t%.4E\t%.4E\t%.4E\t%.4E' % (line[0], line[1], line[2], line[3], line[4], line[5])
@@ -821,11 +852,15 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     output['Vw'] = Vw
     output['disp'] = disp
     output['B'] = np.array([xb, yb, zb], dtype=np.float)
+    output['F'] = np.array([xF, yF, 0.], dtype=np.float)
     output['Sf'] = Sf
     output['r'] = r
     output['R'] = R
+    output['GMx'] = GMx
+    output['GMy'] = GMy
     output['KH'] = KH
     output['Vc'] = Vc
     output['Fc'] = Fc
+
     return output
 
