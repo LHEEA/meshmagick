@@ -703,21 +703,156 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
 
 
 
+def _get_Sf_Vw(V, F):
+    """
+
+    Parameters
+    ----------
+    V
+    F
+
+    Returns
+    -------
+
+    """
+    Vc, Fc, clip_infos = mm.clip_by_plane(V, F, mm.Plane(), infos=True)
+
+    areas, normals, centers = mm.get_all_faces_properties(Vc, Fc)
+
+    Vw = (areas*(normals*centers).sum(axis=1)).sum()/3. # Formule approchee mais moyennee
+
+    Sf = 0.
+    polygons = clip_infos['PolygonsNewID']
+    for polygon in polygons:
+        polyverts = Vc [polygon]
+
+        x = polyverts[:, 0]
+        y = polyverts[:, 1]
+
+        Sf += ((np.roll(y, -1)-y) * (np.roll(x, -1)+x)).sum()
+    Sf *= 0.5
+
+    return Vc, Fc, Sf, Vw
+
+
+def set_displacement(V, F, disp, rho_water=1023, grav=9.81, abs_tol= 1., itermax=25, verbose=False):
+    """
+    Displaces mesh at a prescribed displacement and returns
+
+    Parameters
+    ----------
+    V : ndarray
+        Array of the mesh vertices
+    F : ndarray
+        Array of the mesh connectivities
+    disp : float
+        Mass displacement of the hull (in tons)
+    rho_water : float
+        Density of water (in kg/m**3)
+    grav : float
+        Acceleration of gravity (in m/s**2)
+    abs_tol : float
+        absolute tolerance on the volume (in m**3)
+    itermax : int
+        Maximum number of iterations
+    verbose : bool
+        False by default. If True, a convergence report is printed on the screen
+    Returns
+    -------
+        dz : float
+            The quantity necessary to
+        Vc : ndarray
+        Fc : ndarray
+    """
+
+    dz = 0.
+    iter = 0
+    rho = rho_water*1e-3 # To convert automatically the displacement in kg in calculations
+
+    while True:
+        if iter == itermax:
+            if verbose:
+                print 'No convergence of the displacement after %u iterations' % itermax
+            break
+
+        Vc = V.copy()
+        Fc = F.copy()
+
+        # Translating the mesh
+        mm.translate_1D(Vc, dz, 'z')
+
+        # Getting hydrostatics
+        # TODO: ecrire une fonction privee permettant de ne calculer que Sf et Vw ainsi que Vc et Fc
+        # On pourra alors ne plus utiliser grav dans cette fonction !
+        Vc, Fc, Sf, Vw = _get_Sf_Vw(Vc, Fc)
+        # hs_output = compute_hydrostatics(Vc, Fc, 0, rho_water=rho_water, grav=grav, verbose=False)
+        # Sf = hs_output['Sf']
+        # Vw = hs_output['Vw']
+
+        dV = Vw - disp/rho
+        if math.fabs(dV) < abs_tol:
+            break
+
+        iter += 1
+        # Updating dz
+        dz += dV / Sf
+
+    if verbose:
+        print 'Displacement obtained after %u iterations' % iter
+        print 'The mesh has been displaced by %f m along z to reach a displacement of %f tons' % (dz, rho_water*Vw*1e-3)
+
+    return dz, Vc, Fc
 
 
 
 # Implementation of the formulae based on integrations on the mesh faces and not only on the intersections
 # Taken from Delhommeau and for validation purposes
-def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., verbose=False):
-    # Decoupe du maillage par un plan
-    plane = mm.Plane() # Plan Oxy
+def compute_hydrostatics(V, F, zg, rho_water=1023, grav=9.81, verbose=False):
+    """
+    Computes the hydrostatics properties of a mesh.
+
+    Parameters
+    ----------
+    V : ndarray
+        Array of the mesh vertices
+    F : ndarray
+        Array of the mesh connectivities
+    zg : float
+        Vertical position of the center of gravity
+    rho_water : float
+        Density of water (default: 2013 kg/m**3)
+    grav : float
+        Gravity acceleration (default: 9.81 m/s**2)
+    verbose : bool, optional
+        False by default. If True, a hydrostatic report is printed on screen.
+
+    Returns
+    -------
+    output : dict
+        Dictionary containing the hydrosatic properties and whose keys are:
+            'Sw': (float) Wet surface area (in m**2)
+            'Vw': (float) Immersed volume (in m**3)
+            'disp': (float) Displacement (in Tons)
+            'B': (ndarray) Coordinates of the buoyancy center (in m)
+            'F': (ndarray) Coordinates of the center of flotation (in m)
+            'Sf': (float) Area of the flotation surface (in m**2)
+            'r': (float) Transverse metacentric radius (in m)
+            'R': (float) Longitudinal metacentrix radius (in m)
+            'GMx': (float) Transverse metacentric height (in m)
+            'GMy': (float) Longitudinal metacentric height (in m)
+            'KH': (ndarray) Hydrostatic stiffness matrix
+            'Vc': (ndarray) Array of hydrostatic mesh vertices
+            'Fc': (ndarray) Array of hydrostatic mesh connectivities
+    """
+
+    eps = 1e-4 # For zeroing tiny coefficients in the hydrostatic stiffness matrix
+
+    # Clipping the mesh by the Oxy plane
+    plane = mm.Plane() # Oxy plane
     try:
-        Vc, Fc, clip_infos = mm.clip_by_plane(Vw, F, plane, infos=True)
+        Vc, Fc, clip_infos = mm.clip_by_plane(V, F, plane, infos=True)
     except:
         raise Exception, 'Hydrostatic module only work with watertight hull. Please consider using the --sym option.'
-
-    nv = Vc.shape[0]
-    nf = Fc.shape[0]
 
     # Calculs des pptes des facettes
     areas, normals, centers = mm.get_all_faces_properties(Vc, Fc)
@@ -726,8 +861,7 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     Sw = areas.sum()
 
     # Calcul volume de carene
-    # TODO: verifier que cette formule donne de bons resultats !! --> semble etre une formule approchee
-    Vw = (areas*(normals*centers).sum(axis=1)).sum()/3.
+    Vw = (areas*(normals*centers).sum(axis=1)).sum()/3. # Formule approchee mais moyennee
 
     # Buoyancy center calculation
     xb = (areas * normals[:, 1] * centers[:, 1] * centers[:, 0]).sum() / Vw
@@ -812,7 +946,7 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
     KH[4, 3] = S45
 
     # Zeroing tiny coefficients
-    KH[np.fabs(KH) < 1e-4] = 0.
+    KH[np.fabs(KH) < eps] = 0.
 
     # Flotation center F:
     xF = -S35/S33
@@ -872,3 +1006,26 @@ def compute_hydrostatics(Vw, F, zg, rho_water=1023, grav=9.81, x0=0., y0=0., ver
 
     return output
 
+
+if __name__ == '__main__':
+
+    # The following code are only for testng purpose
+
+
+    V, F = mm.load_MAR('Cylinder.mar')
+    plane = mm.Plane(np.array([0, 1, 0]))
+    V, F = mm.symmetrize(V, F, plane=plane)
+
+    V = mm.translate_1D(V, 1, 'x') # TODO: implementer la tranformation sur la matrice KH !!!!
+
+    compute_hydrostatics(V, F, -4.4, verbose=True)
+
+    target_disp = 750
+    abs_tol = 1.
+
+    dz, Vc, Fc = set_displacement(V, F, target_disp, abs_tol=abs_tol, verbose=True)
+
+    # Verification
+    hs_output = compute_hydrostatics(Vc, Fc, 0, verbose=True)
+    if math.fabs(hs_output['disp'] - target_disp) > abs_tol:
+        raise ValueError, 'Convergence problem'
