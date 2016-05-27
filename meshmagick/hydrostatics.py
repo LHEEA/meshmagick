@@ -702,18 +702,423 @@ def get_GZ_curves(hsMesh, zcog, spacing=2., rho_water=1023, g=9.81, verbose=Fals
 
 
 
+#### END OLD CODE
 
-def _get_Sf_Vw(V, F):
+
+
+
+
+
+def show(V, F, CG=None, B=None):
+
+    # TODO: afficher polygones...
+    import MMviewer
+    import vtk
+    my_viewer = MMviewer.MMViewer()
+
+    # Adding mesh
+    polydata_mesh = mm._build_vtkPolyData(V, F)
+    my_viewer.add_polydata(polydata_mesh)
+
+    # Flotation plane
+    plane = vtk.vtkPlaneSource()
+
+    # plane.SetNormal(0, 0, 1)
+    xmin, ymin = V[:, :2].min(axis=0)
+    xmax, ymax = V[:, :2].max(axis=0)
+    plane.SetOrigin(xmin, ymax, 0)
+    plane.SetPoint1(xmin, ymin, 0)
+    plane.SetPoint2(xmax, ymax, 0)
+
+    my_viewer.add_polydata(plane.GetOutput(), color=[0.1, 0.9, 0.7])
+
+    # Adding O
+    pO = vtk.vtkPoints()
+    vO = vtk.vtkCellArray()
+
+    iO = pO.InsertNextPoint([0, 0, 0])
+    vO.InsertNextCell(1)
+    vO.InsertCellPoint(iO)
+
+    pdO = vtk.vtkPolyData()
+    pdO.SetPoints(pO)
+    pdO.SetVerts(vO)
+
+    my_viewer.add_polydata(pdO, color=[0, 0, 0])
+
+    # Adding CG
+    if CG is not None:
+        pCG = vtk.vtkPoints()
+        vCG = vtk.vtkCellArray()
+
+        iCG = pCG.InsertNextPoint(CG)
+        vCG.InsertNextCell(1)
+        vCG.InsertCellPoint(iCG)
+
+        pdCG = vtk.vtkPolyData()
+        pdCG.SetPoints(pCG)
+        pdCG.SetVerts(vCG)
+
+        my_viewer.add_polydata(pdCG, color=[1, 0, 0])
+
+        # Ploting also a line between O and CG
+        points = vtk.vtkPoints()
+        points.InsertNextPoint(0, 0, 0)
+        points.InsertNextPoint(CG)
+
+        line = vtk.vtkLine()
+        line.GetPointIds().SetId(0, 0)
+        line.GetPointIds().SetId(1, 1)
+
+        lines = vtk.vtkCellArray()
+        lines.InsertNextCell(line)
+
+        lines_pd = vtk.vtkPolyData()
+        lines_pd.SetPoints(points)
+        lines_pd.SetLines(lines)
+
+        my_viewer.add_polydata(lines_pd, color=[0, 0, 0])
+
+    # Adding B
+    if B is not None:
+        pB = vtk.vtkPoints()
+        vB = vtk.vtkCellArray()
+
+        iB = pB.InsertNextPoint(B)
+        vB.InsertNextCell(1)
+        vB.InsertCellPoint(iB)
+
+        pdB = vtk.vtkPolyData()
+        pdB.SetPoints(pB)
+        pdB.SetVerts(vB)
+
+        my_viewer.add_polydata(pdB, color=[0, 1, 0])
+
+        # Ploting also a line between O and B
+        points = vtk.vtkPoints()
+        points.InsertNextPoint(0, 0, 0)
+        points.InsertNextPoint(B)
+
+        line = vtk.vtkLine()
+        line.GetPointIds().SetId(0, 0)
+        line.GetPointIds().SetId(1, 1)
+
+        lines = vtk.vtkCellArray()
+        lines.InsertNextCell(line)
+
+        lines_pd = vtk.vtkPolyData()
+        lines_pd.SetPoints(points)
+        lines_pd.SetLines(lines)
+
+        my_viewer.add_polydata(lines_pd, color=[0, 0, 0])
+
+
+
+
+    # # Display intersection polygons
+    # if polygons is not None:
+    #     for polygon_ids in polygons:
+    #         np = polygon_ids.size
+    #         points_coord = V[polygon_ids]
+    #         points = vtk.vtkPoints()
+    #         for point in points_coord:
+    #             points.InsertNextPoint(point)
+    #         polygon = vtk.vtkPolygon()
+    #         polygon.GetPointIds().SetNumberOfIds(np)
+    #         for i in xrange(np):
+    #             polygon.GetPointIds().SetId(i, i)
+    #         cell = vtk.vtkCellArray()
+    #         cell.InsertNextCell(polygon)
+    #
+    #         polygon_pd = vtk.vtkPolyData()
+    #         polygon_pd.SetPoints(points)
+    #         polygon_pd.SetPolys(cell)
+    #
+    #         my_viewer.add_polydata(polygon_pd, color=[1, 0, 0])
+
+
+    # Adding corner annotation
+    ca = vtk.vtkCornerAnnotation()
+    ca.SetLinearFontScaleFactor(2)
+    ca.SetNonlinearFontScaleFactor(1)
+    ca.SetMaximumFontSize(20)
+    labels = "O: Black; CG: Red; B: Green\nTo see points, press 'w'"
+    ca.SetText(2, labels)
+    ca.GetTextProperty().SetColor(0., 0., 0.)
+    my_viewer.renderer.AddViewProp(ca)
+
+
+    my_viewer.show()
+    my_viewer.finalize()
+
+
+
+
+
+def _get_rotation_matrix(thetax, thetay):
+
+    theta = math.sqrt(thetax*thetax + thetay*thetay)
+    if theta == 0.:
+        nx = ny = 0.
+        ctheta = 1.
+        stheta = 0.
+    else:
+        nx, ny = thetax/theta, thetay/theta
+        ctheta = math.cos(theta)
+        stheta = math.sin(theta)
+    nxny = nx*ny
+
+    # Olinde Rodrigues formulae
+    R = ctheta*np.eye(3) \
+       + (1-ctheta) * np.array([[nx*nx, nxny, 0.],
+                                [nxny, ny*ny, 0.],
+                                [0., 0., 0.]]) \
+       + stheta * np.array([[0., 0.,  ny],
+                            [0., 0., -nx],
+                            [-ny, nx, 0.]])
+    return R
+
+
+
+def compute_equilibrium(V, F, disp, CG, rho_water=1023, grav=9.81,
+                        reltol=1e-2, itermax=100, max_nb_relaunch=10, theta_relax=2, z_relax=0.1,
+                        verbose=False, anim=False):
     """
 
     Parameters
     ----------
-    V
-    F
+    V : ndarray
+        Array of mesh vertices
+    F :
+        Array of mesh connectivities
+    disp : float
+        Mass displacement of the floater (in tons)
+    CG : ndarray
+        Position of the center of gravity
+    rho_water : float, optional
+        Density of water (Default 1023 kg/m**3)
+    grav : float, optional
+        Acceleration of gravity (default 9.81 m/s**2)
+    abstol : float, optional
+        Absolute tolerance
+    itermax : int, optional
+        Maximum number of iterations
+    verbose : bool, optional
+        If True, prints results on screen. Default is False.
 
     Returns
     -------
 
+    """
+    max_nb_relaunch = 10
+
+    # Relaxation parameters
+    z_relax = 0.1 # in meters
+    theta_relax_x = theta_relax * math.pi/180.
+    theta_relax_y = theta_relax * math.pi/180.
+
+
+    rhog = rho_water*grav
+    mg = disp*grav*1e3 # Conversion of displacement in kg
+
+    dz = 0.
+    thetax = 0.
+    thetay = 0.
+    iter = 0
+
+    R = np.eye(3, 3)
+    dz_update = 0.
+
+    Vc = V.copy()
+    Fc = F.copy()
+    CGc = CG.copy()
+
+    # origin = np.zeros(3)
+
+    nb_relaunch = 0
+
+    while True:
+        print '\n', iter
+        if iter == (nb_relaunch+1)*itermax:
+            # Max iterations reach
+
+            if nb_relaunch < max_nb_relaunch:
+                nb_relaunch += 1
+                # Random on the position of the body
+                print 'Max iteration reached: relaunching number %u with random orientation' % nb_relaunch
+                thetax, thetay = np.random.rand(2)*2*math.pi
+                R = _get_rotation_matrix(thetax, thetay)
+                Vc = np.transpose(np.dot(R, Vc.T))
+                CGc = np.dot(R, CGc)
+                # origin = np.dot(R, origin)
+                dz = thetax = thetay = 0.
+            else:
+                code = 0
+                break
+
+        # Transformation
+        R = _get_rotation_matrix(thetax, thetay)
+
+        # Applying transformation to the mesh
+        Vc[:, -1] += dz # Z translation
+        Vc = np.transpose(np.dot(R, Vc.T)) # rotation
+
+        if anim:
+            mm.write_VTP('mesh%u.vtp'%iter, Vc, Fc)
+
+        # Applying transformation to the center of gravity
+        CGc[-1] += dz
+        CGc = np.dot(R, CGc)
+        xg, yg, zg = CGc
+
+        # origin[-1] += dz
+        # origin = np.dot(R, origin)
+
+        # Computing hydrostatics
+        hs_output = compute_hydrostatics(Vc, Fc, zg, rho_water=rho_water, grav=grav, verbose=False)
+
+        # Computing characteristic length
+        # TODO: L et l doivent etre calcules a partir du polygone d'intersection !!!
+        xmin, xmax = hs_output['Sf_x_lim']
+        ymin, ymax = hs_output['Sf_y_lim']
+        L, l = xmax-xmin, ymax-ymin
+
+        xb, yb, zb = hs_output['B']
+        KH = hs_output['KH'][2:5, 2:5]
+        if KH[1, 1] < 0.:
+            xstable = False
+            print 'Unstable in roll'
+        else:
+            xstable = True
+
+        if KH[2, 2] < 0.:
+            ystable = False
+            print 'Unstable in pitch'
+        else:
+            ystable = True
+
+        Vw = hs_output['Vw']
+
+        # Correcting KH
+        # corr = grav*zg * (rho_water*Vw - disp)
+        # KH[3, 3] += corr
+        # KH[4, 4] += corr
+
+        # Residual to compensate
+        rhogV = rhog*Vw
+
+        res = np.array([rhogV - mg,
+                        rhogV*yb - mg*yg,
+                       -rhogV*xb + mg*xg])
+
+        # Convergence criteria
+        scale = np.array([mg, mg*l, mg*L])
+
+        if np.all(np.fabs(res/scale) < reltol):
+            # Convergence at an equilibrium
+            if xstable and ystable:
+                # Stable equilibrium
+                code = 1
+                break
+            else:
+                # code = 2
+                # if not ystable:
+                #     print '\nConvergence reach at an unstable configuration in PITCH at iteration %u' % iter
+                #     print '\t--> Keep going iterations with an opposite orientation\n'
+                #     # Choose a new position at 180 deg in pitch
+                #     R = _get_rotation_matrix(0., math.pi)
+                #     Vc = np.transpose(np.dot(R, Vc.T)) # rotation
+                #     CGc = np.dot(R, CGc)
+                #
+                # if not xstable:
+                #     print '\nConvergence reach at an unstable configuration in ROLL at iteration %u' % iter
+                #     print '\t--> Keep going iterations with an opposite orientation\n'
+                #     # Choose a new position at 180 deg in roll
+                #     R = _get_rotation_matrix(math.pi, 0.)
+                #     Vc = np.transpose(np.dot(R, Vc.T)) # rotation
+                #     CGc = np.dot(R, CGc)
+
+                iter += 1
+                continue
+
+        dz_old = dz
+        thetax_old = thetax
+        thetay_old = thetay
+
+        # ESSAI d'utilisation de KH diagonale seulement
+        # KH = np.diag(np.diag(KH))
+
+        # Computing correction
+        dz, thetax, thetay = np.linalg.solve(KH, res)
+
+        # Adaptativity
+        # if dz*dz_old < 0.:
+        #     z_relax /= 2
+        #
+        # if thetax*thetax_old < 0.:
+        #     theta_relax_x /= 2
+        #
+        # if thetay*thetay_old < 0.:
+        #     theta_relax_y /= 2
+
+        # Relaxation
+        if math.fabs(dz) > z_relax:
+            dz = math.copysign(z_relax, dz)
+
+        if math.fabs(thetax) > theta_relax_x:
+            thetax = math.copysign(theta_relax_x, thetax)
+
+        if math.fabs(thetay) > theta_relax_y:
+            thetay = math.copysign(theta_relax_y, thetay)
+        # print dz, thetax, thetay
+
+        # if z_relax < 1e-4 and theta_relax_x < 1e-3 and theta_relax_y < 1e-3:
+        #     print "Can't converge to a solution better than %f %%" % (np.max(np.fabs(res/scale))*100)
+        #     break
+
+        iter += 1
+
+    # Zeroing xcog and ycog
+    Vc[:, 0] -= CGc[0]
+    Vc[:, 1] -= CGc[1]
+    CGc[0] = CGc[1] = 0.
+
+    # origin[0] -= CGc[0]
+    # origin[1] -= CGc[1]
+
+    if verbose:
+        if code == 0:
+            # Max iterations
+            print 'No convergence after %u iterations' % itermax
+        elif code == 1:
+            print 'Convergence reached after %u iterations at %f %% of the displacement.' % (iter, reltol*100)
+        elif code == 2:
+            print 'Convergence reached but at an unstable configuration'
+
+    # print origin + CGc
+    # print CG
+
+    return Vc, Fc, CGc
+
+
+
+def _get_Sf_Vw(V, F):
+    """
+    Computes only the flotation surface area and the immersed volume of the mesh
+
+    Parameters
+    ----------
+    V : ndarray
+        Array of the mesh vertices
+    F : ndarray
+        Array of the mesh connectivities
+
+    Returns
+    -------
+    Vc : ndarray
+    Fc : ndarray
+    Sf : float
+    Vw : float
     """
     Vc, Fc, clip_infos = mm.clip_by_plane(V, F, mm.Plane(), infos=True)
 
@@ -779,7 +1184,7 @@ def set_displacement(V, F, disp, rho_water=1023, grav=9.81, abs_tol= 1., itermax
         Fc = F.copy()
 
         # Translating the mesh
-        mm.translate_1D(Vc, dz, 'z')
+        mm.translate_1D(Vc, dz, 'z') # TODO: le faire directement
 
         # Getting hydrostatics
         # TODO: ecrire une fonction privee permettant de ne calculer que Sf et Vw ainsi que Vc et Fc
@@ -794,6 +1199,8 @@ def set_displacement(V, F, disp, rho_water=1023, grav=9.81, abs_tol= 1., itermax
             break
 
         iter += 1
+
+        # TODO: mettre une relaxation sur la MAJ de dz...
         # Updating dz
         dz += dV / Sf
 
@@ -804,9 +1211,6 @@ def set_displacement(V, F, disp, rho_water=1023, grav=9.81, abs_tol= 1., itermax
     return dz, Vc, Fc
 
 
-
-# Implementation of the formulae based on integrations on the mesh faces and not only on the intersections
-# Taken from Delhommeau and for validation purposes
 def compute_hydrostatics(V, F, zg, rho_water=1023, grav=9.81, verbose=False):
     """
     Computes the hydrostatics properties of a mesh.
@@ -852,6 +1256,7 @@ def compute_hydrostatics(V, F, zg, rho_water=1023, grav=9.81, verbose=False):
     try:
         Vc, Fc, clip_infos = mm.clip_by_plane(V, F, plane, infos=True)
     except:
+        show(V, F)
         raise Exception, 'Hydrostatic module only work with watertight hull. Please consider using the --sym option.'
 
     # Calculs des pptes des facettes
@@ -876,12 +1281,17 @@ def compute_hydrostatics(V, F, zg, rho_water=1023, grav=9.81, verbose=False):
     sigma4 = 0. # \int_{Sf} x^2 dS
     sigma5 = 0. # \int_{Sf} y^2 dS
 
+    xmin = []
+    xmax = []
+    ymin = []
+    ymax = []
+
     polygons = clip_infos['PolygonsNewID']
     for polygon in polygons:
-        polyverts = Vc [polygon]
+        polyverts = Vc[polygon]
 
         # TODO: voir si on conserve ce test...
-        if np.any(np.fabs(polyverts[:, 2]) > 1e-6):
+        if np.any(np.fabs(polyverts[:, 2]) > 1e-3):
             print 'The intersection polygon is not on the plane z=0'
 
         xi, yi = polyverts[0, :2]
@@ -901,6 +1311,14 @@ def compute_hydrostatics(V, F, zg, rho_water=1023, grav=9.81, verbose=False):
             sigma5 += dx * (yi*yi + yii*yii) * py
 
             xi, yi = xii, yii
+
+        xmin.append(polyverts[:, 0].min())
+        xmax.append(polyverts[:, 0].max())
+        ymin.append(polyverts[:, 1].min())
+        ymax.append(polyverts[:, 1].max())
+
+    Sf_x_lim = [min(xmin), max(xmax)]
+    Sf_y_lim = [min(ymin), max(ymax)]
 
     sigma0 /= 2
     sigma1 /= 6
@@ -928,6 +1346,7 @@ def compute_hydrostatics(V, F, zg, rho_water=1023, grav=9.81, verbose=False):
     a = zg - zb # BG
     GMx = r - a
     GMy = R - a
+    # print 'GMx=%f; GMy=%f' % (GMx, GMy)
 
     # Stiffness matrix coefficients that depend on the position of the gravity center
     S44 = rhog*Vw * GMx
@@ -1001,8 +1420,11 @@ def compute_hydrostatics(V, F, zg, rho_water=1023, grav=9.81, verbose=False):
     output['GMx'] = GMx
     output['GMy'] = GMy
     output['KH'] = KH
+    output['Sf_x_lim'] = Sf_x_lim
+    output['Sf_y_lim'] = Sf_y_lim
     output['Vc'] = Vc
     output['Fc'] = Fc
+    output['polygons'] = polygons
 
     return output
 
@@ -1012,20 +1434,44 @@ if __name__ == '__main__':
     # The following code are only for testng purpose
 
 
-    V, F = mm.load_MAR('Cylinder.mar')
+    V, F = mm.load_VTP('tests/SEAREV/SEAREV.vtp')
+    # V, F = mm.load_MAR('Cylinder.mar')
     plane = mm.Plane(np.array([0, 1, 0]))
     V, F = mm.symmetrize(V, F, plane=plane)
+    # V, F = mm.symmetrize(V, F, plane=mm.Plane())
+    # mm.show(V, F)
 
-    V = mm.translate_1D(V, 1, 'x') # TODO: implementer la tranformation sur la matrice KH !!!!
+    # compute_hydrostatics(V, F, -4.3, verbose=True)
 
-    compute_hydrostatics(V, F, -4.4, verbose=True)
 
-    target_disp = 750
-    abs_tol = 1.
+    # SEAREV :
+    disp = 2000
+    CG = np.array([-1, 0, -3])
 
-    dz, Vc, Fc = set_displacement(V, F, target_disp, abs_tol=abs_tol, verbose=True)
+    # show(V, F, CG=CG)
+    # Cylindre
+    # disp = 1100
+    # CG = np.array([0.3, 2, 3])
+    V, F, CGc = compute_equilibrium(V, F, disp, CG, rho_water=1023, grav=9.81,
+                                    reltol=1e-2, itermax=100, max_nb_relaunch=15, theta_relax=1, z_relax=0.1,
+                                    verbose=True, anim=False)
 
-    # Verification
-    hs_output = compute_hydrostatics(Vc, Fc, 0, verbose=True)
-    if math.fabs(hs_output['disp'] - target_disp) > abs_tol:
-        raise ValueError, 'Convergence problem'
+
+    hs_output = compute_hydrostatics(V, F, CGc[-1], verbose=True)
+    print '\nCenter of gravity new_location: ', CGc
+    print '\nBuoyancy center               : ', hs_output['B']
+
+    show(V, F, CG=CGc, B=hs_output['B'])
+
+
+    # target_disp = 750
+    # abs_tol = 1.
+    #
+    # dz, Vc, Fc = set_displacement(V, F, target_disp, abs_tol=abs_tol, verbose=True)
+    #
+    # mm.show(Vc, Fc)
+    #
+    # # Verification
+    # hs_output = compute_hydrostatics(Vc, Fc, 0, verbose=True)
+    # if math.fabs(hs_output['disp'] - target_disp) > abs_tol:
+    #     raise ValueError, 'Convergence problem'
