@@ -68,7 +68,19 @@ class MMViewer:
     def normals_off(self):
         self.normals = False
 
-    def add_polydata(self, polydata, color=[1,1,0]):
+    def add_plane(self, center, normal):
+        plane = vtk.vtkPlaneSource()
+        plane.SetCenter(center)
+        plane.SetNormal(normal)
+
+        mapper = vtk.vtkPolyDataMapper()
+        if vtk.VTK_MAJOR_VERSION <= 5:
+            mapper.SetInput(plane.GetOutput())
+        else:
+            mapper.SetInputData(plane.GetOutput())
+
+
+    def add_polydata(self, polydata, color=[1, 1, 0]):
         if not isinstance(polydata, vtk.vtkPolyData):
             raise AssertionError, 'polydata must be a vtkPolyData object'
 
@@ -90,6 +102,7 @@ class MMViewer:
         actor.GetProperty().EdgeVisibilityOn()
         actor.GetProperty().SetEdgeColor(0, 0, 0)
         actor.GetProperty().SetLineWidth(1)
+        actor.GetProperty().SetPointSize(10)
 
         self.renderer.AddActor(actor)
 
