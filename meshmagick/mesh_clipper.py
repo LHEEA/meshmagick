@@ -360,32 +360,107 @@ def split_mesh(V, F, plane):
 
 def clip_crown(V, F_crown, plane):
 
+    # TODO: voir a recuperer ces positions en entree... (seulement pour la crown !
+    pos = plane.get_point_pos_wrt_plane(V)
+
     F_crown_clipped = list()
+    direct_boundary_edges = dict()
+    inv_boundary_edges = dict()
+
     for iface, face in enumerate(F_crown):
-        pos = plane.get_point_pos_wrt_plane(V[face])
-        if np.all(pos <=0.):
-            # Face has to be kept like that as it does not intersect the plane
+        # print face
 
-            # TODO: construire un edge du polygone
-            continue
+        # TODO: reposer sur les edges generes dans une classe...
+        if face[0] == face[-1]:
+            nb = 3
         else:
-            if face[0] == face[-1]:
-                nb = 3
-            else:
-                nb = 4
-            edges = np.array([(face[i-1], face[i]) for i in xrange(nb)])
+            nb = 4
+        edges = np.array([(face[i-1], face[i]) for i in xrange(nb)])
+
+        if np.all(pos[face] <= 0.):
+            # Face has to be kept like that as it does not intersect the plane
+            F_crown_clipped.append(face)
+
+            # Extracting eventual edge already on the plane
+            for edge in edges:
+                # print pos[edge]
+                # print edge
+                if np.all(pos[edge] == 0.):
+                    direct_boundary_edges[edge[1]] = edge[0]
+                    inv_boundary_edges[edge[0]] = edge[1]
+
+            continue
+
+        else:
+            # The edge has to be clipped
+            for edge in edges:
+                # print pos[edge]
+                if np.prod(pos[edge]) < 0.:
+                    # TODO: continuer
+                    print pos[edge]
 
 
+
+    # Ordering boundary edges in continuous lines
+    closed_polygons = list()
+    open_lines = list()
+    while True:
+        try:
+            line = list()
+            V0_init, V1 = direct_boundary_edges.popitem()
+            line.append(V0_init)
+            line.append(V1)
+            V0 = V1
+
+            while True:
+                try:
+                    V1 = direct_boundary_edges.pop(V0)
+                    line.append(V1)
+                    V0 = V1
+                except KeyError:
+                    if line[0] != line[-1]:
+                        # Trying to find an other queue
+                        queue = list()
+                        V0 = V0_init
+                        while True:
+                            try:
+                                V1 = inv_boundary_edges[V0]
+                                direct_boundary_edges.pop(V1)
+                                queue.append(V1)
+                                V0 = V1
+                            except:
+                                queue.reverse()
+                                line = queue + line
+                                open_lines.append(line)
+                                break
+                    else:
+                        closed_polygons.append(line)
+
+                    break
+
+        except:
+            print "%u closed polygon(s) found" % len(closed_polygons)
+            print closed_polygons
+            print "%u open line(s) found" % len(open_lines)
+            print open_lines
+            break
+
+
+    # print direct_boundary_edges
 
 
 
 if __name__ == '__main__':
 
     V, F = mm.load_VTP('Cylinder.vtp')
-    plane = Plane()
-    V, F = mm.symmetrize(V, F, plane)
-    plane.normal = np.array([0, 1, 0])
-    V, F = mm.symmetrize(V, F, plane)
+    # plane = Plane([0, 1, 0])
+    # V, F = mm.clip_by_plane(V, F, plane)
+
+    # mm.show(V, F)
+
+    # V, F = mm.symmetrize(V, F, plane)
+    # plane.normal = np.array([0, 1, 0])
+    # V, F = mm.symmetrize(V, F, plane)
 
     V[:, 2] += 0.5
 
