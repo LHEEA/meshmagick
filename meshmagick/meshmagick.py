@@ -2218,7 +2218,7 @@ def clean_mesh(V, F, verbose=False):
         print "-----------------"
     return V, F
 
-def merge_duplicates(V, F, verbose=False, tol=1e-8):
+def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
     """merge_duplicates(V, F, verbose=False, tol=1e-8)
 
     Returns a new node array where close nodes have been merged into one node (following tol). It also returns
@@ -2243,6 +2243,7 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
             numpy array of the faces' nodes connectivities, accordingly
             to the new node list that has been merged
     """
+    # TODO: Refaire la documentation --> les entrees sorties ont change !!
 
     # TODO : Set a tolerance option in command line arguments
     if verbose:
@@ -2302,8 +2303,9 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
             newID[iperm[range(istart, istop)]] = ilevel
         V = np.array(Vtmp, dtype=float)
         # Applying renumbering to cells
-        for cell in F:
-            cell[:] = newID[cell]
+        if F is not None:
+            for cell in F:
+                cell[:] = newID[cell]
 
         if verbose:
             nv_new = V.shape[0]
@@ -2311,7 +2313,16 @@ def merge_duplicates(V, F, verbose=False, tol=1e-8):
             print "\t -> New number of nodes     : {:d}".format(nv_new)
             print "\t -> {:d} nodes have been merged".format(nv-nv_new)
 
-    return V, F
+    if F is not None:
+        if return_index:
+            return V, F, newID
+        else:
+            return V, F
+    else:
+        if return_index:
+            return V, newID
+        else:
+            return V
 
 def concatenate(V1, F1, V2, F2):
     """
