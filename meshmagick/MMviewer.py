@@ -6,6 +6,7 @@ This module is part of meshmagick. It implements a viewer based on vtk
 """
 
 import vtk
+from os import getcwd
 
 class MMViewer:
     def __init__(self):
@@ -47,6 +48,7 @@ class MMViewer:
                         "r : reset view\n" + \
                         "s : surface representation\n" + \
                         "w : wire representation\n" + \
+                        "x : save\n" + \
                         "e : quit"
 
         corner_annotation = vtk.vtkCornerAnnotation()
@@ -78,7 +80,6 @@ class MMViewer:
             mapper.SetInput(plane.GetOutput())
         else:
             mapper.SetInputData(plane.GetOutput())
-
 
     def add_polydata(self, polydata, color=[1, 1, 0]):
         if not isinstance(polydata, vtk.vtkPolyData):
@@ -185,6 +186,21 @@ class MMViewer:
         self.render_window.Render()
         self.render_window_interactor.Start()
 
+    def save(self):
+        from vtk import vtkXMLPolyDataWriter
+
+        writer = vtkXMLPolyDataWriter()
+        writer.SetDataModeToAscii()
+        writer.SetFileName('mmviewer_save.vtp')
+
+        for polydata in self.polydatas:
+            writer.SetInput(polydata)
+        writer.Write()
+
+        print "File 'mmviewer_save.vtp' written in %s" % getcwd()
+        return
+
+
     def finalize(self):
         del self.render_window
         del self.render_window_interactor
@@ -213,4 +229,7 @@ class MMViewer:
         elif key == 'e' or key == 'q':
             self.render_window_interactor.GetRenderWindow().Finalize()
             self.render_window_interactor.TerminateApp()
+
+        elif key == 'x':
+            self.save()
 
