@@ -5,6 +5,7 @@
 import meshmagick as mm
 import numpy as np
 import math
+import sys
 
 # TODO: voir si on ne peut pas mettre ces fonctions dans un module dedie ?
 def _rodrigues(thetax, thetay):
@@ -286,20 +287,20 @@ class Plane(object):
             raise RuntimeError, 'Intersection is outside the edge'
         return (1-t)*P0 + t*P1
 
-    def orthogonal_projection_on_plane(self, points):
+    def orthogonal_projection_on_plane(self, point):
         """
 
         Parameters
         ----------
-        points
+        point
 
         Returns
         -------
 
         """
-        pos = self.get_point_pos_wrt_plane(points)
+        # TODO: passer en vectoriel
 
-        return points - np.einsum('i, j', pos, self.normal)
+        return point - self.get_point_pos_wrt_plane(point) * self.normal
 
 
 # class Mesh(object):
@@ -391,23 +392,89 @@ def split_mesh(V, F, plane):
 # reutiliser les donnes d'integrales dessus !
 
 
+# def __clip210(data):
+#     pass
+#
+# clip_dict = {'210': _clip210,
+#              '120': _clip120,
+#              '021': _clip021,
+#              '012': _clip012,
+#              '111': _clip111,
+#              '201': _clip201,
+#              '102': _clip102,
+#              '310': _clip310,
+#              '220': _clip220,
+#              '211': _clip211,
+#              '121': _clip121,
+#              '112': _clip112,
+#              '022': _clip022,
+#              '211': _clip211,
+#              '202': _clip202,
+#              '103': _clip103,
+#              '301': _clip301,
+#              '013': _clip013}
+def clip_face(face, V, plane, pos=None):
+    """
+
+    Parameters
+    ----------
+    face : ndarray
+    V : ndarray
+    plane : Plane
+    pos : ndarray, optional
+
+    Returns
+    -------
+
+    """
+
+    tol = 1e-4 # A placer en argument
+
+    vertices = V[face]
+
+    if pos is None:
+        pos = plane.get_point_pos_wrt_plane(vertices)
+
+
+    # Building edges
+    nbv = len(face)
+    edges = np.asarray([(face[i-1], face[i]) for i in xrange(nbv)])
+    positions = np.asarray([(pos[i-1], pos[i]) for i in xrange(nbv)])
+
+    v_above = np.where(positions > tol)[0]
+    v_on = np.where(np.fabs(positions) <= tol)[0]
+    v_below = np.where(positions < -tol)[0]
+
+    data = [v_above, v_on, v_below]
+
+    nb_above = v_above.sum()
+    nb_on = v_on.sum()
+    nb_below = v_below.sum()
+
+    face_type = str(nb_above)+str(nb_on)+str(nb_below)
+
+
+
+    return V, new_face, I
+
+
+
+
+
+
 def clip_crown(Vinit, F_crown, plane):
 
     tol = 1e-4
-
-    # arrays for triangle and quadrangle extraction in case of clipped face having 5 edges
-    triangle = [2, 3, 4, 2]
-    quadrangle = [0, 1, 2, 4]
+    #
+    # # arrays for triangle and quadrangle extraction in case of clipped face having 5 edges
+    # triangle = [2, 3, 4, 2]
+    # quadrangle = [0, 1, 2, 4]
 
     # TODO: voir a recuperer ces positions en entree... (seulement pour la crown !
     V = Vinit.copy()
     nv = V.shape[0]
 
-    pos = plane.get_point_pos_wrt_plane(V)
-
-    # Projecting vertices that are very close to the plane
-    # close_vertices = np.where(np.fabs(pos) < 1e-4)[0]
-    # V[close_vertices] = plane.orthogonal_projection_on_plane(V[close_vertices])
+    pos = plane.get_point_pos_wrt_plane(V) # TODO: voir a recuperer pos en entree
 
     F_crown_clipped = list()
     direct_boundary_edges = dict()
@@ -417,112 +484,178 @@ def clip_crown(Vinit, F_crown, plane):
     nI = nv
 
     for iface, face in enumerate(F_crown):
-        # print face
 
-        # TODO: reposer sur les edges generes dans une classe...
         if face[0] == face[-1]:
             face = face[:3]
 
-        edges = np.array([(face[i-1], face[i]) for i in xrange(len(face))])
+        nv_face = len(face)
 
-        if np.all(pos[face] <= 0.):
-            # Every face vertex is below the plane. The face has to be kept intact as it does not intersect the plane.
+        face_pos = pos[face]
+
+        # Determining the type of face
+        above_mask = face_pos > tol
+        on_mask = np.fabs(face_pos) <= tol
+        below_mask = face_pos < -tol
+
+        v_above = np.where(face_pos > tol)[0]
+        v_on = np.where(np.fabs(face_pos) <= tol)[0]
+        v_below = np.where(face_pos < -tol)[0]
+
+        nb_above = above_mask.sum()
+        nb_on = on_mask.sum()
+        nb_below = below_mask.sum()
+
+        face_type = str(nb_above)+str(nb_on)+str(nb_below)
+
+        if face_type == '210' or face_type == '310': #Done
+            V[face[v_on[0]]] = plane.orthogonal_projection_on_plane(V[face[v_on[0]]])
+            boundary_edge = []
+
+        elif face_type == '120': # Done
+            face = np.roll(face, -v_above[0])
+            V[face[1]] = plane.orthogonal_projection_on_plane(V[face[1]])
+            V[face[2]] = plane.orthogonal_projection_on_plane(V[face[2]])
+            boundary_edge = [face[1], face[2]]
+
+        elif face_type == '021': # Done
+            face = np.roll(face, -v_below[0])
+            V[face[1]] = plane.orthogonal_projection_on_plane(V[face[1]])
+            V[face[2]] = plane.orthogonal_projection_on_plane(V[face[2]])
+            boundary_edge = [face[2], face[1]]
+            face = list(face)
+            face.append(face[0])
             F_crown_clipped.append(face)
 
-            # Extracting eventual edge already on the plane and to be added to the boundary edges
-            for edge in edges:
-                if np.all(pos[edge] == 0.):
-                    direct_boundary_edges[edge[1]] = edge[0]
-                    inv_boundary_edges[edge[0]] = edge[1]
+        elif face_type == '012' or face_type == '013': # Done
+            V[face[v_on[0]]] = plane.orthogonal_projection_on_plane(V[face[v_on[0]]])
+            boundary_edge = []
+            face = list(face)
+            face.append(face[0])
+            F_crown_clipped.append(face)
 
-            continue
+        elif face_type == '111': #Done
+            face = np.roll(face, -v_on[0])
+            P1, P2 = V[face[[1, 2]]]
+            if pos[face[1]] < 0.:
+                Iright = plane.get_edge_intersection(P1, P2)
+                intersections.append(Iright)
+                boundary_edge = [face[0], nI]
+                F_crown_clipped.append([face[0], face[1], nI, face[0]])
+            else:
+                Ileft = plane.get_edge_intersection(P1, P2)
+                intersections.append(Ileft)
+                boundary_edge = [nI, face[0]]
+                F_crown_clipped.append([nI, face[2], face[0], nI])
+            V[face[0]] = plane.orthogonal_projection_on_plane(V[face[0]])
+            nI += 1
 
-        else:
-            # The face has at least one vertex lying above the plane. We then have to clip the face.
-            new_face = list()
-            for edge in edges:
-                pos0, pos1 = pos[edge]
+        elif face_type == '201':#done
+            face = np.roll(face, -v_below[0])
+            P0, P1, P2 = V[face]
+            Ileft = plane.get_edge_intersection(P0, P2)
+            Iright = plane.get_edge_intersection(P0, P1)
+            intersections += [Ileft, Iright]
+            boundary_edge = [nI, nI+1]
+            F_crown_clipped.append([nI, face[0], nI+1, nI])
+            nI += 2
 
-                if pos0*pos1 < 0.:
-                    # Edge has to be clipped
-                    if pos0 > 0.:
-                        if pos0 < tol:
-                            ileft = edge[0]
-                            new_face.append(edge[0])
-                        elif -pos1 < tol:
-                            ileft = edge[1]
-                            continue
-                        else:
-                            P0, P1 = V[edge]
-                            I = plane.get_edge_intersection(P0, P1)
-                            intersections.append(I)
-                            ileft = nI
-                            new_face.append(nI)
-                            nI+=1
-                    else:
-                        if -pos0 < tol:
-                            iright = edge[0]
-                            continue
-                        elif pos1 < tol:
-                            iright = edge[1]
-                            new_face.append(edge[0])
-                            new_face.append(edge[1])
-                        else:
-                            P0, P1 = V[edge]
-                            I = plane.get_edge_intersection(P0, P1)
-                            intersections.append(I)
-                            new_face.append(edge[0])
-                            iright = nI
-                            new_face.append(nI)
-                            nI += 1
-                else:
+        elif face_type == '102': #Done
+            face = np.roll(face, -v_above[0])
+            P0, P1, P2 = V[face]
+            Ileft = plane.get_edge_intersection(P0, P1)
+            Iright = plane.get_edge_intersection(P0, P2)
+            intersections += [Ileft, Iright]
+            boundary_edge = [nI, nI+1]
+            F_crown_clipped.append([nI,  face[1], face[2], nI+1])
+            nI += 2
 
-                    # Edge is entirely at one side of the plane
-                    if pos0 > 0.:
-                        # Edge is rejected
-                        continue
-                    else:
-                        # Edge is kept
-                        new_face.append(edge[0])
-                        if -pos1 < tol:
-                            iright = edge[1]
-                            new_face.append(edge[1])
+        elif face_type == '220': # Done
+            if v_above[1] == v_above[0]+1:
+                face = np.roll(face, -v_above[1])
+            boundary_edge = [face[1], face[2]]
 
-            if len(new_face) == 0:
-                # The face has been rejected
-                continue
+        elif face_type == '211': # Done
+            face = np.roll(face, -v_on[0])
+            if pos[face[1]] < 0.:
+                P1, P2 = V[face[[1, 2]]]
+                Iright = plane.get_edge_intersection(P1, P2)
+                intersections.append(Iright)
+                boundary_edge = [face[0], nI]
+                F_crown_clipped.append([face[0], face[1], nI, face[0]])
+            else:
+                P2, P3 = V[face[[2, 3]]]
+                Ileft = plane.get_edge_intersection(P2, P3)
+                intersections.append(Ileft)
+                boundary_edge = [nI, face[0]]
+                F_crown_clipped.append([nI, face[3], face[0], nI])
+            V[face[0]] = plane.orthogonal_projection_on_plane(V[face[0]])
+            nI += 1
 
-            # Boundary edge
-            direct_boundary_edges[ileft] = iright
-            inv_boundary_edges[iright] = ileft
+        elif face_type == '121': # Done
+            face = np.roll(face, -v_above[0])
+            V[face[1]] = plane.orthogonal_projection_on_plane(V[face[1]])
+            V[face[3]] = plane.orthogonal_projection_on_plane(V[face[3]])
+            boundary_edge = [face[1], face[3]]
+            F_crown_clipped.append([face[1], face[2], face[3], face[1]])
 
-            new_face_len = len(new_face)
-            if new_face_len == 3:
-                # Triangles
-                new_face.append(new_face[0])
-            elif new_face_len == 5:
-                # We obtained a polygon with 5 edges --> has to be split
-                new_face = np.asarray(new_face)
+        elif face_type == '112': # Done
+            face = np.roll(face, -v_on[0])
+            if pos[face[1]] < 0.:
+                P2, P3 = V[face[[2, 3]]]
+                Iright = plane.get_edge_intersection(P2, P3)
+                intersections.append(Iright)
+                boundary_edge = [face[0], nI]
+                F_crown_clipped.append([face[0], face[1], face[2], nI])
+            else:
+                P1, P2 = V[face[[1, 2]]]
+                Ileft = plane.get_edge_intersection(P1, P2)
+                intersections.append(Ileft)
+                boundary_edge = [nI, face[0]]
+                F_crown_clipped.append([nI, face[2], face[3], face[0]])
+            V[face[0]] = plane.orthogonal_projection_on_plane(V[face[0]])
+            nI += 1
 
-                newV = np.where(new_face >= nv)[0]
-                print iface
-                if newV[1] != newV[0]+1:
-                    new_face = np.roll(new_face, 1)
-                else:
-                    new_face = np.roll(new_face, -newV[0])
+        elif face_type == '202': # Done
+            if v_above[1] == v_above[0]+1:
+                face = np.roll(face, -v_above[1])
+            P0, P1, P2, P3 = V[face]
+            Ileft = plane.get_edge_intersection(P0, P1)
+            Iright = plane.get_edge_intersection(P2, P3)
+            intersections += [Ileft, Iright]
+            boundary_edge = [nI, nI+1]
+            F_crown_clipped.append([nI, face[1], face[2], nI+1])
+            nI += 2
 
-                F_crown_clipped.append(new_face[quadrangle]) # A ajouter !
-                new_face = new_face[triangle]
+        elif face_type == '103': # Done
+            face = np.roll(face, -v_above[0])
+            P0, P1, P3 = V[face[[0, 1, 3]]]
+            Ileft = plane.get_edge_intersection(P0, P1)
+            Iright = plane.get_edge_intersection(P0, P3)
+            intersections += [Ileft, Iright]
+            boundary_edge = [nI, nI+1]
+            F_crown_clipped.append([nI, face[1], face[3], nI+1])
+            F_crown_clipped.append([face[1], face[2], face[3], face[1]])
+            nI += 2
 
-                pass # TODO: voir si utile
+        elif face_type == '301':#Done
+            face = np.roll(face, -v_below[0])
+            P0, P1, P3 = V[face[[0, 1, 3]]]
+            Ileft = plane.get_edge_intersection(P0, P3)
+            Iright = plane.get_edge_intersection(P0, P1)
+            intersections += [Ileft, Iright]
+            boundary_edge = [nI, nI+1]
+            F_crown_clipped.append([nI, face[0], nI+1, nI])
+            nI +=2
 
-            F_crown_clipped.append(new_face)
+        if len(boundary_edge) == 2:
+            direct_boundary_edges[boundary_edge[0]] = boundary_edge[1]
+            inv_boundary_edges[boundary_edge[1]] = boundary_edge[0]
+
 
     # It is now necessary to merge intersection vertices in order to build the intersection polygons
-    intersections, newID = mm.merge_duplicates(np.asarray(intersections), return_index=True, tol=1e-4)
+    intersections, newID = mm.merge_duplicates(np.asarray(intersections), return_index=True, tol=tol)
 
     newID = np.concatenate((np.arange(nv), newID + nv))
-    # Updating new vertices IDs from merged vertices
     F_crown_clipped = newID[F_crown_clipped]
 
     V = np.concatenate((V, intersections))
@@ -533,6 +666,7 @@ def clip_crown(Vinit, F_crown, plane):
 
     # mm.show(V, F_crown_clipped)
     # mm.write_VTP('ring_clipped.vtp', V, F_crown_clipped)
+
 
     # Ordering boundary edges in continuous lines
     closed_polygons = list()
@@ -577,7 +711,7 @@ def clip_crown(Vinit, F_crown, plane):
             print "%u open line(s) found" % len(open_lines)
             for line in open_lines:
                 print line
-            if len(open_lines) > 0:
+            if len(open_lines) > 0: # TODO: A retirer
                 raise RuntimeError, 'no closed loop'
 
             break
@@ -592,23 +726,24 @@ if __name__ == '__main__':
     V, F = mm.load_VTP('SEAREV.vtp')
     plane = Plane()
 
+    # clip(V, F, plane)
+    # sys.exit(0)
+
     # V, F = mm.symmetrize(V, F, plane)
     # plane.normal = np.array([0, 1, 0])
     # V, F = mm.symmetrize(V, F, plane)
 
     # Rotation aleatoire
     import hydrostatics as hs
-    import sys
 
-    R = np.load('save.npy')
-    print R
-    V = np.transpose(np.dot(R, V.T))
-    normal = [0, 0, 1]
-    c = 0
-    plane = Plane(normal, c)
-    crown_face_ids, below_face_ids = split_mesh(V, F, plane)
-    Vclip, F_crown = clip_crown(V, F[crown_face_ids], plane)
-    sys.exit(0)
+    # R = np.load('save.npy')
+    # V = np.transpose(np.dot(R, V.T))
+    # normal = [0, 0, 1]
+    # c = 0
+    # plane = Plane(normal, c)
+    # crown_face_ids, below_face_ids = split_mesh(V, F, plane)
+    # Vclip, F_crown = clip_crown(V, F[crown_face_ids], plane)
+    # sys.exit(0)
 
     while True:
         Vc = V.copy()
@@ -625,7 +760,7 @@ if __name__ == '__main__':
         crown_face_ids, below_face_ids = split_mesh(Vc, F, plane)
 
         try:
-            Vclip, F_crown = clip_crown(Vc, F[crown_face_ids], plane)
+            clip_crown(Vc, F[crown_face_ids], plane)
             # mm.show(Vclip, F_crown)
         except:
             np.save('save', R)
