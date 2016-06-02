@@ -4416,7 +4416,7 @@ def _build_polyline(curve):
     polyline.GetPointIds().SetNumberOfIds(npoints)
 
     for id in xrange(npoints):
-        polyline.GetPointIds().SetId(i, i)
+        polyline.GetPointIds().SetId(id, id)
 
     cells = vtk.vtkCellArray()
     cells.InsertNextCell(polyline)
