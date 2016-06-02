@@ -320,23 +320,26 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
             raise RuntimeError, 'Intersection is outside the edge'
         return (1-t)*P0 + t*P1
 
-    def orthogonal_projection_on_plane(self, point):
+    def orthogonal_projection_on_plane(self, points):
         """
-        Returns the coordinates of the orthogonal projection of point
+        Returns the coordinates of the orthogonal projection of points
 
         Parameters
         ----------
-        point : ndarray
-            Coordinates of the point to be projected
+        points : ndarray
+            Coordinates of the points to be projected
 
         Returns
         -------
-        I : ndarray
-            Coordinates of the projection point
+        projected_points : ndarray
+            Coordinates of the projection points
         """
         # TODO: passer en vectoriel
+        projected_points = np.zeros_like(points)
+        for point, projected_point in zip(points, projected_points):
+            projected_point[:] = point - self.get_point_dist_wrt_plane(point) * self.normal
 
-        return point - self.get_point_dist_wrt_plane(point) * self.normal
+        return projected_points
 
 
 def split_mesh(V, F, plane):
@@ -461,10 +464,26 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
     if pos is None:
         pos = plane.get_point_dist_wrt_plane(Vclip) # TODO: voir a recuperer pos en entree
 
+    # Vertices pre-projection
+    v_on = np.where(np.fabs(pos) <= tol)[0]
+    V[v_on] = plane.orthogonal_projection_on_plane(V[v_on])
+    pos[v_on] = 0.
+
+    on_mask = np.zeros(nv, dtype=np.bool)
+    on_mask[v_on] = True
+
+    # Classifying vertices
+    above_mask = pos > tol
+    below_mask = pos < -tol
+
+    v_above = np.where(above_mask)[0]
+    # v_on = np.where(on_mask)[0]
+    v_below = np.where(below_mask)[0]
+
+    # Init
     F_clip = list()
     direct_boundary_edges = dict()
     inv_boundary_edges = dict()
-
     intersections = list()
     nI = nv
 
@@ -477,24 +496,25 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
 
         face_pos = pos[face]
 
-        # Determining the type of face
-        above_mask = face_pos > tol
-        on_mask = np.fabs(face_pos) <= tol
-        below_mask = face_pos < -tol
+        # Determining the type of face clipping
+        v_above_face = np.where(above_mask[face])[0]
+        v_on_face = np.where(on_mask[face])[0]
+        v_below_face = np.where(below_mask[face])[0]
 
-        v_above = np.where(face_pos > tol)[0]
-        v_on = np.where(np.fabs(face_pos) <= tol)[0]
-        v_below = np.where(face_pos < -tol)[0]
-
-        nb_above = above_mask.sum()
-        nb_on = on_mask.sum()
-        nb_below = below_mask.sum()
+        nb_above = len(v_above_face)
+        nb_on = len(v_on_face)
+        nb_below = len(v_below_face)
 
         face_type = str(nb_above)+str(nb_on)+str(nb_below)
 
         if face_type == '202': # Done
-            if v_above[1] == v_above[0]+1:
-                face = np.roll(face, -v_above[1])
+            #    0*-----*3
+            #     |     |
+            # ----o-----o----
+            #     |     |
+            #    1*-----*2
+            if v_above_face[1] == v_above_face[0]+1:
+                face = np.roll(face, -v_above_face[1])
             P0, P1, P2, P3 = Vclip[face]
             Ileft = plane.get_edge_intersection(P0, P1)
             Iright = plane.get_edge_intersection(P2, P3)
@@ -504,7 +524,16 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
             nI += 2
 
         elif face_type == '301':#Done
-            face = np.roll(face, -v_below[0])
+            #      *2
+            #     / \
+            #    /   \
+            #   /     \
+            # 3*       *1
+            #   \     /
+            # ---o---o---
+            #     \ /
+            #      *0
+            face = np.roll(face, -v_below_face[0])
             P0, P1, P3 = Vclip[face[[0, 1, 3]]]
             Ileft = plane.get_edge_intersection(P0, P3)
             Iright = plane.get_edge_intersection(P0, P1)
@@ -514,7 +543,16 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
             nI +=2
 
         elif face_type == '103': # Done
-            face = np.roll(face, -v_above[0])
+            #      *0
+            #     / \
+            # ---o---o---
+            #   /     \
+            # 1* - - - *3
+            #   \     /
+            #    \   /
+            #     \ /
+            #      *2
+            face = np.roll(face, -v_above_face[0])
             P0, P1, P3 = Vclip[face[[0, 1, 3]]]
             Ileft = plane.get_edge_intersection(P0, P1)
             Iright = plane.get_edge_intersection(P0, P3)
@@ -525,7 +563,12 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
             nI += 2
 
         elif face_type == '102': #Done
-            face = np.roll(face, -v_above[0])
+            #      *O
+            #     / \
+            # ---o---o---
+            #   /     \
+            # 1*-------*2
+            face = np.roll(face, -v_above_face[0])
             P0, P1, P2 = Vclip[face]
             Ileft = plane.get_edge_intersection(P0, P1)
             Iright = plane.get_edge_intersection(P0, P2)
@@ -535,7 +578,12 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
             nI += 2
 
         elif face_type == '201':#done
-            face = np.roll(face, -v_below[0])
+            #  2*-------*1
+            #    \     /
+            #  ---o---o---
+            #      \ /
+            #       *0
+            face = np.roll(face, -v_below_face[0])
             P0, P1, P2 = Vclip[face]
             Ileft = plane.get_edge_intersection(P0, P2)
             Iright = plane.get_edge_intersection(P0, P1)
@@ -545,7 +593,16 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
             nI += 2
 
         elif face_type == '211': # Done
-            face = np.roll(face, -v_on[0])
+            #        *3                   *1
+            #       / \                  / \
+            #      /   *2       or     2*   \
+            #    0/   /                  \   \0
+            # ---*---o---              ---o---*---
+            #     \ /                      \ /
+            #      *1                       *3
+            #
+
+            face = np.roll(face, -v_on_face[0])
             if pos[face[1]] < 0.:
                 P1, P2 = Vclip[face[[1, 2]]]
                 Iright = plane.get_edge_intersection(P1, P2)
@@ -558,11 +615,17 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
                 intersections.append(Ileft)
                 boundary_edge = [nI, face[0]]
                 F_clip.append([nI, face[3], face[0], nI])
-            Vclip[face[0]] = plane.orthogonal_projection_on_plane(Vclip[face[0]])
             nI += 1
 
         elif face_type == '112': # Done
-            face = np.roll(face, -v_on[0])
+            #       *3                     *1
+            #      / \                    / \
+            #  ---*---o---      or    ---o---*---
+            #     0\   \                /   /0
+            #       \   *2            2*   /
+            #        \ /                \ /
+            #         *1                 *3
+            face = np.roll(face, -v_on_face[0])
             if pos[face[1]] < 0.:
                 P2, P3 = Vclip[face[[2, 3]]]
                 Iright = plane.get_edge_intersection(P2, P3)
@@ -575,20 +638,36 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
                 intersections.append(Ileft)
                 boundary_edge = [nI, face[0]]
                 F_clip.append([nI, face[2], face[3], face[0]])
-            Vclip[face[0]] = plane.orthogonal_projection_on_plane(Vclip[face[0]])
             nI += 1
 
         elif face_type == '013': # Done
-            Vclip[face[v_on[0]]] = plane.orthogonal_projection_on_plane(Vclip[face[v_on[0]]])
-            boundary_edge = []
+            # -----*-----
+            #     / \
+            #    /   \
+            #   *     *
+            #    \   /
+            #     \ /
+            #      *
+            boundary_edge = None
             F_clip.append(list(face))
 
         elif face_type == '210' or face_type == '310': #Done
-            Vclip[face[v_on[0]]] = plane.orthogonal_projection_on_plane(Vclip[face[v_on[0]]])
-            boundary_edge = []
+            #   *-------*               *
+            #    \ 210 /               / \ 310
+            #     \   /               *   *
+            #      \ /                 \ /
+            #   ----*----           ----*----
+            boundary_edge = None
 
         elif face_type == '111': #Done
-            face = np.roll(face, -v_on[0])
+            #        *2              *1
+            #       /|               |\
+            #      / |               | \
+            #  ---*--o---    or   ---o--*---
+            #     0\ |               | /0
+            #       \|               |/
+            #        *1              *2
+            face = np.roll(face, -v_on_face[0])
             P1, P2 = Vclip[face[[1, 2]]]
             if pos[face[1]] < 0.:
                 Iright = plane.get_edge_intersection(P1, P2)
@@ -600,63 +679,106 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
                 intersections.append(Ileft)
                 boundary_edge = [nI, face[0]]
                 F_clip.append([nI, face[2], face[0], nI])
-            Vclip[face[0]] = plane.orthogonal_projection_on_plane(Vclip[face[0]])
             nI += 1
 
         elif face_type == '120': # Done
-            face = np.roll(face, -v_above[0])
-            Vclip[face[1]] = plane.orthogonal_projection_on_plane(Vclip[face[1]])
-            Vclip[face[2]] = plane.orthogonal_projection_on_plane(Vclip[face[2]])
+            #         *O
+            #        / \
+            #       /   \
+            #     1/     \2
+            # ----*-------*----
+            face = np.roll(face, -v_above_face[0])
             boundary_edge = [face[1], face[2]]
 
         elif face_type == '021': # Done
-            face = np.roll(face, -v_below[0])
-            Vclip[face[1]] = plane.orthogonal_projection_on_plane(Vclip[face[1]])
-            Vclip[face[2]] = plane.orthogonal_projection_on_plane(Vclip[face[2]])
+            #  ----*-------*----
+            #      2\     /1
+            #        \   /
+            #         \ /
+            #          *0
+            face = np.roll(face, -v_below_face[0])
             boundary_edge = [face[2], face[1]]
             face = list(face)
             face.append(face[0])
             F_clip.append(face)
 
+        elif face_type == '022':
+            # ----*-----*----
+            #    0|     |3
+            #     |     |
+            #    1*-----*2
+            if v_on_face[1] == v_on_face[0]+1:
+                face = np.roll(face, -v_on_face[1])
+            boundary_edge = [face[0], face[3]]
+            F_clip.append(list(face))
+
         elif face_type == '012': # Done
-            Vclip[face[v_on[0]]] = plane.orthogonal_projection_on_plane(Vclip[face[v_on[0]]])
-            boundary_edge = []
+            #   ------*------
+            #        / \
+            #       /   \
+            #      /     \
+            #     *-------*
+            boundary_edge = None
             face = list(face)
             face.append(face[0])
             F_clip.append(face)
 
         elif face_type == '220': # Done
-            if v_above[1] == v_above[0]+1:
-                face = np.roll(face, -v_above[1])
+            #    0*-----*3
+            #     |     |
+            #    1|     |2
+            # ----*-----*----
+            if v_above_face[1] == v_above_face[0]+1:
+                face = np.roll(face, -v_above_face[1])
             boundary_edge = [face[1], face[2]]
 
         elif face_type == '121': # Done
-            face = np.roll(face, -v_above[0])
-            Vclip[face[1]] = plane.orthogonal_projection_on_plane(Vclip[face[1]])
-            Vclip[face[3]] = plane.orthogonal_projection_on_plane(Vclip[face[3]])
+            #       *0
+            #      / \
+            #     /   \
+            # ---*-----*---
+            #    1\   /3
+            #      \ /
+            #       *2
+            face = np.roll(face, -v_above_face[0])
             boundary_edge = [face[1], face[3]]
             F_clip.append([face[1], face[2], face[3], face[1]])
 
         elif face_type == '300' or face_type == '400':
-            boundary_edge = []
+            #       *               *-----*
+            #      / \              |     |
+            #     /300\       or    | 400 |
+            #    *-----*            *-----*
+            # ____________       ______________
+            boundary_edge = None
 
         elif face_type == '003':
-            boundary_edge = []
+            #  -----------
+            #       *
+            #      / \
+            #     /   \
+            #    *-----*
+            boundary_edge = None
             face = list(face)
             face.append(face[0])
             F_clip.append(face)
 
         elif face_type == '004':
-            boundary_edge = []
+            #  ---------------
+            #      *-----*
+            #      |     |
+            #      |     |
+            #      *-----*
+            boundary_edge = None
             F_clip.append(list(face))
 
         # Building boundary connectivity
-        if len(boundary_edge) == 2:
+        if boundary_edge is not None:
             direct_boundary_edges[boundary_edge[0]] = boundary_edge[1]
             inv_boundary_edges[boundary_edge[1]] = boundary_edge[0]
 
     # It is now necessary to merge intersection vertices in order to build the intersection polygons
-    intersections, newID = mm.merge_duplicates(np.asarray(intersections), return_index=True, tol=tol)
+    intersections, newID = mm.merge_duplicates(np.asarray(intersections), return_index=True, tol=0.1*tol)
 
     newID = np.concatenate((np.arange(nv), newID + nv))
     F_clip = newID[F_clip]
@@ -708,9 +830,11 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
             except:
                 # TODO: retirer les deux lines suivantes
                 print "%u closed polygon\n%u open curve" % (len(boundary_polygons), len(boundary_lines))
+                # print boundary_lines[0]
 
                 if assert_closed_boundaries:
                     if len(boundary_lines) > 0:
+                        mm.write_VTP('mesh_clip.vtp', Vclip, F_clip)
                         raise RuntimeError, 'Open intersection curve found'
 
                 break
@@ -739,14 +863,14 @@ if __name__ == '__main__':
     # Rotation aleatoire
     import hydrostatics as hs
 
-    R = np.load('buggy_rotation_meshmagick.npy')
-    V = np.transpose(np.dot(R, V.T))
-    normal = [0, 0, 1]
-    c = 0
-    plane = Plane(normal, c)
-    crown_face_ids, below_face_ids = split_mesh(V, F, plane)
-    Vclip, F_crown = _clip(V, F[crown_face_ids], plane, return_boundaries=True)
-    sys.exit(0)
+    # R = np.load('buggy_rotation_meshmagick.npy')
+    # V = np.transpose(np.dot(R, V.T))
+    # normal = [0, 0, 1]
+    # c = 0
+    # plane = Plane(normal, c)
+    # crown_face_ids, below_face_ids = split_mesh(V, F, plane)
+    # Vclip, F_crown, boundary_polygons, boundary_lines = _clip(V, F[crown_face_ids], plane, return_boundaries=True)
+    # sys.exit(0)
 
     iter = 0
     while True:
@@ -767,7 +891,7 @@ if __name__ == '__main__':
         crown_face_ids, below_face_ids = split_mesh(Vc, F, plane)
 
         try:
-            _clip(Vc, F[crown_face_ids], plane, return_boundaries=True)
+            Vclip, F_crown, boundary_polygons, boundary_lines = _clip(Vc, F[crown_face_ids], plane, return_boundaries=True)
             # mm.show(Vclip, F_crown)
         except:
             np.save('buggy_rotation_meshmagick', R)
