@@ -379,7 +379,6 @@ class invalidate_cache(object):
 
 
 # TODO: cette classe devra se trouver dans meshmagick...
-# from cached_property import cached_property
 
 class Mesh(object):
 
@@ -410,7 +409,6 @@ class Mesh(object):
     def nb_faces(self):
         return self._F.shape[0]
 
-    # @property
     @property
     def V(self):
         # print 'getting V'
@@ -437,6 +435,8 @@ class Mesh(object):
         self._F.setflags(write=False)
         return
 
+    # TODO: implementer la fonction directement dans la classe mais la splitter pour chaque propriete areas,normals,
+    # centers...
     def _update_faces_properties(self):
         areas, normals, centers = mm.get_all_faces_properties(self._V, self._F)
         self._cached_properties['faces_areas'] = areas
@@ -473,10 +473,18 @@ class Mesh(object):
         self._get_tri_quad_ids()
         return self._cached_properties['triangles']
 
+    @property
+    def nb_triangles(self):
+        return len(self.triangles)
+
     @cached_property
     def quadrangles(self):
         self._get_tri_quad_ids()
         return self._cached_properties['quadrangles']
+
+    @property
+    def nb_quadrangles(self):
+        return len(self.quadrangles)
 
 
 
@@ -1030,8 +1038,7 @@ if __name__ == '__main__':
 
 
     plane = Plane()
-    clipper = MeshClipper(mesh=mesh,
-                          clipping_surface=plane)
+    clipper = MeshClipper(mesh=mesh, clipping_surface=plane)
 
     # clipper.partition_mesh()
 

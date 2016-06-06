@@ -678,9 +678,9 @@ def get_all_faces_properties(V, F):
     # Collectively dealing with triangles
     triangles = F[triangle_mask]
 
-    triangles_normals = np.cross(V[triangles[:,1]] - V[triangles[:,0]], V[triangles[:,2]] - V[triangles[:,0]])
+    triangles_normals = np.cross(V[triangles[:, 1]] - V[triangles[:, 0]], V[triangles[:, 2]] - V[triangles[:, 0]])
     triangles_areas = np.linalg.norm(triangles_normals, axis=1)
-    normals[triangle_mask] = triangles_normals / np.array(([triangles_areas,]*3)).T
+    normals[triangle_mask] = triangles_normals / np.array(([triangles_areas, ]*3)).T
     areas[triangle_mask] = triangles_areas/2.
     centers[triangle_mask] = np.sum(V[triangles[:, :3]], axis=1)/3.
 
