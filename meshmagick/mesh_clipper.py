@@ -107,6 +107,9 @@ def _get_rotation_matrix(thetax, thetay, atype='fixed'):
     return R
 
 
+
+
+
 # Classes
 class Plane(object): # TODO: placer cette classe dans un module a part --> utilise dans meshmagick aussi...
     """
@@ -340,6 +343,174 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
             projected_point[:] = point - self.get_point_dist_wrt_plane(point) * self.normal
 
         return projected_points
+
+
+
+class cached_property(object):
+    def __init__(self, func):
+        self.__doc__ = getattr(func, '__doc__')
+        self.func = func
+
+    def __get__(self, obj, cls):
+        try:
+            return obj._cached_properties[self.func.__name__]
+        except:
+            # print 'Computing %s and caching it' % self.func.__name__
+            value = self.func(obj)
+            try:
+                obj._cached_properties[self.func.__name__] = value # FIXME: les valeurs sont enregistrees deux fois...
+            except AttributeError:
+                obj._cached_properties = {self.func.__name__: value}
+            return value
+
+
+class invalidate_cache(object):
+    def __init__(self, func):
+        self.__doc__ = getattr(func, '__doc__')
+        self.func = func
+
+    def __call__(self, cls, *args):
+        self.func(cls, *args)
+        # print 'Invalidation of the cache'
+        try:
+            cls._cached_properties.clear()
+        except:
+            cls._cached_properties = dict()
+
+
+# TODO: cette classe devra se trouver dans meshmagick...
+# from cached_property import cached_property
+
+class Mesh(object):
+
+    def __init__(self, vertices, faces):
+        """
+
+        Parameters
+        ----------
+        vertices : ndarray
+            (nv x 3) Array of mesh vertices coordinates. Each line is a vertex.
+        faces : ndarray
+            Arrays of mesh connectivities for faces.
+
+        Returns
+        -------
+
+        """
+
+        self.V = vertices
+        self.F = faces
+
+
+    @cached_property
+    def nb_vertices(self):
+        return self._V.shape[0]
+
+    @property
+    def nb_faces(self):
+        return self._F.shape[0]
+
+    # @property
+    @property
+    def V(self):
+        # print 'getting V'
+        return self._V.copy()
+
+    @property
+    def F(self):
+        # print 'getting F'
+        return self._F.copy()
+
+    @V.setter
+    @invalidate_cache
+    def V(self, value):
+        # print 'setting V'
+        self._V = np.asarray(value, dtype=np.float).copy()
+        self._V.setflags(write=False)
+        return
+
+    @F.setter
+    @invalidate_cache
+    def F(self, value):
+        # print 'setting F'
+        self._F = np.asarray(value, dtype=np.int).copy()
+        self._F.setflags(write=False)
+        return
+
+    def _update_faces_properties(self):
+        areas, normals, centers = mm.get_all_faces_properties(self._V, self._F)
+        self._cached_properties['faces_areas'] = areas
+        self._cached_properties['faces_normals'] = normals
+        self._cached_properties['faces_centers'] = centers
+        return
+
+    @cached_property
+    def faces_areas(self):
+        self._update_faces_properties()
+        return self._cached_properties['faces_areas']
+
+    @cached_property
+    def faces_centers(self):
+        self._update_faces_properties()
+        return self._cached_properties['faces_centers']
+
+    @cached_property
+    def faces_normals(self):
+        self._update_faces_properties()
+        return self._cached_properties['faces_normals']
+
+    def _get_tri_quad_ids(self):
+        triangle_mask = (self._F[:, 0] == self._F[:, -1])
+        quadrangles_mask = np.invert(triangle_mask)
+        self._cached_properties['triangles_mask'] = triangle_mask
+        self._cached_properties['quadrangles_mask'] = quadrangles_mask
+        self._cached_properties['triangles'] = np.where(triangle_mask)[0]
+        self._cached_properties['quadrangles'] = np.where(quadrangles_mask)[0]
+
+
+    @cached_property
+    def triangles(self):
+        self._get_tri_quad_ids()
+        return self._cached_properties['triangles']
+
+    @cached_property
+    def quadrangles(self):
+        self._get_tri_quad_ids()
+        return self._cached_properties['quadrangles']
+
+
+
+
+class MeshClipper(object):
+    def __init__(self, mesh=None, clipping_surface=None):
+        self._mesh = mesh
+        self._clipping_surface = clipping_surface
+
+    @property
+    def mesh(self):
+        return self._mesh
+
+    @property
+    def clipping_surface(self):
+        return self._clipping_surface
+
+    @mesh.setter
+    @invalidate_cache
+    def mesh(self, obj):
+        self.mesh = obj
+        return
+
+    @clipping_surface.setter
+    @invalidate_cache
+    def clipping_surface(self, obj):
+        self.clipping_surface = obj
+        return
+
+    # def partition_mesh(self):
+    #     #TODO: split_mesh doit devenir une methode de classe MeshClipper
+    #     print split_mesh(self.mesh.V, self.mesh.F, self.clipping_surface)
+
+
 
 
 def split_mesh(V, F, plane):
@@ -851,6 +1022,25 @@ def _clip(V, F, plane, tol=1e-4, pos=None, return_boundaries=False, assert_close
 if __name__ == '__main__':
 
     V, F = mm.load_VTP('SEAREV.vtp')
+
+    mesh = Mesh(V, F)
+
+    print mesh.triangles
+    print mesh.quadrangles
+
+
+    plane = Plane()
+    clipper = MeshClipper(mesh=mesh,
+                          clipping_surface=plane)
+
+    # clipper.partition_mesh()
+
+
+
+    sys.exit(0)
+
+#####################################
+
     plane = Plane()
 
     # clip(V, F, plane)
