@@ -527,49 +527,49 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
         return clipped_V, clipped_F
 
 
-def extract_faces(V, F, idF):
-    """
-    extract_faces(V, F, idF)
-
-    performs the extraction of a subset of the initial mesh giving the
-    ids of faces that we want to extract.
-
-    Parameters:
-        V: ndarray
-            numpy array that define the coordinates of the initial mesh's
-            nodes
-        F: ndarray
-            numpy array that defines the initial mesh's faces by their node
-            connectivity
-        idF: ndarray
-            numpy array that defines the ids of the faces we want to extract
-            from the initial mesh defined by V, F arrays
-
-    Returns:
-        Vring: ndarray
-            numpy array that defines the nodes coordinates of the extracted mesh
-        Fring: ndarray
-            numpy array that defines the faces of the extracted mesh by their
-            node connectivity
-    """
-
-    nv = V.shape[0]
-    nf = F.shape[0]
-
-    # Determination of the vertices to keep
-    Vmask = np.zeros(nv, dtype=bool)
-    Vmask[F[idF].flatten()] = True
-    idV = np.arange(nv)[Vmask]
-
-    # Building up the vertex array
-    Vring = V[idV]
-    newID_V = np.arange(nv)
-    newID_V[idV] = np.arange(len(idV))
-
-    Fring = F[idF]
-    Fring = newID_V[Fring.flatten()].reshape((len(idF), 4))
-
-    return Vring, Fring
+# def extract_faces(V, F, idF):
+#     """
+#     extract_faces(V, F, idF)
+#
+#     performs the extraction of a subset of the initial mesh giving the
+#     ids of faces that we want to extract.
+#
+#     Parameters:
+#         V: ndarray
+#             numpy array that define the coordinates of the initial mesh's
+#             nodes
+#         F: ndarray
+#             numpy array that defines the initial mesh's faces by their node
+#             connectivity
+#         idF: ndarray
+#             numpy array that defines the ids of the faces we want to extract
+#             from the initial mesh defined by V, F arrays
+#
+#     Returns:
+#         Vring: ndarray
+#             numpy array that defines the nodes coordinates of the extracted mesh
+#         Fring: ndarray
+#             numpy array that defines the faces of the extracted mesh by their
+#             node connectivity
+#     """
+#
+#     nv = V.shape[0]
+#     nf = F.shape[0]
+#
+#     # Determination of the vertices to keep
+#     Vmask = np.zeros(nv, dtype=bool)
+#     Vmask[F[idF].flatten()] = True
+#     idV = np.arange(nv)[Vmask]
+#
+#     # Building up the vertex array
+#     Vring = V[idV]
+#     newID_V = np.arange(nv)
+#     newID_V[idV] = np.arange(len(idV))
+#
+#     Fring = F[idF]
+#     Fring = newID_V[Fring.flatten()].reshape((len(idF), 4))
+#
+#     return Vring, Fring
 
 
 def get_edge_intersection_by_plane(plane, V0, V1):

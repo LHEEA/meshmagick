@@ -5,8 +5,10 @@ This module is part of meshmagick software. It provides functions for mesh clipp
 """
 
 import meshmagick as mm # TODO: voir si oblige d'importer meshmagick ici ...
+import MMviewer
 import numpy as np
 import math
+import vtk
 import sys # Retirer
 
 # TODO: voir si on ne peut pas mettre ces fonctions dans un module dedie ?
@@ -133,7 +135,7 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
 
         normal = np.asarray(normal, dtype=np.float)
 
-        self.normal = normal / np.linalg.norm(normal)
+        self._normal = normal / np.linalg.norm(normal)
         self.c = c
 
         # Storing rotation matrix (redundant !) to speedup computations
@@ -142,6 +144,14 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
         self._rot = _get_rotation_matrix(thetax, thetay)
 
         return
+
+    @property
+    def normal(self):
+        return self._normal
+
+    @normal.setter
+    def normal(self, value):
+        self._normal = np.asarray(value, dtype=np.float)
 
     def rotate_normal(self, thetax, thetay):
         """
@@ -355,7 +365,7 @@ class cached_property(object):
         try:
             return obj._cached_properties[self.func.__name__]
         except:
-            # print 'Computing %s and caching it' % self.func.__name__
+            print 'Computing %s and caching it' % self.func.__name__
             value = self.func(obj)
             try:
                 obj._cached_properties[self.func.__name__] = value # FIXME: les valeurs sont enregistrees deux fois...
@@ -371,7 +381,7 @@ class invalidate_cache(object):
 
     def __call__(self, cls, *args):
         self.func(cls, *args)
-        # print 'Invalidation of the cache'
+        print 'Invalidation of the cache'
         try:
             cls._cached_properties.clear()
         except:
@@ -401,7 +411,7 @@ class Mesh(object):
         self.F = faces
 
 
-    @cached_property
+    @property
     def nb_vertices(self):
         return self._V.shape[0]
 
@@ -437,54 +447,298 @@ class Mesh(object):
 
     # TODO: implementer la fonction directement dans la classe mais la splitter pour chaque propriete areas,normals,
     # centers...
-    def _update_faces_properties(self):
-        areas, normals, centers = mm.get_all_faces_properties(self._V, self._F)
-        self._cached_properties['faces_areas'] = areas
-        self._cached_properties['faces_normals'] = normals
-        self._cached_properties['faces_centers'] = centers
-        return
 
     @cached_property
+    def faces_properties(self):
+        # areas, normals, centers = mm.get_all_faces_properties(self._V, self._F)
+        nf = self.nb_faces
+
+        # triangle_mask = F[:, 0] == F[:, -1]
+        # nb_triangles = np.sum(triangle_mask)
+        # quads_mask = np.invert(triangle_mask)
+        # nb_quads = nf - nb_triangles
+
+        areas = np.zeros(nf, dtype=np.float)
+        normals = np.zeros((nf, 3), dtype=np.float)
+        centers = np.zeros((nf, 3), dtype=np.float)
+
+        # Collectively dealing with triangles
+        # triangles = F[triangle_mask]
+        triangles_id = self.triangles_ids
+        triangles = self._F[triangles_id]
+
+        triangles_normals = np.cross(self._V[triangles[:, 1]] - self._V[triangles[:, 0]],
+                                     self._V[triangles[:, 2]] - self._V[triangles[:, 0]])
+        triangles_areas = np.linalg.norm(triangles_normals, axis=1)
+        normals[triangles_id] = triangles_normals / np.array(([triangles_areas, ] * 3)).T
+        areas[triangles_id] = triangles_areas / 2.
+        centers[triangles_id] = np.sum(self._V[triangles[:, :3]], axis=1) / 3.
+
+        # Collectively dealing with quads
+        quads_id = self.quadrangles_ids
+        quads = self._F[quads_id]
+        # quads = F[quads_mask]
+
+        quads_normals = np.cross(self._V[quads[:, 2]] - self._V[quads[:, 0]],
+                                 self._V[quads[:, 3]] - self._V[quads[:, 1]])
+        normals[quads_id] = quads_normals / np.array(([np.linalg.norm(quads_normals, axis=1), ] * 3)).T
+
+        a1 = np.linalg.norm(np.cross(self._V[quads[:, 1]] - self._V[quads[:, 0]],
+                                     self._V[quads[:, 2]] - self._V[quads[:, 0]]), axis=1) * 0.5
+        a2 = np.linalg.norm(np.cross(self._V[quads[:, 3]] - self._V[quads[:, 0]],
+                                     self._V[quads[:, 2]] - self._V[quads[:, 0]]), axis=1) * 0.5
+        areas[quads_id] = a1 + a2
+
+        C1 = np.sum(self._V[quads[:, :3]], axis=1) / 3.
+        C2 = (np.sum(self._V[quads[:, 2:4]], axis=1) + self._V[quads[:, 0]]) / 3.
+
+        centers[quads_id] = (np.array(([a1, ] * 3)).T * C1 + np.array(([a2, ] * 3)).T * C2)
+        centers[quads_id] /= np.array(([areas[quads_id], ] * 3)).T
+
+        faces_properties = {'areas': areas,
+                            'normals': normals,
+                            'centers': centers}
+
+        return faces_properties
+
+    @property
     def faces_areas(self):
-        self._update_faces_properties()
-        return self._cached_properties['faces_areas']
+        return self.faces_properties['areas']
 
-    @cached_property
+    @property
     def faces_centers(self):
-        self._update_faces_properties()
-        return self._cached_properties['faces_centers']
+        return self.faces_properties['centers']
+
+    @property
+    def faces_normals(self):
+        return self.faces_properties['normals']
 
     @cached_property
-    def faces_normals(self):
-        self._update_faces_properties()
-        return self._cached_properties['faces_normals']
-
-    def _get_tri_quad_ids(self):
+    def triangles_quadrangles_ids(self):
         triangle_mask = (self._F[:, 0] == self._F[:, -1])
         quadrangles_mask = np.invert(triangle_mask)
-        self._cached_properties['triangles_mask'] = triangle_mask
-        self._cached_properties['quadrangles_mask'] = quadrangles_mask
-        self._cached_properties['triangles'] = np.where(triangle_mask)[0]
-        self._cached_properties['quadrangles'] = np.where(quadrangles_mask)[0]
+        triangles_quadrangles = {'triangles_ids': np.where(triangle_mask)[0],
+                                 'quadrangles_ids': np.where(quadrangles_mask)[0]}
 
+        return triangles_quadrangles
 
-    @cached_property
-    def triangles(self):
-        self._get_tri_quad_ids()
-        return self._cached_properties['triangles']
+    @property
+    def triangles_ids(self):
+        return self.triangles_quadrangles_ids['triangles_ids']
 
     @property
     def nb_triangles(self):
-        return len(self.triangles)
+        return len(self.triangles_ids)
 
-    @cached_property
-    def quadrangles(self):
-        self._get_tri_quad_ids()
-        return self._cached_properties['quadrangles']
+    @property
+    def quadrangles_ids(self):
+        return self.triangles_quadrangles_ids['quadrangles_ids']
 
     @property
     def nb_quadrangles(self):
-        return len(self.quadrangles)
+        return len(self.quadrangles_ids)
+
+    def extract_faces(self, id_faces_to_extract):
+        nv = self.nb_vertices
+
+        # Determination of the vertices to keep
+        Vmask = np.zeros(nv, dtype=bool)
+        Vmask[self._F[id_faces_to_extract].flatten()] = True
+        idV = np.arange(nv)[Vmask]
+
+        # Building up the vertex array
+        V_extracted = self._V[idV]
+        newID_V = np.arange(nv)
+        newID_V[idV] = np.arange(len(idV))
+
+        F_extracted = self._F[id_faces_to_extract]
+        F_extracted = newID_V[F_extracted.flatten()].reshape((len(id_faces_to_extract), 4))
+
+        return Mesh(V_extracted, F_extracted)
+
+    @cached_property
+    def vtk_polydata(self):
+
+        # Create a vtkPoints object and store the points in it
+        points = vtk.vtkPoints()
+        for point in self._V:
+            points.InsertNextPoint(point)
+
+        # Create a vtkCellArray to store faces
+        faces = vtk.vtkCellArray()
+        for face_ids in self._F:
+            if face_ids[0] == face_ids[-1]:
+                # Triangle
+                curface = face_ids[:3]
+                vtk_face = vtk.vtkTriangle()
+            else:
+                # Quadrangle
+                curface = face_ids[:4]
+                vtk_face = vtk.vtkQuad()
+
+            for idx, id in enumerate(curface):
+                vtk_face.GetPointIds().SetId(idx, id)
+
+            faces.InsertNextCell(vtk_face)
+
+        vtk_polydata = vtk.vtkPolyData()
+        vtk_polydata.SetPoints(points)
+        vtk_polydata.SetPolys(faces)
+
+        return vtk_polydata
+
+    def show(self):
+        self.viewer = MMviewer.MMViewer()
+        self.viewer.add_polydata(self.vtk_polydata)
+        self.viewer.show()
+
+    @cached_property
+    def _connectivity(self):
+
+        nv = self.nb_vertices
+        nf = self.nb_faces
+
+        mesh_closed = True
+
+        # Building connectivities
+
+        # Establishing VV and VF connectivities
+        VV = dict([(i, set()) for i in xrange(nv)])
+        VF = dict([(i, set()) for i in xrange(nv)])
+        for (iface, face) in enumerate(self._F):
+            if face[0] == face[-1]:
+                face_w = face[:3]
+            else:
+                face_w = face
+            for (index, iV) in enumerate(face_w):
+                VF[iV].add(iface)
+                VV[face_w[index - 1]].add(iV)
+                VV[iV].add(face_w[index - 1])
+
+        # Connectivity FF
+        boundary_edges = dict()
+
+        FF = dict([(i, set()) for i in xrange(nf)])
+        for ivertex in xrange(nv):
+            S1 = VF[ivertex]
+            for iadjV in VV[ivertex]:
+                S2 = VF[iadjV]
+                I = list(S1 & S2)
+                if len(I) == 2:
+                    FF[I[0]].add(I[1])
+                    FF[I[1]].add(I[0])
+
+                elif len(I) == 1:
+                    boundary_face = self._F[I[0]]
+
+                    if boundary_face[0] == boundary_face[-1]:
+                        boundary_face = boundary_face[:3]
+                    ids = np.where((boundary_face == ivertex) + (boundary_face == iadjV))[0]
+
+                    if ids[1] != ids[0]+1:
+                        iV_orig, iV_target = boundary_face[ids]
+                    else:
+                        iV_target, iV_orig = boundary_face[ids]
+
+                    boundary_edges[iV_orig] = iV_target
+                else:
+                    raise RuntimeError, 'Unexpected error while computing mesh connectivities'
+
+        # Computing boundaries
+        boundaries = list()
+        while True:
+            try:
+                boundary = list()
+                iV0_init, iV1 = boundary_edges.popitem()
+                boundary.append(iV0_init)
+                boundary.append(iV1)
+                iV0 = iV1
+
+                while True:
+                    try:
+                        iV1 = boundary_edges.pop(iV0)
+                        boundary.append(iV1)
+                        iV0 = iV1
+                    except KeyError:
+                        if boundary[0] != boundary[-1]:
+                            print 'Boundary is not closed !!!'
+                        else:
+                            boundaries.append(boundary)
+                        break
+            except KeyError:
+                break
+
+        connectivity = {'VV': VV,
+                        'VF': VF,
+                        'FF': FF,
+                        'boundaries': boundaries}
+        return connectivity
+
+    @property
+    def VV(self):
+        return self._connectivity['VV']
+
+    @property
+    def VF(self):
+        return self._connectivity['VF']
+
+    @property
+    def FF(self):
+        return self._connectivity['FF']
+
+    @property
+    def boundaries(self):
+        return self._connectivity['boundaries']
+
+    @property
+    def nb_boundaries(self):
+        return len(self._connectivity['boundaries'])
+
+    def is_mesh_closed(self):
+        return len(self._connectivity['boundaries']) == 0
+
+    def is_mesh_conformal(self):
+
+        tol = 1e-7
+
+        boundaries = self._connectivity['boundaries']
+        polygons_areas = np.zeros(len(boundaries), dtype=np.float)
+
+        conformal = True
+
+        for boundary in boundaries:
+            boundary_vertices = self._V[boundary]
+            # Si les trois projections (Oxy, Oxz, Oyz) de boundary sont des courbes dans ces plans, alors la courbe
+            # est colapsee
+            # Projecting on Oxy
+            plane = Plane(normal=[0., 0., 1.])
+            proj0 = plane.orthogonal_projection_on_plane(boundary_vertices)
+            # Projecting on Oyz
+            plane.normal = [1., 0., 0.]
+            proj1 = plane.orthogonal_projection_on_plane(boundary_vertices)
+            # Projecting on Oxz
+            plane.normal = [0., 1., 0.]
+            proj2 = plane.orthogonal_projection_on_plane(boundary_vertices)
+
+            # Compputing areas of curves
+            x = proj0[:, 0]
+            y = proj0[:, 1]
+            a0 = ((np.roll(y, -1)-y) * (np.roll(x, -1)+x)).sum()
+
+            y = proj1[:, 0]
+            z = proj1[:, 1]
+            a1 = ((np.roll(y, -1)-y) * (np.roll(z, -1)+z)).sum()
+
+            x = proj2[:, 0]
+            z = proj2[:, 1]
+            a2 = ((np.roll(x, -1)-x) * (np.roll(z, -1)+z)).sum()
+
+            if math.fabs(a0) < tol and math.fabs(a1) < tol and math.fabs(a2) < tol:
+                conformal = False
+
+            return conformal
+
+
 
 
 
@@ -1031,14 +1285,19 @@ if __name__ == '__main__':
 
     V, F = mm.load_VTP('SEAREV.vtp')
 
+    V, F = mm.clip_by_plane(V, F, mm.Plane())
+
     mesh = Mesh(V, F)
 
-    print mesh.triangles
-    print mesh.quadrangles
+    print mesh.is_mesh_conformal()
+    # print mesh._connectivity
+
+    # mesh_extract = mesh.extract_faces([1, 2, 3])
+    # mm.show(mesh_extract.V, mesh_extract.F)
 
 
-    plane = Plane()
-    clipper = MeshClipper(mesh=mesh, clipping_surface=plane)
+    # plane = Plane()
+    # clipper = MeshClipper(mesh=mesh, clipping_surface=plane)
 
     # clipper.partition_mesh()
 
