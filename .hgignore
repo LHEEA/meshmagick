@@ -8,6 +8,7 @@ syntax: glob
 *.vtu
 *.dat
 *.orig
+*.vtp
 
 # folders to ignore
 tests/**
