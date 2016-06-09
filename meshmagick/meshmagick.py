@@ -1670,7 +1670,7 @@ def main():
             if len(plane) == 4:
                 # plane is defined by normal and scalar
                 try:
-                    planes[iplane] = Plane(normal=map(float, plane[:3]), c=plane[3])
+                    planes[iplane] = Plane(normal=map(float, plane[:3]), scalar=plane[3])
                     # planes[iplane].normal = np.array(map(float, plane[:3]), dtype=np.float)
                     # planes[iplane].c = float(plane[3])
                 except:

@@ -17,7 +17,7 @@ class MeshClipper(object):
 
         self._internal_data = dict()
 
-        self.update()
+        self._update()
 
     @property
     def verbose(self):
@@ -49,18 +49,17 @@ class MeshClipper(object):
     def vicinity_tol(self, value):
         self._internal_data.clear()
         self._vicinity_tol = float(value)
-        self.update()
+        self._update()
 
     @property
     def source_mesh(self):
         return self._source_mesh
 
     @source_mesh.setter
-    # @invalidate_cache
     def source_mesh(self, value):
         self._source_mesh = value
         self._internal_data.clear()
-        self.update()
+        self._update()
         return
 
     @property
@@ -68,21 +67,20 @@ class MeshClipper(object):
         return self._plane
 
     @plane.setter
-    # @invalidate_cache
     def plane(self, value):
         self._internal_data.clear()
         self._plane = value
-        self.update()
+        self._update()
         return
 
-    def update(self):
+    def _update(self):
         self._vertices_positions_wrt_plane()
-        self.partition_mesh()
+        self._partition_mesh()
+        self.clip()
         return
 
-    # @cached_property
     def _vertices_positions_wrt_plane(self):
-        vertices_distances = self.plane.get_point_dist_wrt_plane(self.source_mesh._V)
+        vertices_distances = self._plane.get_point_dist_wrt_plane(self._source_mesh._V)
 
         vertices_positions = {'vertices_distances': vertices_distances,
                               'vertices_above_mask': vertices_distances > self._vicinity_tol,
@@ -92,27 +90,11 @@ class MeshClipper(object):
         self._internal_data.update(vertices_positions)
         return
 
-    @property
-    def vertices_distances(self):
-        return self._internal_data['vertices_distances']
-
-    @property
-    def vertices_above_mask(self):
-        return self._internal_data['vertices_above_mask']
-
-    @property
-    def vertices_on_mask(self):
-        return self._internal_data['vertices_on_mask']
-
-    @property
-    def vertices_below_mask(self):
-        return self._internal_data['vertices_below_mask']
-
-    # @cached_property
-    def partition_mesh(self):
-        vertices_above_mask = self.vertices_above_mask
-        vertices_on_mask = self.vertices_on_mask
-        vertices_below_mask = self.vertices_below_mask
+    def _partition_mesh(self):
+        vertices_distances = self._internal_data['vertices_distances']
+        vertices_above_mask = self._internal_data['vertices_above_mask']
+        vertices_on_mask = self._internal_data['vertices_on_mask']
+        vertices_below_mask = self._internal_data['vertices_below_mask']
 
         source_mesh_faces = self.source_mesh.F
 
@@ -134,8 +116,13 @@ class MeshClipper(object):
             new_mesh, ids = self._source_mesh.extract_faces(faces_ids, return_index=True)
             new_mesh.name = key
             partition['_'.join((key, 'vertices_ids'))] = ids
+            partition['_'.join((key, 'vertices_distances'))] = vertices_distances[ids]
+            partition['_'.join((key, 'above_vertices_mask'))] = vertices_above_mask[ids]
+            partition['_'.join((key, 'on_vertices_mask'))] = vertices_on_mask[ids]
+            partition['_'.join((key, 'below_vertices_mask'))] = vertices_below_mask[ids]
             partition[key] = new_mesh
 
+        # Generating partition meshes
         generate_mesh(above_faces_ids, 'upper_mesh')
         generate_mesh(crown_faces_ids, 'crown_mesh')
         generate_mesh(below_faces_ids, 'lower_mesh')
@@ -147,77 +134,6 @@ class MeshClipper(object):
 
         return
 
-    @property
-    def above_faces_ids(self):
-        return self._internal_data['above_faces_ids']
-
-    @property
-    def crown_faces_ids(self):
-        return self._internal_data['crown_faces_ids']
-
-    @property
-    def below_faces_ids(self):
-        return self._internal_data['below_faces_ids']
-
-    @property
-    def upper_mesh_vertices_distances(self):
-        vertices_ids = self._internal_data['upper_mesh_vertices_ids']
-        return self._internal_data['vertices_distances'][vertices_ids]
-
-    @property
-    def upper_mesh_above_vertices_mask(self):
-        vertices_ids = self._internal_data['upper_mesh_vertices_ids']
-        return self._internal_data['vertices_above_mask'][vertices_ids]
-
-    @property
-    def upper_mesh_on_vertices_mask(self):
-        vertices_ids = self._internal_data['upper_mesh_vertices_ids']
-        return self._internal_data['vertices_on_mask'][vertices_ids]
-
-    @property
-    def upper_mesh_below_vertices_mask(self):
-        vertices_ids = self._internal_data['upper_mesh_vertices_ids']
-        return self._internal_data['vertices_below_mask'][vertices_ids]
-
-    @property
-    def crown_mesh_vertices_distances(self):
-        vertices_ids = self._internal_data['crown_mesh_vertices_ids']
-        return self._internal_data['vertices_distances'][vertices_ids]
-
-    @property
-    def crown_mesh_above_vertices_mask(self):
-        vertices_ids = self._internal_data['crown_mesh_vertices_ids']
-        return self._internal_data['vertices_above_mask'][vertices_ids]
-
-    @property
-    def crown_mesh_on_vertices_mask(self):
-        vertices_ids = self._internal_data['crown_mesh_vertices_ids']
-        return self._internal_data['vertices_on_mask'][vertices_ids]
-
-    @property
-    def crown_mesh_below_vertices_mask(self):
-        vertices_ids = self._internal_data['crown_mesh_vertices_ids']
-        return self._internal_data['vertices_below_mask'][vertices_ids]
-
-    @property
-    def lower_mesh_vertices_distances(self):
-        vertices_ids = self._internal_data['lower_mesh_vertices_ids']
-        return self._internal_data['vertices_distances'][vertices_ids]
-
-    @property
-    def lower_mesh_above_vertices_mask(self):
-        vertices_ids = self._internal_data['lower_mesh_vertices_ids']
-        return self._internal_data['vertices_above_mask'][vertices_ids]
-
-    @property
-    def lower_mesh_on_vertices_mask(self):
-        vertices_ids = self._internal_data['lower_mesh_vertices_ids']
-        return self._internal_data['vertices_on_mask'][vertices_ids]
-
-    @property
-    def lower_mesh_below_vertices_mask(self):
-        vertices_ids = self._internal_data['lower_mesh_vertices_ids']
-        return self._internal_data['vertices_below_mask'][vertices_ids]
 
     @property
     def lower_mesh(self):
@@ -251,22 +167,22 @@ class MeshClipper(object):
     def clipped_crown_mesh(self):
         return self._internal_data['clipped_crown_mesh']
 
-    @cached_property
+    # @cached_property
     def clip_crown_by_plane(self):
 
         crown_mesh = self.crown_mesh
         vertices = crown_mesh.V
-        vertices_on_mask = self.crown_mesh_on_vertices_mask
+        vertices_on_mask = self._internal_data['crown_mesh_on_vertices_mask']
 
         # TODO: Vertices pre-projection
         # vertices_on = partition['vertices_on']
         # V[vertices_on] = plane.orthogonal_projection_on_plane(V[vertices_on])
         # pos[vertices_on] = 0.
 
-        vertices_above_mask = self.crown_mesh_above_vertices_mask
-        vertices_below_mask = self.crown_mesh_below_vertices_mask
+        vertices_above_mask = self._internal_data['crown_mesh_above_vertices_mask']
+        vertices_below_mask = self._internal_data['crown_mesh_below_vertices_mask']
 
-        vertices_distances = self.crown_mesh_vertices_distances
+        vertices_distances = self._internal_data['crown_mesh_vertices_distances']
 
         # Init
         crown_faces = list()
@@ -565,6 +481,7 @@ class MeshClipper(object):
 
         clipped_crown_mesh = Mesh(vertices, crown_faces)
 
+        # TODO: faire un merge uniquement sur la liste instersections et non sur tout le maillage clipped_crown
         newID = clipped_crown_mesh.merge_duplicates(return_index=True)
 
         # Updating dictionaries
@@ -632,81 +549,15 @@ class MeshClipper(object):
         self._internal_data.update(output)
         return
 
-        # else:  # return_boundaries = False
-        #     # mm.show(vertices, crown_faces)
-        #     return immersed_mesh
-
-    # @cached_property
     @property
     def clipped_mesh(self):
-        return self.clip()
+        return self._internal_data['clipped_mesh']
 
-    # @cached_property
-    # def _source_mesh_faces_properties(self):
-    #     return self._source_mesh.faces_properties
-
-    @property
-    def upper_mesh_faces_areas(self):
-        return self._source_mesh.faces_properties['areas'][self.above_faces_ids]
-
-    @property
-    def upper_mesh_faces_normals(self):
-        return self._source_mesh.faces_properties['normals'][self.above_faces_ids]
-
-    @property
-    def upper_mesh_faces_centers(self):
-        return self._source_mesh.faces_properties['centers'][self.above_faces_ids]
-
-    @property
-    def crown_mesh_faces_areas(self):
-        return self._source_mesh.faces_properties['areas'][self.crown_faces_ids]
-
-    @property
-    def crown_mesh_faces_normals(self):
-        return self._source_mesh.faces_properties['normals'][self.crown_faces_ids]
-
-    @property
-    def crown_mesh_faces_centers(self):
-        return self._source_mesh.faces_properties['centers'][self.crown_faces_ids]
-
-    @property
-    def clipped_crown_mesh_faces_areas(self):
-        return self.clipped_crown_mesh.faces_areas
-
-    @property
-    def clipped_crown_mesh_faces_normals(self):
-        return self.clipped_crown_mesh.faces_normals
-
-    @property
-    def clipped_crown_mesh_faces_centers(self):
-        return self.clipped_crown_mesh.faces_centers
-
-    @property
-    def lower_mesh_faces_areas(self):
-        return self._source_mesh.faces_properties['areas'][self.below_faces_ids]
-
-    @property
-    def lower_mesh_faces_normals(self):
-        return self._source_mesh.faces_properties['normals'][self.below_faces_ids]
-
-    @property
-    def lower_mesh_faces_centers(self):
-        return self._source_mesh.faces_properties['centers'][self.below_faces_ids]
-
-    @property
-    def clipped_mesh_faces_areas(self):
-        return np.concatenate((self.lower_mesh_faces_areas, self.clipped_crown_mesh_faces_areas))
-
-    @property
-    def clipped_mesh_faces_centers(self):
-        return np.concatenate((self.lower_mesh_faces_centers, self.clipped_crown_mesh_faces_centers), axis=0)
-
-    @property
-    def clipped_mesh_faces_normals(self):
-        return np.concatenate((self.lower_mesh_faces_normals, self.clipped_crown_mesh_faces_normals), axis=0)
 
     def clip(self):
-        return self.lower_mesh + self.clipped_crown_mesh
+        self.clip_crown_by_plane()
+        self._internal_data['clipped_mesh'] = self.lower_mesh + self.clipped_crown_mesh
+        return
 
 if __name__ == '__main__':
 
@@ -733,13 +584,13 @@ if __name__ == '__main__':
     # # print
     # print clipped_mesh.faces_areas.sum()
 
-    for iter in xrange(300):
+    for iter in xrange(100):
         print iter
         thetax, thetay = np.random.rand(2)*2*math.pi
         plane.rotate_normal(thetax, thetay)
         clipper.plane = plane
-        clipper.clip()
-        print clipper.lower_mesh
+        # clipper.clipped_mesh.show()
+        # print clipper.lower_mesh
         # mmio.write_VTP('mesh_%u.vtp'%iter, clipper.clipped_mesh.V, clipper.clipped_mesh.F)
 
 

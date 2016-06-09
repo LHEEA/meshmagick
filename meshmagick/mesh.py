@@ -116,7 +116,7 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
     """
     Class to handle planes for clipping purposes
     """
-    def __init__(self, normal=[0., 0., 1.], c=0.):
+    def __init__(self, normal=[0., 0., 1.], scalar=0.):
         """
         Plane constructor
 
@@ -124,7 +124,7 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
         ----------
         normal : array_like, optional
             Normal of the plane. Default to [0., 0., 1.]
-        c : float, optional
+        scalar : float, optional
             Plane scalar parameter. Default to 0.
 
         Returns
@@ -135,10 +135,10 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
         normal = np.asarray(normal, dtype=np.float)
 
         self._normal = normal / np.linalg.norm(normal)
-        self.c = float(c)
+        self._c = float(scalar)
 
         # Storing rotation matrix (redundant !) to speedup computations
-        # Shall be update in methods !!! --> using decorator ?
+        # Shall be _update in methods !!! --> using decorator ?
         thetax, thetay = self.get_normal_orientation_wrt_z()
         self._rot = _get_rotation_matrix(thetax, thetay)
 
@@ -152,6 +152,16 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
     def normal(self, value):
         value = np.asarray(value, dtype=np.float)
         self._normal = value / np.linalg.norm(value)
+        return
+
+    @property
+    def c(self):
+        return self._c
+
+    @c.setter
+    def c(self, value):
+        self._c = float(value)
+        return
 
     def rotate_normal(self, thetax, thetay):
         """
@@ -264,7 +274,7 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
         """
         self.rotate_normal(thetax, thetay)
         ctheta = math.cos(math.sqrt(thetax*thetax + thetay*thetay))
-        self.c = self.c * ctheta + c
+        self._c = self._c * ctheta + c
         return
 
     def get_point_dist_wrt_plane(self, points):
@@ -281,7 +291,7 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
         dist : ndarray
             Array of distances of points with respect to the plane
         """
-        return np.dot(points, self.normal) - self.c
+        return np.dot(points, self._normal) - self._c
 
     def flip_normal(self):
         """
@@ -308,7 +318,7 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
         """
         # TODO: verifier effectivement que si on prend des points se trouvant dans le plan, leurs coordonnees dans le
         #  plan n'ont pas de composante z
-        return -self.c*self.normal + np.transpose(np.dot(self._rot, points.T))
+        return -self._c*self.normal + np.transpose(np.dot(self._rot, points.T))
 
     def get_edge_intersection(self, P0, P1):
         """
@@ -328,7 +338,7 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
         """
         P0n = np.dot(P0, self.normal)
         P1n = np.dot(P1, self.normal)
-        t = (P0n-self.c) / (P0n-P1n)
+        t = (P0n-self._c) / (P0n-P1n)
         if t<0. or t>1.:
             raise RuntimeError, 'Intersection is outside the edge'
         return (1-t)*P0 + t*P1
@@ -1801,7 +1811,7 @@ if __name__ == '__main__':
     # c = 0
     # plane = Plane(normal, c)
     # crown_face_ids, below_face_ids = partition_mesh(V, F, plane)
-    # Vclip, F_crown, boundary_polygons, boundary_lines = _clip(V, F[crown_face_ids], plane, return_boundaries=True)
+    # Vclip, F_crown, boundary_polygons, boundary_line_partition_mesh[crown_face_ids], plane, return_boundaries=True)
     # sys.exit(0)
 
     iter = 0
