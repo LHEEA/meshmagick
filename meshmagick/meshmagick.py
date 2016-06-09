@@ -367,7 +367,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
     edges = dict() # keys are ID of vertices that are above the plane
 
 
-    # Loop on the faces to clip
+    # Loop on the faces to clip_by_plane
     for (iface, face) in enumerate(F[clipped_faces]):
         # face is a copy (not a reference) of the line of F
         clipped_face_id = clipped_faces[iface]
@@ -1429,7 +1429,7 @@ def main():
                         help="""flips the normals of the mesh""")
 
     parser.add_argument('-p', '--plane', nargs='+', action='append',
-                        help="""Defines a plane used by the --clip and --symmetrize options.
+                        help="""Defines a plane used by the --clip_by_plane and --symmetrize options.
                         It can be defined by the floats nx ny nz c where [nx, ny, nz]
                         is a normal vector to the plane and c defines its position
                         following the equation <N|X> = c with X a point belonging
@@ -1442,7 +1442,7 @@ def main():
                         0 following the order given in the command line.
                         """)
 
-    parser.add_argument('-c', '--clip', nargs='*', action='append',
+    parser.add_argument('-c', '--clip_by_plane', nargs='*', action='append',
                         help="""cuts the mesh with a plane. Is no arguments are given, the Oxy plane
                         is used. If an integer is given, it should correspond to a plane defined with
                         the --plane option. If a key string is given, it should be a valid key (see
@@ -1816,9 +1816,9 @@ def main():
         mesh.triangulate_quadrangles()
 
     # Clipping the mesh
-    if args.clip is not None:
+    if args.clip_by_plane is not None:
         clipping_plane = Plane()
-        nb_clip = len(args.clip)
+        nb_clip = len(args.clip_by_plane)
 
         if verbose:
             if nb_clip == 1:
@@ -1827,7 +1827,7 @@ def main():
                 verb = 'planes'
             print '\nMesh is being clipped by %u %s' % (nb_clip, verb)
 
-        for plane in args.clip:
+        for plane in args.clip_by_plane:
             if len(plane) == 0:
                 # Default clipping plane Oxy
                 clipping_plane.normal = np.array([0., 0., 1.], dtype=np.float)
@@ -1924,9 +1924,10 @@ def main():
         if args.zcog is None:
             raise ValueError, 'The hydrostatics option shall be used along with the --zcog option for the hydrostatic stiffness matrix to be computed'
 
-        outputHS = hs.compute_hydrostatics(V, F, args.zcog, verbose=verbose)
-        V = outputHS['Vc']
-        F = outputHS['Fc']
+        output_hs = hs.compute_hydrostatics(mesh, args.zcog, verbose=verbose)
+        mesh = output_hs['mesh_hs']
+        # V = outputHS['Vc']
+        # F = outputHS['Fc']
 
     # if args.hydrostatics:
     #     try:

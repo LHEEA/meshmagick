@@ -4,7 +4,6 @@
 import os
 import numpy as np
 
-
 # =======================================================================
 # MESH LOADERS
 # ======================================================================
@@ -38,7 +37,6 @@ def load_mesh(filename, format):
     V, F = loader(filename)
 
     return V, F
-
 
 def load_RAD(filename):
     """load_RAD(filename)
@@ -91,7 +89,6 @@ def load_RAD(filename):
     F = np.asarray(F, dtype=np.int) - 1
 
     return V, F
-
 
 def load_HST(filename):
     """load_HST(filename)
@@ -157,13 +154,11 @@ def load_HST(filename):
 
     return V, F-1
 
-
 def load_DAT(filename):
     """Not implemented.
     Intended to load .DAT files used in DIODORE (PRINCIPIA (c))
     """
     raise NotImplementedError
-
 
 def load_INP(filename):
     """load_INP(filename)
@@ -331,7 +326,6 @@ def load_INP(filename):
 
     return V, F-1
 
-
 def load_TEC(filename):
     """load_TEC(filename)
 
@@ -400,7 +394,6 @@ def load_TEC(filename):
 
     return V, F
 
-
 def load_VTU(filename):
     """load_VTU(filename)
 
@@ -428,7 +421,6 @@ def load_VTU(filename):
 
     V, F = _dump_vtk(vtk_mesh)
     return V, F
-
 
 def load_VTP(filename):
     """load_VTP(filename)
@@ -458,7 +450,6 @@ def load_VTP(filename):
     V, F = _dump_vtk(vtk_mesh)
     return V, F
 
-
 def load_VTK(filename):
     """load_VTK(filename)
 
@@ -485,7 +476,6 @@ def load_VTK(filename):
 
     V, F = _dump_vtk(vtk_mesh)
     return V, F
-
 
 def _dump_vtk(vtk_mesh):
     """_dump_vtk(vtk_mesh)
@@ -526,7 +516,6 @@ def _dump_vtk(vtk_mesh):
             F[k][3] = F[k][0]
 
     return V, F
-
 
 def load_STL(filename):
     """load_STL(filename)
@@ -574,7 +563,6 @@ def load_STL(filename):
     V, F = merge_duplicates(V, F)
 
     return V, F
-
 
 def load_NAT(filename):
     """load_NAT(filename)
@@ -635,7 +623,6 @@ def load_NAT(filename):
     ifile.close()
     return V, F-1
 
-
 def load_GDF(filename):
     """load_GDF(filename)
 
@@ -685,7 +672,6 @@ def load_GDF(filename):
 
     return V, F
 
-
 def load_MAR(filename):
     """load_MAR(filename)
 
@@ -729,46 +715,6 @@ def load_MAR(filename):
     ifile.close()
 
     return V, F-1
-
-
-# def load_STL2(filename):
-#     import re
-#
-#     ifile = open(filename, 'r')
-#     text = ifile.read()
-#     ifile.close()
-#
-#     endl = r'(?:\n|\r|\r\n)'
-#     patt_str = r"""
-#             ^\s*facet\s+normal(.*)""" + endl + """
-#             ^\s*outer\sloop""" + endl + """
-#             ^\s*vertex\s+(.*)""" + endl + """
-#             ^\s*vertex\s+(.*)""" + endl + """
-#             ^\s*vertex\s+(.*)""" + endl + """
-#             ^\s*endloop""" + endl + """
-#             ^\s*endfacet""" + endl + """
-#            """
-#     pattern = re.compile(patt_str, re.MULTILINE | re.VERBOSE)
-#
-#     normal = []
-#     V = []
-#     for match in pattern.finditer(text):
-#         normal.append(map(float, match.group(1).split()))
-#         V.append(map(float, match.group(2).split()))
-#         V.append(map(float, match.group(3).split()))
-#         V.append(map(float, match.group(4).split()))
-#
-#     V = np.array(V, dtype=float, order='fortran')
-#
-#     nf = np.size(V, 0) / 3
-#     F = np.zeros((nf, 4), dtype=np.int32, order='fortran')
-#
-#     base = np.array([1, 2, 3, 1])
-#     for i in range(nf):
-#         F[i, :] = base + 3 * i
-#
-#     return V, F
-
 
 def load_MSH(filename):
     """load_MSH(filename)
@@ -814,6 +760,45 @@ def load_MSH(filename):
         F[ntri:, :] = myMesh.Elmts.get(3)[1]
 
     return V, F
+# def load_STL2(filename):
+#     import re
+#
+#     ifile = open(filename, 'r')
+#     text = ifile.read()
+#     ifile.close()
+#
+#     endl = r'(?:\n|\r|\r\n)'
+#     patt_str = r"""
+#             ^\s*facet\s+normal(.*)""" + endl + """
+#             ^\s*outer\sloop""" + endl + """
+#             ^\s*vertex\s+(.*)""" + endl + """
+#             ^\s*vertex\s+(.*)""" + endl + """
+#             ^\s*vertex\s+(.*)""" + endl + """
+#             ^\s*endloop""" + endl + """
+#             ^\s*endfacet""" + endl + """
+#            """
+#     pattern = re.compile(patt_str, re.MULTILINE | re.VERBOSE)
+#
+#     normal = []
+#     V = []
+#     for match in pattern.finditer(text):
+#         normal.append(map(float, match.group(1).split()))
+#         V.append(map(float, match.group(2).split()))
+#         V.append(map(float, match.group(3).split()))
+#         V.append(map(float, match.group(4).split()))
+#
+#     V = np.array(V, dtype=float, order='fortran')
+#
+#     nf = np.size(V, 0) / 3
+#     F = np.zeros((nf, 4), dtype=np.int32, order='fortran')
+#
+#     base = np.array([1, 2, 3, 1])
+#     for i in range(nf):
+#         F[i, :] = base + 3 * i
+#
+#     return V, F
+
+
 
 
 
@@ -846,7 +831,6 @@ def write_mesh(filename, V, F, format):
     writer(filename, V, F)
 
     return 1
-
 
 def write_DAT(filename, V, F):
     """write_DAT(filename, V, F)
@@ -940,7 +924,6 @@ def write_DAT(filename, V, F):
 
     return 1
 
-
 def write_HST(filename, V, F):
     """write_HST(filename, V, F)
 
@@ -999,7 +982,6 @@ def write_HST(filename, V, F):
 
     print u'File {0:s} written'.format(filename)
 
-
 def write_TEC(filename, V, F):
     """write_TEC(filename, V, F)
 
@@ -1044,7 +1026,6 @@ def write_TEC(filename, V, F):
 
     return 1
 
-
 def write_VTU(filename, V, F):
     """write_VTU(filename, V, F)
 
@@ -1071,7 +1052,6 @@ def write_VTU(filename, V, F):
     writer.Write()
 
     return 1
-
 
 def write_VTP(filename, V, F):
     """write_VTP(filename, V, F)
@@ -1100,7 +1080,6 @@ def write_VTP(filename, V, F):
 
     return 1
 
-
 def write_VTK(filename, V, F):
     """write_VTK(filename, V, F)
 
@@ -1127,7 +1106,6 @@ def write_VTK(filename, V, F):
     writer.Write()
 
     return 1
-
 
 def _write_paraview(filename, V, F, writer):
     """_write_paraview(filename, V, F)
@@ -1263,7 +1241,6 @@ def write_NAT(filename, V, F):
 
     return 1
 
-
 def write_GDF(filename, V, F):
     """write_GDF(filename, V, F)
 
@@ -1297,7 +1274,6 @@ def write_GDF(filename, V, F):
     ofile.close()
 
     return 1
-
 
 def write_MAR(filename, V, F):
     """write_MAR(filename, V, F)
@@ -1396,7 +1372,6 @@ def write_STL(filename, V, F):
 
 def write_INP(filename, V, F):
     raise NotImplementedError
-
 
 def write_MSH(filename, V, F):
     raise NotImplementedError

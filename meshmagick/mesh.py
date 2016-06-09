@@ -150,7 +150,8 @@ class Plane(object): # TODO: placer cette classe dans un module a part --> utili
 
     @normal.setter
     def normal(self, value):
-        self._normal = np.asarray(value, dtype=np.float)
+        value = np.asarray(value, dtype=np.float)
+        self._normal = value / np.linalg.norm(value)
 
     def rotate_normal(self, thetax, thetay):
         """
@@ -680,7 +681,18 @@ class Mesh(object):
         else:
             return self._F[face_id]
 
-    def extract_faces(self, id_faces_to_extract, return_id_extracted_vertices=False):
+    def extract_faces(self, id_faces_to_extract, return_index=False):
+        """
+        Extracts a new mesh from a selection of faces ids
+
+        Parameters
+        ----------
+        id_faces_to_extract : ndarray
+
+        Returns
+        -------
+        extracted_mesh : Mesh
+        """
         nv = self.nb_vertices
 
         # Determination of the vertices to keep
@@ -699,7 +711,16 @@ class Mesh(object):
         extracted_mesh = Mesh(V_extracted, F_extracted)
         extracted_mesh._verbose = self._verbose
 
-        if return_id_extracted_vertices:
+
+        # TODO: exporter les pptes de facettes si elles n'ont pas ete calculees
+        # if hasattr(self, '_cached_properties') and self._cached_properties.has_key('areas'):
+        #     extracted_mesh._cached_properties['areas'] = self.faces_areas[id_faces_to_extract]
+        #     extracted_mesh._cached_properties['normals'] = self.faces_normals[id_faces_to_extract]
+        #     extracted_mesh._cached_properties['centers'] = self.faces_centers[id_faces_to_extract]
+
+        extracted_mesh.name = 'mesh_extracted_from_%s' % self.name
+
+        if return_index:
             return extracted_mesh, idV
         else:
             return extracted_mesh
@@ -971,12 +992,23 @@ class Mesh(object):
         self.F = np.fliplr(F)
         return
 
-    def __add__(self, mesh):
-        V = np.concatenate((self.V, mesh.V), axis=0)
-        F = np.concatenate((self.F, mesh.F+self.nb_vertices), axis=0)
-        new_mesh = Mesh(V, F, name='_'.join([self.name, mesh.name]))
+    def __add__(self, mesh_to_add):
+        V = np.concatenate((self.V, mesh_to_add.V), axis=0)
+        F = np.concatenate((self.F, mesh_to_add.F + self.nb_vertices), axis=0)
+        new_mesh = Mesh(V, F, name='_'.join([self.name, mesh_to_add.name]))
         # new_mesh.merge_duplicates()
-        new_mesh._verbose = self._verbose or mesh._verbose
+        new_mesh._verbose = self._verbose or mesh_to_add._verbose
+
+        # TODO: exporter les pptes de facette si elles sont presentes dans les 2 maillages
+        # if hasattr(self, '_cached_properties') and hasattr(mesh_to_add, '_cached_properties'):
+        #     if self._cached_properties.has_key('faces_properties') and mesh_to_add._cached_properties.has_key('faces_properties'):
+        #         new_mesh._cached_properties['faces_properties']['areas'] = \
+        #             np.concatenate(self.faces_areas, mesh_to_add.faces_areas)
+        #         new_mesh._cached_properties['faces_properties']['centers'] = \
+        #             np.concatenate(self.faces_centers, mesh_to_add.faces_centers)
+        #         new_mesh._cached_properties['faces_properties']['normals'] = \
+        #             np.concatenate(self.faces_normals, mesh_to_add.faces_normals)
+
         return new_mesh
 
     def copy(self):
@@ -1121,8 +1153,8 @@ class Mesh(object):
 
         return
 
-    def remove_unused_vertices(self):
-
+    def remove_unused_vertices(self, return_index=False):
+        # TODO: implementer return_index !!
         nv = self.nb_vertices
         V, F = self.V, self.F
 
@@ -1179,7 +1211,7 @@ class Mesh(object):
         return
 
     def remove_degenerated_faces(self, rtol=1e-5):
-
+        # TODO: implementer un retour d'index des faces extraites
         areas = self.faces_areas
         area_threshold = areas.mean() * rtol
 
@@ -1248,50 +1280,109 @@ class Mesh(object):
         self.verbose = verbose
         return
 
-    def _partition_wrt_plane(self, plane, tol=1e-4):
+    def _classify_vertices_wrt_plane(self, plane, tol=1e-4):
 
         distances = plane.get_point_dist_wrt_plane(self._V)
 
-        vertices_above_mask = distances > tol
-        vertices_on_mask = np.fabs(distances) < tol
-        vertices_below_mask = distances < -tol
+        # TODO: faire une classe pour la gestion des infos
+        vertices_positions_info = {'plane_source': plane,
+                                   'distances': distances,
+                                   'vertices_above_mask': distances > tol,
+                                   'vertices_on_mask': np.fabs(distances) < tol,
+                                   'vertices_below_mask': distances < -tol
+                                   }
+        self._vertices_positions_info = vertices_positions_info
+        return
+
+    def _partition_wrt_plane(self, plane, tol=1e-4):
+
+        # Computing vertices position wrt plane
+        self._classify_vertices_wrt_plane(plane, tol=tol)
+        vertices_above_mask = self._vertices_positions_info['vertices_above_mask']
+        vertices_on_mask = self._vertices_positions_info['vertices_on_mask']
+        vertices_below_mask = self._vertices_positions_info['vertices_below_mask']
 
         nb_vertices_above = vertices_above_mask[self._F].sum(axis=1)
         nb_vertices_on = vertices_on_mask[self._F].sum(axis=1)
         nb_vertices_below = vertices_below_mask[self._F].sum(axis=1)
 
+        # Simple criteria ensuring that faces are totally above or below the plane (4 vertices at the same side)
+        # Works for both triangles and quadrangles
         above_faces_mask = nb_vertices_above == 4
         below_faces_mask = nb_vertices_below == 4
 
         crown_faces_mask = np.logical_and(np.logical_not(above_faces_mask), np.logical_not(below_faces_mask))
 
-        partition = {
-            'distances': distances,
-            'vertices_above_mask': vertices_above_mask,
-            'vertices_on_mask': vertices_on_mask,
-            'vertices_below_mask': vertices_below_mask,
-            'above_faces_ids': np.where(above_faces_mask)[0],
-            'crown_faces_ids': np.where(crown_faces_mask)[0],
-            'below_faces_ids': np.where(below_faces_mask)[0]
-        }
+        def _create_and_store_informations(mask):
+            mesh = self.extract_faces(np.where(mask)[0])
+            extracted_vertices_ids = mesh._extraction_informations['extracted_vertices_ids']
+            vertices_positions_info = {'plane_source': self._vertices_positions_info['plane_source'],
+                                       'distances': self._vertices_positions_info['distances'][extracted_vertices_ids],
+                                       'vertices_above_mask': vertices_above_mask[extracted_vertices_ids],
+                                       'vertices_on_mask': vertices_on_mask[extracted_vertices_ids],
+                                       'vertices_below_mask': vertices_below_mask[extracted_vertices_ids]
+                                    }
+            mesh._vertices_positions_info = vertices_positions_info
+            return mesh
 
-        return partition
+        above_mesh = _create_and_store_informations(above_faces_mask)
+        above_mesh.name = 'lower_mesh'
+        crown_mesh = _create_and_store_informations(crown_faces_mask)
+        crown_mesh.name = 'crown_mesh'
+        below_mesh = _create_and_store_informations(below_faces_mask)
+        below_mesh.name = 'upper_mesh'
+
+        return above_mesh, crown_mesh, below_mesh
 
     # def get_crown_faces_ids(self, plane):
     #     return self._partition_wrt_plane(plane)['crown_faces_ids']
 
-
     def clip(self, plane, return_boundaries=False, assert_closed_boundaries=False):
+
+        # Partitioning the mesh
+        # TODO: si c'est une autre surface, on appelle une fonction de partition utilisant un octree...
+        above_mesh, crown_mesh, below_mesh = self._partition_wrt_plane(plane)
+
+        # Clipping the crown
+        # TODO: si ce n'est pas un plan, on appelle une autre fonction
+        crown_mesh.clip_by_plane(plane)
+
+
+        # TODO : FINIR
+        clipped_mesh = None
+        return clipped_mesh
+
+    def clip_by_plane(self, plane, return_boundaries=False, assert_closed_boundaries=False):
+        """
+        Clip the mesh by a plane
+
+        Parameters
+        ----------
+        plane : Plane
+        partition : dict, optional
+        return_boundaries : bool, optional
+        assert_closed_boundaries : bool, optional
+
+        Returns
+        -------
+        immersed_mesh: Mesh
+        boundaries: dict
+        """
 
         nv = self.nb_vertices
 
-        partition = self._partition_wrt_plane(plane)
+        # if not partition:
+        #     partition = self._partition_wrt_plane(plane)
 
-        below_mesh = self.extract_faces(partition['below_faces_ids'])
-        clipped_crown_mesh, idV = self.extract_faces(partition['crown_faces_ids'], return_id_extracted_vertices=True)
-        crown_vertices = clipped_crown_mesh.V
+        # upper_mesh = self.extract_faces(partition['below_faces_ids'])
+        # clipped_crown_mesh = self.extract_faces(partition['crown_faces_ids'])
+        vertices = self.V
 
-        vertices_above_mask = partition['vertices_above_mask'][idV]
+        # idV = clipped_crown_mesh._extraction_informations['extracted_vertices_ids']
+        vertices
+
+
+        vertices_above_mask = self._vertices_positions_info['vertices_above_mask']
         vertices_on_mask = partition['vertices_on_mask'][idV]
         vertices_below_mask = partition['vertices_below_mask'][idV]
 
@@ -1331,7 +1422,7 @@ class Mesh(object):
                 #    1*-----*2
                 if v_above_face[1] == v_above_face[0] + 1:
                     face = np.roll(face, -v_above_face[1])
-                P0, P1, P2, P3 = crown_vertices[face]
+                P0, P1, P2, P3 = vertices[face]
                 Ileft = plane.get_edge_intersection(P0, P1)
                 Iright = plane.get_edge_intersection(P2, P3)
                 intersections += [Ileft, Iright]
@@ -1350,7 +1441,7 @@ class Mesh(object):
                 #     \ /
                 #      *0
                 face = np.roll(face, -v_below_face[0])
-                P0, P1, P3 = crown_vertices[face[[0, 1, 3]]]
+                P0, P1, P3 = vertices[face[[0, 1, 3]]]
                 Ileft = plane.get_edge_intersection(P0, P3)
                 Iright = plane.get_edge_intersection(P0, P1)
                 intersections += [Ileft, Iright]
@@ -1369,7 +1460,7 @@ class Mesh(object):
                 #     \ /
                 #      *2
                 face = np.roll(face, -v_above_face[0])
-                P0, P1, P3 = crown_vertices[face[[0, 1, 3]]]
+                P0, P1, P3 = vertices[face[[0, 1, 3]]]
                 Ileft = plane.get_edge_intersection(P0, P1)
                 Iright = plane.get_edge_intersection(P0, P3)
                 intersections += [Ileft, Iright]
@@ -1385,7 +1476,7 @@ class Mesh(object):
                 #   /     \
                 # 1*-------*2
                 face = np.roll(face, -v_above_face[0])
-                P0, P1, P2 = crown_vertices[face]
+                P0, P1, P2 = vertices[face]
                 Ileft = plane.get_edge_intersection(P0, P1)
                 Iright = plane.get_edge_intersection(P0, P2)
                 intersections += [Ileft, Iright]
@@ -1400,7 +1491,7 @@ class Mesh(object):
                 #      \ /
                 #       *0
                 face = np.roll(face, -v_below_face[0])
-                P0, P1, P2 = crown_vertices[face]
+                P0, P1, P2 = vertices[face]
                 Ileft = plane.get_edge_intersection(P0, P2)
                 Iright = plane.get_edge_intersection(P0, P1)
                 intersections += [Ileft, Iright]
@@ -1420,13 +1511,13 @@ class Mesh(object):
 
                 face = np.roll(face, -v_on_face[0])
                 if pos[face[1]] < 0.:
-                    P1, P2 = crown_vertices[face[[1, 2]]]
+                    P1, P2 = vertices[face[[1, 2]]]
                     Iright = plane.get_edge_intersection(P1, P2)
                     intersections.append(Iright)
                     boundary_edge = [face[0], nI]
                     crown_faces.append([face[0], face[1], nI, face[0]])
                 else:
-                    P2, P3 = crown_vertices[face[[2, 3]]]
+                    P2, P3 = vertices[face[[2, 3]]]
                     Ileft = plane.get_edge_intersection(P2, P3)
                     intersections.append(Ileft)
                     boundary_edge = [nI, face[0]]
@@ -1443,13 +1534,13 @@ class Mesh(object):
                 #         *1                 *3
                 face = np.roll(face, -v_on_face[0])
                 if pos[face[1]] < 0.:
-                    P2, P3 = crown_vertices[face[[2, 3]]]
+                    P2, P3 = vertices[face[[2, 3]]]
                     Iright = plane.get_edge_intersection(P2, P3)
                     intersections.append(Iright)
                     boundary_edge = [face[0], nI]
                     crown_faces.append([face[0], face[1], face[2], nI])
                 else:
-                    P1, P2 = crown_vertices[face[[1, 2]]]
+                    P1, P2 = vertices[face[[1, 2]]]
                     Ileft = plane.get_edge_intersection(P1, P2)
                     intersections.append(Ileft)
                     boundary_edge = [nI, face[0]]
@@ -1484,7 +1575,7 @@ class Mesh(object):
                 #       \|               |/
                 #        *1              *2
                 face = np.roll(face, -v_on_face[0])
-                P1, P2 = crown_vertices[face[[1, 2]]]
+                P1, P2 = vertices[face[[1, 2]]]
                 if pos[face[1]] < 0.:
                     Iright = plane.get_edge_intersection(P1, P2)
                     intersections.append(Iright)
@@ -1593,13 +1684,18 @@ class Mesh(object):
                 direct_boundary_edges[boundary_edge[0]] = boundary_edge[1]
                 inv_boundary_edges[boundary_edge[1]] = boundary_edge[0]
 
-        crown_vertices = np.concatenate((crown_vertices, intersections))
+        vertices = np.concatenate((vertices, intersections))
 
-        clipped_crown_mesh = Mesh(crown_vertices, crown_faces)
+        clipped_crown_mesh = Mesh(vertices, crown_faces)
 
         newID = clipped_crown_mesh.merge_duplicates(return_index=True)
 
         immersed_mesh = clipped_crown_mesh + below_mesh
+
+        # Storing extraction informations
+        extraction_informations = {'source_mesh': self,
+                                   'extracted_vertices_ids': None,
+                                   'extracted_faces_ids': None}
 
         if return_boundaries:
             # Updating dictionaries
@@ -1651,7 +1747,7 @@ class Mesh(object):
 
                     if assert_closed_boundaries:
                         if len(open_lines) > 0:
-                            # mm.write_VTP('mesh_clip.vtp', crown_vertices, crown_faces)
+                            # mm.write_VTP('mesh_clip.vtp', vertices, crown_faces)
                             raise RuntimeError, 'Open intersection curve found'
 
                     break
@@ -1662,7 +1758,7 @@ class Mesh(object):
             return immersed_mesh, boundaries
 
         else:  # return_boundaries = False
-            # mm.show(crown_vertices, crown_faces)
+            # mm.show(vertices, crown_faces)
             return immersed_mesh
 
 
@@ -1679,7 +1775,7 @@ if __name__ == '__main__':
 
     # mesh.verbose_on()
     #
-    # clipped_mesh, boundaries = mesh.clip(plane, return_boundaries=True)
+    # clipped_mesh, boundaries = mesh.clip_by_plane(plane, return_boundaries=True)
 
 
 
@@ -1689,7 +1785,7 @@ if __name__ == '__main__':
 
     plane = Plane()
 
-    # clip(V, F, plane)
+    # clip_by_plane(V, F, plane)
     # sys.exit(0)
 
     # V, F = mm.symmetrize(V, F, plane)
