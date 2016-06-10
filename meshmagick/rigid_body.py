@@ -7,25 +7,49 @@ from mesh import *
 class RigidBody(object):
 
     def __init__(self, mass=None, cog=None, body_mesh=None):
-        self._mass = mass
+        self._mass = mass*1e3 # On entre la masse en tonnes !!!
         self._cog = cog
         self._body_mesh = body_mesh
 
 class PlainRigidBody(RigidBody):
-    def __init__(self, mass=None, cog=None, body_mesh=None):
+    def __init__(self, mass=None, cog=None, body_mesh=None, rho_material=1026.):
         RigidBody.__init__(self, mass=mass, cog=cog, body_mesh=body_mesh)
+        self._rho_material = rho_material
 
+    @property
+    def mass(self):
+        return self._mass*1e-3 # Attention: travailler en tonnes !!!
 
-    def get_cog_from_properties(self):
+    @property
+    def rho_material(self):
+        return self._rho_material
+
+    @rho_material.setter
+    def rho_material(self, value):
+        self._rho_material = float(value)
+        return
+
+    def _set_mass_from_properties(self):
+        self._mass = self._rho_material * self._body_mesh.volume
+        return
+
+    @property
+    def cog(self):
+        return self._cog
+
+    def _set_cog_from_properties(self):
 
         volume = self._body_mesh.volume
         mesh_normals = self._body_mesh.faces_normals
 
         sigma_6_8 = self._body_mesh.get_surface_integrals()[6:9]
+        self._cog = (mesh_normals.T * sigma_6_8).sum(axis=1) / (2*volume)
+        return
 
-        return (mesh_normals.T * sigma_6_8).sum(axis=1) / (2*volume)
-
-
+    def guess_mass_properties(self):
+        self._set_cog_from_properties()
+        self._set_mass_from_properties()
+        return
 
 class ShellRigidBody(RigidBody):
 
@@ -43,4 +67,5 @@ if __name__ == '__main__':
 
     body = PlainRigidBody(body_mesh=mymesh)
 
-    print body.get_cog_from_properties()
+    body.guess_mass_properties()
+    print body.cog, body.mass
