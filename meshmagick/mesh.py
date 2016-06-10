@@ -1392,10 +1392,9 @@ class Mesh(object):
         self.verbose = verbose
         return
 
-
-
     def _compute_faces_integrals(self, sum_faces_contrib=False): # TODO: implementer le sum_surface_contrib
 
+        # TODO: faire la machinerie pour pour
         surface_integrals = np.zeros((15, self.nb_faces), dtype=np.float)
 
         # First triangles
@@ -1418,9 +1417,38 @@ class Mesh(object):
             surface_integrals[:, quadrangles_ids] += \
                 self._compute_triangles_integrals(self._vertices[quadrangles[:, (0, 2, 3)]])
 
-            
+        # names = ('sint_x', 'sint_y', 'sint_z',
+        #          'sint_yz', 'sint_xz', 'sint_xy',
+        #          'sint_x2', 'sint_y2', 'sint_z2',
+        #          'sint_x3', 'sint_y3', 'sint_z3'
+        #          'sint_x2y', 'sint_y2z', 'sint_z2x')
+        #
+        # s_int = dict(zip(names, surface_integrals))
+        # self.__internals__.update(s_int)
+
+        self.__internals__['surface_integrals'] = surface_integrals
 
         return
+
+    def has_surface_integrals(self):
+        return self.__internals__.has_key('surface_integrals')
+
+    def get_surface_integrals(self):
+        return self.__internals__['surface_integrals']
+
+    def _compute_volume(self):
+        if not self.has_surface_integrals():
+            self._compute_faces_integrals()
+
+        normals = self.faces_normals
+        sigma_0_2 = self.__internals__['surface_integrals'][:3]
+
+        return (normals.T * sigma_0_2).sum() / 3.
+
+    @property
+    def volume(self):
+        return self._compute_volume()
+
 
 
     @staticmethod
@@ -1479,6 +1507,8 @@ if __name__ == '__main__':
     mymesh = Mesh(V, F)
 
     mymesh._compute_faces_integrals()
+
+    print mymesh.volume
 
     sys.exit(0)
 
