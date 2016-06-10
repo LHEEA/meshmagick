@@ -15,7 +15,7 @@ import math
 
 
 # TODO: voir a mettre ca dans la classe mesh
-def show(V, F, CG=None, B=None):
+def show(vertices, faces, CG=None, B=None):
 
     # TODO: afficher polygones...
     import MMviewer
@@ -23,15 +23,15 @@ def show(V, F, CG=None, B=None):
     my_viewer = MMviewer.MMViewer()
 
     # Adding mesh
-    polydata_mesh = mm._build_vtkPolyData(V, F)
+    polydata_mesh = mm._build_vtkPolyData(vertices, faces)
     my_viewer.add_polydata(polydata_mesh)
 
     # Flotation plane
     plane = vtk.vtkPlaneSource()
 
     # plane.SetNormal(0, 0, 1)
-    xmin, ymin = V[:, :2].min(axis=0)
-    xmax, ymax = V[:, :2].max(axis=0)
+    xmin, ymin = vertices[:, :2].min(axis=0)
+    xmax, ymax = vertices[:, :2].max(axis=0)
     plane.SetOrigin(xmin, ymax, 0)
     plane.SetPoint1(xmin, ymin, 0)
     plane.SetPoint2(xmax, ymax, 0)
@@ -118,9 +118,6 @@ def show(V, F, CG=None, B=None):
 
         my_viewer.add_polydata(lines_pd, color=[0, 0, 0])
 
-
-
-
     # # Display intersection polygons
     # if polygons is not None:
     #     for polygon_ids in polygons:
@@ -141,7 +138,6 @@ def show(V, F, CG=None, B=None):
     #         polygon_pd.SetPolys(cell)
     #
     #         my_viewer.add_polydata(polygon_pd, color=[1, 0, 0])
-
 
     # Adding corner annotation
     ca = vtk.vtkCornerAnnotation()
@@ -180,16 +176,16 @@ def _get_rotation_matrix(thetax, thetay):
                             [-ny, nx, 0.]])
     return R
 
-def compute_equilibrium(V, F, disp, CG, rho_water=1023, grav=9.81,
+def compute_equilibrium(vertices, faces, disp, CG, rho_water=1023, grav=9.81,
                         reltol=1e-2, itermax=100, max_nb_relaunch=10, theta_relax=2, z_relax=0.1,
                         verbose=False, anim=False):
     """
 
     Parameters
     ----------
-    V : ndarray
+    vertices : ndarray
         Array of mesh vertices
-    F :
+    faces :
         Array of mesh connectivities
     disp : float
         Mass displacement of the floater (in tons)
@@ -229,8 +225,8 @@ def compute_equilibrium(V, F, disp, CG, rho_water=1023, grav=9.81,
     R = np.eye(3, 3)
     dz_update = 0.
 
-    Vc = V.copy()
-    Fc = F.copy()
+    Vc = vertices.copy()
+    Fc = faces.copy()
     CGc = CG.copy()
 
     # origin = np.zeros(3)
@@ -400,15 +396,15 @@ def compute_equilibrium(V, F, disp, CG, rho_water=1023, grav=9.81,
 
     return Vc, Fc, CGc
 
-def _get_Sf_Vw(V, F):
+def _get_Sf_Vw(vertices, faces):
     """
     Computes only the flotation surface area and the immersed volume of the mesh
 
     Parameters
     ----------
-    V : ndarray
+    vertices : ndarray
         Array of the mesh vertices
-    F : ndarray
+    faces : ndarray
         Array of the mesh connectivities
 
     Returns
@@ -418,7 +414,7 @@ def _get_Sf_Vw(V, F):
     Sf : float
     Vw : float
     """
-    Vc, Fc, clip_infos = mm.clip_by_plane(V, F, mm.Plane(), infos=True)
+    Vc, Fc, clip_infos = mm.clip_by_plane(vertices, faces, mm.Plane(), infos=True)
 
     areas, normals, centers = mm.get_all_faces_properties(Vc, Fc)
 
@@ -437,15 +433,15 @@ def _get_Sf_Vw(V, F):
 
     return Vc, Fc, Sf, Vw
 
-def set_displacement(V, F, disp, rho_water=1023, grav=9.81, abs_tol= 1., itermax=25, verbose=False):
+def set_displacement(vertices, faces, disp, rho_water=1023, grav=9.81, abs_tol= 1., itermax=25, verbose=False):
     """
     Displaces mesh at a prescribed displacement and returns
 
     Parameters
     ----------
-    V : ndarray
+    vertices : ndarray
         Array of the mesh vertices
-    F : ndarray
+    faces : ndarray
         Array of the mesh connectivities
     disp : float
         Mass displacement of the hull (in tons)
@@ -477,8 +473,8 @@ def set_displacement(V, F, disp, rho_water=1023, grav=9.81, abs_tol= 1., itermax
                 print 'No convergence of the displacement after %u iterations' % itermax
             break
 
-        Vc = V.copy()
-        Fc = F.copy()
+        Vc = vertices.copy()
+        Fc = faces.copy()
 
         # Translating the mesh
         mm.translate_1D(Vc, dz, 'z') # TODO: le faire directement
@@ -547,13 +543,15 @@ def compute_hydrostatics(mesh, zg, rho_water=1023, grav=9.81, verbose=False):
 
     eps = 1e-4 # For zeroing tiny coefficients in the hydrostatic stiffness matrix
 
+    # TODO: initialiser un clipper
+
     # Clipping the mesh by the Oxy plane
     plane = Plane() # Oxy plane
     try:
         # Vc, Fc, clip_infos = mm.clip_by_plane(vertices, faces, plane, infos=True)
         clipped_mesh, boundaries = mesh.clip(plane, return_boundaries=True, assert_closed_boundaries=True)
     except:
-        show(V, F)
+        show(mesh.vertices, mesh.faces)
         raise Exception, 'Hydrostatic module only work with watertight hull. Please consider using the --sym option.'
 
     # TODO: retenir les pptes du maillage initial
@@ -739,10 +737,10 @@ if __name__ == '__main__':
     # The following code are only for testng purpose
 
 
-    V, F = mm.load_VTP('tests/SEAREV/SEAREV.vtp')
+    vertices, faces = mm.load_VTP('tests/SEAREV/SEAREV.vtp')
     # vertices, faces = mm.load_MAR('Cylinder.mar')
     plane = mm.Plane(np.array([0, 1, 0]))
-    V, F = mm.symmetrize(V, F, plane=plane)
+    vertices, faces = mm.symmetrize(vertices, faces, plane=plane)
     # vertices, faces = mm.symmetrize(vertices, faces, plane=mm.Plane())
     # mm.show(vertices, faces)
 
@@ -757,26 +755,15 @@ if __name__ == '__main__':
     # Cylindre
     # disp = 1100
     # CG = np.array([0.3, 2, 3])
-    V, F, CGc = compute_equilibrium(V, F, disp, CG, rho_water=1023, grav=9.81,
+    vertices, faces, CGc = compute_equilibrium(vertices, faces, disp, CG, rho_water=1023, grav=9.81,
                                     reltol=1e-2, itermax=100, max_nb_relaunch=15, theta_relax=1, z_relax=0.1,
                                     verbose=True, anim=False)
 
 
-    hs_output = compute_hydrostatics(V, F, CGc[-1], verbose=True)
+    hs_output = compute_hydrostatics(vertices, faces, CGc[-1], verbose=True)
     print '\nCenter of gravity new_location: ', CGc
     print '\nBuoyancy center               : ', hs_output['B']
 
-    show(V, F, CG=CGc, B=hs_output['B'])
+    show(vertices, faces, CG=CGc, B=hs_output['B'])
 
 
-    # target_disp = 750
-    # abs_tol = 1.
-    #
-    # dz, Vc, Fc = set_displacement(vertices, faces, target_disp, abs_tol=abs_tol, verbose=True)
-    #
-    # mm.show(Vc, Fc)
-    #
-    # # Verification
-    # hs_output = compute_hydrostatics(Vc, Fc, 0, verbose=True)
-    # if math.fabs(hs_output['disp'] - target_disp) > abs_tol:
-    #     raise ValueError, 'Convergence problem'

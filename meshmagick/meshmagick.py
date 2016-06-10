@@ -43,865 +43,375 @@ __email__      = "Francois.Rongere@ec-nantes.fr"
 __status__     = "Development"
 
 
-real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?' # Regex for floats
-
-# TODO: for vtk usage, replace vtkUnstructuredGrid by vtkPolyData --> .vtp files...
-
-# MESHMAGICK CLASSES
-# ------------------
-
-# class Plane: # TODO: reposer sur la classe plane developpee dans mesh_clipper
-#     """Class to manipulate planes.
+# _mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float) # Defines the array coefficient to compute surface integrals efficiently
+# def _get_surface_integrals(V, F, sum=True):
+#     """_get_surface_integrals(vertices, faces, sum=True)
 #
-#     Planes are used for symmetrizing and clipping meshes. The internal representation
-#     of a plane is the equation <N.X> = c where X is a point belonging to the plane,
-#     N is the normal to the plane and c is the normal distance of the plane with respect
-#     to the coordinate system origin.
+#     Internal function
+#     Computes all the faces' integrals that may be used in several computations such
+#     as inertial properties of meshes. This function is partly based on the work of
+#     David Eberly:
+#     ...
 #
-#     Example:
-#         We can define a plane by giving a normal and a scalar.
+#     Parameters:
+#         V: ndarray
+#             numpy array of the mesh's nodes coordinates
+#         F: ndarray
+#             numpy array of the mesh's faces nodes connectivity
+#         sum[optional]: bool
+#             if let to True, the results will be summed over all faces.
+#             Otherwise, no sum will be performed and individual integral
+#             on faces will be returned
 #
-#         >>> my_plane = Plane([1, 0, 0], 0)
+#     Return:
+#         sint: ndarray
+#             numpy array of shape (nf, 15) that contains different integrals
+#             over the mesh faces. If sum is False, nf is equal to the number
+#             of faces in the mesh. Otherwise, nf=1.
 #
-#         will define the plane 0yz with a normal pointing towards the positive x-axis.
+#             The different integrals that sint contains are:
+#
+#              sint[0]  = \int x dS
+#              sint[1]  = \int y dS
+#              sint[2]  = \int z dS
+#              sint[3]  = \int yz dS
+#              sint[4]  = \int xz dS
+#              sint[5]  = \int xy dS
+#              sint[6]  = \int x^2 dS
+#              sint[7]  = \int y^2 dS
+#              sint[8]  = \int z^2 dS
+#              sint[9]  = \int x^3 dS
+#              sint[10] = \int y^3 dS
+#              sint[11] = \int z^3 dS
+#              sint[12] = \int x^2y dS
+#              sint[13] = \int y^2z dS
+#              sint[14] = \int z^2x dS
+#     """
+#
+#     # TODO : put reference to the Eberly's work in the docstring
+#
+#     nf = F.shape[0]
+#
+#     if sum:
+#         sint = np.zeros(15, dtype=float)
+#     else:
+#         sint = np.zeros((nf, 15), dtype=float)
+#
+#     tri1 = [0, 1, 2]
+#     tri2 = [0, 2, 3]
+#
+#     cross = np.cross
+#
+#     sint_tmp = np.zeros(15)
+#     for (iface, face) in enumerate(F):
+#         sint_tmp *= 0.
+#         # sint_tmp = np.zeros(15) # FIXME : Essai, la version precedente serait mieux !
+#
+#         if face[0] == face[-1]:
+#             nb = 1
+#         else:
+#             nb = 2
+#
+#         vertices = V[face]
+#
+#         # Loop on triangles of the face
+#         for itri in xrange(nb):
+#             if itri == 0:
+#                 triangle = tri1
+#             else:
+#                 triangle = tri2
+#
+#             V0, V1, V2 = vertices[triangle]
+#             x0, y0, z0 = V0
+#             x1, y1, z1 = V1
+#             x2, y2, z2 = V2
+#
+#             d0, d1, d2 = cross(V1-V0, V2-V0)
+#             e1_c_e2 = math.sqrt(d0**2 + d1**2 + d2**2)
+#
+#             temp0 = V0 + V1
+#             f1 = temp0 + V2
+#             temp1 = V0*V0
+#             temp2 = temp1 + V1*temp0
+#             f2 = temp2 + V2*f1
+#             f3 = V0*temp1 + V1*temp2 + V2*f2
+#             g0 = f2 + V0*(f1+V0)
+#             g1 = f2 + V1*(f1+V1)
+#             g2 = f2 + V2*(f1+V2)
+#
+#             yz = z0*(4*y0 - y1 - y2)  - y0*(z1+z2) + 3*(y1*z1 + y2*z2)
+#             xz = x0*(4*z0 - z1 - z2)  - z0*(x1+x2) + 3*(x1*z1 + x2*z2)
+#             xy = y0*(4*x0 - x1 - x2)  - x0*(y1+y2) + 3*(x1*y1 + x2*y2)
+#
+#             # Update integrals
+#             sint_tmp[0] += d0 * f1[0] # order 1 in vol, x in surf
+#             sint_tmp[1] += d1 * f1[1] # order 1 in vol, y in surf
+#             sint_tmp[2] += d2 * f1[2] # order 1 in vol, z in surf
+#
+#             sint_tmp[3] +=  d0 * yz # order yz in surf
+#             sint_tmp[4] +=  d1 * xz # order xz in surf
+#             sint_tmp[5] +=  d2 * xy # order xy in surf
+#
+#             sint_tmp[6] += d0 * f2[0] # order x in vol, x**2 in surf
+#             sint_tmp[7] += d1 * f2[1] # order y in vol, y**2 in surf
+#             sint_tmp[8] += d2 * f2[2] # order z in vol, z**2 in surf
+#             sint_tmp[9] += d0 * f3[0] # order x**2 in vol, x**3 in surf
+#             sint_tmp[10] += d1 * f3[1] # order y**2 in vol, y**3 in surf
+#             sint_tmp[11] += d2 * f3[2] # order z**2 in vol, z**3 in surf
+#             sint_tmp[12] += d0 * (y0*g0[0] + y1*g1[0] + y2*g2[0]) # order xy in vol, x**2*y in surf
+#             sint_tmp[13] += d1 * (z0*g0[1] + z1*g1[1] + z2*g2[1]) # order yz in vol, y**2*z in surf
+#             sint_tmp[14] += d2 * (x0*g0[2] + x1*g1[2] + x2*g2[2]) # order zx in vol, z**2*x in surf
+#
+#             if sum:
+#                 sint += sint_tmp
+#             else:
+#                 sint[iface] = sint_tmp
+#
+#     if sum:
+#         sint *= _mult_surf
+#     else:
+#         sint = np.array([sint[j]*_mult_surf for j in xrange(nf)], dtype=float)
+#
+#     return sint
+#
+#
+# def get_mass_cog(V, F, rho=1.):
+#     """get_mass_cog(vertices, faces, rho=1.)
+#
+#     Returns the mass and the center of gravity of a mesh
+#
+#     Parameters:
+#         V: ndarray
+#             numpy array of the coordinates of the mesh's nodes
+#         F: ndarray
+#             numpy array of the faces' nodes connectivities
+#         rho[optional]: float
+#             specifies the density of the material enclosed by the mesh
+#
+#     Returns:
 #
 #     """
-#     def __init__(self, normal=np.array([0., 0., 1.]), c=0.):
-#         """Plane constructor
+#     # TODO: allow to specify as mush as options as in get_inertial_properties... or remove this function !
 #
-#         Parameters:
-#             normal: ndarray
-#                 A numpy array of three elements defining the normal to the plane.
-#             c: float
-#                 A float defining the normal distance of the plane with respect to
-#                 the coordinate system origin.
-#         """
-#         self.normal = normal / np.linalg.norm(normal) # Ensuring a unit normal
-#         self.c = c
-#
-#         phi, theta = self._get_angles_from_normal()
-#         self.Re0 = self._get_rotation_matrix(phi, theta)
+#     return get_inertial_properties(V, F, rho=rho)[:2]
 #
 #
-#     def set_position(self, z=0., phi=0., theta=0.):
-#         """Set the position of the plane from z and phi, theta angles (given in radian)
-#         instead of the normal and scalar convention."""
+# _mult_vol = np.array([1., 1., 1., 1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.]) # Defines the array coefficient to compute volume integrals on meshes
+# def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False):
+#     """get_inertial_properties(vertices, faces, rho=7500., mass=None, thickness=None, shell=False, verbose=False)
 #
-#         self.Re0 = self._get_rotation_matrix(phi, theta)
-#         self.normal = self.Re0[2]
-#         self.c = z
+#     Returns the inertial properties of a mesh. The mesh may be considred as being
+#     filled with homogeneous material or as being a shell.
 #
-#         return 1
+#     Parameters:
+#         V: ndarray
+#             numpy array of the coordinates of the mesh's nodes
+#         F: ndarray
+#             numpy array of the faces' nodes connectivities
+#         rho[optional]: float
+#             the density of the material. By default, it is the steel density
+#             (7500 kg/m**3)
+#         mass[optional]: float
+#             the mass of the mesh. If it is specified, it will overwrite
+#             the density (even if explicitely given)
+#         thickness[optional]: float
+#             specifies the thickness of the hull. Used if shell is set to True.
+#         shell[optional]: bool
+#             if set to True, the mesh will be considered as a shell
+#         verbose[optional]: bool
+#             if set to True, the function will display a report on inertial
+#             properties of the mesh
+#
+#     Returns:
+#         mass: float
+#             The mass of the mesh (computed or given...)
+#         cog: ndarray
+#             The coordinates of the center of gravity of the mesh
+#         inertia_matrix: ndarray
+#             The inertia matrix of the mesh expressed at the center
+#              of gravity
+#
+#     """
+#     # TODO : allow to specify a reduction point...
+#     # The default density rho is that of steel
+#
+#     tol = 1e-8
+#
+#     # FIXME : la gestion des options n'est pas claire ici !!! Remettre les choses a plat
+#
+#     if shell: # The geometry is a shell with homogeneous thickness and density.
+#         areas, normals = get_all_faces_properties(V, F)[:2]
+#         St = areas.sum() # Total surface
+#         # The geometry is considered as being a shell with thickness given
+#         if mass is None:
+#
+#             # FIXME : may not work if thickness is not given !!
+#
+#             # if thickness is None:
+#             #     # Assuming a standard thickness of 1cm
+#             #     thickness = 1e-2
+#
+#             sigma = thickness * rho
+#             mass = St*sigma
+#
+#         else:# A mass has been specified
+#             sigma = mass/St # Surfacic density
+#
+#             if thickness is None:
+#                 # Computing the equivalent thickness
+#                 thickness = sigma / rho
+#             else:
+#                 # thickness has been given, overwriting the density of the medium accordingly
+#                 rho_tmp = sigma / thickness
+#                 rho = rho_tmp
+#
+#         # Getting surface integrals
+#         sint = _get_surface_integrals(V, F, sum=False)
+#
+#         normals[normals==0.] = 1. # To avoid division by zero
+#         # Correcting these integrals by normals
+#         sint[:, :3] /= normals
+#         sint[:, 3:6] /= normals
+#         sint[:, 6:9] /= normals
+#         sint[:, 9:12] /= normals
+#         sint[:, 12:15] /= normals
+#
+#         nu = sint.sum(axis=0)
+#
+#         cog = np.array([nu[0], nu[1], nu[2]], dtype=np.float) * sigma / mass
+#
+#         inertia_matrix = np.array([
+#             [nu[7]+nu[8] ,   -nu[5]   ,   -nu[4]],
+#             [  -nu[5]    , nu[6]+nu[8],   -nu[3]],
+#             [  -nu[4]    ,   -nu[3]   , nu[6]+nu[7]]
+#         ], dtype=np.float) * sigma
+#
+#         if verbose:
+#             print '\nPrincipal inertia parameters report:'
+#             print '------------------------------------\n'
+#             print 'Total surface         : %f m**2' % St
+#             print 'Thickness             : %f m' % thickness
+#             print 'Density               : %f kg/m**3' % rho
+#             print 'Surface density       : %f kg/m**2' % sigma
+#
+#     else:
+#         # The geometry is full
+#         sint = _get_surface_integrals(V, F)
+#
+#         # Appliying multipliers
+#         sint *= _mult_vol
+#
+#         # We take the mean of 3 possible computations from surface integrals
+#         vol = (sint[0] + sint[1] + sint[2]) / 3.
+#         cog = np.array([sint[6]/vol, sint[7]/vol, sint[8]/vol], dtype=float)
+#
+#         # Inertia matrix is expressed for the moment in O
+#         # xx = sint[10] + sint[11] - vol*(cog[1]**2 + cog[2]**2)
+#         # yy = sint[9] + sint[11] - vol*(cog[2]**2 + cog[0]**2)
+#         # zz = sint[9] + sint[10] - vol*(cog[0]**2 + cog[1]**2)
+#         # xy = -(sint[12] - vol*cog[0]*cog[1])
+#         # yz = -(sint[13] - vol*cog[1]*cog[2])
+#         # xz = -(sint[14] - vol*cog[2]*cog[0])
+#
+#         # Inertia matrix expressed in cog
+#         xx = sint[10] + sint[11]
+#         yy = sint[9] + sint[11]
+#         zz = sint[9] + sint[10]
+#         xy = -sint[12]
+#         yz = -sint[13]
+#         xz = -sint[14]
+#
+#         mass = rho * vol
+#         # The inertia matrix is expressed in
+#         inertia_matrix = rho * np.array(
+#             [
+#                 [xx, xy, xz],
+#                 [xy, yy, yz],
+#                 [xz, yz, zz]
+#             ], dtype=np.float)
+#
+#     # Cleaning
+#     cog[np.fabs(cog) < tol] = 0.
+#     inertia_matrix[np.fabs(inertia_matrix) < tol] = 0.
+#
+#     if verbose:
+#         print 'Mass                  : %f kg' % mass
+#         print 'COG                   : (%f, %f, %f) m' % tuple(cog)
+#         print 'Inertia matrix in COG : '
+#         print '\t%E, %E, %E\n\t%E, %E, %E\n\t%E, %E, %E\n' % tuple(inertia_matrix.flatten())
+#
+#     return mass, cog, inertia_matrix
 #
 #
-#     def get_position(self):
-#         """Returns the position of the plane as a [z, phi, theta] numpy array
-#         """
-#         # FIXME : on ne garde plus les angles en attribut
-#         phi, theta = self._get_angles_from_normal()
-#         return np.array([self.c, phi, theta], dtype=np.float)
+# def transport_inertia_matrix(mass, cog, Ig, point, rot=np.eye(3, dtype=np.float)):
+#     """transport_inertia_matrix(mass, cog, Ig, point, rot)
+#
+#     Performs the transport of the inertia matrix of a mesh at an other
+#     reduction point
+#
+#     Parameters:
+#         mass: float
+#             The mass of the mesh
+#         cog: ndarray
+#             The coordinates of the center of gravity
+#         Ig: ndarray
+#             The 3x3 inertia matrix of the mesh expressed at cog
+#         point: ndarray
+#             The coordinates of the reduction point
+#         rot: ndarray
+#             The rotation matrix defining the orientation of the
+#             new axis system with respect to the current
+#
+#     Returns:
+#         Ipoint:
+#             The 3x3 inertia matrix of the mesh expressed at the
+#             new reduction point and in a frame rotated by rot with
+#             respect to the initial coordinate system
+#     """
+#
+#     point_cog = cog - point
+#     Ipoint = rot * Ig * rot.T + \
+#              mass * (np.eye(3, dtype=float) * np.dot(point_cog, point_cog)
+#                      - np.outer(point_cog, point_cog))
+#     return Ipoint
 #
 #
-#     def update(self, deta):
-#         """Update the position of the plane with respect to its current position"""
+# def get_volume(V, F):
+#     """get_volume(vertices, faces)
 #
-#         # Computing the rotation matrix between current and final position
-#         Rpp_p = self._get_rotation_matrix(deta[1], deta[2])
+#     Returns the volume of the mesh
 #
-#         self.Re0 = np.dot(Rpp_p, self.Re0)
-#         self.normal = self.Re0[2]
-#         self.c = self.c * Rpp_p[2, 2] + deta[0]
+#     Parameters:
+#         V: ndarray
+#             numpy array of the coordinates of the mesh's nodes
+#         F: ndarray
+#             numpy array of the faces' nodes connectivities
 #
-#         return 1
-#
-#
-#     def flip(self):
-#         """Flip the normal orientation"""
-#         self.normal = -self.normal
-#         #TODO : faire la mise a jour des infos d'angle !!
-#
-#
-#     def _get_angles_from_normal(self):
-#         """Internal method returning the orientation of the plane normal
-#         with respect to the coordinate system"""
-#
-#         u, v, w = self.normal
-#
-#         phi = math.asin(-v)
-#         theta = math.atan2(u, w)
-#
-#         return phi, theta
+#     Returns:
+#         vol: float
+#             The volume of the mesh
+#     """
+#     return _get_surface_integrals(V, F)[0]
 #
 #
-#     def _get_rotation_matrix(self, phi, theta):
-#         """Internal method returning the rotation matrix associated to the
-#         orientation of the plane's normal orientation angles"""
+# def get_COM(V, F):
+#     """get_COM(vertices, faces)
 #
-#         # Rotation matrix
-#         cphi = math.cos(phi)
-#         sphi = math.sin(phi)
-#         ctheta = math.cos(theta)
-#         stheta = math.sin(theta)
+#     Returns the center of mass (center of gravity) of the mesh
 #
-#         Re0 = np.zeros((3, 3), dtype=float)
-#         Re0[0] = [ctheta, 0., -stheta]
-#         Re0[1] = [sphi*stheta, cphi, sphi*ctheta]
-#         Re0[2] = [cphi*stheta, -sphi, cphi*ctheta]
+#     Parameters:
+#         V: ndarray
+#             numpy array of the coordinates of the mesh's nodes
+#         F: ndarray
+#             numpy array of the faces' nodes connectivities
 #
-#         return Re0
+#     Returns:
+#         com: ndarray
+#             Coordinates of the center of gravity of the mesh
+#     """
+#     # FIXME: la sortie est tres etonnante. Ne doit pas faire ce que ca dit !!!
 #
-#
-#     def coord_in_plane(self, vertices):
-#         """Returns the coordinates of vertices in the local plane coordinate system"""
-#
-#         # FIXME : ne fonctionne pas si on envoie un seul vertex !
-#         if vertices.ndim == 1: # Case where only one vertex is given
-#             new_vertices = np.dot(self.Re0, vertices)
-#             new_vertices[2] -= self.c
-#         else:
-#             new_vertices = np.array([np.dot(self.Re0, vertices[i]) for i in xrange(vertices.shape[0])], dtype=float)
-#             new_vertices[:, 2] -= self.c
-#         return new_vertices
-
-
-
-def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
-    """clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False)
-
-    Performs a mesh clipping by plane
-
-    Parameters:
-        Vinit: ndarray
-            numpy array of shape (nv, 3) specifying the nodes's coodinates
-            of the initial mesh to be clipped. nv is the number of nodes.
-        Finit: ndarray
-            numpy array of shape (nf, 4) specifying the node connectivity
-            for the faces description of the initial mesh to be clipped.
-            nf is the number of faces in the mesh. Every face is a line of
-            Finit. It specifies 4 nodes ids. In case of a triangle face,
-            the convention is to repeat the first node id as the last element.
-        plane: Plane
-            Plane instance that defines the clipping plane
-        abs_tol: float
-            tolerance under which a node is considered as belonging to the
-            clipping plane
-        infos: boolean
-            if set to True, the function also returns a dictionary named
-            clip_info which embed information on the clipping procedure
-            such as the clipping polygons
-
-    Returns:
-        clipped_V: ndarray
-            numpy array of shape (new_nv, 3) giving the nodes of the clipped
-            mesh. new_nv is the number of vertices in the clipped mesh
-        clipped_F: ndarray
-            numpy array of shape (new_nf, 4) giving the connectivity of faces
-            for the clipped mesh. new_nf is the number of faces in the clipped
-            mesh
-        clip_infos [optional]: dict
-            dictionary giving the following informations:
-                'FkeptOldID':
-                    a numpy array of size new_nf specifying for
-                    each kept face the old ID it had in the initial, non clipped
-                    mesh
-                 'FkeptNewID':
-                    a numpy array of size nf specifying for each old face, in case
-                    it has been kept in the clipped mesh, its new ID in the clipped
-                    mesh
-                 'FToUpdateNewID':
-                    a numpy array of size nm giving the list of face ids that have
-                     been modified in the clipping procedure (following IDs in the
-                     clipped mesh). nm is the number of modified faces. Modified
-                     faces are those faces that have been intersected by the plane
-                     and that potentially have degenerated from triangles to
-                     quadrangles or other modification linked to that kind of
-                     intersection. It also concerns the newly created faces (mainly
-                     those that appeared in qudrangle intersection by plane that
-                     gives a polygon with five edges and that need to be subdivided
-                     into a triangle plus a quadrangle)
-                 'PolygonsNewID':
-                    a list of numpy arrays specifying for each clipping polygon
-                    (generated by the intersection of the mesh with the clipping
-                    plane) the list of node ids of the polygon. The size of this
-                    list gives the number of polygons issued from the intersection
-    """
-
-    # Working on different arrays
-    V = Vinit.copy()
-    F = Finit.copy()
-
-    # To store information about extraction
-    # TODO : create a class clip_infos ?
-    clip_infos = {'FkeptOldID':[], 'FkeptNewID':[], 'FToUpdateNewID':[], 'PolygonsNewID':[]}
-
-    # Necessary to deal with clipping of quadrangle that give a pentagon
-    triangle = [2, 3, 4, 2]
-    quadrangle = [1, 2, 4, 5]
-
-    # Classification of vertices
-    nv = V.shape[0]
-    nf = F.shape[0]
-
-    # Getting the position of each vertex with respect to the plane (projected distance)
-    positions = np.dot(V, plane.normal)-plane.c
-
-    boundary_v_mask = (np.fabs(positions) <= abs_tol) # Vertices that are already on the boundary
-
-    # Getting the vertices we are sure to keep
-    keepV = positions <= abs_tol # Vertices we know we will keep
-
-    # If the mesh is totally at one side of the plane, no need to go further !
-    nb_kept_V = np.sum(keepV)
-    if nb_kept_V == 0:
-        # Mesh is totally above the plane, no intersection, nothing to keep --> error
-        raise RuntimeError, 'Mesh is totally above the clipping plane. No cells to keep...'
-
-    # Getting triangles and quads masks
-    triangle_mask = F[:, 0] == F[:, -1]
-    nb_triangles = np.sum(triangle_mask)
-    quad_mask = np.invert(triangle_mask)
-    nb_quads = nf-nb_triangles
-
-    # Getting the number of kept vertex by face
-    nb_V_kept_by_face = np.zeros(nf, dtype=np.int32)
-    nb_V_kept_by_face[triangle_mask] = \
-        np.sum(keepV[(F[triangle_mask,:3]).flatten()].reshape((nb_triangles, 3)), axis=1)
-    nb_V_kept_by_face[quad_mask] = \
-        np.sum(keepV[(F[quad_mask]).flatten()].reshape((nb_quads, 4)), axis=1)
-
-    # Getting the number of vertex below the plane by face
-    nb_V_below_by_face = np.zeros(nf, dtype=np.int32)
-    V_below_mask = positions < -abs_tol
-    nb_V_below_by_face[triangle_mask] = np.sum(V_below_mask[(F[triangle_mask, :3]).flatten()].reshape(nb_triangles,
-                                                                                                       3), axis=1)
-    nb_V_below_by_face[quad_mask] = np.sum(V_below_mask[(F[quad_mask]).flatten()].reshape(nb_quads, 4), axis=1)
-
-    # Getting the faces that are kept as every of their vertices are kept
-    keepF = np.zeros(nf, dtype=bool)
-    keepF[np.logical_and(triangle_mask, nb_V_kept_by_face == 3)] = True
-    keepF[np.logical_and(quad_mask, nb_V_kept_by_face == 4)] = True
-
-    clip_infos['FkeptOldID'] = np.arange(nf)[keepF] # TODO : voir si on ne peut pas mettre cette ligne dans le bloc
-    # infos suivant
-
-    if infos:
-        # Getting the boundary faces
-        nb_V_on_boundary_by_face = np.zeros(nf, dtype=np.int32)
-        nb_V_on_boundary_by_face[triangle_mask] = \
-            np.sum(boundary_v_mask[(F[triangle_mask, :3]).flatten()].reshape((nb_triangles, 3)), axis=1)
-        nb_V_on_boundary_by_face[quad_mask] = \
-            np.sum(boundary_v_mask[(F[quad_mask]).flatten()].reshape((nb_quads, 4)), axis=1)
-
-        # Faces that are at the boundary but that have to be clipped, sharing an edge with the boundary
-        boundary_faces_mask = np.zeros(nf, dtype=bool)
-        boundary_faces_mask[triangle_mask] =  np.logical_and(nb_V_on_boundary_by_face[triangle_mask] == 2,
-                                                             nb_V_kept_by_face[triangle_mask] == 3)
-        boundary_faces_mask[quad_mask] =  np.logical_and(nb_V_on_boundary_by_face[quad_mask] == 2,
-                                                             nb_V_kept_by_face[quad_mask] == 4)
-
-        # Building the boundary edges that are formed by the boundary_vertices
-        # boundary_faces = np.array([i for i in xrange(nf)])[boundary_faces_mask]
-        boundary_faces = np.arange(nf)[boundary_faces_mask]
-        boundary_edges = {}
-        for face in F[boundary_faces]:
-            if face[0] == face[-1]:
-                face_w = face[:3]
-            else:
-                face_w = face
-            boundary_v_face_mask = boundary_v_mask[face_w]
-            for (index, is_V_on_boundary) in enumerate(boundary_v_face_mask):
-                if is_V_on_boundary:
-                    if boundary_v_face_mask[index-1]:
-                        boundary_edges[face_w[index]] = face_w[index-1]
-                    else:
-                        boundary_edges[face_w[index+1]] = face_w[index]
-                    break
-
-    # All the faces are kept, the mesh is totally under the plane
-    if nb_kept_V == nv:
-        if infos:
-            # Detecting if the mesh has intersection polygons
-            if boundary_v_mask.sum() > 0:
-                # Computing the boundary polygons
-                initV = boundary_edges.keys()[0]
-                polygons = []
-                while len(boundary_edges) > 0:
-                    polygon = [initV]
-                    closed = False
-                    iV = initV
-                    while 1:
-                        iVtarget = boundary_edges.pop(iV)
-                        polygon.append(iVtarget)
-                        iV = iVtarget
-                        if iVtarget == initV:
-                            polygons.append(polygon)
-                            if len(boundary_edges) > 0:
-                                initV = boundary_edges.keys()[0]
-                            break
-                clip_infos['PolygonsNewID'] = polygons
-            # clip_infos['FkeptOldID'] = np.arange(nf, dtype=np.int32)
-            clip_infos['FkeptNewID'] = clip_infos['FkeptOldID'].copy()
-
-            return V, F, clip_infos
-        else:
-            return V, F
-
-    clipped_mask = np.zeros(nf, dtype=bool)
-    clipped_mask[triangle_mask] = np.logical_and(nb_V_kept_by_face[triangle_mask] < 3,
-                                                 nb_V_below_by_face[triangle_mask] > 0)
-    clipped_mask[quad_mask] = np.logical_and(nb_V_kept_by_face[quad_mask] < 4,
-                                                 nb_V_below_by_face[quad_mask] > 0)
-
-    keepF[clipped_mask] = True
-    clipped_faces = np.arange(nf)[clipped_mask]
-
-    nb_kept_F = np.sum(keepF)
-
-    # TODO : etablir ici une connectivite des faces a couper afin d'aider a la projection des vertex sur le plan
-
-    # Initializing the mesh clipping
-    nb_new_V = 0
-    newV = []
-    nb_new_F = 0
-    newF = []
-    edges = dict() # keys are ID of vertices that are above the plane
-
-
-    # Loop on the faces to clip_by_plane
-    for (iface, face) in enumerate(F[clipped_faces]):
-        # face is a copy (not a reference) of the line of faces
-        clipped_face_id = clipped_faces[iface]
-
-        if triangle_mask[clipped_face_id]:
-            nb = 3
-        else:
-            nb = 4
-
-        pos_lst = list(keepV[face[:nb]])
-        face_lst = list(face[:nb])
-
-        for iv in range(nb-1, -1, -1):
-            # For loop on vertices
-            if pos_lst[iv-1] != pos_lst[iv]: # TODO : Gerer les projections ici !!!!
-                # We get an edge
-                # TODO : use a switch to activate vertices projections (or doing it outside based on the clip_infos data)
-
-                iV0 = face_lst[iv-1]
-                iV1 = face_lst[iv]
-                V0 = V[iV0]
-                V1 = V[iV1]
-
-                if any(boundary_v_mask[[iV0, iV1]]):
-                    # Case where the true vertex is on the boundary --> do not compute any intersection
-                    continue
-
-                # Storing the edge and the vertex
-                if edges.has_key(iV0):
-                    if iV1 not in edges[iV0][0]:
-                        # We have to compute the intersection
-                        Q = get_edge_intersection_by_plane(plane, V0, V1)
-                        nb_new_V += 1
-                        newV.append(Q)
-                        id_Q = int(nv) + nb_new_V - 1
-
-                        edges[iV0][0].append(iV1)
-                        edges[iV0][1].append(id_Q)
-                    else:
-                        # Intersection has already been calculated
-                        id_Q = edges[iV0][1][edges[iV0][0].index(iV1)]
-                else:
-                    # We have to compute the intersection
-                    Q = get_edge_intersection_by_plane(plane, V0, V1)
-                    nb_new_V += 1
-                    newV.append(Q)
-                    id_Q = int(nv) + nb_new_V - 1
-
-                    edges[iV0] = [[iV1], [id_Q]]
-
-                # Here, we know the intersection
-                if edges.has_key(iV1):
-                    if iV0 not in edges[iV1][0]:
-                        edges[iV1][0].append(iV0)
-                        edges[iV1][1].append(id_Q)
-                else:
-                    edges[iV1] = [[iV0], [id_Q]]
-
-
-                face_lst.insert(iv, id_Q)
-                pos_lst.insert(iv, True)
-
-        face_w = np.asarray(face_lst, dtype=np.int32)
-        pos = np.asarray(pos_lst, dtype=bool)
-
-        clipped_face = face_w[pos]
-
-        if infos:
-            # Storing the boundary edge, making the orientation so that the normals of the final closed polygon will be
-            # upward
-            for index, ivertex in enumerate(clipped_face):
-                if ivertex >= nv:
-                    if clipped_face[index-1] >= nv or boundary_v_mask[clipped_face[index-1]]:
-                        boundary_edges[ivertex] = clipped_face[index-1]
-                    else:
-                        if index < len(clipped_face)-1:
-                            boundary_edges[clipped_face[index+1]] = ivertex
-                        else:
-                            boundary_edges[clipped_face[0]] = ivertex
-                    break
-
-        if len(clipped_face) == 3: # We get a triangle
-            clipped_face = np.append(clipped_face, clipped_face[0])
-
-        if len(clipped_face) == 5: # A quad has degenerated in a pentagon, we have to split it in two faces
-            n_roll = np.where(pos==False)[0][0]
-            clipped_face = np.roll(face_w, -n_roll)
-
-            nb_new_F += 1
-            quad = clipped_face[quadrangle]
-            newF.append(quad)
-
-            clipped_face = clipped_face[triangle] # Modified face
-
-        # Updating the initial face with the clipped face
-        F[clipped_face_id] = clipped_face
-
-    # Adding new elements to the initial mesh
-    # TODO : use np.append(vertices, ..., axis=0) instead of np.concatenate
-    if nb_new_V > 0:
-        V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
-    if nb_new_F > 0:
-        F = np.concatenate((F, np.asarray(newF, dtype=np.int32)))
-
-    extended_nb_V = nv + nb_new_V
-    extended_nb_F = nf + nb_new_F
-    new_nb_V = nb_kept_V + nb_new_V
-    new_nb_F = nb_kept_F + nb_new_F
-
-    # Getting the new IDs of kept faces before concatenation
-    if infos:
-        newID_F = np.arange(extended_nb_F)
-        newID_F[keepF] = np.arange(new_nb_F)
-
-    # extending the masks to comply with the extended mesh
-    keepV = np.concatenate((keepV, np.ones(nb_new_V, dtype=bool)))
-    keepF = np.concatenate((keepF, np.ones(nb_new_F, dtype=bool)))
-
-    # Extracting the kept mesh
-    clipped_V = V[keepV]
-    # clipped_F = faces[keepF]
-
-    # Upgrading connectivity array with new indexing
-    newID_V = np.arange(extended_nb_V)
-    newID_V[keepV] = np.arange(new_nb_V)
-    clipped_F = newID_V[(F[keepF]).flatten()].reshape((new_nb_F, 4)) # modif ici
-
-    if infos:
-        # Grabing faces that have been modified or added
-        modifiedF = newID_F[clipped_faces]
-        if nb_new_F > 0:
-            modifiedF = np.concatenate((modifiedF, np.arange(nb_kept_F, new_nb_F)))
-        clip_infos['FToUpdateNewID'] = modifiedF
-        clip_infos['FkeptNewID'] = newID_F[clip_infos['FkeptOldID']]
-
-        # Computing the boundary polygons
-        initV = boundary_edges.keys()[0]
-        polygons = []
-        while len(boundary_edges) > 0:
-            polygon = [initV]
-            closed = False
-            iV = initV
-            while 1:
-                iVtarget = boundary_edges.pop(iV)
-                polygon.append(iVtarget)
-                iV = iVtarget
-                if iVtarget == initV:
-                    polygons.append(polygon)
-                    if len(boundary_edges) > 0:
-                        initV = boundary_edges.keys()[0]
-                    break
-        # Upgrading with the new connectivity
-        for (index, polygon) in enumerate(polygons):
-            polygons[index] = newID_V[polygon]
-        clip_infos['PolygonsNewID'] = polygons
-
-    if infos:
-        return clipped_V, clipped_F, clip_infos
-    else:
-        return clipped_V, clipped_F
-
-
-
-
-_mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float) # Defines the array coefficient to compute surface integrals efficiently
-def _get_surface_integrals(V, F, sum=True):
-    """_get_surface_integrals(vertices, faces, sum=True)
-
-    Internal function
-    Computes all the faces' integrals that may be used in several computations such
-    as inertial properties of meshes. This function is partly based on the work of
-    David Eberly:
-    ...
-
-    Parameters:
-        V: ndarray
-            numpy array of the mesh's nodes coordinates
-        F: ndarray
-            numpy array of the mesh's faces nodes connectivity
-        sum[optional]: bool
-            if let to True, the results will be summed over all faces.
-            Otherwise, no sum will be performed and individual integral
-            on faces will be returned
-
-    Return:
-        sint: ndarray
-            numpy array of shape (nf, 15) that contains different integrals
-            over the mesh faces. If sum is False, nf is equal to the number
-            of faces in the mesh. Otherwise, nf=1.
-
-            The different integrals that sint contains are:
-
-             sint[0]  = \int x dS
-             sint[1]  = \int y dS
-             sint[2]  = \int z dS
-             sint[3]  = \int yz dS
-             sint[4]  = \int xz dS
-             sint[5]  = \int xy dS
-             sint[6]  = \int x^2 dS
-             sint[7]  = \int y^2 dS
-             sint[8]  = \int z^2 dS
-             sint[9]  = \int x^3 dS
-             sint[10] = \int y^3 dS
-             sint[11] = \int z^3 dS
-             sint[12] = \int x^2y dS
-             sint[13] = \int y^2z dS
-             sint[14] = \int z^2x dS
-    """
-
-    # TODO : put reference to the Eberly's work in the docstring
-
-    nf = F.shape[0]
-
-    if sum:
-        sint = np.zeros(15, dtype=float)
-    else:
-        sint = np.zeros((nf, 15), dtype=float)
-
-    tri1 = [0, 1, 2]
-    tri2 = [0, 2, 3]
-
-    cross = np.cross
-
-    sint_tmp = np.zeros(15)
-    for (iface, face) in enumerate(F):
-        sint_tmp *= 0.
-        # sint_tmp = np.zeros(15) # FIXME : Essai, la version precedente serait mieux !
-
-        if face[0] == face[-1]:
-            nb = 1
-        else:
-            nb = 2
-
-        vertices = V[face]
-
-        # Loop on triangles of the face
-        for itri in xrange(nb):
-            if itri == 0:
-                triangle = tri1
-            else:
-                triangle = tri2
-
-            V0, V1, V2 = vertices[triangle]
-            x0, y0, z0 = V0
-            x1, y1, z1 = V1
-            x2, y2, z2 = V2
-
-            d0, d1, d2 = cross(V1-V0, V2-V0)
-            e1_c_e2 = math.sqrt(d0**2 + d1**2 + d2**2)
-
-            temp0 = V0 + V1
-            f1 = temp0 + V2
-            temp1 = V0*V0
-            temp2 = temp1 + V1*temp0
-            f2 = temp2 + V2*f1
-            f3 = V0*temp1 + V1*temp2 + V2*f2
-            g0 = f2 + V0*(f1+V0)
-            g1 = f2 + V1*(f1+V1)
-            g2 = f2 + V2*(f1+V2)
-
-            yz = z0*(4*y0 - y1 - y2)  - y0*(z1+z2) + 3*(y1*z1 + y2*z2)
-            xz = x0*(4*z0 - z1 - z2)  - z0*(x1+x2) + 3*(x1*z1 + x2*z2)
-            xy = y0*(4*x0 - x1 - x2)  - x0*(y1+y2) + 3*(x1*y1 + x2*y2)
-
-            # Update integrals
-            sint_tmp[0] += d0 * f1[0] # order 1 in vol, x in surf
-            sint_tmp[1] += d1 * f1[1] # order 1 in vol, y in surf
-            sint_tmp[2] += d2 * f1[2] # order 1 in vol, z in surf
-
-            sint_tmp[3] +=  d0 * yz # order yz in surf
-            sint_tmp[4] +=  d1 * xz # order xz in surf
-            sint_tmp[5] +=  d2 * xy # order xy in surf
-
-            sint_tmp[6] += d0 * f2[0] # order x in vol, x**2 in surf
-            sint_tmp[7] += d1 * f2[1] # order y in vol, y**2 in surf
-            sint_tmp[8] += d2 * f2[2] # order z in vol, z**2 in surf
-            sint_tmp[9] += d0 * f3[0] # order x**2 in vol, x**3 in surf
-            sint_tmp[10] += d1 * f3[1] # order y**2 in vol, y**3 in surf
-            sint_tmp[11] += d2 * f3[2] # order z**2 in vol, z**3 in surf
-            sint_tmp[12] += d0 * (y0*g0[0] + y1*g1[0] + y2*g2[0]) # order xy in vol, x**2*y in surf
-            sint_tmp[13] += d1 * (z0*g0[1] + z1*g1[1] + z2*g2[1]) # order yz in vol, y**2*z in surf
-            sint_tmp[14] += d2 * (x0*g0[2] + x1*g1[2] + x2*g2[2]) # order zx in vol, z**2*x in surf
-
-            if sum:
-                sint += sint_tmp
-            else:
-                sint[iface] = sint_tmp
-
-    if sum:
-        sint *= _mult_surf
-    else:
-        sint = np.array([sint[j]*_mult_surf for j in xrange(nf)], dtype=float)
-
-    return sint
-
-
-def get_mass_cog(V, F, rho=1.):
-    """get_mass_cog(vertices, faces, rho=1.)
-
-    Returns the mass and the center of gravity of a mesh
-
-    Parameters:
-        V: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        F: ndarray
-            numpy array of the faces' nodes connectivities
-        rho[optional]: float
-            specifies the density of the material enclosed by the mesh
-
-    Returns:
-
-    """
-    # TODO: allow to specify as mush as options as in get_inertial_properties... or remove this function !
-
-    return get_inertial_properties(V, F, rho=rho)[:2]
-
-
-_mult_vol = np.array([1., 1., 1., 1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.]) # Defines the array coefficient to compute volume integrals on meshes
-def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False):
-    """get_inertial_properties(vertices, faces, rho=7500., mass=None, thickness=None, shell=False, verbose=False)
-
-    Returns the inertial properties of a mesh. The mesh may be considred as being
-    filled with homogeneous material or as being a shell.
-
-    Parameters:
-        V: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        F: ndarray
-            numpy array of the faces' nodes connectivities
-        rho[optional]: float
-            the density of the material. By default, it is the steel density
-            (7500 kg/m**3)
-        mass[optional]: float
-            the mass of the mesh. If it is specified, it will overwrite
-            the density (even if explicitely given)
-        thickness[optional]: float
-            specifies the thickness of the hull. Used if shell is set to True.
-        shell[optional]: bool
-            if set to True, the mesh will be considered as a shell
-        verbose[optional]: bool
-            if set to True, the function will display a report on inertial
-            properties of the mesh
-
-    Returns:
-        mass: float
-            The mass of the mesh (computed or given...)
-        cog: ndarray
-            The coordinates of the center of gravity of the mesh
-        inertia_matrix: ndarray
-            The inertia matrix of the mesh expressed at the center
-             of gravity
-
-    """
-    # TODO : allow to specify a reduction point...
-    # The default density rho is that of steel
-
-    tol = 1e-8
-
-    # FIXME : la gestion des options n'est pas claire ici !!! Remettre les choses a plat
-
-    if shell: # The geometry is a shell with homogeneous thickness and density.
-        areas, normals = get_all_faces_properties(V, F)[:2]
-        St = areas.sum() # Total surface
-        # The geometry is considered as being a shell with thickness given
-        if mass is None:
-
-            # FIXME : may not work if thickness is not given !!
-
-            # if thickness is None:
-            #     # Assuming a standard thickness of 1cm
-            #     thickness = 1e-2
-
-            sigma = thickness * rho
-            mass = St*sigma
-
-        else:# A mass has been specified
-            sigma = mass/St # Surfacic density
-
-            if thickness is None:
-                # Computing the equivalent thickness
-                thickness = sigma / rho
-            else:
-                # thickness has been given, overwriting the density of the medium accordingly
-                rho_tmp = sigma / thickness
-                rho = rho_tmp
-
-        # Getting surface integrals
-        sint = _get_surface_integrals(V, F, sum=False)
-
-        normals[normals==0.] = 1. # To avoid division by zero
-        # Correcting these integrals by normals
-        sint[:, :3] /= normals
-        sint[:, 3:6] /= normals
-        sint[:, 6:9] /= normals
-        sint[:, 9:12] /= normals
-        sint[:, 12:15] /= normals
-
-        nu = sint.sum(axis=0)
-
-        cog = np.array([nu[0], nu[1], nu[2]], dtype=np.float) * sigma / mass
-
-        inertia_matrix = np.array([
-            [nu[7]+nu[8] ,   -nu[5]   ,   -nu[4]],
-            [  -nu[5]    , nu[6]+nu[8],   -nu[3]],
-            [  -nu[4]    ,   -nu[3]   , nu[6]+nu[7]]
-        ], dtype=np.float) * sigma
-
-        if verbose:
-            print '\nPrincipal inertia parameters report:'
-            print '------------------------------------\n'
-            print 'Total surface         : %f m**2' % St
-            print 'Thickness             : %f m' % thickness
-            print 'Density               : %f kg/m**3' % rho
-            print 'Surface density       : %f kg/m**2' % sigma
-
-    else:
-        # The geometry is full
-        sint = _get_surface_integrals(V, F)
-
-        # Appliying multipliers
-        sint *= _mult_vol
-
-        # We take the mean of 3 possible computations from surface integrals
-        vol = (sint[0] + sint[1] + sint[2]) / 3.
-        cog = np.array([sint[6]/vol, sint[7]/vol, sint[8]/vol], dtype=float)
-
-        # Inertia matrix is expressed for the moment in O
-        # xx = sint[10] + sint[11] - vol*(cog[1]**2 + cog[2]**2)
-        # yy = sint[9] + sint[11] - vol*(cog[2]**2 + cog[0]**2)
-        # zz = sint[9] + sint[10] - vol*(cog[0]**2 + cog[1]**2)
-        # xy = -(sint[12] - vol*cog[0]*cog[1])
-        # yz = -(sint[13] - vol*cog[1]*cog[2])
-        # xz = -(sint[14] - vol*cog[2]*cog[0])
-
-        # Inertia matrix expressed in cog
-        xx = sint[10] + sint[11]
-        yy = sint[9] + sint[11]
-        zz = sint[9] + sint[10]
-        xy = -sint[12]
-        yz = -sint[13]
-        xz = -sint[14]
-
-        mass = rho * vol
-        # The inertia matrix is expressed in
-        inertia_matrix = rho * np.array(
-            [
-                [xx, xy, xz],
-                [xy, yy, yz],
-                [xz, yz, zz]
-            ], dtype=np.float)
-
-    # Cleaning
-    cog[np.fabs(cog) < tol] = 0.
-    inertia_matrix[np.fabs(inertia_matrix) < tol] = 0.
-
-    if verbose:
-        print 'Mass                  : %f kg' % mass
-        print 'COG                   : (%f, %f, %f) m' % tuple(cog)
-        print 'Inertia matrix in COG : '
-        print '\t%E, %E, %E\n\t%E, %E, %E\n\t%E, %E, %E\n' % tuple(inertia_matrix.flatten())
-
-    return mass, cog, inertia_matrix
-
-
-def transport_inertia_matrix(mass, cog, Ig, point, rot=np.eye(3, dtype=np.float)):
-    """transport_inertia_matrix(mass, cog, Ig, point, rot)
-
-    Performs the transport of the inertia matrix of a mesh at an other
-    reduction point
-
-    Parameters:
-        mass: float
-            The mass of the mesh
-        cog: ndarray
-            The coordinates of the center of gravity
-        Ig: ndarray
-            The 3x3 inertia matrix of the mesh expressed at cog
-        point: ndarray
-            The coordinates of the reduction point
-        rot: ndarray
-            The rotation matrix defining the orientation of the
-            new axis system with respect to the current
-
-    Returns:
-        Ipoint:
-            The 3x3 inertia matrix of the mesh expressed at the
-            new reduction point and in a frame rotated by rot with
-            respect to the initial coordinate system
-    """
-
-    point_cog = cog - point
-    Ipoint = rot * Ig * rot.T + \
-             mass * (np.eye(3, dtype=float) * np.dot(point_cog, point_cog)
-                     - np.outer(point_cog, point_cog))
-    return Ipoint
-
-
-def get_volume(V, F):
-    """get_volume(vertices, faces)
-
-    Returns the volume of the mesh
-
-    Parameters:
-        V: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        F: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Returns:
-        vol: float
-            The volume of the mesh
-    """
-    return _get_surface_integrals(V, F)[0]
-
-
-def get_COM(V, F):
-    """get_COM(vertices, faces)
-
-    Returns the center of mass (center of gravity) of the mesh
-
-    Parameters:
-        V: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        F: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Returns:
-        com: ndarray
-            Coordinates of the center of gravity of the mesh
-    """
-    # FIXME: la sortie est tres etonnante. Ne doit pas faire ce que ca dit !!!
-
-    return _get_surface_integrals(V, F)
-
+#     return _get_surface_integrals(V, F)
 
 
 def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
@@ -1009,21 +519,6 @@ def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
             return V, newID
         else:
             return V
-
-# def concatenate(V1, F1, V2, F2):
-#     """
-#     Concatenates two meshes
-#
-#     """
-#     nv1 = V1.shape[0]
-#     nv2 = V2.shape[0]
-#
-#     vertices = np.concatenate((V1, V2), axis=0)
-#     faces = np.concatenate((F1, F2+nv1), axis=0)
-#
-#     return vertices, faces
-
-
 
 
 
