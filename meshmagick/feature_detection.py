@@ -31,12 +31,12 @@ class MeshHE:
         self.nv = V.shape[0]
         self.nf = F.shape[0]
 
-        # Partitionning faces array with triangles first and quadrangles last
+        # Partitionning _faces array with triangles first and quadrangles last
 
-        # NOTE: Here we modify the order of faces. See in the future if it is a problem.
+        # NOTE: Here we modify the order of _faces. See in the future if it is a problem.
         # It is of practical interest when it comes to generate the half-edge data structure
-        # But it could be possible to order faces like that temporarily, perform fast generation
-        # of the half-edge data structure and then get back to the initial faces ordering...
+        # But it could be possible to order _faces like that temporarily, perform fast generation
+        # of the half-edge data structure and then get back to the initial _faces ordering...
         triangle_mask = F[:, 0] == F[:, -1]
         self.nb_tri = sum(triangle_mask)
         self.nb_quad = self.nf - self.nb_tri
@@ -201,9 +201,9 @@ class MeshHE:
     def detect_features(self,
                         thetaf=10, # Threshold for l-strongness in DA of half-edges
                         thetaF=65, # Threshold for u-strongness in DA of edges
-                        thetaD=40, # Threshold for u-strongness in AD of vertices (sharpness)
+                        thetaD=40, # Threshold for u-strongness in AD of _vertices (sharpness)
                         thetat=20, # Threshold for u-strongness in OSTA of edges
-                        thetaT=40, # Threshold for u-strongness in TA of vertices
+                        thetaT=40, # Threshold for u-strongness in TA of _vertices
                         thetae=25, # Threshold for e-strongness in DA of edges
                         thetak=50, # Threshold for obsurity of curves
                         k=5,       # Minimum length of curves for not being obscure
@@ -217,7 +217,7 @@ class MeshHE:
         pi = math.pi
         acos = math.acos
 
-        # generating faces properties
+        # generating _faces properties
         if self.areas is None:
             self.generate_faces_properties()
 
@@ -455,7 +455,7 @@ class MeshHE:
             if len(iHE_candidate) > 0:
                 ICH[iV] = list(iHE_candidate)
 
-        # Candidate vertices are ICH.keys()...
+        # Candidate _vertices are ICH.keys()...
 
         # This is for debug of the algorithm
         # if debug:
@@ -747,7 +747,7 @@ class MeshHE:
                     surfaces.append(surface)
 
                 if len(unvisited_faces_ids) == 0:
-                    # We're done, every faces have been visited :)
+                    # We're done, every _faces have been visited :)
                     break
                 else:
                     F_stack = [unvisited_faces_ids[0]]
@@ -789,8 +789,8 @@ class MeshHE:
         # long_surface = []
         # for i, surface in enumerate(surfaces):
         #     long_surface += surface
-        #     vertices, faces = extract_faces(self.vertices, self.faces, long_surface)
-        #     write_VTP('surf%u.vtp'%i, vertices, faces)
+        #     _vertices, _faces = extract_faces(self._vertices, self._faces, long_surface)
+        #     write_VTP('surf%u.vtp'%i, _vertices, _faces)
 
         if verbose:
             print "\t-> Features detected!"

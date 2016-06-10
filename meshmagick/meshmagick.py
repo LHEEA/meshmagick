@@ -7,19 +7,21 @@
 """
 This module contains utility function to manipulate, load, save and
 convert surface mesh files used by the hydrodynamics community.
-Two numpy arrays are manipulated in this module : vertices and faces.
-vertices is the array of nodes coordinates. It is an array of shape (nv, 3) where
+Two numpy arrays are manipulated in this module : _vertices and _faces.
+_vertices is the array of nodes coordinates. It is an array of shape (nv, 3) where
 nv is the number of nodes in the mesh.
-faces is the array of cell connectivities. It is an array of shape (nf, 4) where
+_faces is the array of cell connectivities. It is an array of shape (nf, 4) where
 nf is the number of cells in the mesh. Not that it has 4 columns as we consider
 flat polygonal cells up to 4 edges (quads). Triangles are obtained by repeating
 the first node at the end of the cell node ID list.
 
 IMPORTANT NOTE:
-IDs of vertices are internally idexed from 0 in meshmagick. However, several mesh
+IDs of _vertices are internally idexed from 0 in meshmagick. However, several mesh
 file format use indexing starting at 1. This different convention might be transparent
 to user and 1-indexing may not be present outside the I/O functions
 """
+
+# TODO: move meshmagick.py at the root level of the project ?
 
 from mesh import *
 import mmio
@@ -45,10 +47,10 @@ __status__     = "Development"
 
 # _mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float) # Defines the array coefficient to compute surface integrals efficiently
 # def _get_surface_integrals(V, F, sum=True):
-#     """_get_surface_integrals(vertices, faces, sum=True)
+#     """_get_surface_integrals(_vertices, _faces, sum=True)
 #
 #     Internal function
-#     Computes all the faces' integrals that may be used in several computations such
+#     Computes all the _faces' integrals that may be used in several computations such
 #     as inertial properties of meshes. This function is partly based on the work of
 #     David Eberly:
 #     ...
@@ -57,17 +59,17 @@ __status__     = "Development"
 #         V: ndarray
 #             numpy array of the mesh's nodes coordinates
 #         F: ndarray
-#             numpy array of the mesh's faces nodes connectivity
+#             numpy array of the mesh's _faces nodes connectivity
 #         sum[optional]: bool
-#             if let to True, the results will be summed over all faces.
+#             if let to True, the results will be summed over all _faces.
 #             Otherwise, no sum will be performed and individual integral
-#             on faces will be returned
+#             on _faces will be returned
 #
 #     Return:
 #         sint: ndarray
 #             numpy array of shape (nf, 15) that contains different integrals
-#             over the mesh faces. If sum is False, nf is equal to the number
-#             of faces in the mesh. Otherwise, nf=1.
+#             over the mesh _faces. If sum is False, nf is equal to the number
+#             of _faces in the mesh. Otherwise, nf=1.
 #
 #             The different integrals that sint contains are:
 #
@@ -112,7 +114,7 @@ __status__     = "Development"
 #         else:
 #             nb = 2
 #
-#         vertices = V[face]
+#         _vertices = V[face]
 #
 #         # Loop on triangles of the face
 #         for itri in xrange(nb):
@@ -121,7 +123,7 @@ __status__     = "Development"
 #             else:
 #                 triangle = tri2
 #
-#             V0, V1, V2 = vertices[triangle]
+#             V0, V1, V2 = _vertices[triangle]
 #             x0, y0, z0 = V0
 #             x1, y1, z1 = V1
 #             x2, y2, z2 = V2
@@ -176,7 +178,7 @@ __status__     = "Development"
 #
 #
 # def get_mass_cog(V, F, rho=1.):
-#     """get_mass_cog(vertices, faces, rho=1.)
+#     """get_mass_cog(_vertices, _faces, rho=1.)
 #
 #     Returns the mass and the center of gravity of a mesh
 #
@@ -184,7 +186,7 @@ __status__     = "Development"
 #         V: ndarray
 #             numpy array of the coordinates of the mesh's nodes
 #         F: ndarray
-#             numpy array of the faces' nodes connectivities
+#             numpy array of the _faces' nodes connectivities
 #         rho[optional]: float
 #             specifies the density of the material enclosed by the mesh
 #
@@ -198,7 +200,7 @@ __status__     = "Development"
 #
 # _mult_vol = np.array([1., 1., 1., 1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.]) # Defines the array coefficient to compute volume integrals on meshes
 # def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False):
-#     """get_inertial_properties(vertices, faces, rho=7500., mass=None, thickness=None, shell=False, verbose=False)
+#     """get_inertial_properties(_vertices, _faces, rho=7500., mass=None, thickness=None, shell=False, verbose=False)
 #
 #     Returns the inertial properties of a mesh. The mesh may be considred as being
 #     filled with homogeneous material or as being a shell.
@@ -207,7 +209,7 @@ __status__     = "Development"
 #         V: ndarray
 #             numpy array of the coordinates of the mesh's nodes
 #         F: ndarray
-#             numpy array of the faces' nodes connectivities
+#             numpy array of the _faces' nodes connectivities
 #         rho[optional]: float
 #             the density of the material. By default, it is the steel density
 #             (7500 kg/m**3)
@@ -377,7 +379,7 @@ __status__     = "Development"
 #
 #
 # def get_volume(V, F):
-#     """get_volume(vertices, faces)
+#     """get_volume(_vertices, _faces)
 #
 #     Returns the volume of the mesh
 #
@@ -385,7 +387,7 @@ __status__     = "Development"
 #         V: ndarray
 #             numpy array of the coordinates of the mesh's nodes
 #         F: ndarray
-#             numpy array of the faces' nodes connectivities
+#             numpy array of the _faces' nodes connectivities
 #
 #     Returns:
 #         vol: float
@@ -395,7 +397,7 @@ __status__     = "Development"
 #
 #
 # def get_COM(V, F):
-#     """get_COM(vertices, faces)
+#     """get_COM(_vertices, _faces)
 #
 #     Returns the center of mass (center of gravity) of the mesh
 #
@@ -403,7 +405,7 @@ __status__     = "Development"
 #         V: ndarray
 #             numpy array of the coordinates of the mesh's nodes
 #         F: ndarray
-#             numpy array of the faces' nodes connectivities
+#             numpy array of the _faces' nodes connectivities
 #
 #     Returns:
 #         com: ndarray
@@ -415,16 +417,16 @@ __status__     = "Development"
 
 
 def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
-    """merge_duplicates(vertices, faces, verbose=False, tol=1e-8)
+    """merge_duplicates(_vertices, _faces, verbose=False, tol=1e-8)
 
     Returns a new node array where close nodes have been merged into one node (following tol). It also returns
-    the connectivity array faces with the new node IDs.
+    the connectivity array _faces with the new node IDs.
 
     Parameters:
         V: ndarray
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
-            numpy array of the faces' nodes connectivities
+            numpy array of the _faces' nodes connectivities
         verbose[optional]: bool
             if set to True, displays information on the merge procedure
         tol[optional]: float
@@ -432,18 +434,22 @@ def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
             that have to be merged
 
     Returns:
-        vertices: ndarray
+        _vertices: ndarray
             numpy array of the coordinates of the mesh's nodes where
             every node is different
-        faces: ndarray
-            numpy array of the faces' nodes connectivities, accordingly
+        _faces: ndarray
+            numpy array of the _faces' nodes connectivities, accordingly
             to the new node list that has been merged
     """
     # TODO: Refaire la documentation --> les entrees sorties ont change !!
 
     # TODO : Set a tolerance option in command line arguments
+
+    # This function is a bottleneck in the clipping routines
+    # TODO: use np.unique to cluster groups --> acceleration !!
+
     if verbose:
-        print "* Removing duplicate vertices:"
+        print "* Removing duplicate _vertices:"
     nv, nbdim = V.shape
 
     levels = [0, nv]
@@ -480,9 +486,9 @@ def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
             else:
                 levels_tmp.append(levels[ilevel])
         if len(levels_tmp) == nv:
-            # No duplicate vertices
+            # No duplicate _vertices
             if verbose:
-                print "\t -> No duplicate vertices detected :)"
+                print "\t -> No duplicate _vertices detected :)"
             break
 
         levels_tmp.append(nv)
@@ -566,9 +572,9 @@ def _is_point_inside_polygon(point, poly):
     return inside
 
 def generate_lid(V, F, max_area=None, verbose=False):
-    """generate_lid(vertices, faces, max_area=None, verbose=False)
+    """generate_lid(_vertices, _faces, max_area=None, verbose=False)
 
-    Meshes the lid of a mesh with triangular faces to be used in irregular frequency
+    Meshes the lid of a mesh with triangular _faces to be used in irregular frequency
     removal in BEM softwares. It clips the mesh againt the plane Oxy, extract the intersection
     polygon and relies on meshpy (that is a wrapper around the TRIANGLE meshing library).
     It is able to deal with moonpools.
@@ -577,7 +583,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
         V: ndarray
             numpy array of the coordinates of the mesh's nodes
         F: ndarray
-            numpy array of the faces' nodes connectivities
+            numpy array of the _faces' nodes connectivities
         max_area[optional]: float
             The maximum area of triangles to be generated
         verbose[optional]: bool
@@ -706,7 +712,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
         mesh_points_3D = np.zeros((nmp, 3))
         mesh_points_3D[:, :-1] = mesh_points
 
-        # show(vertices, faces)
+        # show(_vertices, _faces)
         # return
 
         # Adding the lid to the initial mesh
@@ -841,7 +847,7 @@ def main():
                     (4) HYDROSTAR is a BEM Software for seakeeping developped by
                         BUREAU VERITAS
                     (5) GMSH is an open source meshing software developped by C. Geuzaine
-                    and J.-faces. Remacle
+                    and J.-_faces. Remacle
                     (6) PARAVIEW is an open source visualization software developped by
                         Kitware
                     (7) TECPLOT is a visualization software developped by Tecplot
@@ -950,7 +956,7 @@ def main():
                         given as argument (default 1e-8)""")
 
     parser.add_argument('-tq', '--triangulate_quadrangles', action='store_true',
-                        help="""Triangulate all quadrangle faces by a simple splitting procedure.
+                        help="""Triangulate all quadrangle _faces by a simple splitting procedure.
                         Twho triangles are generated and from both solution, the one with the best
                         aspect ratios is kept. This option may be used in conjunction with a
                         mesh export in a format that only deal with triangular cells like STL format.""")
@@ -1136,7 +1142,7 @@ def main():
     else:
         raise IOError, 'file %s not found'%args.infilename
 
-    # Merge duplicate vertices
+    # Merge duplicate _vertices
     if args.merge_duplicates is not None:
         tol = float(args.merge_duplicates)
         mesh.merge_duplicates(tol=tol)
@@ -1367,7 +1373,7 @@ def main():
     #     else:
     #         hull = True
     #
-    #     mass, cog, inertia_matrix = get_inertial_properties(vertices, faces,
+    #     mass, cog, inertia_matrix = get_inertial_properties(_vertices, _faces,
     #                                     rho=args.rho_medium,
     #                                     mass=args.mass,
     #                                     thickness=args.thickness,
@@ -1398,7 +1404,7 @@ def main():
     #     if args.zcog is None:
     #         raise RuntimeError, 'For the GZ computations, the --zcog option is mandatory'
     #
-    #     hsMesh = hs.HydrostaticsMesh(vertices, faces, rho_water=args.rho_water, g=args.grav)
+    #     hsMesh = hs.HydrostaticsMesh(_vertices, _faces, rho_water=args.rho_water, g=args.grav)
     #     hs.get_GZ_curves(hsMesh, args.zcog,
     #                      spacing=spacing,
     #                      rho_water=args.rho_water,
@@ -1421,8 +1427,8 @@ def main():
 
         output_hs = hs.compute_hydrostatics(mesh, args.zcog, verbose=verbose)
         mesh = output_hs['mesh_hs']
-        # vertices = outputHS['Vc']
-        # faces = outputHS['Fc']
+        # _vertices = outputHS['Vc']
+        # _faces = outputHS['Fc']
 
     # if args.hydrostatics:
     #     try:
@@ -1441,8 +1447,8 @@ def main():
     #         cog = np.asarray(args.cog, dtype=np.float)
     #
     #     # TODO : Revoir la structure afin de ne jouer que sur l'objet !!
-    #     hsMesh = hs.HydrostaticsMesh(vertices, faces, rho_water=args.rho_water, g=args.grav)
-    #     vertices, faces = hs.get_hydrostatics(hsMesh,
+    #     hsMesh = hs.HydrostaticsMesh(_vertices, _faces, rho_water=args.rho_water, g=args.grav)
+    #     _vertices, _faces = hs.get_hydrostatics(hsMesh,
     #                                mass=args.mass,
     #                                zcog=args.zcog,
     #                                cog=cog,
@@ -1503,7 +1509,7 @@ def main():
 
         if verbose:
             print 'Writing %s' % args.outfilename
-        mmio.write_mesh(args.outfilename, mesh.vertices, mesh.faces, format)
+        mmio.write_mesh(args.outfilename, mesh._vertices, mesh._faces, format)
         if verbose:
             print '\t-> Done.'
 

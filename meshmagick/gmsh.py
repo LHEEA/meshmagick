@@ -293,59 +293,59 @@ class Mesh:
         elm_type[6] = 6    # 6-node prism
         elm_type[7] = 5    # 5-node pyramid
         elm_type[8] = 3    # 3-node second order line
-                            # (2 nodes at vertices and 1 with edge)
+                            # (2 nodes at _vertices and 1 with edge)
         elm_type[9] = 6    # 6-node second order triangle
-                            # (3 nodes at vertices and 3 with edges)
+                            # (3 nodes at _vertices and 3 with edges)
         elm_type[10] = 9    # 9-node second order quadrangle
-                            # (4 nodes at vertices,
+                            # (4 nodes at _vertices,
                             #  4 with edges and 1 with face)
         elm_type[11] = 10   # 10-node second order tetrahedron
-                            # (4 nodes at vertices and 6 with edges)
+                            # (4 nodes at _vertices and 6 with edges)
         elm_type[12] = 27   # 27-node second order hexahedron
-                            # (8 nodes at vertices, 12 with edges,
-                            #  6 with faces and 1 with volume)
+                            # (8 nodes at _vertices, 12 with edges,
+                            #  6 with _faces and 1 with volume)
         elm_type[13] = 18   # 18-node second order prism
-                            # (6 nodes at vertices,
-                            #  9 with edges and 3 with quadrangular faces)
+                            # (6 nodes at _vertices,
+                            #  9 with edges and 3 with quadrangular _faces)
         elm_type[14] = 14   # 14-node second order pyramid
-                            # (5 nodes at vertices,
+                            # (5 nodes at _vertices,
                             #  8 with edges and 1 with quadrangular face)
         elm_type[15] = 1    # 1-node point
         elm_type[16] = 8    # 8-node second order quadrangle
-                            # (4 nodes at vertices and 4 with edges)
+                            # (4 nodes at _vertices and 4 with edges)
         elm_type[17] = 20   # 20-node second order hexahedron
-                            # (8 nodes at vertices and 12 with edges)
+                            # (8 nodes at _vertices and 12 with edges)
         elm_type[18] = 15   # 15-node second order prism
-                            # (6 nodes at vertices and 9 with edges)
+                            # (6 nodes at _vertices and 9 with edges)
         elm_type[19] = 13   # 13-node second order pyramid
-                            # (5 nodes at vertices and 8 with edges)
+                            # (5 nodes at _vertices and 8 with edges)
         elm_type[20] = 9    # 9-node third order incomplete triangle
-                            # (3 nodes at vertices, 6 with edges)
+                            # (3 nodes at _vertices, 6 with edges)
         elm_type[21] = 10   # 10-node third order triangle
-                            # (3 nodes at vertices, 6 with edges, 1 with face)
+                            # (3 nodes at _vertices, 6 with edges, 1 with face)
         elm_type[22] = 12   # 12-node fourth order incomplete triangle
-                            # (3 nodes at vertices, 9 with edges)
+                            # (3 nodes at _vertices, 9 with edges)
         elm_type[23] = 15   # 15-node fourth order triangle
-                            # (3 nodes at vertices, 9 with edges, 3 with face)
+                            # (3 nodes at _vertices, 9 with edges, 3 with face)
         elm_type[24] = 15   # 15-node fifth order incomplete triangle
-                            # (3 nodes at vertices, 12 with edges)
+                            # (3 nodes at _vertices, 12 with edges)
         elm_type[25] = 21   # 21-node fifth order complete triangle
-                            # (3 nodes at vertices, 12 with edges, 6 with face)
+                            # (3 nodes at _vertices, 12 with edges, 6 with face)
         elm_type[26] = 4    # 4-node third order edge
-                            # (2 nodes at vertices, 2 internal to edge)
+                            # (2 nodes at _vertices, 2 internal to edge)
         elm_type[27] = 5    # 5-node fourth order edge
-                            # (2 nodes at vertices, 3 internal to edge)
+                            # (2 nodes at _vertices, 3 internal to edge)
         elm_type[28] = 6    # 6-node fifth order edge
-                            # (2 nodes at vertices, 4 internal to edge)
+                            # (2 nodes at _vertices, 4 internal to edge)
         elm_type[29] = 20   # 20-node third order tetrahedron
-                            # (4 nodes at vertices, 12 with edges,
-                            #  4 with faces)
+                            # (4 nodes at _vertices, 12 with edges,
+                            #  4 with _faces)
         elm_type[30] = 35   # 35-node fourth order tetrahedron
-                            # (4 nodes at vertices, 18 with edges,
-                            #  12 with faces, 1 in volume)
+                            # (4 nodes at _vertices, 18 with edges,
+                            #  12 with _faces, 1 in volume)
         elm_type[31] = 56   # 56-node fifth order tetrahedron
-                            # (4 nodes at vertices, 24 with edges,
-                            #  24 with faces, 4 in volume)
+                            # (4 nodes at _vertices, 24 with edges,
+                            #  24 with _faces, 4 in volume)
         self.elm_type = elm_type
 
     def refine2dtri(self, marked_elements=None):

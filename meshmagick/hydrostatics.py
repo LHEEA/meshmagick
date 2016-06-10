@@ -122,7 +122,7 @@ def show(vertices, faces, CG=None, B=None):
     # if polygons is not None:
     #     for polygon_ids in polygons:
     #         np = polygon_ids.size
-    #         points_coord = vertices[polygon_ids]
+    #         points_coord = _vertices[polygon_ids]
     #         points = vtk.vtkPoints()
     #         for point in points_coord:
     #             points.InsertNextPoint(point)
@@ -184,7 +184,7 @@ def compute_equilibrium(vertices, faces, disp, CG, rho_water=1023, grav=9.81,
     Parameters
     ----------
     vertices : ndarray
-        Array of mesh vertices
+        Array of mesh _vertices
     faces :
         Array of mesh connectivities
     disp : float
@@ -403,7 +403,7 @@ def _get_Sf_Vw(vertices, faces):
     Parameters
     ----------
     vertices : ndarray
-        Array of the mesh vertices
+        Array of the mesh _vertices
     faces : ndarray
         Array of the mesh connectivities
 
@@ -440,7 +440,7 @@ def set_displacement(vertices, faces, disp, rho_water=1023, grav=9.81, abs_tol= 
     Parameters
     ----------
     vertices : ndarray
-        Array of the mesh vertices
+        Array of the mesh _vertices
     faces : ndarray
         Array of the mesh connectivities
     disp : float
@@ -509,9 +509,9 @@ def compute_hydrostatics(mesh, zg, rho_water=1023, grav=9.81, verbose=False):
 
     Parameters
     ----------
-    vertices : ndarray
-        Array of the mesh vertices
-    faces : ndarray
+    _vertices : ndarray
+        Array of the mesh _vertices
+    _faces : ndarray
         Array of the mesh connectivities
     zg : float
         Vertical position of the center of gravity
@@ -530,14 +530,14 @@ def compute_hydrostatics(mesh, zg, rho_water=1023, grav=9.81, verbose=False):
             'Vw': (float) Immersed volume (in m**3)
             'disp': (float) Displacement (in Tons)
             'B': (ndarray) Coordinates of the buoyancy center (in m)
-            'faces': (ndarray) Coordinates of the center of flotation (in m)
+            '_faces': (ndarray) Coordinates of the center of flotation (in m)
             'Sf': (float) Area of the flotation surface (in m**2)
             'r': (float) Transverse metacentric radius (in m)
             'R': (float) Longitudinal metacentrix radius (in m)
             'GMx': (float) Transverse metacentric height (in m)
             'GMy': (float) Longitudinal metacentric height (in m)
             'KH': (ndarray) Hydrostatic stiffness matrix
-            'Vc': (ndarray) Array of hydrostatic mesh vertices
+            'Vc': (ndarray) Array of hydrostatic mesh _vertices
             'Fc': (ndarray) Array of hydrostatic mesh connectivities
     """
 
@@ -548,10 +548,10 @@ def compute_hydrostatics(mesh, zg, rho_water=1023, grav=9.81, verbose=False):
     # Clipping the mesh by the Oxy plane
     plane = Plane() # Oxy plane
     try:
-        # Vc, Fc, clip_infos = mm.clip_by_plane(vertices, faces, plane, infos=True)
+        # Vc, Fc, clip_infos = mm.clip_by_plane(_vertices, _faces, plane, infos=True)
         clipped_mesh, boundaries = mesh.clip(plane, return_boundaries=True, assert_closed_boundaries=True)
     except:
-        show(mesh.vertices, mesh.faces)
+        show(mesh._vertices, mesh._faces)
         raise Exception, 'Hydrostatic module only work with watertight hull. Please consider using the --sym option.'
 
     # TODO: retenir les pptes du maillage initial
@@ -670,7 +670,7 @@ def compute_hydrostatics(mesh, zg, rho_water=1023, grav=9.81, verbose=False):
     # Zeroing tiny coefficients
     KH[np.fabs(KH) < eps] = 0.
 
-    # Flotation center faces:
+    # Flotation center _faces:
     xF = -S35/S33
     yF =  S34/S33
 
@@ -716,7 +716,7 @@ def compute_hydrostatics(mesh, zg, rho_water=1023, grav=9.81, verbose=False):
     output['Vw'] = Vw
     output['disp'] = disp
     output['B'] = np.array([xb, yb, zb], dtype=np.float)
-    output['faces'] = np.array([xF, yF, 0.], dtype=np.float)
+    output['_faces'] = np.array([xF, yF, 0.], dtype=np.float)
     output['Sf'] = Sf
     output['r'] = r
     output['R'] = R
@@ -738,20 +738,20 @@ if __name__ == '__main__':
 
 
     vertices, faces = mm.load_VTP('tests/SEAREV/SEAREV.vtp')
-    # vertices, faces = mm.load_MAR('Cylinder.mar')
+    # _vertices, _faces = mm.load_MAR('Cylinder.mar')
     plane = mm.Plane(np.array([0, 1, 0]))
     vertices, faces = mm.symmetrize(vertices, faces, plane=plane)
-    # vertices, faces = mm.symmetrize(vertices, faces, plane=mm.Plane())
-    # mm.show(vertices, faces)
+    # _vertices, _faces = mm.symmetrize(_vertices, _faces, plane=mm.Plane())
+    # mm.show(_vertices, _faces)
 
-    # compute_hydrostatics(vertices, faces, -4.3, verbose=True)
+    # compute_hydrostatics(_vertices, _faces, -4.3, verbose=True)
 
 
     # SEAREV :
     disp = 2000
     CG = np.array([-1, 0, -3])
 
-    # show(vertices, faces, CG=CG)
+    # show(_vertices, _faces, CG=CG)
     # Cylindre
     # disp = 1100
     # CG = np.array([0.3, 2, 3])

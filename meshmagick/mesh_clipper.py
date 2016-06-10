@@ -96,12 +96,12 @@ class MeshClipper(object):
         vertices_on_mask = self.__internals__['vertices_on_mask']
         vertices_below_mask = self.__internals__['vertices_below_mask']
 
-        source_mesh_faces = self.source_mesh.faces
+        source_mesh_faces = self.source_mesh._faces
 
         nb_vertices_above = vertices_above_mask[source_mesh_faces].sum(axis=1)
         nb_vertices_below = vertices_below_mask[source_mesh_faces].sum(axis=1)
 
-        # Simple criteria ensuring that faces are totally above or below the plane (4 vertices at the same side)
+        # Simple criteria ensuring that _faces are totally above or below the plane (4 _vertices at the same side)
         # Works for both triangles and quadrangles
         above_faces_mask = nb_vertices_above == 4
         below_faces_mask = nb_vertices_below == 4
@@ -171,12 +171,12 @@ class MeshClipper(object):
     def clip_crown_by_plane(self):
 
         crown_mesh = self.crown_mesh
-        vertices = crown_mesh.vertices
+        vertices = crown_mesh._vertices
         vertices_on_mask = self.__internals__['crown_mesh_on_vertices_mask']
 
         # TODO: Vertices pre-projection
         # vertices_on = partition['vertices_on']
-        # vertices[vertices_on] = plane.orthogonal_projection_on_plane(vertices[vertices_on])
+        # _vertices[vertices_on] = plane.orthogonal_projection_on_plane(_vertices[vertices_on])
         # pos[vertices_on] = 0.
 
         vertices_above_mask = self.__internals__['crown_mesh_above_vertices_mask']
@@ -533,7 +533,7 @@ class MeshClipper(object):
 
                 if self._assert_closed_boundaries:
                     if len(open_lines) > 0:
-                        # mm.write_VTP('mesh_clip.vtp', vertices, crown_faces)
+                        # mm.write_VTP('mesh_clip.vtp', _vertices, crown_faces)
                         raise RuntimeError, 'Open intersection curve found'
 
                 break
@@ -576,9 +576,9 @@ if __name__ == '__main__':
     # crown_mesh = clipper.crown_mesh
     #
     #
-    # mmio.write_VTP('lower.vtp', lower_mesh.vertices, lower_mesh.faces)
-    # mmio.write_VTP('crown.vtp', crown_mesh.vertices, crown_mesh.faces)
-    # mmio.write_VTP('upper.vtp', upper_mesh.vertices, upper_mesh.faces)
+    # mmio.write_VTP('lower.vtp', lower_mesh._vertices, lower_mesh._faces)
+    # mmio.write_VTP('crown.vtp', crown_mesh._vertices, crown_mesh._faces)
+    # mmio.write_VTP('upper.vtp', upper_mesh._vertices, upper_mesh._faces)
     #
     # print lower_mesh.faces_areas.sum() + clipped_crown_mesh.faces_areas.sum()
     # # print
@@ -591,7 +591,7 @@ if __name__ == '__main__':
         clipper.plane = plane
         # clipper.clipped_mesh.show()
         # print clipper.lower_mesh
-        # mmio.write_VTP('mesh_%u.vtp'%iter, clipper.clipped_mesh.vertices, clipper.clipped_mesh.faces)
+        # mmio.write_VTP('mesh_%u.vtp'%iter, clipper.clipped_mesh._vertices, clipper.clipped_mesh._faces)
 
 
     # print clipped_mesh.faces_areas.sum()

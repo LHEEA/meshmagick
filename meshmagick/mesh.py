@@ -395,7 +395,13 @@ class invalidate_cache(object):
         except:
             cls._cached_properties = dict()
 
-
+class _3DPointsArray(np.ndarray):
+    def __new__(cls, points):
+        obj = np.asarray(points).view(cls)
+        cls.x = property(fget=lambda cls: cls[:, 0])
+        cls.y = property(fget=lambda cls: cls[:, 1])
+        cls.z = property(fget=lambda cls: cls[:, 2])
+        return obj
 
 class Mesh(object):
     _ids = count(0)
@@ -405,9 +411,9 @@ class Mesh(object):
         Parameters
         ----------
         vertices : ndarray
-            (nv x 3) Array of mesh vertices coordinates. Each line is a vertex.
+            (nv x 3) Array of mesh _vertices coordinates. Each line is a vertex.
         faces : ndarray
-            Arrays of mesh connectivities for faces.
+            Arrays of mesh connectivities for _faces.
 
         Returns
         -------
@@ -416,11 +422,9 @@ class Mesh(object):
 
         self.__internals__ = dict()
 
-        self.vertices = vertices
-        self.faces = faces
+        self._vertices = vertices
+        self._faces = faces
         self._id = self._ids.next()
-
-
 
         if not name:
             self._name = 'mesh_%u' % self._id
@@ -435,8 +439,8 @@ class Mesh(object):
         \tMESH NAME : %s
         --------------------------------------------
 
-        Number of vertices: %u
-        Number of faces:    %u
+        Number of _vertices: %u
+        Number of _faces:    %u
 
         Number of triangles:   %u
         Number of quadrangles: %u
@@ -451,12 +455,12 @@ class Mesh(object):
                self.nb_faces,
                self.nb_triangles,
                self.nb_quadrangles,
-               self.vertices[:, 0].min(),
-               self.vertices[:, 0].max(),
-               self.vertices[:, 1].min(),
-               self.vertices[:, 1].max(),
-               self.vertices[:, 2].min(),
-               self.vertices[:, 2].max(),
+               self._vertices[:, 0].min(),
+               self._vertices[:, 0].max(),
+               self._vertices[:, 1].min(),
+               self._vertices[:, 1].max(),
+               self._vertices[:, 2].min(),
+               self._vertices[:, 2].max(),
                )
         return str_repr
 
@@ -567,20 +571,17 @@ class Mesh(object):
 
     @property
     def nb_faces(self):
-        return self._F.shape[0]
+        return self._faces.shape[0]
 
     @property
     def vertices(self):
-        # print 'getting vertices'
-        return self._vertices.copy()
+        return self._vertices
 
     @property
     def faces(self):
-        # print 'getting faces'
-        return self._F.copy()
+        return self._faces
 
     @vertices.setter
-    # @invalidate_cache
     def vertices(self, value):
         self._vertices = np.asarray(value, dtype=np.float).copy()
         self._vertices.setflags(write=False)
@@ -588,18 +589,17 @@ class Mesh(object):
         return
 
     @faces.setter
-    # @invalidate_cache
     def faces(self, value):
-        self._F = np.asarray(value, dtype=np.int).copy()
-        self._F.setflags(write=False)
+        self._faces = np.asarray(value, dtype=np.int).copy()
+        self._faces.setflags(write=False)
         self.__internals__.clear()
         return
 
     def _faces_properties(self):
-        # faces_areas, faces_normals, faces_centers = mm.get_all_faces_properties(self._vertices, self._F)
+        # faces_areas, faces_normals, faces_centers = mm.get_all_faces_properties(self._vertices, self._faces)
         nf = self.nb_faces
 
-        # triangle_mask = faces[:, 0] == faces[:, -1]
+        # triangle_mask = _faces[:, 0] == _faces[:, -1]
         # nb_triangles = np.sum(triangle_mask)
         # quads_mask = np.invert(triangle_mask)
         # nb_quads = nf - nb_triangles
@@ -609,9 +609,9 @@ class Mesh(object):
         faces_centers = np.zeros((nf, 3), dtype=np.float)
 
         # Collectively dealing with triangles
-        # triangles = faces[triangle_mask]
+        # triangles = _faces[triangle_mask]
         triangles_id = self.triangles_ids
-        triangles = self._F[triangles_id]
+        triangles = self._faces[triangles_id]
 
         triangles_normals = np.cross(self._vertices[triangles[:, 1]] - self._vertices[triangles[:, 0]],
                                      self._vertices[triangles[:, 2]] - self._vertices[triangles[:, 0]])
@@ -622,8 +622,8 @@ class Mesh(object):
 
         # Collectively dealing with quads
         quads_id = self.quadrangles_ids
-        quads = self._F[quads_id]
-        # quads = faces[quads_mask]
+        quads = self._faces[quads_id]
+        # quads = _faces[quads_mask]
 
         quads_normals = np.cross(self._vertices[quads[:, 2]] - self._vertices[quads[:, 0]],
                                  self._vertices[quads[:, 3]] - self._vertices[quads[:, 1]])
@@ -677,7 +677,7 @@ class Mesh(object):
         return self.__internals__['faces_normals']
 
     def _triangles_quadrangles(self):
-        triangle_mask = (self._F[:, 0] == self._F[:, -1])
+        triangle_mask = (self._faces[:, 0] == self._faces[:, -1])
         quadrangles_mask = np.invert(triangle_mask)
         triangles_quadrangles = {'triangles_ids': np.where(triangle_mask)[0],
                                  'quadrangles_ids': np.where(quadrangles_mask)[0]}
@@ -687,7 +687,7 @@ class Mesh(object):
     def _has_triangles_quadrangles(self):
         return self.__internals__.has_key('triangles_ids')
 
-    def _remove_tirangles_quadrangles(self):
+    def _remove_triangles_quadrangles(self):
         del self.__internals__['triangles_ids']
         del self.__internals__['quadrangles_ids']
         return
@@ -702,7 +702,7 @@ class Mesh(object):
     def nb_triangles(self):
         if not self.__internals__.has_key('triangles_ids'):
             self._triangles_quadrangles()
-        return len(self.__internals['triangles_ids'])
+        return len(self.__internals__['triangles_ids'])
 
     @property
     def quadrangles_ids(self):
@@ -717,17 +717,17 @@ class Mesh(object):
         return len(self.__internals__['quadrangles_ids'])
 
     def is_triangle(self, face_id):
-        return self._F[face_id, 0] == self._F[face_id, -1]
+        return self._faces[face_id, 0] == self._faces[face_id, -1]
 
     def get_face(self, face_id):
         if self.is_triangle(face_id):
-            return self._F[face_id, :3]
+            return self._faces[face_id, :3]
         else:
-            return self._F[face_id]
+            return self._faces[face_id]
 
     def extract_faces(self, id_faces_to_extract, return_index=False):
         """
-        Extracts a new mesh from a selection of faces ids
+        Extracts a new mesh from a selection of _faces ids
 
         Parameters
         ----------
@@ -739,9 +739,9 @@ class Mesh(object):
         """
         nv = self.nb_vertices
 
-        # Determination of the vertices to keep
+        # Determination of the _vertices to keep
         Vmask = np.zeros(nv, dtype=bool)
-        Vmask[self._F[id_faces_to_extract].flatten()] = True
+        Vmask[self._faces[id_faces_to_extract].flatten()] = True
         idV = np.arange(nv)[Vmask]
 
         # Building up the vertex array
@@ -749,7 +749,7 @@ class Mesh(object):
         newID_V = np.arange(nv)
         newID_V[idV] = np.arange(len(idV))
 
-        F_extracted = self._F[id_faces_to_extract]
+        F_extracted = self._faces[id_faces_to_extract]
         F_extracted = newID_V[F_extracted.flatten()].reshape((len(id_faces_to_extract), 4))
 
         extracted_mesh = Mesh(V_extracted, F_extracted)
@@ -769,9 +769,9 @@ class Mesh(object):
         for point in self._vertices:
             points.InsertNextPoint(point)
 
-        # Create a vtkCellArray to store faces
+        # Create a vtkCellArray to store _faces
         faces = vtk.vtkCellArray()
-        for face_ids in self._F:
+        for face_ids in self._faces:
             if face_ids[0] == face_ids[-1]:
                 # Triangle
                 curface = face_ids[:3]
@@ -793,9 +793,9 @@ class Mesh(object):
         return vtk_polydata
 
     def show(self):
-        self._vtk_polydata()
+        vtk_polydata = self._vtk_polydata()
         self.viewer = MMviewer.MMViewer()
-        self.viewer.add_polydata(self._vtk_polydata)
+        self.viewer.add_polydata(vtk_polydata)
         self.viewer.show()
         self.viewer.finalize()
 
@@ -811,7 +811,7 @@ class Mesh(object):
         # Establishing VV and VF connectivities
         VV = dict([(i, set()) for i in xrange(nv)])
         VF = dict([(i, set()) for i in xrange(nv)])
-        for (iface, face) in enumerate(self._F):
+        for (iface, face) in enumerate(self._faces):
             if face[0] == face[-1]:
                 face_w = face[:3]
             else:
@@ -835,7 +835,7 @@ class Mesh(object):
                     FF[I[1]].add(I[0])
 
                 elif len(I) == 1:
-                    boundary_face = self._F[I[0]]
+                    boundary_face = self._faces[I[0]]
 
                     if boundary_face[0] == boundary_face[-1]:
                         boundary_face = boundary_face[:3]
@@ -1009,7 +1009,7 @@ class Mesh(object):
 
         self._vertices = np.transpose(np.dot(R, self._vertices.copy().T))
 
-        # Updating faces properties if any
+        # Updating _faces properties if any
         if self._has_faces_properties():
             # Rotating normals and centers too
             normals = self.__internals__['faces_normals']
@@ -1021,7 +1021,7 @@ class Mesh(object):
 
     # @invalidate_cache
     def translate_x(self, tx):
-        V = self.vertices
+        V = self._vertices
         V[:, 0] += tx
         self._vertices = V
 
@@ -1078,7 +1078,7 @@ class Mesh(object):
     def scale(self, alpha):
         V = self._vertices.copy()
         V *= alpha
-        self.vertices = V
+        self._vertices = V
 
         if self._has_faces_properties():
             self._remove_faces_properties()
@@ -1086,8 +1086,8 @@ class Mesh(object):
         return
 
     def flip_normals(self):
-        F = self._F.copy()
-        self.faces = np.fliplr(F)
+        F = self._faces.copy()
+        self._faces = np.fliplr(F)
 
         if self._has_faces_properties():
             self.__internals__['faces_normals'] *= -1
@@ -1095,8 +1095,8 @@ class Mesh(object):
         return
 
     def __add__(self, mesh_to_add):
-        V = np.concatenate((self.vertices, mesh_to_add.vertices), axis=0)
-        F = np.concatenate((self.faces, mesh_to_add.faces + self.nb_vertices), axis=0)
+        V = np.concatenate((self._vertices, mesh_to_add._vertices), axis=0)
+        F = np.concatenate((self._faces, mesh_to_add._faces + self.nb_vertices), axis=0)
         new_mesh = Mesh(V, F, name='_'.join([self.name, mesh_to_add.name]))
         # new_mesh.merge_duplicates()
         new_mesh._verbose = self._verbose or mesh_to_add._verbose
@@ -1118,19 +1118,19 @@ class Mesh(object):
 
     def merge_duplicates(self, tol=1e-8, return_index=False):
         # TODO: voir ou mettre l'implementation de la fonction merge_duplicates
-        output = mm.merge_duplicates(self.vertices, self.faces, verbose=False, tol=tol, return_index=return_index)
+        output = mm.merge_duplicates(self._vertices, self._faces, verbose=False, tol=tol, return_index=return_index)
         if return_index:
             V, F, newID = output
         else:
             V, F = output
         if self._verbose:
-            print "* Merging duplicate vertices"
+            print "* Merging duplicate _vertices"
             delta_n = self.nb_vertices - V.shape[0]
             if delta_n > 0:
-                print "\t--> %u vertices have been merged" % delta_n
+                print "\t--> %u _vertices have been merged" % delta_n
             else:
-                print "\t--> No duplicate vertices have been found"
-        self.vertices, self.faces = V, F
+                print "\t--> No duplicate _vertices have been found"
+        self._vertices, self._faces = V, F
 
         if self._has_connectivity():
             self._remove_connectivity()
@@ -1146,7 +1146,7 @@ class Mesh(object):
 
         nv = self.nb_vertices
         nf = self.nb_faces
-        F = self.faces
+        F = self._faces
 
         # Building connectivities
         VV = self.VV
@@ -1162,7 +1162,7 @@ class Mesh(object):
         # Flooding the mesh to find inconsistent normals
         type_cell = np.zeros(nf, dtype=np.int32)
         type_cell[:] = 4
-        # triangles_mask = faces[:, 0] == faces[:, -1]
+        # triangles_mask = _faces[:, 0] == _faces[:, -1]
         type_cell[self.triangles_ids] = 3
 
         FVis = np.zeros(nf, dtype=bool)
@@ -1190,7 +1190,7 @@ class Mesh(object):
                 # Removing the other pointer
                 FF[iadjF].remove(iface)  # So as it won't go from iadjF to iface in the future
 
-                # Shared vertices
+                # Shared _vertices
                 adjface = F[iadjF]
                 S2 = set(adjface)
                 # try:
@@ -1198,7 +1198,7 @@ class Mesh(object):
                 if len(common_vertices) == 2:
                     iV1, iV2 = common_vertices
                 else:
-                    print 'WARNING: faces %u and %u have more than 2 vertices in common !' % (iface, iadjF)
+                    print 'WARNING: _faces %u and %u have more than 2 _vertices in common !' % (iface, iadjF)
                     continue
 
                 # Checking normal consistency
@@ -1221,7 +1221,7 @@ class Mesh(object):
         if self._verbose:
             print "* Healing normals to make them consistent and if possible outward"
             if nb_reversed > 0:
-                print '\t--> %u faces have been reversed to make normals consistent across the mesh' % (nb_reversed)
+                print '\t--> %u _faces have been reversed to make normals consistent across the mesh' % (nb_reversed)
             else:
                 print "\t--> Normals orientations are consistent"
 
@@ -1234,7 +1234,7 @@ class Mesh(object):
             areas = self.faces_areas
             normals = self.faces_normals
             centers = self.faces_centers
-            # areas, normals, centers = get_all_faces_properties(vertices, faces)
+            # areas, normals, centers = get_all_faces_properties(_vertices, _faces)
 
             hs = (np.array([(centers[:, 2] - zmax) * areas, ] * 3).T * normals).sum(axis=0)
 
@@ -1265,7 +1265,7 @@ class Mesh(object):
     def remove_unused_vertices(self, return_index=False):
         # TODO: implementer return_index !!
         nv = self.nb_vertices
-        V, F = self.vertices, self.faces
+        V, F = self._vertices, self._faces
 
         usedV = np.zeros(nv, dtype=np.bool)
         usedV[sum(map(list, F), [])] = True
@@ -1277,16 +1277,16 @@ class Mesh(object):
             F = newID_V[F]
             V = V[usedV]
 
-        self.vertices, self.faces = V, F
+        self._vertices, self._faces = V, F
 
         if self._verbose:
-            print "* Removing unused vertices in the mesh:"
+            print "* Removing unused _vertices in the mesh:"
             if nb_usedV < nv:
                 unusedV = np.where(np.logical_not(usedV))[0]
                 vlist_str = '[' + ', '.join(str(iV) for iV in unusedV) + ']'
-                print "\t--> %u unused vertices have been removed" % (nv - nb_usedV)
+                print "\t--> %u unused _vertices have been removed" % (nv - nb_usedV)
             else:
-                print "\t--> No unused vertices"
+                print "\t--> No unused _vertices"
 
         if self._has_connectivity():
             self._remove_connectivity()
@@ -1295,7 +1295,7 @@ class Mesh(object):
 
     def heal_triangles(self):
 
-        F = self.faces
+        F = self._faces
 
         quads = F[:, 0] != F[:, -1]
         nquads_init = sum(quads)
@@ -1310,7 +1310,7 @@ class Mesh(object):
         quads = F[:, 0] != F[:, -1]
         nquads_final = sum(quads)
 
-        self.faces = F
+        self._faces = F
 
         if self._verbose:
             print "* Ensuring consistent definition of triangles:"
@@ -1323,21 +1323,21 @@ class Mesh(object):
         return
 
     def remove_degenerated_faces(self, rtol=1e-5):
-        # TODO: implementer un retour d'index des faces extraites
+        # TODO: implementer un retour d'index des _faces extraites
         areas = self.faces_areas
         area_threshold = areas.mean() * rtol
 
-        # Detecting faces that have null area
-        F = self.faces[np.logical_not(areas < area_threshold)]
+        # Detecting _faces that have null area
+        F = self._faces[np.logical_not(areas < area_threshold)]
         if self._verbose:
             nb_removed = self.nb_faces - F.shape[0]
-            print '* Removing degenerated faces'
+            print '* Removing degenerated _faces'
             if nb_removed > 0:
-                print '\t-->%u degenerated faces have been removed' % nb_removed
+                print '\t-->%u degenerated _faces have been removed' % nb_removed
             else:
-                print '\t--> No degenerated faces'
+                print '\t--> No degenerated _faces'
 
-        self.faces = F
+        self._faces = F
         return
 
     def heal_mesh(self):
@@ -1355,7 +1355,7 @@ class Mesh(object):
         T1 = (0, 1, 2)
         T2 = (0, 2, 3)
 
-        F = self.faces
+        F = self._faces
 
         # Triangulation
         new_faces = F[self.quadrangles_ids].copy()
@@ -1372,20 +1372,20 @@ class Mesh(object):
             if self.nb_quadrangles != 0:
                 print '\t-->{:d} quadrangles have been split in triangles'.format(self.nb_quadrangles)
 
-        self.faces = F
+        self._faces = F
 
         return F
 
     def symmetrize(self, plane):
 
         # Symmetrizing the nodes
-        V, F = self.vertices, self.faces
+        V, F = self._vertices, self._faces
 
         # normal = plane.normal / np.dot(plane.normal, plane.normal)
         V = np.concatenate((V, V - 2 * np.outer(np.dot(V, plane.normal) - plane.c, plane.normal)))
         F = np.concatenate((F, np.fliplr(F.copy() + self.nb_vertices)))
 
-        self.vertices, self.faces = V, F
+        self._vertices, self._faces = V, F
         verbose = self.verbose
         self.verbose_off()
         self.merge_duplicates()
@@ -1393,12 +1393,97 @@ class Mesh(object):
         return
 
 
+
+    def _compute_faces_integrals(self, sum_faces_contrib=False): # TODO: implementer le sum_surface_contrib
+
+        surface_integrals = np.zeros((15, self.nb_faces), dtype=np.float)
+
+        # First triangles
+        if self.nb_triangles > 0:
+            triangles_ids = self.triangles_ids
+            # print self._faces[triangles_ids][:, :3].shape
+            triangles_vertices = self._vertices[self._faces[triangles_ids][:, :3]] # Remettre le 3
+            surface_integrals[:, triangles_ids] = self._compute_triangles_integrals(triangles_vertices)
+
+        # Now quadrangles by splitting them up
+        if self.nb_quadrangles > 0:
+            quadrangles_ids = self.quadrangles_ids
+            quadrangles = self._faces[quadrangles_ids]
+
+            # First pass
+            surface_integrals[:, quadrangles_ids] = \
+                self._compute_triangles_integrals(self._vertices[quadrangles[:, (0, 1, 2)]])
+
+            # Second pass
+            surface_integrals[:, quadrangles_ids] += \
+                self._compute_triangles_integrals(self._vertices[quadrangles[:, (0, 2, 3)]])
+
+            
+
+        return
+
+
+    @staticmethod
+    def _compute_triangles_integrals(triangles_vertices, sum_faces_contrib=False):
+        """
+        Notes
+        -----
+        triangles_vertices doit decrire par dimension croissante du general au particulier :
+        dimension 0 : informations sur chaque facette -- triangles_vertices[0] -> facette 0)
+        dimension 1 : informations sur chaque vertex de la facette -- triangles_vertices[0, 1] -> vertex 1 de la facette 0
+        dimension 2 : information sur chacune des coordonnées des vertex -- triangles_vertices[0, 1, 2] -> coordonnee z du vertex 1 de la facette 0
+        """
+
+
+        s_int = np.zeros((15, triangles_vertices.shape[0]), dtype=np.float)
+
+        P0, P1, P2 = map(_3DPointsArray, np.rollaxis(triangles_vertices, 1, 0))
+
+        t0 = P0 + P1
+        f1 = t0 + P2
+        t1 = P0 * P0
+        t2 = t1 + P1*t0
+        f2 = t2 + P2*f1
+        f3 = P0*t1 + P1*t2 + P2*f2
+        g0 = f2 + P0 * (f1+P0)
+        g1 = f2 + P1 * (f1+P1)
+        g2 = f2 + P2 * (f1+P2)
+
+        e1 = P1 - P0
+        e2 = P2 - P0
+
+        delta = np.linalg.norm(np.cross(e1, e2), axis=1)
+
+        s_int[0:3] = np.einsum('i, ij -> ji', delta, f1) / 6.
+
+        s_int[3] = delta * (6.*P0.y*P0.z + 3*(P1.y*P1.z + P2.y*P2.z) - P0.y*f1[:, 2] - P0.z*f1[:, 1]) / 12.
+        s_int[4] = delta * (6.*P0.x*P0.z + 3*(P1.x*P1.z + P2.x*P2.z) - P0.x*f1[:, 2] - P0.z*f1[:, 0]) / 12.
+        s_int[5] = delta * (6.*P0.x*P0.y + 3*(P1.x*P1.y + P2.x*P2.y) - P0.x*f1[:, 1] - P0.y*f1[:, 0]) / 12.
+
+        s_int[6:9] = np.einsum('i, ij -> ji', delta, f2) / 12.
+        s_int[9:12] = np.einsum('i, ij -> ji', delta, f3) / 20.
+
+        # Ne pas oublier le delta
+        s_int[12] = delta * ( P0.y*g0[:, 0] + P1.y*g1[:, 0] + P2.y*g2[:, 0]) / 60.
+        s_int[13] = delta * ( P0.z*g0[:, 1] + P1.z*g1[:, 1] + P2.z*g2[:, 1]) / 60.
+        s_int[14] = delta * ( P0.x*g0[:, 2] + P1.x*g1[:, 2] + P2.x*g2[:, 2]) / 60.
+
+        return s_int
+
+
+
 if __name__ == '__main__':
 
-    V, F = mm.load_VTP('SEAREV.vtp')
-    plane = Plane()
-    # vertices, faces = mm.clip_by_plane(vertices, faces, plane)
-    mesh = Mesh(V, F)
+    import mmio
+    V, F = mmio.load_VTP('SEAREV.vtp')
+    mymesh = Mesh(V, F)
+
+    mymesh._compute_faces_integrals()
+
+    sys.exit(0)
+
+
+
     print mesh
 
     # mesh.verbose_on()
@@ -1413,22 +1498,22 @@ if __name__ == '__main__':
 
     plane = Plane()
 
-    # clip_by_plane(vertices, faces, plane)
+    # clip_by_plane(_vertices, _faces, plane)
     # sys.exit(0)
 
-    # vertices, faces = mm.symmetrize(vertices, faces, plane)
+    # _vertices, _faces = mm.symmetrize(_vertices, _faces, plane)
     # plane.normal = np.array([0, 1, 0])
-    # vertices, faces = mm.symmetrize(vertices, faces, plane)
+    # _vertices, _faces = mm.symmetrize(_vertices, _faces, plane)
 
     # Rotation aleatoire
     import hydrostatics as hs
 
     # R = np.load('buggy_rotation_meshmagick.npy')
-    # vertices = np.transpose(np.dot(R, vertices.T))
+    # _vertices = np.transpose(np.dot(R, _vertices.T))
     # normal = [0, 0, 1]
     # c = 0
     # plane = Plane(normal, c)
-    # crown_face_ids, below_face_ids = partition_mesh(vertices, faces, plane)
+    # crown_face_ids, below_face_ids = partition_mesh(_vertices, _faces, plane)
     # Vclip, F_crown, boundary_polygons, boundary_line_partition_mesh[crown_face_ids], plane, return_boundaries=True)
     # sys.exit(0)
 
@@ -1443,7 +1528,7 @@ if __name__ == '__main__':
         R = hs._get_rotation_matrix(thetax, thetay)
         Vc = np.transpose(np.dot(R, Vc.T))
 
-        # mm.show(Vc, faces)
+        # mm.show(Vc, _faces)
         normal = [0, 0, 1]
         c = 0
         plane = Plane(normal, c)
