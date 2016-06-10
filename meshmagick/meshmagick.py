@@ -7,10 +7,10 @@
 """
 This module contains utility function to manipulate, load, save and
 convert surface mesh files used by the hydrodynamics community.
-Two numpy arrays are manipulated in this module : V and F.
-V is the array of nodes coordinates. It is an array of shape (nv, 3) where
+Two numpy arrays are manipulated in this module : vertices and faces.
+vertices is the array of nodes coordinates. It is an array of shape (nv, 3) where
 nv is the number of nodes in the mesh.
-F is the array of cell connectivities. It is an array of shape (nf, 4) where
+faces is the array of cell connectivities. It is an array of shape (nf, 4) where
 nf is the number of cells in the mesh. Not that it has 4 columns as we consider
 flat polygonal cells up to 4 edges (quads). Triangles are obtained by repeating
 the first node at the end of the cell node ID list.
@@ -369,7 +369,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
 
     # Loop on the faces to clip_by_plane
     for (iface, face) in enumerate(F[clipped_faces]):
-        # face is a copy (not a reference) of the line of F
+        # face is a copy (not a reference) of the line of faces
         clipped_face_id = clipped_faces[iface]
 
         if triangle_mask[clipped_face_id]:
@@ -466,7 +466,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
         F[clipped_face_id] = clipped_face
 
     # Adding new elements to the initial mesh
-    # TODO : use np.append(V, ..., axis=0) instead of np.concatenate
+    # TODO : use np.append(vertices, ..., axis=0) instead of np.concatenate
     if nb_new_V > 0:
         V = np.concatenate((V, np.asarray(newV, dtype=np.float)))
     if nb_new_F > 0:
@@ -488,7 +488,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
 
     # Extracting the kept mesh
     clipped_V = V[keepV]
-    # clipped_F = F[keepF]
+    # clipped_F = faces[keepF]
 
     # Upgrading connectivity array with new indexing
     newID_V = np.arange(extended_nb_V)
@@ -534,7 +534,7 @@ def clip_by_plane(Vinit, Finit, plane, abs_tol=1e-3, infos=False):
 
 _mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float) # Defines the array coefficient to compute surface integrals efficiently
 def _get_surface_integrals(V, F, sum=True):
-    """_get_surface_integrals(V, F, sum=True)
+    """_get_surface_integrals(vertices, faces, sum=True)
 
     Internal function
     Computes all the faces' integrals that may be used in several computations such
@@ -665,7 +665,7 @@ def _get_surface_integrals(V, F, sum=True):
 
 
 def get_mass_cog(V, F, rho=1.):
-    """get_mass_cog(V, F, rho=1.)
+    """get_mass_cog(vertices, faces, rho=1.)
 
     Returns the mass and the center of gravity of a mesh
 
@@ -687,7 +687,7 @@ def get_mass_cog(V, F, rho=1.):
 
 _mult_vol = np.array([1., 1., 1., 1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.]) # Defines the array coefficient to compute volume integrals on meshes
 def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False):
-    """get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False)
+    """get_inertial_properties(vertices, faces, rho=7500., mass=None, thickness=None, shell=False, verbose=False)
 
     Returns the inertial properties of a mesh. The mesh may be considred as being
     filled with homogeneous material or as being a shell.
@@ -866,7 +866,7 @@ def transport_inertia_matrix(mass, cog, Ig, point, rot=np.eye(3, dtype=np.float)
 
 
 def get_volume(V, F):
-    """get_volume(V, F)
+    """get_volume(vertices, faces)
 
     Returns the volume of the mesh
 
@@ -884,7 +884,7 @@ def get_volume(V, F):
 
 
 def get_COM(V, F):
-    """get_COM(V, F)
+    """get_COM(vertices, faces)
 
     Returns the center of mass (center of gravity) of the mesh
 
@@ -905,10 +905,10 @@ def get_COM(V, F):
 
 
 def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
-    """merge_duplicates(V, F, verbose=False, tol=1e-8)
+    """merge_duplicates(vertices, faces, verbose=False, tol=1e-8)
 
     Returns a new node array where close nodes have been merged into one node (following tol). It also returns
-    the connectivity array F with the new node IDs.
+    the connectivity array faces with the new node IDs.
 
     Parameters:
         V: ndarray
@@ -922,10 +922,10 @@ def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
             that have to be merged
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes where
             every node is different
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities, accordingly
             to the new node list that has been merged
     """
@@ -1018,10 +1018,10 @@ def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
 #     nv1 = V1.shape[0]
 #     nv2 = V2.shape[0]
 #
-#     V = np.concatenate((V1, V2), axis=0)
-#     F = np.concatenate((F1, F2+nv1), axis=0)
+#     vertices = np.concatenate((V1, V2), axis=0)
+#     faces = np.concatenate((F1, F2+nv1), axis=0)
 #
-#     return V, F
+#     return vertices, faces
 
 
 
@@ -1071,7 +1071,7 @@ def _is_point_inside_polygon(point, poly):
     return inside
 
 def generate_lid(V, F, max_area=None, verbose=False):
-    """generate_lid(V, F, max_area=None, verbose=False)
+    """generate_lid(vertices, faces, max_area=None, verbose=False)
 
     Meshes the lid of a mesh with triangular faces to be used in irregular frequency
     removal in BEM softwares. It clips the mesh againt the plane Oxy, extract the intersection
@@ -1211,7 +1211,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
         mesh_points_3D = np.zeros((nmp, 3))
         mesh_points_3D[:, :-1] = mesh_points
 
-        # show(V, F)
+        # show(vertices, faces)
         # return
 
         # Adding the lid to the initial mesh
@@ -1346,7 +1346,7 @@ def main():
                     (4) HYDROSTAR is a BEM Software for seakeeping developped by
                         BUREAU VERITAS
                     (5) GMSH is an open source meshing software developped by C. Geuzaine
-                    and J.-F. Remacle
+                    and J.-faces. Remacle
                     (6) PARAVIEW is an open source visualization software developped by
                         Kitware
                     (7) TECPLOT is a visualization software developped by Tecplot
@@ -1872,7 +1872,7 @@ def main():
     #     else:
     #         hull = True
     #
-    #     mass, cog, inertia_matrix = get_inertial_properties(V, F,
+    #     mass, cog, inertia_matrix = get_inertial_properties(vertices, faces,
     #                                     rho=args.rho_medium,
     #                                     mass=args.mass,
     #                                     thickness=args.thickness,
@@ -1903,7 +1903,7 @@ def main():
     #     if args.zcog is None:
     #         raise RuntimeError, 'For the GZ computations, the --zcog option is mandatory'
     #
-    #     hsMesh = hs.HydrostaticsMesh(V, F, rho_water=args.rho_water, g=args.grav)
+    #     hsMesh = hs.HydrostaticsMesh(vertices, faces, rho_water=args.rho_water, g=args.grav)
     #     hs.get_GZ_curves(hsMesh, args.zcog,
     #                      spacing=spacing,
     #                      rho_water=args.rho_water,
@@ -1926,8 +1926,8 @@ def main():
 
         output_hs = hs.compute_hydrostatics(mesh, args.zcog, verbose=verbose)
         mesh = output_hs['mesh_hs']
-        # V = outputHS['Vc']
-        # F = outputHS['Fc']
+        # vertices = outputHS['Vc']
+        # faces = outputHS['Fc']
 
     # if args.hydrostatics:
     #     try:
@@ -1946,8 +1946,8 @@ def main():
     #         cog = np.asarray(args.cog, dtype=np.float)
     #
     #     # TODO : Revoir la structure afin de ne jouer que sur l'objet !!
-    #     hsMesh = hs.HydrostaticsMesh(V, F, rho_water=args.rho_water, g=args.grav)
-    #     V, F = hs.get_hydrostatics(hsMesh,
+    #     hsMesh = hs.HydrostaticsMesh(vertices, faces, rho_water=args.rho_water, g=args.grav)
+    #     vertices, faces = hs.get_hydrostatics(hsMesh,
     #                                mass=args.mass,
     #                                zcog=args.zcog,
     #                                cog=cog,
@@ -2008,7 +2008,7 @@ def main():
 
         if verbose:
             print 'Writing %s' % args.outfilename
-        mmio.write_mesh(args.outfilename, mesh.V, mesh.F, format)
+        mmio.write_mesh(args.outfilename, mesh.vertices, mesh.faces, format)
         if verbose:
             print '\t-> Done.'
 

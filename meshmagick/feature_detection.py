@@ -789,8 +789,8 @@ class MeshHE:
         # long_surface = []
         # for i, surface in enumerate(surfaces):
         #     long_surface += surface
-        #     V, F = extract_faces(self.vertices, self.faces, long_surface)
-        #     write_VTP('surf%u.vtp'%i, V, F)
+        #     vertices, faces = extract_faces(self.vertices, self.faces, long_surface)
+        #     write_VTP('surf%u.vtp'%i, vertices, faces)
 
         if verbose:
             print "\t-> Features detected!"

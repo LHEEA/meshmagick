@@ -22,9 +22,9 @@ def load_mesh(filename, format):
             format of the mesh defined in the extension_dict dictionary
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
     """
     os.path.isfile(filename)
@@ -49,9 +49,9 @@ def load_RAD(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: RAD files have a 1-indexing
@@ -100,9 +100,9 @@ def load_HST(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: HST files have a 1-indexing
@@ -172,9 +172,9 @@ def load_INP(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: INP/DAT files use a 1-indexing
@@ -337,9 +337,9 @@ def load_TEC(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: TEC files have a 0-indexing
@@ -405,9 +405,9 @@ def load_VTU(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: VTU files have a 0-indexing
@@ -433,9 +433,9 @@ def load_VTP(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: VTP files have a 0-indexing
@@ -461,9 +461,9 @@ def load_VTK(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: VTU files have a 0-indexing
@@ -490,9 +490,9 @@ def _dump_vtk(vtk_mesh):
             the reader to use (new XML format ot legacy vtk format)
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
     """
     # Importing the mesh from the file
@@ -530,9 +530,9 @@ def load_STL(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: STL files have a 0-indexing
@@ -598,9 +598,9 @@ def load_NAT(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: NAT files have a 1-indexing
@@ -635,9 +635,9 @@ def load_GDF(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: GDF files have a 1-indexing
@@ -682,9 +682,9 @@ def load_MAR(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: MAR files have a 1-indexing
@@ -728,9 +728,9 @@ def load_MSH(filename):
             name of the meh file on disk
 
     Returns:
-        V: ndarray
+        vertices: ndarray
             numpy array of the coordinates of the mesh's nodes
-        F: ndarray
+        faces: ndarray
             numpy array of the faces' nodes connectivities
 
     Note: MSH files have a 0-indexing
@@ -780,23 +780,23 @@ def load_MSH(filename):
 #     pattern = re.compile(patt_str, re.MULTILINE | re.VERBOSE)
 #
 #     normal = []
-#     V = []
+#     vertices = []
 #     for match in pattern.finditer(text):
 #         normal.append(map(float, match.group(1).split()))
-#         V.append(map(float, match.group(2).split()))
-#         V.append(map(float, match.group(3).split()))
-#         V.append(map(float, match.group(4).split()))
+#         vertices.append(map(float, match.group(2).split()))
+#         vertices.append(map(float, match.group(3).split()))
+#         vertices.append(map(float, match.group(4).split()))
 #
-#     V = np.array(V, dtype=float, order='fortran')
+#     vertices = np.array(vertices, dtype=float, order='fortran')
 #
-#     nf = np.size(V, 0) / 3
-#     F = np.zeros((nf, 4), dtype=np.int32, order='fortran')
+#     nf = np.size(vertices, 0) / 3
+#     faces = np.zeros((nf, 4), dtype=np.int32, order='fortran')
 #
 #     base = np.array([1, 2, 3, 1])
 #     for i in range(nf):
-#         F[i, :] = base + 3 * i
+#         faces[i, :] = base + 3 * i
 #
-#     return V, F
+#     return vertices, faces
 
 
 
@@ -833,7 +833,7 @@ def write_mesh(filename, V, F, format):
     return 1
 
 def write_DAT(filename, V, F):
-    """write_DAT(filename, V, F)
+    """write_DAT(filename, vertices, faces)
 
     Writes .DAT file format for the DIODORE (PRINCIPA (c)) software.
     It also displays suggestions for inclusion into the .INP configuration
@@ -925,7 +925,7 @@ def write_DAT(filename, V, F):
     return 1
 
 def write_HST(filename, V, F):
-    """write_HST(filename, V, F)
+    """write_HST(filename, vertices, faces)
 
     Writes .HST file format for the HYDROSTAR (Bureau Veritas (c)) software.
 
@@ -983,7 +983,7 @@ def write_HST(filename, V, F):
     print u'File {0:s} written'.format(filename)
 
 def write_TEC(filename, V, F):
-    """write_TEC(filename, V, F)
+    """write_TEC(filename, vertices, faces)
 
     Writes .TEC file format for the TECPLOT (Tecplot (c)) visualisation
     software. It relies on the VTK library for its writer.
@@ -1006,7 +1006,7 @@ def write_TEC(filename, V, F):
 
     ofile.write('VARIABLES = \"X\",\"Y\",\"Z\" \n')
     ofile.write('ZONE T=\"MESH\" \n')
-    ofile.write('N={nv:10d} ,E={nf:10d} ,F=FEPOINT, ET=QUADRILATERAL\n'.format(nv=nv, nf=nf))
+    ofile.write('N={nv:10d} ,E={nf:10d} ,faces=FEPOINT, ET=QUADRILATERAL\n'.format(nv=nv, nf=nf))
 
     node_block = '\n'.join( # block
         ''.join(
@@ -1027,7 +1027,7 @@ def write_TEC(filename, V, F):
     return 1
 
 def write_VTU(filename, V, F):
-    """write_VTU(filename, V, F)
+    """write_VTU(filename, vertices, faces)
 
     Writes .vtu file format for the paraview (Kitware (c)) visualisation
     software. It relies on the VTK library for its writer. VTU files use
@@ -1054,7 +1054,7 @@ def write_VTU(filename, V, F):
     return 1
 
 def write_VTP(filename, V, F):
-    """write_VTP(filename, V, F)
+    """write_VTP(filename, vertices, faces)
 
     Writes .vtp file format for the paraview (Kitware (c)) visualisation
     software. It relies on the VTK library for its writer. VTP files use
@@ -1081,7 +1081,7 @@ def write_VTP(filename, V, F):
     return 1
 
 def write_VTK(filename, V, F):
-    """write_VTK(filename, V, F)
+    """write_VTK(filename, vertices, faces)
 
     Writes .vtk file format for the paraview (Kitware (c)) visualisation
     software. It relies on the VTK library for its writer. VTK files use
@@ -1108,7 +1108,7 @@ def write_VTK(filename, V, F):
     return 1
 
 def _write_paraview(filename, V, F, writer):
-    """_write_paraview(filename, V, F)
+    """_write_paraview(filename, vertices, faces)
 
     Internal driver function that writes vtk files to be visualised into
     the Paraview software. It relies on the VTK library.
@@ -1132,7 +1132,7 @@ def _write_paraview(filename, V, F, writer):
     return 1
 
 def _build_vtkUnstructuredGrid(V, F):
-    """_build_vtk_mesh_obj(V, F)
+    """_build_vtk_mesh_obj(vertices, faces)
 
     Internal function that builds a VTK object for manipulation by the VTK library.
 
@@ -1209,7 +1209,7 @@ def _build_vtkPolyData(V, F):
     return polyDataMesh
 
 def write_NAT(filename, V, F):
-    """write_NAT(filename, V, F)
+    """write_NAT(filename, vertices, faces)
 
     Writes .nat file format as defined into the load_NAT function.
 
@@ -1242,7 +1242,7 @@ def write_NAT(filename, V, F):
     return 1
 
 def write_GDF(filename, V, F):
-    """write_GDF(filename, V, F)
+    """write_GDF(filename, vertices, faces)
 
     Writes .gdf file format for the WAMIT (Wamit INC. (c)) BEM software.
 
@@ -1276,7 +1276,7 @@ def write_GDF(filename, V, F):
     return 1
 
 def write_MAR(filename, V, F):
-    """write_MAR(filename, V, F)
+    """write_MAR(filename, vertices, faces)
 
     Writes mesh files to be used with Nemoh BEM software (Ecole Centrale de Nantes)
 
@@ -1320,7 +1320,7 @@ def write_RAD(filename, V, F):
     raise NotImplementedError
 
 def write_STL(filename, V, F):
-    """write_STL(filename, V, F)
+    """write_STL(filename, vertices, faces)
 
     Writes .stl file format. It relies on the VTK library for its writer.
 
