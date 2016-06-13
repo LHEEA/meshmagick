@@ -1096,7 +1096,7 @@ class Mesh(object):
     def __add__(self, mesh_to_add):
         V = np.concatenate((self._vertices, mesh_to_add._vertices), axis=0)
         F = np.concatenate((self._faces, mesh_to_add._faces + self.nb_vertices), axis=0)
-        new_mesh = Mesh(V, F, name='_'.join([self.name, mesh_to_add.name]))
+        new_mesh = Mesh(V, F, name='_'.join([self.name, 'merged_with_', mesh_to_add.name]))
         # new_mesh.merge_duplicates()
         new_mesh._verbose = self._verbose or mesh_to_add._verbose
 
@@ -1116,12 +1116,19 @@ class Mesh(object):
         return copy.deepcopy(self)
 
     def merge_duplicates(self, tol=1e-8, return_index=False):
+
         # TODO: voir ou mettre l'implementation de la fonction merge_duplicates
-        output = mm.merge_duplicates(self._vertices, self._faces, verbose=False, tol=tol, return_index=return_index)
+        # output = mm.merge_duplicates(self._vertices, self._faces, verbose=False, tol=tol, return_index=return_index)
+
+        mm.merge_duplicates2(self._vertices)
+
+        sys.exit(0)
+
         if return_index:
             V, F, newID = output
         else:
             V, F = output
+
         if self._verbose:
             print "* Merging duplicate _vertices"
             delta_n = self.nb_vertices - V.shape[0]
