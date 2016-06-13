@@ -422,8 +422,8 @@ class Mesh(object):
 
         self.__internals__ = dict()
 
-        self._vertices = vertices
-        self._faces = faces
+        self._vertices = np.asarray(vertices, dtype=np.float)
+        self._faces = np.asarray(faces, dtype=np.int)
         self._id = self._ids.next()
 
         if not name:
@@ -1019,7 +1019,6 @@ class Mesh(object):
 
         return
 
-    # @invalidate_cache
     def translate_x(self, tx):
         V = self._vertices
         V[:, 0] += tx

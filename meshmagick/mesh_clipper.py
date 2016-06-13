@@ -134,7 +134,6 @@ class MeshClipper(object):
 
         return
 
-
     @property
     def lower_mesh(self):
         return self.__internals__['lower_mesh']
