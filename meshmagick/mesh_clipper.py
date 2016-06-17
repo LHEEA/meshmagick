@@ -134,7 +134,6 @@ class MeshClipper(object):
 
         return
 
-
     @property
     def lower_mesh(self):
         return self.__internals__['lower_mesh']
@@ -556,7 +555,9 @@ class MeshClipper(object):
 
     def clip(self):
         self.clip_crown_by_plane()
-        self.__internals__['clipped_mesh'] = self.lower_mesh + self.clipped_crown_mesh
+        clipped_mesh = self.lower_mesh + self.clipped_crown_mesh
+        clipped_mesh.name = '_'.join((self._source_mesh.name, 'clipped'))
+        self.__internals__['clipped_mesh'] = clipped_mesh
         return
 
 if __name__ == '__main__':
@@ -584,7 +585,7 @@ if __name__ == '__main__':
     # # print
     # print clipped_mesh.faces_areas.sum()
 
-    for iter in xrange(100):
+    for iter in xrange(1):
         print iter
         thetax, thetay = np.random.rand(2)*2*math.pi
         plane.rotate_normal(thetax, thetay)

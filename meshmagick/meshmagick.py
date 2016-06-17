@@ -416,6 +416,34 @@ __status__     = "Development"
 #     return _get_surface_integrals(V, F)
 
 
+def merge_duplicates2(vertices, tol=1e-8, return_index=False):
+
+    vertices = np.asarray(vertices, dtype=np.float)
+
+    nv = vertices.shape[0]
+
+    index = np.arange(nv)
+    levels = [[0, nv]]
+
+    for idim in xrange(1):
+        coord = vertices[index, idim].copy()
+
+        for level in levels:
+            isort = coord.argsort()
+
+            dist = np.diff(coord[isort])
+
+            print np.where(dist > tol)[0]
+            print nv
+
+
+    if return_index:
+        return vertices, index
+    else:
+        return vertices
+
+
+
 def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
     """merge_duplicates(_vertices, _faces, verbose=False, tol=1e-8)
 
