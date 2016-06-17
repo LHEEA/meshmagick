@@ -14,6 +14,9 @@ from itertools import count
 from warnings import warn
 import sys # Retirer
 
+# TODO: les points doivent etre des objects nodes...
+# TODO: On doit pouvoir specifier des objets frame
+
 # TODO: voir si on ne peut pas mettre ces fonctions dans un module dedie ?
 def _rodrigues(thetax, thetay):
     """
@@ -429,7 +432,7 @@ class Mesh(object):
         if not name:
             self._name = 'mesh_%u' % self._id
         else:
-            self._name = name
+            self._name = str(name)
 
         self._verbose = False
 
@@ -1372,6 +1375,8 @@ class Mesh(object):
             if self.nb_quadrangles != 0:
                 print '\t-->{:d} quadrangles have been split in triangles'.format(self.nb_quadrangles)
 
+        self.__internals__.clear()
+
         self._faces = F
 
         return F
@@ -1488,8 +1493,8 @@ class Mesh(object):
         s_int[4] = delta * (6.*P0.x*P0.z + 3*(P1.x*P1.z + P2.x*P2.z) - P0.x*f1[:, 2] - P0.z*f1[:, 0]) / 12.
         s_int[5] = delta * (6.*P0.x*P0.y + 3*(P1.x*P1.y + P2.x*P2.y) - P0.x*f1[:, 1] - P0.y*f1[:, 0]) / 12.
 
-        s_int[6:9] = np.einsum('i, ij -> ji', delta, f2) / 12.
-        s_int[9:12] = np.einsum('i, ij -> ji', delta, f3) / 20.
+        s_int[6:9] = np.einsum('i, ij -> ji', delta, f2) / 12. # semble OK
+        s_int[9:12] = np.einsum('i, ij -> ji', delta, f3) / 20. # --> problem
 
         # Ne pas oublier le delta
         s_int[12] = delta * ( P0.y*g0[:, 0] + P1.y*g1[:, 0] + P2.y*g2[:, 0]) / 60.
