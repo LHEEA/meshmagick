@@ -2,25 +2,30 @@
 #  -*- coding: utf-8 -*-
 
 from mesh import *
+from nodes import *
 import numpy as np
 
-import sys
+# import sys
+
+
+class InertiaTensor(np.ndarray):
+
+    def __new__(cls, name=None):
+        obj = np.zeros((6, 6), dtype=np.float).view(cls)
+        obj._node = Node([0, 0, 0])
+        obj._name = name
+        return obj
 
 
 
 
-class Inertia(object):
-    def __init__(self, mesh):
-        self._mesh = mesh
+    @property
+    def rotational_inertia_matrix(self):
+        return self[3:, 3:]
 
-        self.__internals__ = dict()
-
-        self._compute_surface_integrals_vectorized()
-
-
-    def reset(self):
-        self.__internals__.clear()
-
+    # @property
+    # def Ixx(self):
+    #     return self.__internals__['inertia_matrix']
 
 
 
@@ -35,5 +40,5 @@ if __name__ == '__main__':
     vertices, faces = mmio.load_VTP('SEAREV.vtp')
     mymesh = Mesh(vertices, faces)
 
-    inertia = Inertia(mymesh)
+    # inertia = Inertia(mymesh)
 
