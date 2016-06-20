@@ -10,6 +10,11 @@ real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?' # Regex for floats
 # ======================================================================
 # Contains here all functions to load meshes from different file formats
 
+def check_file(filename):
+    if not os.path.isfile(filename):
+        raise IOError, "file %s not found" % filename
+    return
+
 def load_mesh(filename, format):
     """load_mesh(filename, format)
 
@@ -28,6 +33,7 @@ def load_mesh(filename, format):
         _faces: ndarray
             numpy array of the _faces' nodes connectivities
     """
+    check_file(filename)
     os.path.isfile(filename)
 
     if not extension_dict.has_key(format):
@@ -59,7 +65,7 @@ def load_RAD(filename):
     """
 
     import re
-
+    check_file(filename)
     ifile = open(filename, 'r')
     data = ifile.read()
     ifile.close()
@@ -108,6 +114,8 @@ def load_HST(filename):
 
     Note: HST files have a 1-indexing
     """
+    check_file(filename)
+
     ifile = open(filename, 'r')
     data = ifile.read()
     ifile.close()
@@ -159,6 +167,7 @@ def load_DAT(filename):
     """Not implemented.
     Intended to load .DAT files used in DIODORE (PRINCIPIA (c))
     """
+    check_file(filename)
     raise NotImplementedError
 
 def load_INP(filename):
@@ -180,6 +189,7 @@ def load_INP(filename):
 
     Note: INP/DAT files use a 1-indexing
     """
+    check_file(filename)
     import re
 
     ifile = open(filename, 'r')
@@ -345,6 +355,7 @@ def load_TEC(filename):
 
     Note: TEC files have a 0-indexing
     """
+    check_file(filename)
 
     from vtk import vtkTecplotReader
 
@@ -413,6 +424,7 @@ def load_VTU(filename):
 
     Note: VTU files have a 0-indexing
     """
+    check_file(filename)
 
     from vtk import vtkXMLUnstructuredGridReader
     reader = vtkXMLUnstructuredGridReader()
@@ -441,6 +453,7 @@ def load_VTP(filename):
 
     Note: VTP files have a 0-indexing
     """
+    check_file(filename)
 
     from vtk import vtkXMLPolyDataReader
     reader = vtkXMLPolyDataReader()
@@ -469,6 +482,8 @@ def load_VTK(filename):
 
     Note: VTU files have a 0-indexing
     """
+    check_file(filename)
+
     from vtk import vtkUnstructuredGridReader
     reader = vtkUnstructuredGridReader()
     reader.SetFileName(filename)
@@ -538,6 +553,7 @@ def load_STL(filename):
 
     Note: STL files have a 0-indexing
     """
+    check_file(filename)
 
     from vtk import vtkSTLReader
 
@@ -606,6 +622,7 @@ def load_NAT(filename):
 
     Note: NAT files have a 1-indexing
     """
+    check_file(filename)
 
     ifile = open(filename, 'r')
     xsym, ysym = map(int, ifile.readline().split())
@@ -643,6 +660,8 @@ def load_GDF(filename):
 
     Note: GDF files have a 1-indexing
     """
+    check_file(filename)
+
     ifile = open(filename, 'r')
 
     ifile.readline()  # skip one header line
@@ -690,6 +709,7 @@ def load_MAR(filename):
 
     Note: MAR files have a 1-indexing
     """
+    check_file(filename)
 
     ifile = open(filename, 'r')
 
