@@ -17,7 +17,7 @@ import sys # Retirer
 # TODO: les points doivent etre des objects nodes...
 # TODO: On doit pouvoir specifier des objets frame
 
-# TODO: voir si on ne peut pas mettre ces fonctions dans un module dedie ?
+# TODO: voir si on ne peut pas mettre ces fonctions dans un module dedie --> module rotation !!!
 def _rodrigues(thetax, thetay):
     """
     Computes the rotation matrix corresponding to angles thetax and thetay using the Olinde-Rodrigues formula
@@ -113,6 +113,15 @@ def _get_rotation_matrix(thetax, thetay, atype='fixed'):
         raise AttributeError, 'Unknown angle convention: %s' % atype
 
     return R
+
+def _get_axis_angle_from_rotation_matrix(rot):
+    warn('Fonction _get_axis_angle_from_rotation_matrix a verifier !!!')
+    theta = math.acos((np.trace(rot)-1.)*0.5)
+    direction = (1./(2.*math.sin(theta))) * np.array([rot[2, 1]-rot[1, 2],
+                                                      rot[0, 2]-rot[2, 0],
+                                                      rot[1, 0]-rot[0, 1]])
+    return theta, direction
+
 
 
 # Classes
@@ -425,8 +434,8 @@ class Mesh(object):
 
         self.__internals__ = dict()
 
-        self._vertices = np.asarray(vertices, dtype=np.float)
-        self._faces = np.asarray(faces, dtype=np.int)
+        self._vertices = vertices
+        self._faces = faces
         self._id = self._ids.next()
 
         if not name:
@@ -1022,6 +1031,7 @@ class Mesh(object):
 
         return
 
+    # @invalidate_cache
     def translate_x(self, tx):
         V = self._vertices
         V[:, 0] += tx
@@ -1099,7 +1109,7 @@ class Mesh(object):
     def __add__(self, mesh_to_add):
         V = np.concatenate((self._vertices, mesh_to_add._vertices), axis=0)
         F = np.concatenate((self._faces, mesh_to_add._faces + self.nb_vertices), axis=0)
-        new_mesh = Mesh(V, F, name='_'.join([self.name, 'merged_with_', mesh_to_add.name]))
+        new_mesh = Mesh(V, F, name='_'.join([self.name, mesh_to_add.name]))
         # new_mesh.merge_duplicates()
         new_mesh._verbose = self._verbose or mesh_to_add._verbose
 
@@ -1119,19 +1129,12 @@ class Mesh(object):
         return copy.deepcopy(self)
 
     def merge_duplicates(self, tol=1e-8, return_index=False):
-
         # TODO: voir ou mettre l'implementation de la fonction merge_duplicates
-        # output = mm.merge_duplicates(self._vertices, self._faces, verbose=False, tol=tol, return_index=return_index)
-
-        mm.merge_duplicates2(self._vertices)
-
-        sys.exit(0)
-
+        output = mm.merge_duplicates(self._vertices, self._faces, verbose=False, tol=tol, return_index=return_index)
         if return_index:
             V, F, newID = output
         else:
             V, F = output
-
         if self._verbose:
             print "* Merging duplicate _vertices"
             delta_n = self.nb_vertices - V.shape[0]
@@ -1499,8 +1502,8 @@ class Mesh(object):
         s_int[4] = delta * (6.*P0.x*P0.z + 3*(P1.x*P1.z + P2.x*P2.z) - P0.x*f1[:, 2] - P0.z*f1[:, 0]) / 12.
         s_int[5] = delta * (6.*P0.x*P0.y + 3*(P1.x*P1.y + P2.x*P2.y) - P0.x*f1[:, 1] - P0.y*f1[:, 0]) / 12.
 
-        s_int[6:9] = np.einsum('i, ij -> ji', delta, f2) / 12. # semble OK
-        s_int[9:12] = np.einsum('i, ij -> ji', delta, f3) / 20. # --> problem
+        s_int[6:9] = np.einsum('i, ij -> ji', delta, f2) / 12.
+        s_int[9:12] = np.einsum('i, ij -> ji', delta, f3) / 20.
 
         # Ne pas oublier le delta
         s_int[12] = delta * ( P0.y*g0[:, 0] + P1.y*g1[:, 0] + P2.y*g2[:, 0]) / 60.

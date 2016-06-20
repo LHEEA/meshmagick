@@ -6,9 +6,9 @@ import numpy as np
 
 class Node(np.ndarray):
 
-    def __new__(cls, coords, name=None):
+    def __new__(cls, name, coords):
         obj = np.asarray(coords, dtype=np.float).view(cls)
-        obj.name = name
+        obj._name = str(name)
         return obj
 
     def __str__(self):

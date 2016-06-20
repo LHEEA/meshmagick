@@ -1,27 +1,20 @@
 #!/usr/bin/env python
 #  -*- coding: utf-8 -*-
 
-from mesh import *
-from nodes import *
-from inertia import *
+import mesh
+import nodes
+import inertia
+import frame
 from itertools import count
+from warnings import warn
 
 # TODO: Make this class abstract
+# TODO: make a system of frame attachment (observer pattern)
 class RigidBody(object):
     _ids = count(0)
-    def __init__(self, name=None, mass=None, cog=None): # TODO: doit avoir name, cog, frame, mass, inertia
-        """
-        Rigid Body constructor
+    def __init__(self, name=None, mass=None, cog=None, rb_inertia=None):
 
-        Parameters
-        ----------
-        mass : float
-            mass of the body (should be specified in tons but is stored in kg)
-        cog : array_like
-            position of the center of gravity in the body reference frame
-        name : str
-            The body's name
-        """
+        self._id = self._ids.next()
 
         if name:
             self._name = str(name)
@@ -31,12 +24,21 @@ class RigidBody(object):
         self.mass = mass
         self.cog = cog
 
-        self._id = self._ids.next()
+        if rb_inertia:
+            if not isinstance(rb_inertia, RigidBodyInertia): # TODO:
+                raise ValueError, "RigidBody rb_inertia parameter must be a RigidBodyInertia object"
+
+        # Setting the reference frame
+        self._reference_frame = frame.Frame('_'.join((self._name, 'reference_frame')))
+
+
 
         self._body_mesh = None
 
-        # TODO: Passer a une classe
-        self._spatial_inertia_tensor = None
+
+
+        # # TODO: Passer a une classe
+        # self._spatial_inertia_tensor = None
 
         return
 
@@ -75,7 +77,7 @@ class RigidBody(object):
     @body_mesh.setter
     def body_mesh(self, value):
         if value is not None:
-            if not isinstance(value, Mesh):
+            if not isinstance(value, mesh.Mesh):
                 raise TypeError, "RigidBody Mesh must be a Mesh object"
         self._body_mesh = value
         return
@@ -99,7 +101,7 @@ class RigidBody(object):
     @cog.setter
     def cog(self, value):
         if value:
-            self._cog = Node(value, name='_'.join((self._name, 'COG')))
+            self._cog = nodes.Node('_'.join((self._name, 'COG')), value)
         else:
             self._cog = None
         return
@@ -112,24 +114,13 @@ class RigidBody(object):
     def name(self, value):
         self._name = str(value)
 
-    # @property
-    # def spatial_inertia_tensor(self):
-    #     return self._spatial_inertia_tensor
+    def show(self):
+        if not self.body_mesh:
+            warn("Unable to visualize %s as no mesh has been specified" % self._name)
 
-    # @spatial_inertia_tensor.setter
-    # def spatial_inertia_tensor(self, value):
-    #     value = np.asarray(value, dtype=np.float)
-    #     if value.shape != (6, 6):
-    #         raise ValueError, 'Rigid Body spatial inertia tensor must have shape (6, 6)'
-    #
-    #     # self._spatial_inertia_tensor = InertiaTensor(value) # TODO : Passer a une classe
-    #     self._spatial_inertia_tensor = value
-    #     return
-
-
-
-
-
+        # TODO : FINIR
+        # TODO: devrait montrer le cog, la masse, les axes principaux d'inertie...
+        return
 
 
 class PlainRigidBody(RigidBody):
@@ -174,59 +165,50 @@ class PlainRigidBody(RigidBody):
         self._cog = cog
         return
 
-    def _set_inertia_from_properties(self):
+    def guess_mass_properties_from_mesh(self):
         # Following formula from technical report on inertia computations
 
+        if not self.body_mesh:
+            warn("Unable to compute %s's mass properties from mesh as no mesh has been specified" % self._name)
+            return
+
+        # Computing mass
+        # --------------
+        mesh_volume = self._body_mesh.volume
+        mass = self._rho_material * mesh_volume
+        self._mass = mass
+        # TODO: voir si on ne supprime pas la ppte en tant que tel --> recuperer depuis l'objet Spatial Inertia
+
+        # Computing COG
+        # -------------
         mesh_normals = self._body_mesh.faces_normals.T
-        integrals = self._body_mesh.get_surface_integrals()[9:15]
+        integrals = self._body_mesh.get_surface_integrals()[6:15]
+        sigma_6_8 = integrals[:3]
 
-        sigma9, sigma10, sigma11 = (mesh_normals * integrals[:3]).sum(axis=1)
-        sigma12, sigma13, sigma14 = (mesh_normals * integrals[3:]).sum(axis=1)
+        cog = (mesh_normals * sigma_6_8).sum(axis=1) / (2*mesh_volume)
+        # cog[np.fabs(cog) < 1e-6] = 0. # TODO: voir si utile, ou mettre en option d'affichage --> le mieux ?
+        self._cog = cog
 
-        # vol = self._body_mesh.volume
+        # Computing the rotational inertia matrix
+        # ---------------------------------------
+        sigma9, sigma10, sigma11 = (mesh_normals * integrals[3:6]).sum(axis=1)
+        sigma12, sigma13, sigma14 = (mesh_normals * integrals[6:10]).sum(axis=1)
 
-        Ixx = (sigma10+sigma11) / 3. # TODO: voir pourquoi besoin de diviser par le volume !!!
-        Iyy = (sigma9+sigma11) / 3.
-        Izz = (sigma9+sigma10) / 3.
-        Ixy = -sigma12 / 2.
-        Ixz = -sigma14 / 2.
-        Iyz = -sigma13 / 2.
+        rho = self._rho_material
 
-        rotational_inertia = self._rho_material * \
-            np.asarray(
-                [[Ixx, Ixy, Ixz],
-                 [Ixy, Iyy, Iyz],
-                 [Ixz, Iyz, Izz]],
-        dtype=np.float)
+        Ixx = rho * (sigma10+sigma11) / 3.
+        Iyy = rho * (sigma9+sigma11) / 3.
+        Izz = rho * (sigma9+sigma10) / 3.
+        Ixy = rho * sigma12 / 2.
+        Ixz = rho * sigma14 / 2.
+        Iyz = rho * sigma13 / 2.
 
-        # rotational_inertia[np.fabs(rotational_inertia) < 1e-6] = 0.
-
-        cog = self._cog
-        mass = self._mass
-
-        # TODO:
-
-        # Expressing the inertia matrix at cog
-        rotational_inertia -= mass * (np.inner(cog, cog)*np.eye(3) - np.outer(cog, cog))
-
-        print rotational_inertia
-        # TODO: A finir, il faut maintenant stocker la matrice dans une classe InertiaTensor
-
-
+        inertia_name = '_'.join((self._name, 'rotational_inertia'))
+        self._inertia = inertia.RigidBodyInertia(inertia_name, Ixx=Ixx, Iyy=Iyy, Izz=Izz, Ixy=Ixy, Ixz=Ixz, Iyz=Iyz,
+                                         parent=self)
+        # print self._inertia
 
         return
-
-    def guess_mass_properties(self):
-        self._set_cog_from_properties()
-        self._set_mass_from_properties()
-        self._set_inertia_from_properties()
-        return
-
-    # TODO: redefinir setters et getter pour mass et cog...
-
-    # @property
-    # def inertia_matrix(self):
-    #     return self._inertia_matrix
 
 
 
@@ -244,15 +226,16 @@ if __name__ == '__main__':
     import mmio
     vertices, faces = mmio.load_VTP('Cylinder.vtp')
 
-    mymesh = Mesh(vertices, faces)
+    mymesh = mesh.Mesh(vertices, faces)
+    # mymesh.show()
 
     # Pour le cylindre
-    plane = Plane()
+    plane = mesh.Plane()
     mymesh.symmetrize(plane)
     plane.normal = [0, 1, 0]
     mymesh.symmetrize(plane)
 
-    mymesh.translate([20., 100, 3.2])
+    # mymesh.translate([2000., 100, 3.2])
 
     mymesh.triangulate_quadrangles()
     # print mymesh
@@ -261,21 +244,11 @@ if __name__ == '__main__':
 
     body = PlainRigidBody(name='mybody', mass=0., cog=[0, 0, 0])
 
-    body.cog = [0, 0, 0]
-
-
     body.body_mesh = mymesh
     body.name = "Mybody"
 
-    # print body.body_mesh.volume
-
-    body.guess_mass_properties()
-
-    # print body.mass, body.body_mesh.volume*1026*1e-3
-    # print body.cog
+    body.guess_mass_properties_from_mesh()
 
 
-    # print type(body.spatial_inertia_tensor)
 
-    # print body
 
