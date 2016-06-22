@@ -13,6 +13,7 @@ syntax: glob
 # folders to ignore
 tests/**
 .idea/**
+UML/**
 meshmagick.egg*
 doc/**
 dist/**

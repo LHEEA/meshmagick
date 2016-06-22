@@ -91,8 +91,53 @@ class Node(np.ndarray):
         self[:] = np.asarray(coords, dtype=np.float)
         return
 
+    def is_absolute(self):
+        return isinstance(self._parent, GroundNode)
+
+    def is_relative(self):
+        return not self.is_absolute()
+
+    def get_absolute_position(self):
+        # CA NE FONCTIONNE PAS !!!!
+        node = self
+        position = self.asarray()
+        while True:
+            if isinstance(node._parent, GroundNode):
+                break
+            node = self._parent
+            position
+
+
+
+    def asarray(self):
+        return np.asarray(self)
+
+    def __add__(self, other):
+        self[:] += other
+        return self
+
+    def __radd__(self, other):
+        self[:] += other
+        return self
+
+    def __sub__(self, other):
+        self[:] -= np.asarray(other)
+        return self
+
+    def __rsub__(self, other):
+        self[:] *= -1
+        self[:] += np.asarray(other)
+        return self
+
+    def __mul__(self, other):
+        self[:] *= np.asarray(other)
 
 class GroundNode(Node):
+    """
+    Reference Node for the world. Coordinates 0., 0., 0. and immutable
+
+    It uses the Singleton design pattern to ensure a unique instance.
+    """
     _instance = None
 
     def __new__(cls):
@@ -112,20 +157,21 @@ class GroundNode(Node):
     def parent(self):
         return None
 
-# if __name__ == '__main__':
-#     mynode = Node('node', [1, 2, 3])
-#     mynode2 = mynode.copy()
-#     mynode3 = mynode.copy()
-#
-#     mynode3.set_coords([3, 4, 5])
-#
-#     print mynode2
-#     # mynode = np.asarray([1, 2, 3])
-#
-#     print type(mynode)
-#     ground = GroundNode()
-#
-#     print ground
-#
-#     # ground.name = 'coucou' # ne doit pas etre possible
-#     print ground.name
+    def is_absolute(self):
+        return True
+
+    def is_relative(self):
+        return False
+
+if __name__ == '__main__':
+    mynode0 = Node('node', [0, 0, 0])
+
+    # print mynode0 + [1, 2, 3]
+    # print [1, 2, 3] + mynode0
+
+    # mynode1 = Node('node1', np.random.rand(3), parent=mynode0)
+
+    print [0, 1, 2] - mynode0
+    # print mynode0 - [0, 1, 2]
+    # a = mynode1 - [0, 1, 2]
+    # print a

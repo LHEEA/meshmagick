@@ -12,6 +12,12 @@ import numpy as np
 
 # TODO: ajouter la production d'inerties de solides connus --> utile pour comparaison !!
 
+
+# TODO: Definir une class MassProperties qui encapsule RigidBodyInertia... ou SpatialRigidBody Inertia
+# TODO: Une classe Inertia devrait avoir une Frame attachée (ie cela devient un tenseur...)
+
+
+
 # import sys
 class RigidBodyInertia(np.ndarray):
     def __new__(cls, name, Ixx=0., Iyy=0., Izz=0., Ixy=0., Ixz=0., Iyz=0., node=[0., 0., 0.], parent=None):
@@ -118,7 +124,7 @@ class RigidBodyInertia(np.ndarray):
         return
 
     def get_principal_axes(self):
-
+        # TODO: finir et definir plus clairement l'objectif !!
         eig_values, eig_vectors = np.linalg.eigh(np.asarray(self))
         # u0, u1, u2 = map(np.asarray, eig_vectors.T)
         e0, e1, e2 = eig_vectors.T

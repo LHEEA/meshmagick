@@ -204,6 +204,8 @@ class PlainRigidBody(RigidBody):
         Iyz = rho * sigma13 / 2.
 
         inertia_name = '_'.join((self._name, 'rotational_inertia'))
+
+        warn('Implementation non terminee, non robustifiee')
         self._inertia = inertia.RigidBodyInertia(inertia_name, Ixx=Ixx, Iyy=Iyy, Izz=Izz, Ixy=Ixy, Ixz=Ixz, Iyz=Iyz,
                                          parent=self)
         # print self._inertia
@@ -222,7 +224,7 @@ class ShellRigidBody(RigidBody):
 
 
 
-if __name__ == '__main__':
+def test():
     import mmio
     vertices, faces = mmio.load_VTP('Cylinder.vtp')
 
@@ -250,5 +252,6 @@ if __name__ == '__main__':
     body.guess_mass_properties_from_mesh()
 
 
-
+if __name__ == '__main__':
+    test()
 
