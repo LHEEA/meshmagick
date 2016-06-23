@@ -15,7 +15,7 @@ class Transform(object):
         self._target_frame = target_frame
 
         if not root_frame:
-            self._root_frame = frame.ground
+            self._root_frame = frame.ground_frame
         else:
             if not isinstance(root_frame, frame.Frame):
                 raise ValueError, "A Transform root frame must be a Frame object"
