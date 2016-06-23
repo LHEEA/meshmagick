@@ -10,7 +10,7 @@ class Transform(object):
     """Base class for frame transformations"""
     def __init__(self, target_frame, rotation=None, translation=None, root_frame=None):
         if not isinstance(target_frame, frame.Frame):
-            raise ValueError, "A Transform target frame must be a Frame object"
+            raise ValueError, "A Transform target frame must be a BaseFrame object"
 
         self._target_frame = target_frame
 
@@ -18,7 +18,7 @@ class Transform(object):
             self._root_frame = frame.ground_frame
         else:
             if not isinstance(root_frame, frame.Frame):
-                raise ValueError, "A Transform root frame must be a Frame object"
+                raise ValueError, "A Transform root frame must be a BaseFrame object"
             self._root_frame = root_frame
 
         if not rotation:

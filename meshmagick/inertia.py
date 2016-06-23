@@ -14,7 +14,7 @@ import numpy as np
 
 
 # TODO: Definir une class MassProperties qui encapsule RigidBodyInertia... ou SpatialRigidBody Inertia
-# TODO: Une classe Inertia devrait avoir une Frame attachée (ie cela devient un tenseur...)
+# TODO: Une classe Inertia devrait avoir une BaseFrame attachée (ie cela devient un tenseur...)
 
 
 
