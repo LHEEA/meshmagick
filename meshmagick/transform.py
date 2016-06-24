@@ -1,54 +1,46 @@
 #!/usr/bin/env python
 #  -*- coding: utf-8 -*-
 
-import frame
-import rotation as rot
 import numpy as np
+import base_classes as bc
+
+
+
+class _Rotation(object):
+    def __init__(self, rotation_matrix):
+        self._matrix = np.array(rotation_matrix, dtype=np.float)
+
+
+
+
+
+class _Rotation_axis_angle(object):
+    def __init__(self, axis, angle):
+        
+
+
+class Rotation(object):
+    __rotation_classes = {
+        'axis_angle': _Rotation_axis_angle
+    }
+
+    @staticmethod
+    def get_rotation(name, *args, **kwargs):
+        rotation_class = Rotation.__rotation_classes.get(name.lower(), None)
+
+        if rotation_class:
+            return rotation_class(*args, **kwargs)
+        raise NotImplemented("The requested rotation representation is not implemented")
+
 
 
 class Transform(object):
-    """Base class for frame transformations"""
-    def __init__(self, target_frame, rotation=None, translation=None, root_frame=None):
-        if not isinstance(target_frame, frame.Frame):
-            raise ValueError, "A Transform target frame must be a BaseFrame object"
-
-        self._target_frame = target_frame
-
-        if not root_frame:
-            self._root_frame = frame.ground_frame
-        else:
-            if not isinstance(root_frame, frame.Frame):
-                raise ValueError, "A Transform root frame must be a BaseFrame object"
-            self._root_frame = root_frame
-
-        if not rotation:
-            rotation = rot.Rotation()
-        else:
-            # TODO : FINIR !!!
-            if not isinstance(rotation, rot.Rotation):
-                # TODO: construire un objet rotation ?
-                pass
-            else:
-                pass
-
-        if not translation:
-            translation = np.zeros(3)
-
-        self._rotation = rotation
-        self._translation = translation
+    pass
 
 
+if __name__ == '__main__':
 
-    # TODO: definir des operateurs !! *, +, /, \... plutot que directement des methodes !! --> plus succint
-    # def motion_transform(self, motion_vector):
-    #     pass
-    #
-    # def force_transform(self, force_vector):
-    #     pass
-    #
-    # def inverse_motion_tranform(self, motion_vector):
-    #     pass
-    #
-    # def inverse_force_transform(self, force_vector):
-    #     pass
+    rot = Rotation.get_rotation('axis_angle', 1, 2)
+
+
 
