@@ -213,7 +213,7 @@ class MeshHE:
             print "\nDetecting features of the mesh"
 
         la = np.linalg
-        epsilon = math.tan(thetaf*math.pi/180/2)**2
+        epsilon = math.tan(math.radians(thetaf)/2)**2
         pi = math.pi
         acos = math.acos
 

@@ -1302,28 +1302,28 @@ def main():
     if args.rotate is not None:
         if verbose:
             print '\nOPERATION: Rotation by [%f, %f, %f]' % tuple(args.rotate)
-        mesh.rotate(args.rotate*math.pi/180.)
+        mesh.rotate(map(math.radians, args.rotate))
         if verbose:
             print '\t-> Done.'
 
     if args.rotatex is not None:
         if verbose:
             print '\nOPERATION: Rotation by %f around X (Roll)' % args.rotatex
-        mesh.rotate_x(args.rotatex*math.pi/180.)
+        mesh.rotate_x(math.radians(args.rotatex))
         if verbose:
             print '\t-> Done.'
 
     if args.rotatey is not None:
         if verbose:
             print '\nOPERATION: Rotation by %f around Y (Pitch)' % args.rotatey
-        mesh.rotate_y(args.rotatey * math.pi / 180.)
+        mesh.rotate_y(math.radians(args.rotatey))
         if verbose:
             print '\t-> Done.'
 
     if args.rotatez is not None:
         if verbose:
             print '\nOPERATION: Rotation by %f around Z (Yaw)' % args.rotatez
-        mesh.rotate_z(args.rotatez * math.pi / 180.)
+        mesh.rotate_z(math.radians(args.rotatez))
         if verbose:
             print '\t-> Done.'
 

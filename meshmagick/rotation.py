@@ -4,15 +4,20 @@
 This module defines many rotation representations.
 """
 
+# TODO: pour les quaternions, utiliser le module  "https://github.com/moble/quaternion"
 
 import numpy as np
 
-
 class Rotation(object):
-    """Base class for rotations"""
-    def __init__(self):
-        pass
+    pass
 
-    @property
-    def matrix(self):
-        return None
+
+
+# class Rotation(object):
+#     """Base class for rotations"""
+#     def __init__(self):
+#         pass
+#
+#     @property
+#     def matrix(self):
+#         return None

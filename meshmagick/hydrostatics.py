@@ -210,8 +210,8 @@ def compute_equilibrium(vertices, faces, disp, CG, rho_water=1023, grav=9.81,
 
     # Relaxation parameters
     z_relax = 0.1 # in meters
-    theta_relax_x = theta_relax * math.pi/180.
-    theta_relax_y = theta_relax * math.pi/180.
+    theta_relax_x = math.radians(theta_relax)
+    theta_relax_y = math.radians(theta_relax)
 
 
     rhog = rho_water*grav
