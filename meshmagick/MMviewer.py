@@ -8,6 +8,10 @@ This module is part of meshmagick. It implements a viewer based on vtk
 import vtk
 from os import getcwd
 
+# TODO: See links below for interactive update of actors
+# https://stackoverflow.com/questions/31075569/vtk-rotate-actor-programmatically-while-vtkrenderwindowinteractor-is-active
+# https://stackoverflow.com/questions/32417197/vtk-update-vtkpolydata-in-renderwindow-without-blocking-interaction
+
 class MMViewer:
     def __init__(self):
 
@@ -17,8 +21,8 @@ class MMViewer:
 
         # Building render window
         self.render_window = vtk.vtkRenderWindow()
-        # self.render_window.SetSize(1024, 769)
-        self.render_window.FullScreenOn()
+        # self.render_window.FullScreenOn() # BUGFIX: It causes the window to fail to open...
+        self.render_window.SetSize(1024, 768)
         self.render_window.SetWindowName("Meshmagick viewer")
         self.render_window.AddRenderer(self.renderer)
 
@@ -26,9 +30,6 @@ class MMViewer:
         self.render_window_interactor = vtk.vtkRenderWindowInteractor()
         self.render_window_interactor.SetRenderWindow(self.render_window)
         self.render_window_interactor.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
-        self.render_window_interactor.SetStillUpdateRate(0.0001)
-
-        # keyPressCallback = vtk.vtkCommand()
         self.render_window_interactor.AddObserver('KeyPressEvent', self.KeyPress, 0.0)
 
         # Building axes view
@@ -36,6 +37,10 @@ class MMViewer:
         widget = vtk.vtkOrientationMarkerWidget()
         widget.SetOrientationMarker(axes)
         self.widget = widget
+
+        self.widget.SetInteractor(self.render_window_interactor)
+        self.widget.SetEnabled(1)
+        self.widget.InteractiveOn()
 
         # Building command annotations
         command_text = "left mouse : rotate\n" + \
@@ -49,7 +54,7 @@ class MMViewer:
                         "s : surface representation\n" + \
                         "w : wire representation\n" + \
                         "x : save\n" + \
-                        "e : quit"
+                        "q : quit"
 
         corner_annotation = vtk.vtkCornerAnnotation()
         corner_annotation.SetLinearFontScaleFactor(2)
@@ -83,7 +88,7 @@ class MMViewer:
 
     def add_polydata(self, polydata, color=[1, 1, 0]):
         if not isinstance(polydata, vtk.vtkPolyData):
-            raise AssertionError, 'polydata must be a vtkPolyData object'
+            raise TypeError, 'polydata must be a vtkPolyData object'
 
         self.polydatas.append(polydata)
 
@@ -106,6 +111,8 @@ class MMViewer:
         actor.GetProperty().SetPointSize(10)
 
         self.renderer.AddActor(actor)
+        self.renderer.Modified()
+        return
 
     def show_normals(self):
         for polydata in self.polydatas:
@@ -133,13 +140,17 @@ class MMViewer:
 
             arrows = vtk.vtkArrowSource()
             arrows.SetTipResolution(16)
-            arrows.SetTipLength(0.3)
+            arrows.SetTipLength(0.5)
             arrows.SetTipRadius(0.1)
 
             glyph = vtk.vtkGlyph3D()
             glyph.SetSourceConnection(arrows.GetOutputPort())
             glyph.SetInputConnection(normals_at_centers.GetOutputPort())
             glyph.SetVectorModeToUseNormal()
+            glyph.SetScaleFactor(1) # FIXME: may be too big ...
+            # glyph.SetVectorModeToUseNormal()
+            # glyph.SetVectorModeToUseVector()
+            # glyph.SetScaleModeToDataScalingOff()
             glyph.Update()
 
             glyph_mapper = vtk.vtkPolyDataMapper()
@@ -159,10 +170,10 @@ class MMViewer:
 
         axes = vtk.vtkCubeAxesActor2D()
         if vtk.VTK_MAJOR_VERSION <= 5:
-            output = self.polydatas[0]
-            axes.SetInput(output)
+            axes.SetInput(self.polydatas[0])
         else:
-            axes.SetInputConnection(self.polydatas[0])
+            axes.SetInputData(self.polydatas[0])
+
         axes.SetCamera(self.renderer.GetActiveCamera())
         axes.SetLabelFormat("%6.4g")
         axes.SetFlyModeToOuterEdges()
@@ -176,12 +187,6 @@ class MMViewer:
 
 
     def show(self):
-
-        self.widget.SetInteractor(self.render_window_interactor)
-        self.widget.SetEnabled(1)
-        self.widget.InteractiveOn()
-
-        self.render_window_interactor.Initialize()
         self.renderer.ResetCamera()
         self.render_window.Render()
         self.render_window_interactor.Start()
@@ -194,7 +199,10 @@ class MMViewer:
         writer.SetFileName('mmviewer_save.vtp')
 
         for polydata in self.polydatas:
-            writer.SetInput(polydata)
+            if vtk.VTK_MAJOR_VERSION <= 5:
+                writer.SetInput(polydata)
+            else:
+                writer.SetInputData(polydata)
         writer.Write()
 
         print "File 'mmviewer_save.vtp' written in %s" % getcwd()
