@@ -159,6 +159,13 @@ class Plane(object): # TODO: placer cette classe dans un module a part (surface)
 
     @property
     def normal(self):
+        """
+
+        Returns
+        -------
+        ndarray
+            The 3x1 plane's normal coordinates
+        """
         return self._normal
 
     @normal.setter
@@ -169,6 +176,13 @@ class Plane(object): # TODO: placer cette classe dans un module a part (surface)
 
     @property
     def c(self):
+        """
+
+        Returns
+        -------
+        float
+            The plane scalar
+        """
         return self._scalar
 
     @c.setter
@@ -206,14 +220,15 @@ class Plane(object): # TODO: placer cette classe dans un module a part (surface)
         thetay : float
             Anglearound Oy (rad)
 
-        Remarks
-        -------
+        Notes
+        -----
         Equations are:
-         $$\theta=\sqrt{\theta_x^2 + \theta_y^2}$$
-         $$\sin{\theta} = \sqrt{n_x^2 + n_y^2}$$
-         $$\theta_x = -\frac{\theta}{\sin{\theta}} n_y$$
-         $$\theta_y =  \frac{\theta}{\sin{\theta}} n_x$$
-         $$n_z = \cos{\theta}$$
+        .. math::
+         \theta=\sqrt{\theta_x^2 + \theta_y^2}\\
+         \sin{\theta} = \sqrt{n_x^2 + n_y^2}\\
+         \theta_x = -\frac{\theta}{\sin{\theta}} n_y\\
+         \theta_y =  \frac{\theta}{\sin{\theta}} n_x\\
+         n_z = \cos{\theta}
 
         """
 
@@ -775,7 +790,7 @@ class Mesh(object):
             return extracted_mesh
 
     def _vtk_polydata(self):
-
+        # TODO: placer cette methode dans MMviewer !!
         # Create a vtkPoints object and store the points in it
         points = vtk.vtkPoints()
         for point in self._vertices:
@@ -1128,21 +1143,37 @@ class Mesh(object):
     def copy(self):
         return copy.deepcopy(self)
 
-    def merge_duplicates(self, tol=1e-8, return_index=False):
-        # TODO: voir ou mettre l'implementation de la fonction merge_duplicates
-        output = mm.merge_duplicates(self._vertices, self._faces, verbose=False, tol=tol, return_index=return_index)
-        if return_index:
-            V, F, newID = output
-        else:
-            V, F = output
-        if self._verbose:
-            print "* Merging duplicate _vertices"
-            delta_n = self.nb_vertices - V.shape[0]
-            if delta_n > 0:
-                print "\t--> %u _vertices have been merged" % delta_n
-            else:
-                print "\t--> No duplicate _vertices have been found"
-        self._vertices, self._faces = V, F
+    # def merge_duplicates(self, tol=1e-8, return_index=False):
+    #     # TODO: voir ou mettre l'implementation de la fonction merge_duplicates
+    #     output = mm.merge_duplicates(self._vertices, self._faces, verbose=False, tol=tol, return_index=return_index)
+    #     if return_index:
+    #         V, F, newID = output
+    #     else:
+    #         V, F = output
+    #     if self._verbose:
+    #         print "* Merging duplicate vertices"
+    #         delta_n = self.nb_vertices - V.shape[0]
+    #         if delta_n > 0:
+    #             print "\t--> %u vertices have been merged" % delta_n
+    #         else:
+    #             print "\t--> No duplicate vertices have been found"
+    #     self._vertices, self._faces = V, F
+    #
+    #     if self._has_connectivity():
+    #         self._remove_connectivity()
+    #
+    #     if return_index:
+    #         return newID
+    #     else:
+    #         return
+
+    def merge_duplicates(self, decimals=8, return_index=False):
+        uniq, newID = Mesh.merge_duplicates_rows(self._vertices,
+                                                 decimals=decimals, return_index=True, verbose=self._verbose)
+
+        # Updating mesh data
+        self._vertices = uniq
+        self._faces = newID[self._faces] # Faces vertices ids are updated here
 
         if self._has_connectivity():
             self._remove_connectivity()
@@ -1151,6 +1182,39 @@ class Mesh(object):
             return newID
         else:
             return
+
+    @staticmethod
+    def merge_duplicates_rows(arr, decimals=8, return_index=False, verbose=False):
+        # The technique relies on np.unique and has been proposed in the following post:
+        # https://stackoverflow.com/questions/17273022/python-numpy-build-2d-array-without-adding-duplicate-rows-for-triangular-mesh
+
+        nb_vertices = arr.shape[0]
+
+        # Rounding array to the specified number of decimals for fair comparison in np.unique
+        rounded_arr = np.round(arr, decimals=decimals)
+
+        # Defining a row_dtype so that the rows are compared as a whole
+        row_dtype = np.dtype((np.void, (3 * rounded_arr.dtype.itemsize)))
+        _, index, inv = np.unique(rounded_arr.view(row_dtype), return_index=True, return_inverse=True)
+
+        # Re-introducing initial unrounded values
+        uniq = arr[index]
+        nb_uniq = uniq.shape[0]
+
+        if verbose:
+            print "* Merging duplicate vertices that are close to %u decimals..." % decimals
+            delta_n = nb_vertices - nb_uniq
+            if delta_n == 0:
+                print "\t--> No duplicate vertices have been found"
+            else:
+                print "\t--> Initial number of vertices : %u" % nb_vertices
+                print "\t--> Final number of vertices   : %u" % nb_uniq
+                print "\t--> %u vertices have been merged\n" % delta_n
+
+        if return_index:
+            return uniq, inv
+        else:
+            return uniq
 
     def heal_normals(self):
 
