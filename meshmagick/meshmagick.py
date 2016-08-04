@@ -416,143 +416,147 @@ __status__     = "Development"
 #     return _get_surface_integrals(V, F)
 
 
-def merge_duplicates2(vertices, tol=1e-8, return_index=False):
+# def merge_duplicates2(vertices, tol=1e-8, return_index=False):
+#
+#     vertices = np.asarray(vertices, dtype=np.float)
+#
+#     nv = vertices.shape[0]
+#
+#     index = np.arange(nv)
+#     levels = [[0, nv]]
+#
+#     for idim in xrange(1):
+#         coord = vertices[index, idim].copy()
+#
+#         for level in levels:
+#             isort = coord.argsort()
+#
+#             dist = np.diff(coord[isort])
+#
+#             print np.where(dist > tol)[0]
+#             print nv
+#
+#
+#     if return_index:
+#         return vertices, index
+#     else:
+#         return vertices
 
-    vertices = np.asarray(vertices, dtype=np.float)
-
-    nv = vertices.shape[0]
-
-    index = np.arange(nv)
-    levels = [[0, nv]]
-
-    for idim in xrange(1):
-        coord = vertices[index, idim].copy()
-
-        for level in levels:
-            isort = coord.argsort()
-
-            dist = np.diff(coord[isort])
-
-            print np.where(dist > tol)[0]
-            print nv
-
-
-    if return_index:
-        return vertices, index
-    else:
-        return vertices
 
 
 
-def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
-    """merge_duplicates(_vertices, _faces, verbose=False, tol=1e-8)
 
-    Returns a new node array where close nodes have been merged into one node (following tol). It also returns
-    the connectivity array _faces with the new node IDs.
-
-    Parameters:
-        V: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        F: ndarray
-            numpy array of the _faces' nodes connectivities
-        verbose[optional]: bool
-            if set to True, displays information on the merge procedure
-        tol[optional]: float
-            the tolerance used to define nodes that are coincident and
-            that have to be merged
-
-    Returns:
-        _vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes where
-            every node is different
-        _faces: ndarray
-            numpy array of the _faces' nodes connectivities, accordingly
-            to the new node list that has been merged
-    """
-    # TODO: Refaire la documentation --> les entrees sorties ont change !!
-
-    # TODO : Set a tolerance option in command line arguments
-
-    # This function is a bottleneck in the clipping routines
-    # TODO: use np.unique to cluster groups --> acceleration !!
-
-    if verbose:
-        print "* Removing duplicate _vertices:"
-    nv, nbdim = V.shape
-
-    levels = [0, nv]
-    Vtmp = []
-    iperm = np.arange(nv)
-
-    for dim in range(nbdim):
-        # Sorting the first dimension
-        values = V[:, dim].copy()
-        if dim > 0:
-            values = values[iperm]
-        levels_tmp = []
-        for (ilevel, istart) in enumerate(levels[:-1]):
-            istop = levels[ilevel+1]
-
-            if istop-istart > 1:
-                level_values = values[istart:istop]
-                iperm_view = iperm[istart:istop]
-
-                iperm_tmp = level_values.argsort()
-
-                level_values[:] = level_values[iperm_tmp]
-                iperm_view[:] = iperm_view[iperm_tmp]
-
-                levels_tmp.append(istart)
-                vref = values[istart]
-
-                for idx in xrange(istart, istop):
-                    cur_val = values[idx]
-                    if np.abs(cur_val - vref) > tol:
-                        levels_tmp.append(idx)
-                        vref = cur_val
-
-            else:
-                levels_tmp.append(levels[ilevel])
-        if len(levels_tmp) == nv:
-            # No duplicate _vertices
-            if verbose:
-                print "\t -> No duplicate _vertices detected :)"
-            break
-
-        levels_tmp.append(nv)
-        levels = levels_tmp
-
-    else:
-        # Building the new merged node list
-        Vtmp = []
-        newID = np.arange(nv)
-        for (ilevel, istart) in enumerate(levels[:-1]):
-            istop = levels[ilevel+1]
-
-            Vtmp.append(V[iperm[istart]])
-            newID[iperm[range(istart, istop)]] = ilevel
-        V = np.array(Vtmp, dtype=float)
-        # Applying renumbering to cells
-        if F is not None:
-            for cell in F:
-                cell[:] = newID[cell]
-
-        if verbose:
-            nv_new = V.shape[0]
-            print "\t -> Initial number of nodes : {:d}".format(nv)
-            print "\t -> New number of nodes     : {:d}".format(nv_new)
-            print "\t -> {:d} nodes have been merged".format(nv-nv_new)
-
-    if F is not None:
-        if return_index:
-            return V, F, newID
-        else:
-            return V, F
-    else:
-        if return_index:
-            return V, newID
-        else:
-            return V
+# def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
+#     """merge_duplicates(_vertices, _faces, verbose=False, tol=1e-8)
+#
+#     Returns a new node array where close nodes have been merged into one node (following tol). It also returns
+#     the connectivity array _faces with the new node IDs.
+#
+#     Parameters:
+#         V: ndarray
+#             numpy array of the coordinates of the mesh's nodes
+#         F: ndarray
+#             numpy array of the _faces' nodes connectivities
+#         verbose[optional]: bool
+#             if set to True, displays information on the merge procedure
+#         tol[optional]: float
+#             the tolerance used to define nodes that are coincident and
+#             that have to be merged
+#
+#     Returns:
+#         _vertices: ndarray
+#             numpy array of the coordinates of the mesh's nodes where
+#             every node is different
+#         _faces: ndarray
+#             numpy array of the _faces' nodes connectivities, accordingly
+#             to the new node list that has been merged
+#     """
+#     # TODO: Refaire la documentation --> les entrees sorties ont change !!
+#
+#     # TODO : Set a tolerance option in command line arguments
+#
+#     # This function is a bottleneck in the clipping routines
+#     # TODO: use np.unique to cluster groups --> acceleration !!
+#     # TODO: Use the trick described here !!!!:
+#     # http://stackoverflow.com/questions/17273022/python-numpy-build-2d-array-without-adding-duplicate-rows-for-triangular-mesh
+#
+#     if verbose:
+#         print "* Removing duplicate vertices:"
+#     nv, nbdim = V.shape
+#
+#     levels = [0, nv]
+#     Vtmp = []
+#     iperm = np.arange(nv)
+#
+#     for dim in range(nbdim):
+#         # Sorting the first dimension
+#         values = V[:, dim].copy()
+#         if dim > 0:
+#             values = values[iperm]
+#         levels_tmp = []
+#         for (ilevel, istart) in enumerate(levels[:-1]):
+#             istop = levels[ilevel+1]
+#
+#             if istop-istart > 1:
+#                 level_values = values[istart:istop]
+#                 iperm_view = iperm[istart:istop]
+#
+#                 iperm_tmp = level_values.argsort()
+#
+#                 level_values[:] = level_values[iperm_tmp]
+#                 iperm_view[:] = iperm_view[iperm_tmp]
+#
+#                 levels_tmp.append(istart)
+#                 vref = values[istart]
+#
+#                 for idx in xrange(istart, istop):
+#                     cur_val = values[idx]
+#                     if np.abs(cur_val - vref) > tol:
+#                         levels_tmp.append(idx)
+#                         vref = cur_val
+#
+#             else:
+#                 levels_tmp.append(levels[ilevel])
+#         if len(levels_tmp) == nv:
+#             # No duplicate _vertices
+#             if verbose:
+#                 print "\t -> No duplicate vertices detected :)"
+#             break
+#
+#         levels_tmp.append(nv)
+#         levels = levels_tmp
+#
+#     else:
+#         # Building the new merged node list
+#         Vtmp = []
+#         newID = np.arange(nv)
+#         for (ilevel, istart) in enumerate(levels[:-1]):
+#             istop = levels[ilevel+1]
+#
+#             Vtmp.append(V[iperm[istart]])
+#             newID[iperm[range(istart, istop)]] = ilevel
+#         V = np.array(Vtmp, dtype=float)
+#         # Applying renumbering to cells
+#         if F is not None:
+#             for cell in F:
+#                 cell[:] = newID[cell]
+#
+#         if verbose:
+#             nv_new = V.shape[0]
+#             print "\t -> Initial number of nodes : {:d}".format(nv)
+#             print "\t -> New number of nodes     : {:d}".format(nv_new)
+#             print "\t -> {:d} nodes have been merged".format(nv-nv_new)
+#
+#     if F is not None:
+#         if return_index:
+#             return V, F, newID
+#         else:
+#             return V, F
+#     else:
+#         if return_index:
+#             return V, newID
+#         else:
+#             return V
 
 
 
@@ -623,6 +627,9 @@ def generate_lid(V, F, max_area=None, verbose=False):
 
     # TODO: remove verbose mode and place it into the main of meshmagick !!!
 
+    # TODO: Faire de cette fonction une methode dans mesh ??? --> non on a un autre module qui wrappe triangle avec
+    # cython...
+
     try:
         import meshpy.triangle as triangle
     except:
@@ -652,9 +659,9 @@ def generate_lid(V, F, max_area=None, verbose=False):
         points = V[polygon][:, :2]
         n = points.shape[0]
         # Testing the orientation of each polygon by computing the signed area of it
-        sarea = np.array([points[j][0]*points[j+1][1] - points[j+1][0]*points[j][1] for j in xrange(n-1)],
+        signed_area = np.array([points[j][0]*points[j+1][1] - points[j+1][0]*points[j][1] for j in xrange(n-1)],
                          dtype=np.float).sum()
-        if sarea < 0.:
+        if signed_area < 0.:
             holes.append(polygon)
         else:
             boundaries.append(polygon)
