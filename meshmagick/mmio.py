@@ -781,6 +781,52 @@ def load_MSH(filename):
         F[ntri:, :] = myMesh.Elmts.get(3)[1]
 
     return V, F
+
+def load_MED(filename):
+
+    try:
+        import h5py
+    except ImportError as ie:
+        raise('MED file format loading need h5py module')
+
+    check_file(filename)
+
+    file = h5py.File(filename)
+
+    list_of_names = []
+    file.visit(list_of_names.append)
+
+    # TODO: gerer les cas ou on a que des tris ou que des quads...
+    nb_quadrangles = nb_triangles = 0
+
+    for item in list_of_names:
+        if '/NOE/COO' in item:
+            vertices = file.get(item).value.reshape((3, -1)).T
+            nv = vertices.shape[0]
+        if '/MAI/TR3/NOD' in item:
+            triangles = file.get(item).value.reshape((3, -1)).T - 1
+            nb_triangles = triangles.shape[0]
+        if '/MAI/QU4/NOD' in item:
+            quadrangles = file.get(item).value.reshape((4, -1)).T - 1
+            nb_quadrangles = quadrangles.shape[0]
+
+    file.close()
+
+    if nb_triangles == 0:
+        triangles = np.zeros((0, 4), dtype=np.int)
+    else:
+        triangles = np.column_stack((triangles, triangles[:, 0]))
+    if nb_quadrangles == 0:
+        quadrangles = np.zeros((0, 4), dtype=np.int)
+
+    faces = np.zeros((nb_triangles+nb_quadrangles, 4), dtype=np.int)
+    faces[:nb_triangles] = triangles
+    # faces[:nb_triangles, -1] = triangles[:, 0]
+    faces[nb_triangles:] = quadrangles
+
+    return vertices, faces
+
+
 # def load_STL2(filename):
 #     import re
 #
@@ -1397,11 +1443,13 @@ def write_INP(filename, V, F):
 def write_MSH(filename, V, F):
     raise NotImplementedError
 
+def write_MED(filename, V, F):
+    raise NotImplementedError, 'MED writer is not implemented yet'
 
 def know_extension(ext):
     return extension_dict.has_key(ext)
 
-extension_dict = {  # keyword           reader,   writer
+extension_dict = {  # keyword,  reader,   writer
     'mar': (load_MAR, write_MAR),
     'nemoh': (load_MAR, write_MAR),
     'wamit': (load_GDF, write_GDF),
@@ -1417,11 +1465,12 @@ extension_dict = {  # keyword           reader,   writer
     'msh': (load_MSH, write_MSH),
     'rad': (load_RAD, write_RAD),
     'radioss': (load_RAD, write_RAD),
-    'stl': (load_STL, write_STL),  # FIXME: Verifier que ce n'est pas load_STL2
+    'stl': (load_STL, write_STL),
     'vtu': (load_VTU, write_VTU),
     'vtp': (load_VTP, write_VTP),
     'paraview-legacy': (load_VTK, write_VTK),  # VTK
     'vtk': (load_VTK, write_VTK),
     'tecplot': (load_TEC, write_TEC),
-    'tec': (load_TEC, write_TEC)
+    'tec': (load_TEC, write_TEC),
+    'med': (load_MED, write_MED)
 }
