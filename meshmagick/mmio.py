@@ -337,74 +337,116 @@ def load_INP(filename):
 
     return V, F-1
 
+# def load_TEC(filename):
+#     """load_TEC(filename)
+#
+#     Loads TECPLOT (Tecplot (c)) mesh files. It relies on the tecplot file
+#     reader from the VTK library.
+#
+#     Parameters:
+#         filename: str
+#             name of the meh file on disk
+#
+#     Returns:
+#         _vertices: ndarray
+#             numpy array of the coordinates of the mesh's nodes
+#         _faces: ndarray
+#             numpy array of the _faces' nodes connectivities
+#
+#     Note: TEC files have a 0-indexing
+#     """
+#     check_file(filename)
+#
+#     from vtk import vtkTecplotReader
+#
+#     reader = vtkTecplotReader()
+#
+#     # Importing the mesh from the file
+#     reader.SetFileName(filename)
+#     reader.Update()
+#     data = reader.GetOutput()
+#
+#     nv = 0
+#     nf = 0
+#
+#     for iblock in range(data.GetNumberOfBlocks()):
+#         block = data.GetBlock(iblock)
+#         if block.GetClassName() == 'vtkStructuredGrid':
+#             continue
+#         nvblock = block.GetNumberOfPoints()
+#         nfblock = block.GetNumberOfCells()
+#
+#         Vtmp = np.zeros((nvblock, 3), dtype=np.float)
+#         for k in range(nvblock):
+#             Vtmp[k] = np.array(block.GetPoint(k))
+#
+#         if nv == 0:
+#             V = Vtmp
+#         else:
+#             V = np.concatenate((V, Vtmp))
+#
+#         nv += nvblock
+#
+#         # Facet extraction
+#         Ftmp = np.zeros((nfblock, 4), dtype=np.int)
+#         for k in range(nfblock):
+#             cell = block.GetCell(k)
+#             nv_facet = cell.GetNumberOfPoints()
+#             for l in range(nv_facet):
+#                 Ftmp[k][l] = cell.GetPointId(l)
+#             if nv_facet == 3:
+#                 Ftmp[k][l] = Ftmp[k][0]
+#
+#         if nf == 0:
+#             F = Ftmp
+#         else:
+#             F = np.concatenate((F, Ftmp))
+#
+#         nf += nfblock
+#
+#     return V, F
+
 def load_TEC(filename):
     """load_TEC(filename)
 
-    Loads TECPLOT (Tecplot (c)) mesh files. It relies on the tecplot file
-    reader from the VTK library.
+        Loads TECPLOT (Tecplot (c)) mesh files. It relies on the tecplot file
+        reader from the VTK library.
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+        Parameters:
+            filename: str
+                name of the meh file on disk
 
-    Returns:
-        _vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        _faces: ndarray
-            numpy array of the _faces' nodes connectivities
+        Returns:
+            _vertices: ndarray
+                numpy array of the coordinates of the mesh's nodes
+            _faces: ndarray
+                numpy array of the _faces' nodes connectivities
 
-    Note: TEC files have a 0-indexing
-    """
+        Note: TEC files have a 1-indexing
+        """
+    import re
+
     check_file(filename)
 
-    from vtk import vtkTecplotReader
+    data_pattern = re.compile(\
+                    r'ZONE.*\s*N\s*=\s*(\d+)\s*,\s*E=\s*(\d+)\s*,\s*F\s*=\s*FEPOINT\s*,\s*ET\s*=\s*QUADRILATERAL\s+' \
+                  + r'(^(?:\s*' + real_str + r'){3,})\s+' \
+                  + r'(^(?:\s*\d+)*)', re.MULTILINE)
 
-    reader = vtkTecplotReader()
+    with open(filename) as f:
+        data = f.read()
 
-    # Importing the mesh from the file
-    reader.SetFileName(filename)
-    reader.Update()
-    data = reader.GetOutput()
+    nv, nf, vertices, faces = data_pattern.search(data).groups()
+    nv = int(nv)
+    nf = int(nf)
 
-    nv = 0
-    nf = 0
+    vertices = np.asarray(map(float, vertices.split()), dtype=np.float).reshape((nv, -1))[:, :3]
+    faces = np.asarray(map(int, faces.split()), dtype=np.int).reshape((nf, 4))-1
 
-    for iblock in range(data.GetNumberOfBlocks()):
-        block = data.GetBlock(iblock)
-        if block.GetClassName() == 'vtkStructuredGrid':
-            continue
-        nvblock = block.GetNumberOfPoints()
-        nfblock = block.GetNumberOfCells()
+    return vertices, faces
 
-        Vtmp = np.zeros((nvblock, 3), dtype=np.float)
-        for k in range(nvblock):
-            Vtmp[k] = np.array(block.GetPoint(k))
 
-        if nv == 0:
-            V = Vtmp
-        else:
-            V = np.concatenate((V, Vtmp))
 
-        nv += nvblock
-
-        # Facet extraction
-        Ftmp = np.zeros((nfblock, 4), dtype=np.int)
-        for k in range(nfblock):
-            cell = block.GetCell(k)
-            nv_facet = cell.GetNumberOfPoints()
-            for l in range(nv_facet):
-                Ftmp[k][l] = cell.GetPointId(l)
-            if nv_facet == 3:
-                Ftmp[k][l] = Ftmp[k][0]
-
-        if nf == 0:
-            F = Ftmp
-        else:
-            F = np.concatenate((F, Ftmp))
-
-        nf += nfblock
-
-    return V, F
 
 def load_VTU(filename):
     """load_VTU(filename)
@@ -756,6 +798,9 @@ def load_MSH(filename):
 
     Note: MSH files have a 0-indexing
     """
+
+    # TODO: coder une version propre a meshmagick...
+
     import gmsh
 
     myMesh = gmsh.Mesh()
