@@ -337,75 +337,6 @@ def load_INP(filename):
 
     return V, F-1
 
-# def load_TEC(filename):
-#     """load_TEC(filename)
-#
-#     Loads TECPLOT (Tecplot (c)) mesh files. It relies on the tecplot file
-#     reader from the VTK library.
-#
-#     Parameters:
-#         filename: str
-#             name of the meh file on disk
-#
-#     Returns:
-#         _vertices: ndarray
-#             numpy array of the coordinates of the mesh's nodes
-#         _faces: ndarray
-#             numpy array of the _faces' nodes connectivities
-#
-#     Note: TEC files have a 0-indexing
-#     """
-#     check_file(filename)
-#
-#     from vtk import vtkTecplotReader
-#
-#     reader = vtkTecplotReader()
-#
-#     # Importing the mesh from the file
-#     reader.SetFileName(filename)
-#     reader.Update()
-#     data = reader.GetOutput()
-#
-#     nv = 0
-#     nf = 0
-#
-#     for iblock in range(data.GetNumberOfBlocks()):
-#         block = data.GetBlock(iblock)
-#         if block.GetClassName() == 'vtkStructuredGrid':
-#             continue
-#         nvblock = block.GetNumberOfPoints()
-#         nfblock = block.GetNumberOfCells()
-#
-#         Vtmp = np.zeros((nvblock, 3), dtype=np.float)
-#         for k in range(nvblock):
-#             Vtmp[k] = np.array(block.GetPoint(k))
-#
-#         if nv == 0:
-#             V = Vtmp
-#         else:
-#             V = np.concatenate((V, Vtmp))
-#
-#         nv += nvblock
-#
-#         # Facet extraction
-#         Ftmp = np.zeros((nfblock, 4), dtype=np.int)
-#         for k in range(nfblock):
-#             cell = block.GetCell(k)
-#             nv_facet = cell.GetNumberOfPoints()
-#             for l in range(nv_facet):
-#                 Ftmp[k][l] = cell.GetPointId(l)
-#             if nv_facet == 3:
-#                 Ftmp[k][l] = Ftmp[k][0]
-#
-#         if nf == 0:
-#             F = Ftmp
-#         else:
-#             F = np.concatenate((F, Ftmp))
-#
-#         nf += nfblock
-#
-#     return V, F
-
 def load_TEC(filename):
     """load_TEC(filename)
 
@@ -444,9 +375,6 @@ def load_TEC(filename):
     faces = np.asarray(map(int, faces.split()), dtype=np.int).reshape((nf, 4))-1
 
     return vertices, faces
-
-
-
 
 def load_VTU(filename):
     """load_VTU(filename)
@@ -871,52 +799,10 @@ def load_MED(filename):
 
     return vertices, faces
 
-
-# def load_STL2(filename):
-#     import re
-#
-#     ifile = open(filename, 'r')
-#     text = ifile.read()
-#     ifile.close()
-#
-#     endl = r'(?:\n|\r|\r\n)'
-#     patt_str = r"""
-#             ^\s*facet\s+normal(.*)""" + endl + """
-#             ^\s*outer\sloop""" + endl + """
-#             ^\s*vertex\s+(.*)""" + endl + """
-#             ^\s*vertex\s+(.*)""" + endl + """
-#             ^\s*vertex\s+(.*)""" + endl + """
-#             ^\s*endloop""" + endl + """
-#             ^\s*endfacet""" + endl + """
-#            """
-#     pattern = re.compile(patt_str, re.MULTILINE | re.VERBOSE)
-#
-#     normal = []
-#     _vertices = []
-#     for match in pattern.finditer(text):
-#         normal.append(map(float, match.group(1).split()))
-#         _vertices.append(map(float, match.group(2).split()))
-#         _vertices.append(map(float, match.group(3).split()))
-#         _vertices.append(map(float, match.group(4).split()))
-#
-#     _vertices = np.array(_vertices, dtype=float, order='fortran')
-#
-#     nf = np.size(_vertices, 0) / 3
-#     _faces = np.zeros((nf, 4), dtype=np.int32, order='fortran')
-#
-#     base = np.array([1, 2, 3, 1])
-#     for i in range(nf):
-#         _faces[i, :] = base + 3 * i
-#
-#     return _vertices, _faces
-
-
-
-
-
 #=======================================================================
 #                             MESH WRITERS
 #=======================================================================
+# Contains here all functions to write meshes in different file formats
 
 def write_mesh(filename, V, F, format):
     """write_mesh(filename, format)
