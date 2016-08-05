@@ -5,6 +5,7 @@ This module is part of meshmagick software. It provides functions for mesh clipp
 """
 
 import meshmagick as mm # TODO: voir si oblige d'importer meshmagick ici ...
+from tools import merge_duplicates_rows
 import MMviewer
 import numpy as np
 import math
@@ -13,6 +14,7 @@ import vtk
 from itertools import count
 from warnings import warn
 import sys # Retirer
+
 
 # TODO: les points doivent etre des objects nodes...
 # TODO: On doit pouvoir specifier des objets frame
@@ -392,6 +394,7 @@ class Plane(object): # TODO: placer cette classe dans un module a part (surface)
 
         return projected_points
 
+
 class cached_property(object):
     def __init__(self, func):
         self.__doc__ = getattr(func, '__doc__')
@@ -409,10 +412,12 @@ class cached_property(object):
                 obj._cached_properties = {self.func.__name__: value}
             return value
 
+
 class invalidate_cache(object):
     def __init__(self, func):
         self.__doc__ = getattr(func, '__doc__')
         self.func = func
+
 
     def __call__(self, cls, *args):
         self.func(cls, *args)
@@ -422,6 +427,7 @@ class invalidate_cache(object):
         except:
             cls._cached_properties = dict()
 
+
 class _3DPointsArray(np.ndarray):
     def __new__(cls, points):
         obj = np.asarray(points).view(cls)
@@ -429,6 +435,7 @@ class _3DPointsArray(np.ndarray):
         cls.y = property(fget=lambda cls: cls[:, 1])
         cls.z = property(fget=lambda cls: cls[:, 2])
         return obj
+
 
 class Mesh(object):
     _ids = count(0)
@@ -1168,12 +1175,25 @@ class Mesh(object):
     #         return
 
     def merge_duplicates(self, decimals=8, return_index=False):
-        uniq, newID = Mesh.merge_duplicates_rows(self._vertices,
-                                                 decimals=decimals, return_index=True, verbose=self._verbose)
+        uniq, newID = merge_duplicates_rows(self._vertices, decimals=decimals, return_index=True)
+
+        nv_init = self.nb_vertices
 
         # Updating mesh data
         self._vertices = uniq
         self._faces = newID[self._faces] # Faces vertices ids are updated here
+
+        nv_final = self.nb_vertices
+
+        if self._verbose:
+            print "* Merging duplicate vertices that are close to %u decimals..." % decimals
+            delta_n = nv_init - nv_final
+            if delta_n == 0:
+                print "\t--> No duplicate vertices have been found"
+            else:
+                print "\t--> Initial number of vertices : %u" % nv_init
+                print "\t--> Final number of vertices   : %u" % nv_final
+                print "\t--> %u vertices have been merged\n" % delta_n
 
         if self._has_connectivity():
             self._remove_connectivity()
@@ -1182,39 +1202,6 @@ class Mesh(object):
             return newID
         else:
             return
-
-    @staticmethod
-    def merge_duplicates_rows(arr, decimals=8, return_index=False, verbose=False):
-        # The technique relies on np.unique and has been proposed in the following post:
-        # https://stackoverflow.com/questions/17273022/python-numpy-build-2d-array-without-adding-duplicate-rows-for-triangular-mesh
-
-        nb_vertices = arr.shape[0]
-
-        # Rounding array to the specified number of decimals for fair comparison in np.unique
-        rounded_arr = np.round(arr, decimals=decimals)
-
-        # Defining a row_dtype so that the rows are compared as a whole
-        row_dtype = np.dtype((np.void, (3 * rounded_arr.dtype.itemsize)))
-        _, index, inv = np.unique(rounded_arr.view(row_dtype), return_index=True, return_inverse=True)
-
-        # Re-introducing initial unrounded values
-        uniq = arr[index]
-        nb_uniq = uniq.shape[0]
-
-        if verbose:
-            print "* Merging duplicate vertices that are close to %u decimals..." % decimals
-            delta_n = nb_vertices - nb_uniq
-            if delta_n == 0:
-                print "\t--> No duplicate vertices have been found"
-            else:
-                print "\t--> Initial number of vertices : %u" % nb_vertices
-                print "\t--> Final number of vertices   : %u" % nb_uniq
-                print "\t--> %u vertices have been merged\n" % delta_n
-
-        if return_index:
-            return uniq, inv
-        else:
-            return uniq
 
     def heal_normals(self):
 
