@@ -6,7 +6,11 @@ This module is part of meshmagick. It implements a viewer based on vtk
 """
 
 import vtk
+import os
 from os import getcwd
+from datetime import datetime
+
+__year__ = datetime.now().year
 
 # TODO: See links below for interactive update of actors
 # https://stackoverflow.com/questions/31075569/vtk-rotate-actor-programmatically-while-vtkrenderwindowinteractor-is-active
@@ -30,7 +34,7 @@ class MMViewer:
         self.render_window_interactor = vtk.vtkRenderWindowInteractor()
         self.render_window_interactor.SetRenderWindow(self.render_window)
         self.render_window_interactor.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
-        self.render_window_interactor.AddObserver('KeyPressEvent', self.KeyPress, 0.0)
+        self.render_window_interactor.AddObserver('KeyPressEvent', self.on_key_press, 0.0)
 
         # Building axes view
         axes = vtk.vtkAxesActor()
@@ -54,6 +58,7 @@ class MMViewer:
                         "s : surface representation\n" + \
                         "w : wire representation\n" + \
                         "x : save\n" + \
+                        "c : screenchot\n" + \
                         "q : quit"
 
         corner_annotation = vtk.vtkCornerAnnotation()
@@ -63,6 +68,16 @@ class MMViewer:
         corner_annotation.SetText(3, command_text)
         corner_annotation.GetTextProperty().SetColor(0., 0., 0.)
         self.renderer.AddViewProp(corner_annotation)
+
+        copyright_text = "Meshmagick Viewer\nCopyright 2014-%u, Ecole Centrale de Nantes" % __year__
+
+        copyright_annotation = vtk.vtkCornerAnnotation()
+        copyright_annotation.SetLinearFontScaleFactor(1)
+        copyright_annotation.SetNonlinearFontScaleFactor(1)
+        copyright_annotation.SetMaximumFontSize(12)
+        copyright_annotation.SetText(1, copyright_text)
+        copyright_annotation.GetTextProperty().SetColor(0., 0., 0.)
+        self.renderer.AddViewProp(copyright_annotation)
 
         self.normals = []
         self.axes = []
@@ -185,7 +200,6 @@ class MMViewer:
         self.renderer.AddViewProp(axes)
         self.axes.append(axes)
 
-
     def show(self):
         self.renderer.ResetCamera()
         self.render_window.Render()
@@ -208,12 +222,27 @@ class MMViewer:
         print "File 'mmviewer_save.vtp' written in %s" % getcwd()
         return
 
+    def screenchot(self):
+        w2if = vtk.vtkWindowToImageFilter()
+        w2if.SetInput(self.render_window)
+        w2if.Update()
+
+        writer = vtk.vtkPNGWriter()
+        writer.SetFileName("screenchot.png")
+        if vtk.VTK_MAJOR_VERSION <= 5:
+            writer.SetInput(w2if.GetOutput())
+        else:
+            writer.SetInputData(w2if.GetOutput())
+        writer.Write()
+
+        print "File 'screenchot.png' written in %s" % getcwd()
+        return
 
     def finalize(self):
         del self.render_window
         del self.render_window_interactor
 
-    def KeyPress(self, obj, event):
+    def on_key_press(self, obj, event):
         key = obj.GetKeySym()
 
         if key == 'n':
@@ -240,4 +269,8 @@ class MMViewer:
 
         elif key == 'x':
             self.save()
+
+        elif key == 'c':
+            # pass
+            self.screenchot()
 
