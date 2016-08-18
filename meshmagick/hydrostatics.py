@@ -8,14 +8,16 @@ __maintainer__ = "Francois Rongere"
 __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
 
-import meshmagick as mm
-from mesh import *
+# import meshmagick as mm
+import mesh
+from mesh_clipper import MeshClipper
+
 import numpy as np
 import math
 
 
 # TODO: voir a mettre ca dans la classe mesh
-def show(vertices, faces, CG=None, B=None):
+def show(mymesh, CG=None, B=None):
 
     # TODO: afficher polygones...
     import MMviewer
@@ -176,17 +178,15 @@ def _get_rotation_matrix(thetax, thetay):
                             [-ny, nx, 0.]])
     return R
 
-def compute_equilibrium(vertices, faces, disp, CG, rho_water=1023, grav=9.81,
+def compute_equilibrium(mymesh, disp, CG, rho_water=1023, grav=9.81,
                         reltol=1e-2, itermax=100, max_nb_relaunch=10, theta_relax=2, z_relax=0.1,
                         verbose=False, anim=False):
     """
 
     Parameters
     ----------
-    vertices : ndarray
-        Array of mesh _vertices
-    faces :
-        Array of mesh connectivities
+    mesh : Mesh
+        mesh to be analyzed
     disp : float
         Mass displacement of the floater (in tons)
     CG : ndarray
@@ -225,8 +225,11 @@ def compute_equilibrium(vertices, faces, disp, CG, rho_water=1023, grav=9.81,
     R = np.eye(3, 3)
     dz_update = 0.
 
-    Vc = vertices.copy()
-    Fc = faces.copy()
+    # Vc = vertices.copy()
+    # Fc = faces.copy()
+    mymesh_c = mymesh.copy()
+    # Vc = mymesh.vertices.copy()
+    # Fc = mymesh.faces.copy()
     CGc = CG.copy()
 
     # origin = np.zeros(3)
@@ -253,13 +256,14 @@ def compute_equilibrium(vertices, faces, disp, CG, rho_water=1023, grav=9.81,
                 break
 
         # Transformation
-        R = _get_rotation_matrix(thetax, thetay)
+        # R = mesh._rodrigues(thetax, thetay)
 
         # Applying transformation to the mesh
-        Vc[:, -1] += dz # Z translation
-        Vc = np.transpose(np.dot(R, Vc.T)) # rotation
+        mymesh_c.translate_z(dz)
+        mymesh_c.rotate([thetax, thetay, 0.])
+        # Vc = np.transpose(np.dot(R, Vc.T)) # rotation
 
-        if anim:
+        if anim: # FIXME: IO have been moved to mmio module...
             mm.write_VTP('mesh%u.vtp'%iter, Vc, Fc)
 
         # Applying transformation to the center of gravity
@@ -271,7 +275,7 @@ def compute_equilibrium(vertices, faces, disp, CG, rho_water=1023, grav=9.81,
         # origin = np.dot(R, origin)
 
         # Computing hydrostatics
-        hs_output = compute_hydrostatics(Vc, Fc, zg, rho_water=rho_water, grav=grav, verbose=False)
+        hs_output = compute_hydrostatics(mymesh_c, zg, rho_water=rho_water, grav=grav, verbose=False)
 
         # Computing characteristic length
         # TODO: L et l doivent etre calcules a partir du polygone d'intersection !!!
@@ -396,7 +400,7 @@ def compute_equilibrium(vertices, faces, disp, CG, rho_water=1023, grav=9.81,
 
     return Vc, Fc, CGc
 
-def _get_Sf_Vw(vertices, faces):
+def _get_Sf_Vw(mymesh):
     """
     Computes only the flotation surface area and the immersed volume of the mesh
 
@@ -433,7 +437,7 @@ def _get_Sf_Vw(vertices, faces):
 
     return Vc, Fc, Sf, Vw
 
-def set_displacement(vertices, faces, disp, rho_water=1023, grav=9.81, abs_tol= 1., itermax=25, verbose=False):
+def set_displacement(mymesh, disp, rho_water=1023, grav=9.81, abs_tol= 1., itermax=25, verbose=False):
     """
     Displaces mesh at a prescribed displacement and returns
 
@@ -503,7 +507,7 @@ def set_displacement(vertices, faces, disp, rho_water=1023, grav=9.81, abs_tol= 
 
     return dz, Vc, Fc
 
-def compute_hydrostatics(mesh, zg, rho_water=1023, grav=9.81, verbose=False):
+def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
     """
     Computes the hydrostatics properties of a mesh.
 
@@ -546,13 +550,17 @@ def compute_hydrostatics(mesh, zg, rho_water=1023, grav=9.81, verbose=False):
     # TODO: initialiser un clipper
 
     # Clipping the mesh by the Oxy plane
-    plane = Plane() # Oxy plane
-    try:
+    plane = mesh.Plane([0., 0., 1.], 0.) # Oxy plane
+    # try:
         # Vc, Fc, clip_infos = mm.clip_by_plane(_vertices, _faces, plane, infos=True)
-        clipped_mesh, boundaries = mesh.clip(plane, return_boundaries=True, assert_closed_boundaries=True)
-    except:
-        show(mesh._vertices, mesh._faces)
-        raise Exception, 'Hydrostatic module only work with watertight hull. Please consider using the --sym option.'
+
+    clipper = MeshClipper(mymesh, plane, assert_closed_boundaries=True, verbose=True)
+
+
+        # clipped_mesh, boundaries = mymesh.clip(plane, return_boundaries=True, assert_closed_boundaries=True)
+    # except:
+    #     show(mesh._vertices, mesh._faces)
+    #     raise Exception, 'Hydrostatic module only work with watertight hull. Please consider using the --sym option.'
 
     # TODO: retenir les pptes du maillage initial
     # Calculs des pptes des facettes
@@ -734,28 +742,18 @@ def compute_hydrostatics(mesh, zg, rho_water=1023, grav=9.81, verbose=False):
 
 if __name__ == '__main__':
 
-    # The following code are only for testng purpose
+    # The following code are only for testing purpose
+    import mmio
 
-
-    vertices, faces = mm.load_VTP('tests/SEAREV/SEAREV.vtp')
-    # _vertices, _faces = mm.load_MAR('Cylinder.mar')
-    plane = mm.Plane(np.array([0, 1, 0]))
-    vertices, faces = mm.symmetrize(vertices, faces, plane=plane)
-    # _vertices, _faces = mm.symmetrize(_vertices, _faces, plane=mm.Plane())
-    # mm.show(_vertices, _faces)
-
-    # compute_hydrostatics(_vertices, _faces, -4.3, verbose=True)
-
+    vertices, faces = mmio.load_VTP('tests/SEAREV/SEAREV.vtp')
+    searev = mesh.Mesh(vertices, faces)
 
     # SEAREV :
     disp = 2000
     CG = np.array([-1, 0, -3])
 
-    # show(_vertices, _faces, CG=CG)
-    # Cylindre
-    # disp = 1100
-    # CG = np.array([0.3, 2, 3])
-    vertices, faces, CGc = compute_equilibrium(vertices, faces, disp, CG, rho_water=1023, grav=9.81,
+
+    vertices, faces, CGc = compute_equilibrium(searev, disp, CG, rho_water=1023, grav=9.81,
                                     reltol=1e-2, itermax=100, max_nb_relaunch=15, theta_relax=1, z_relax=0.1,
                                     verbose=True, anim=False)
 
