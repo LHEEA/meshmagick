@@ -215,8 +215,8 @@ class MeshClipper(object):
                 if v_above_face[1] == v_above_face[0] + 1:
                     face = np.roll(face, -v_above_face[1])
                 P0, P1, P2, P3 = vertices[face]
-                Ileft = plane.get_edge_intersection(P0, P1)
-                Iright = plane.get_edge_intersection(P2, P3)
+                Ileft = self._plane.get_edge_intersection(P0, P1)
+                Iright = self._plane.get_edge_intersection(P2, P3)
                 intersections += [Ileft, Iright]
                 boundary_edge = [nI, nI + 1]
                 crown_faces.append([nI, face[1], face[2], nI + 1])
@@ -234,8 +234,8 @@ class MeshClipper(object):
                 #      *0
                 face = np.roll(face, -v_below_face[0])
                 P0, P1, P3 = vertices[face[[0, 1, 3]]]
-                Ileft = plane.get_edge_intersection(P0, P3)
-                Iright = plane.get_edge_intersection(P0, P1)
+                Ileft = self._plane.get_edge_intersection(P0, P3)
+                Iright = self._plane.get_edge_intersection(P0, P1)
                 intersections += [Ileft, Iright]
                 boundary_edge = [nI, nI + 1]
                 crown_faces.append([nI, face[0], nI + 1, nI])
@@ -253,8 +253,8 @@ class MeshClipper(object):
                 #      *2
                 face = np.roll(face, -v_above_face[0])
                 P0, P1, P3 = vertices[face[[0, 1, 3]]]
-                Ileft = plane.get_edge_intersection(P0, P1)
-                Iright = plane.get_edge_intersection(P0, P3)
+                Ileft = self._plane.get_edge_intersection(P0, P1)
+                Iright = self._plane.get_edge_intersection(P0, P3)
                 intersections += [Ileft, Iright]
                 boundary_edge = [nI, nI + 1]
                 crown_faces.append([nI, face[1], face[3], nI + 1])
@@ -269,8 +269,8 @@ class MeshClipper(object):
                 # 1*-------*2
                 face = np.roll(face, -v_above_face[0])
                 P0, P1, P2 = vertices[face]
-                Ileft = plane.get_edge_intersection(P0, P1)
-                Iright = plane.get_edge_intersection(P0, P2)
+                Ileft = self._plane.get_edge_intersection(P0, P1)
+                Iright = self._plane.get_edge_intersection(P0, P2)
                 intersections += [Ileft, Iright]
                 boundary_edge = [nI, nI + 1]
                 crown_faces.append([nI, face[1], face[2], nI + 1])
@@ -284,8 +284,8 @@ class MeshClipper(object):
                 #       *0
                 face = np.roll(face, -v_below_face[0])
                 P0, P1, P2 = vertices[face]
-                Ileft = plane.get_edge_intersection(P0, P2)
-                Iright = plane.get_edge_intersection(P0, P1)
+                Ileft = self._plane.get_edge_intersection(P0, P2)
+                Iright = self._plane.get_edge_intersection(P0, P1)
                 intersections += [Ileft, Iright]
                 boundary_edge = [nI, nI + 1]
                 crown_faces.append([nI, face[0], nI + 1, nI])
@@ -304,13 +304,13 @@ class MeshClipper(object):
                 face = np.roll(face, -v_on_face[0])
                 if vertices_distances[face[1]] < 0.:
                     P1, P2 = vertices[face[[1, 2]]]
-                    Iright = plane.get_edge_intersection(P1, P2)
+                    Iright = self._plane.get_edge_intersection(P1, P2)
                     intersections.append(Iright)
                     boundary_edge = [face[0], nI]
                     crown_faces.append([face[0], face[1], nI, face[0]])
                 else:
                     P2, P3 = vertices[face[[2, 3]]]
-                    Ileft = plane.get_edge_intersection(P2, P3)
+                    Ileft = self._plane.get_edge_intersection(P2, P3)
                     intersections.append(Ileft)
                     boundary_edge = [nI, face[0]]
                     crown_faces.append([nI, face[3], face[0], nI])
@@ -327,13 +327,13 @@ class MeshClipper(object):
                 face = np.roll(face, -v_on_face[0])
                 if vertices_distances[face[1]] < 0.:
                     P2, P3 = vertices[face[[2, 3]]]
-                    Iright = plane.get_edge_intersection(P2, P3)
+                    Iright = self._plane.get_edge_intersection(P2, P3)
                     intersections.append(Iright)
                     boundary_edge = [face[0], nI]
                     crown_faces.append([face[0], face[1], face[2], nI])
                 else:
                     P1, P2 = vertices[face[[1, 2]]]
-                    Ileft = plane.get_edge_intersection(P1, P2)
+                    Ileft = self._plane.get_edge_intersection(P1, P2)
                     intersections.append(Ileft)
                     boundary_edge = [nI, face[0]]
                     crown_faces.append([nI, face[2], face[3], face[0]])
@@ -369,12 +369,12 @@ class MeshClipper(object):
                 face = np.roll(face, -v_on_face[0])
                 P1, P2 = vertices[face[[1, 2]]]
                 if vertices_distances[face[1]] < 0.:
-                    Iright = plane.get_edge_intersection(P1, P2)
+                    Iright = self._plane.get_edge_intersection(P1, P2)
                     intersections.append(Iright)
                     boundary_edge = [face[0], nI]
                     crown_faces.append([face[0], face[1], nI, face[0]])
                 else:
-                    Ileft = plane.get_edge_intersection(P1, P2)
+                    Ileft = self._plane.get_edge_intersection(P1, P2)
                     intersections.append(Ileft)
                     boundary_edge = [nI, face[0]]
                     crown_faces.append([nI, face[2], face[0], nI])
@@ -481,7 +481,9 @@ class MeshClipper(object):
         clipped_crown_mesh = Mesh(vertices, crown_faces)
 
         # TODO: faire un merge uniquement sur la liste instersections et non sur tout le maillage clipped_crown
-        newID = clipped_crown_mesh.merge_duplicates(return_index=True)
+        # FIXME: potentiellement, un bug a ete introduit ici !!! --> l'update n'est plus bon sur les dictionnaires...
+        # Le nonuveau merge_duplicates (avec np.unique) ne fonctionne pas !!!!
+        newID = clipped_crown_mesh.merge_duplicates(return_index=True, decimals=6)
 
         # Updating dictionaries
         direct_boundary_edges = dict(
@@ -569,7 +571,7 @@ if __name__ == '__main__':
 
     plane = Plane()
 
-    clipper = MeshClipper(mymesh, plane)
+    clipper = MeshClipper(mymesh, plane, assert_closed_boundaries=True)
 
 
     # lower_mesh = clipper.lower_mesh
@@ -585,7 +587,7 @@ if __name__ == '__main__':
     # # print
     # print clipped_mesh.faces_areas.sum()
 
-    for iter in xrange(1):
+    for iter in xrange(100):
         print iter
         thetax, thetay = np.random.rand(2)*2*math.pi
         plane.rotate_normal(thetax, thetay)
