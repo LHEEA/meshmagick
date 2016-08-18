@@ -4,7 +4,6 @@
 This module is part of meshmagick software. It provides functions for mesh clipping purpose.
 """
 
-import meshmagick as mm # TODO: voir si oblige d'importer meshmagick ici ...
 from tools import merge_duplicates_rows
 import MMviewer
 import numpy as np
