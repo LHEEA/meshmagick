@@ -301,8 +301,10 @@ def load_INP(filename):
         if field['type'] == 'NODE':
             nodes = np.asarray(meshfiles[file]['NODE_SECTION'], dtype=np.float)
             # Translation of nodes according to frame option id any
-            nodes = translate(nodes, frames[field['FRAME']])  # TODO: s'assurer que frame est une options obligatoire...
-
+            # nodes = translate(nodes, frames[field['FRAME']])  # TODO: s'assurer que frame est une options obligatoire...
+            # nodes[:] = nodes +
+            
+            
             if nbNodes == 0:
                 V = nodes.copy()
                 nbNodes = V.shape[0]
@@ -522,7 +524,7 @@ def load_STL(filename):
     Note: STL files have a 0-indexing
     """
     from vtk import vtkSTLReader
-    from tools import merge_duplicates_rows
+    from tools import merge_duplicate_rows
 
     check_file(filename)
 
@@ -546,7 +548,7 @@ def load_STL(filename):
                 F[k][3] = F[k][0]  # always repeating the first node as stl is triangle only
 
     # Merging duplicates nodes
-    V, newID = merge_duplicates_rows(V, return_index=True)
+    V, newID = merge_duplicate_rows(V, return_index=True)
     F = newID[F]
 
     return V, F
@@ -630,7 +632,7 @@ def load_GDF(filename):
 
     Note: GDF files have a 1-indexing
     """
-    from tools import merge_duplicates_rows
+    from tools import merge_duplicate_rows
 
     check_file(filename)
 
@@ -662,7 +664,7 @@ def load_GDF(filename):
     ifile.close()
 
     # Merging duplicates nodes
-    V, newID = merge_duplicates_rows(V, return_index=True)
+    V, newID = merge_duplicate_rows(V, return_index=True)
     F = newID[F]
 
     return V, F
@@ -740,7 +742,7 @@ def load_MSH(filename):
     nb_nodes, nodes_data = re.search(r'\$Nodes\n(\d+)\n(.+)\$EndNodes', data, re.DOTALL).groups()
     nb_elts, elts_data = re.search(r'\$Elements\n(\d+)\n(.+)\$EndElements', data, re.DOTALL).groups()
 
-    vertices = np.asarray(map(float, nodes_data.split()), dtype=np.float).reshape((float(nb_nodes), 4))[:, 1:]
+    vertices = np.asarray(map(float, nodes_data.split()), dtype=np.float).reshape((int(nb_nodes), 4))[:, 1:]
 
     faces = []
 
@@ -1015,7 +1017,7 @@ def write_HST(filename, V, F):
 
     ofile.close()
 
-    print u'File {0:s} written'.format(filename)
+    # print u'File {0:s} written'.format(filename)
 
 def write_TEC(filename, V, F):
     """write_TEC(filename, _vertices, _faces)
@@ -1041,7 +1043,7 @@ def write_TEC(filename, V, F):
 
     ofile.write('VARIABLES = \"X\",\"Y\",\"Z\" \n')
     ofile.write('ZONE T=\"MESH\" \n')
-    ofile.write('N={nv:10d} ,E={nf:10d} ,_faces=FEPOINT, ET=QUADRILATERAL\n'.format(nv=nv, nf=nf))
+    ofile.write('N={nv:10d} ,E={nf:10d} , F=FEPOINT, ET=QUADRILATERAL\n'.format(nv=nv, nf=nf))
 
     node_block = '\n'.join( # block
         ''.join(
