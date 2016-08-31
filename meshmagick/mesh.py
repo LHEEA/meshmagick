@@ -4,7 +4,7 @@
 This module is part of meshmagick software. It provides functions for mesh clipping purpose.
 """
 
-from tools import merge_duplicates_rows
+from tools import merge_duplicate_rows
 import MMviewer
 import numpy as np
 import math
@@ -955,7 +955,22 @@ class Mesh(object):
         if not self.__internals__.has_key('boundaries'):
             self._connectivity()
         return len(self.__internals__['boundaries'])
-
+    
+    @property
+    def axis_aligned_bbox(self):
+        x, y, z = self._vertices.T
+        return (x.min(), x.max(),
+                y.min(), y.max(),
+                z.min(), z.max())
+    
+    @property
+    def squared_axis_aligned_bbox(self):
+        xmin, xmax, ymin, ymax, zmin, zmax = self.axis_aligned_bbox
+        (x0, y0, z0) = np.array([xmin+xmax, ymin+ymax, zmin+zmax]) * 0.5
+        d = (np.array([xmax-xmin, ymax-ymin, zmax-zmin]) * 0.5).max()
+        return (x0-d, x0+d, y0-d, y0+d, z0-d, z0+d)
+        
+    
     def is_mesh_closed(self):
         if not self.__internals__.has_key('boundaries'):
             self._connectivity()
@@ -1093,7 +1108,7 @@ class Mesh(object):
     def translate(self, t):
         # t = np.asarray(t, dtype=np.float)
         tx, ty, tz = t
-        V = self._vertices.copy()
+        V = self._vertices.copy() # FIXME: why doing a copy ???
         V[:, 0] += tx
         V[:, 1] += ty
         V[:, 2] += tz
@@ -1174,7 +1189,7 @@ class Mesh(object):
     #         return
 
     def merge_duplicates(self, decimals=8, return_index=False):
-        uniq, newID = merge_duplicates_rows(self._vertices, decimals=decimals, return_index=True)
+        uniq, newID = merge_duplicate_rows(self._vertices, decimals=decimals, return_index=True)
 
         nv_init = self.nb_vertices
 
