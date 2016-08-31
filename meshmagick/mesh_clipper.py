@@ -80,6 +80,9 @@ class MeshClipper(object):
         return
 
     def _vertices_positions_wrt_plane(self):
+        """
+        Classifies vertices with respect to the clipping plane
+        """
         vertices_distances = self._plane.get_point_dist_wrt_plane(self._source_mesh._vertices)
 
         vertices_positions = {'vertices_distances': vertices_distances,
@@ -476,7 +479,8 @@ class MeshClipper(object):
                 direct_boundary_edges[boundary_edge[0]] = boundary_edge[1]
                 inv_boundary_edges[boundary_edge[1]] = boundary_edge[0]
 
-        vertices = np.concatenate((vertices, intersections))
+        if len(intersections) > 0:
+            vertices = np.concatenate((vertices, intersections))
 
         clipped_crown_mesh = Mesh(vertices, crown_faces)
 
@@ -571,7 +575,7 @@ if __name__ == '__main__':
 
     plane = Plane()
 
-    clipper = MeshClipper(mymesh, plane, assert_closed_boundaries=True)
+    clipper = MeshClipper(mymesh, plane, assert_closed_boundaries=False, verbose=True)
 
 
     # lower_mesh = clipper.lower_mesh
