@@ -11,3 +11,7 @@ class RigidBody(bc._BaseBody):
             self._name = '_'.join((self._name, '(rigid)'))
 
         self._inertial_frame = self.add_fixed_frame('inertial_frame')
+        self._mesh_frame = bc.null_frame
+
+
+

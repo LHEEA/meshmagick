@@ -2,7 +2,10 @@
 #  -*- coding: utf-8 -*-
 """
 This module defines many rotation representations.
+
 """
+
+# TODO: voir maintenant transform.py !!!
 
 # TODO: pour les quaternions, utiliser le module  "https://github.com/moble/quaternion"
 
@@ -12,12 +15,3 @@ class Rotation(object):
     pass
 
 
-
-# class Rotation(object):
-#     """Base class for rotations"""
-#     def __init__(self):
-#         pass
-#
-#     @property
-#     def matrix(self):
-#         return None

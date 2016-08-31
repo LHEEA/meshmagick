@@ -10,6 +10,7 @@ __status__ = "Development"
 
 # import meshmagick as mm
 import mesh
+import mmio
 from mesh_clipper import MeshClipper
 
 import numpy as np
@@ -206,10 +207,10 @@ def compute_equilibrium(mymesh, disp, CG, rho_water=1023, grav=9.81,
     -------
 
     """
-    max_nb_relaunch = 10
+    # max_nb_relaunch = 10
 
     # Relaxation parameters
-    z_relax = 0.1 # in meters
+    # z_relax = 0.1 # in meters
     theta_relax_x = math.radians(theta_relax)
     theta_relax_y = math.radians(theta_relax)
 
@@ -230,7 +231,7 @@ def compute_equilibrium(mymesh, disp, CG, rho_water=1023, grav=9.81,
     mymesh_c = mymesh.copy()
     # Vc = mymesh.vertices.copy()
     # Fc = mymesh.faces.copy()
-    CGc = CG.copy()
+    CGc = np.asarray(CG, dtype=np.float).copy()
 
     # origin = np.zeros(3)
 
@@ -264,7 +265,7 @@ def compute_equilibrium(mymesh, disp, CG, rho_water=1023, grav=9.81,
         # Vc = np.transpose(np.dot(R, Vc.T)) # rotation
 
         if anim: # FIXME: IO have been moved to mmio module...
-            mm.write_VTP('mesh%u.vtp'%iter, Vc, Fc)
+            mmio.write_VTP('mesh%u.vtp'%iter, mymesh_c.vertices, mymesh_c.faces)
 
         # Applying transformation to the center of gravity
         CGc[-1] += dz
@@ -379,8 +380,9 @@ def compute_equilibrium(mymesh, disp, CG, rho_water=1023, grav=9.81,
         iter += 1
 
     # Zeroing xcog and ycog
-    Vc[:, 0] -= CGc[0]
-    Vc[:, 1] -= CGc[1]
+    mymesh_c.translate([-CGc[0], -CGc[1], 0.])
+    # Vc[:, 0] -= CGc[0]
+    # Vc[:, 1] -= CGc[1]
     CGc[0] = CGc[1] = 0.
 
     # origin[0] -= CGc[0]
@@ -398,7 +400,7 @@ def compute_equilibrium(mymesh, disp, CG, rho_water=1023, grav=9.81,
     # print origin + CGc
     # print CG
 
-    return Vc, Fc, CGc
+    return mymesh_c, CGc
 
 def _get_Sf_Vw(mymesh):
     """
@@ -513,10 +515,8 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
 
     Parameters
     ----------
-    _vertices : ndarray
-        Array of the mesh _vertices
-    _faces : ndarray
-        Array of the mesh connectivities
+    mymesh : Mesh
+        Mesh object for hydrostatic computations
     zg : float
         Vertical position of the center of gravity
     rho_water : float
@@ -524,7 +524,7 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
     grav : float
         Gravity acceleration (default: 9.81 m/s**2)
     verbose : bool, optional
-        False by default. If True, a hydrostatic report is printed on screen.
+        False by default. If True, the hydrostatic report is printed on screen.
 
     Returns
     -------
@@ -534,15 +534,14 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
             'Vw': (float) Immersed volume (in m**3)
             'disp': (float) Displacement (in Tons)
             'B': (ndarray) Coordinates of the buoyancy center (in m)
-            '_faces': (ndarray) Coordinates of the center of flotation (in m)
+            'F': (ndarray) Coordinates of the center of flotation (in m)
             'Sf': (float) Area of the flotation surface (in m**2)
             'r': (float) Transverse metacentric radius (in m)
             'R': (float) Longitudinal metacentrix radius (in m)
             'GMx': (float) Transverse metacentric height (in m)
             'GMy': (float) Longitudinal metacentric height (in m)
             'KH': (ndarray) Hydrostatic stiffness matrix
-            'Vc': (ndarray) Array of hydrostatic mesh _vertices
-            'Fc': (ndarray) Array of hydrostatic mesh connectivities
+
     """
 
     eps = 1e-4 # For zeroing tiny coefficients in the hydrostatic stiffness matrix
@@ -556,7 +555,7 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
 
     clipper = MeshClipper(mymesh, plane, assert_closed_boundaries=True, verbose=True)
 
-
+    clipped_mesh = clipper.clipped_mesh
         # clipped_mesh, boundaries = mymesh.clip(plane, return_boundaries=True, assert_closed_boundaries=True)
     # except:
     #     show(mesh._vertices, mesh._faces)
@@ -569,7 +568,7 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
     # centers = clipped_mesh.faces_centers
     centers = clipped_mesh.faces_centers
 
-    areas, normals, centers = mm.get_all_faces_properties(Vc, Fc)
+    # areas, normals, centers = mm.get_all_faces_properties(Vc, Fc)
 
     # Calcul surface mouillee
     Sw = areas.sum()
@@ -597,9 +596,11 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
     ymin = []
     ymax = []
 
-    polygons = clip_infos['PolygonsNewID']
+    polygons = clipper.closed_polygons
+
+    # polygons = clip_infos['PolygonsNewID']
     for polygon in polygons:
-        polyverts = Vc[polygon]
+        polyverts = clipper.clipped_crown_mesh.vertices[polygon]
 
         # TODO: voir si on conserve ce test...
         if np.any(np.fabs(polyverts[:, 2]) > 1e-3):
@@ -724,7 +725,7 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
     output['Vw'] = Vw
     output['disp'] = disp
     output['B'] = np.array([xb, yb, zb], dtype=np.float)
-    output['_faces'] = np.array([xF, yF, 0.], dtype=np.float)
+    output['F'] = np.array([xF, yF, 0.], dtype=np.float)
     output['Sf'] = Sf
     output['r'] = r
     output['R'] = R
@@ -733,9 +734,9 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
     output['KH'] = KH
     output['Sf_x_lim'] = Sf_x_lim
     output['Sf_y_lim'] = Sf_y_lim
-    output['Vc'] = Vc
-    output['Fc'] = Fc
-    output['polygons'] = polygons
+    # output['Vc'] = Vc
+    # output['Fc'] = Fc
+    # output['polygons'] = polygons
 
     return output
 
@@ -745,23 +746,26 @@ if __name__ == '__main__':
     # The following code are only for testing purpose
     import mmio
 
-    vertices, faces = mmio.load_VTP('tests/SEAREV/SEAREV.vtp')
-    searev = mesh.Mesh(vertices, faces)
+    # vertices, faces = mmio.load_VTP('tests/SEAREV/SEAREV.vtp')
+    # searev = mesh.Mesh(vertices, faces)
+
+    vertices, faces = mmio.load_VTP('Cylinder.vtp')
+    cylinder = mesh.Mesh(vertices, faces)
 
     # SEAREV :
     disp = 2000
     CG = np.array([-1, 0, -3])
 
 
-    vertices, faces, CGc = compute_equilibrium(searev, disp, CG, rho_water=1023, grav=9.81,
-                                    reltol=1e-2, itermax=100, max_nb_relaunch=15, theta_relax=1, z_relax=0.1,
-                                    verbose=True, anim=False)
+    # vertices, faces, CGc = compute_equilibrium(searev, disp, CG, rho_water=1023, grav=9.81,
+    #                                 reltol=1e-2, itermax=100, max_nb_relaunch=15, theta_relax=1, z_relax=0.1,
+    #                                 verbose=True, anim=False)
 
 
-    hs_output = compute_hydrostatics(vertices, faces, CGc[-1], verbose=True)
-    print '\nCenter of gravity new_location: ', CGc
-    print '\nBuoyancy center               : ', hs_output['B']
+    hs_output = compute_hydrostatics(cylinder, CG[-1], verbose=True)
+    # print '\nCenter of gravity new_location: ', CG
+    # print '\nBuoyancy center               : ', hs_output['B']
 
-    show(vertices, faces, CG=CGc, B=hs_output['B'])
+    # show(vertices, faces, CG=CG, B=hs_output['B'])
 
 

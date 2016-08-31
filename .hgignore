@@ -9,12 +9,16 @@ syntax: glob
 *.dat
 *.orig
 *.vtp
+VERSION.txt
 
 # folders to ignore
-tests/**
+mesh_examples/**
+.tests/**
 .idea/**
+.cache/**
 UML/**
 meshmagick.egg*
 doc/**
 dist/**
 build/**
+transform3D/**
