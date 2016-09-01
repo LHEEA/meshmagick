@@ -235,7 +235,7 @@ def compute_equilibrium(V, F, disp, CG, rho_water=1023, grav=9.81,
 
     Vc = V.copy()
     Fc = F.copy()
-    CGc = CG.copy()
+    CGc = np.asarray(CG, dtype=np.float).copy()
 
     # origin = np.zeros(3)
 
@@ -740,7 +740,8 @@ if __name__ == '__main__':
 
     V, F = mm.load_VTP('meshmagick/tests/data/SEAREV.vtp')
     
-    hs_output = compute_hydrostatics(V, F, 0)
+    Vc, Fc, CGc = compute_equilibrium(V, F, 1500, [0, 0, -2])
     
-    pickle.dump(hs_output, open('hs_ouput_r177.p', 'w'))
+    hs_output = compute_hydrostatics(Vc, Fc, CGc[-1])
     
+    show(Vc, Fc, CG=CGc, B=hs_output['B'])
