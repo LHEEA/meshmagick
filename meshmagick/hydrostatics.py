@@ -255,7 +255,9 @@ def compute_equilibrium(mymesh, disp, CG, rho_water=1023, grav=9.81,
             else:
                 code = 0
                 break
-
+        
+        print dz, thetax, thetay
+        
         # Transformation
         # R = mesh._rodrigues(thetax, thetay)
 
@@ -551,7 +553,7 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
     # try:
         # Vc, Fc, clip_infos = mm.clip_by_plane(_vertices, _faces, plane, infos=True)
 
-    clipper = MeshClipper(mymesh, plane, assert_closed_boundaries=True, verbose=True)
+    clipper = MeshClipper(mymesh, plane, assert_closed_boundaries=True, verbose=False)
 
     clipped_mesh = clipper.clipped_mesh
         # clipped_mesh, boundaries = mymesh.clip(plane, return_boundaries=True, assert_closed_boundaries=True)
@@ -745,9 +747,9 @@ if __name__ == '__main__':
     vertices, faces = mmio.load_VTP('meshmagick/tests/data/SEAREV.vtp')
     searev = mesh.Mesh(vertices, faces)
     
-    searevc, CGc = compute_equilibrium(searev, 1500, [0., 0, -2], verbose=True)
+    searevc, CGc = compute_equilibrium(searev, 1500, [1., 0, -2], verbose=True)
     
-    hs_output = compute_hydrostatics(searevc, -2, verbose=True)
+    hs_output = compute_hydrostatics(searevc, CGc[-1], verbose=True)
     
     
     
