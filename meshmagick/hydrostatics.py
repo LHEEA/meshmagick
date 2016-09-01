@@ -224,12 +224,11 @@ def compute_equilibrium(V, F, disp, CG, rho_water=1023, grav=9.81,
 
     rhog = rho_water*grav
     mg = disp*grav*1e3 # Conversion of displacement in kg
-
-    dz = 0.
-    thetax = 0.
-    thetay = 0.
+    
+    # Initializing corrections variables
+    dz = thetax = thetay = 0.
     iter = 0
-
+    
     R = np.eye(3, 3)
     dz_update = 0.
 
@@ -259,7 +258,9 @@ def compute_equilibrium(V, F, disp, CG, rho_water=1023, grav=9.81,
             else:
                 code = 0
                 break
-
+        
+        print dz, thetax, thetay
+        
         # Transformation
         R = _get_rotation_matrix(thetax, thetay)
 
@@ -740,7 +741,7 @@ if __name__ == '__main__':
 
     V, F = mm.load_VTP('meshmagick/tests/data/SEAREV.vtp')
     
-    Vc, Fc, CGc = compute_equilibrium(V, F, 1500, [0, 0, -2])
+    Vc, Fc, CGc = compute_equilibrium(V, F, 1500, [1, 0, -2])
     
     hs_output = compute_hydrostatics(Vc, Fc, CGc[-1])
     
