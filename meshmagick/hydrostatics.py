@@ -750,15 +750,20 @@ if __name__ == '__main__':
     vertices, faces = mmio.load_VTP('meshmagick/tests/data/SEAREV.vtp')
     searev = mesh.Mesh(vertices, faces)
     
-    dz_list = [-5, -2, 0, 2, 4]
+    hs_output = compute_hydrostatics(searev, 0, verbose=True)
     
-    for dz in dz_list:
-        searev_cp = searev.copy()
-        searev_cp.translate_z(dz)
-        hs_output = compute_hydrostatics(searev_cp, 0)
-        
-        hs_output_old = pickle.load(open('hs_output_%s.p'%dz, 'r'))
-        print hs_output, hs_output_old
+    
+    
+    
+    # dz_list = [-5, -2, 0, 2, 4]
+    #
+    # for dz in dz_list:
+    #     searev_cp = searev.copy()
+    #     searev_cp.translate_z(dz)
+    #     hs_output = compute_hydrostatics(searev_cp, 0)
+    #
+    #     hs_output_old = pickle.load(open('hs_output_%s.p'%dz, 'r'))
+    #     print hs_output, hs_output_old
     
     
     
