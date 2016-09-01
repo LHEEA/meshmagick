@@ -745,16 +745,30 @@ if __name__ == '__main__':
 
     # The following code are only for testing purpose
     import mmio
+    import pickle
 
-    # vertices, faces = mmio.load_VTP('tests/SEAREV/SEAREV.vtp')
-    # searev = mesh.Mesh(vertices, faces)
+    vertices, faces = mmio.load_VTP('meshmagick/tests/data/SEAREV.vtp')
+    searev = mesh.Mesh(vertices, faces)
+    
+    dz_list = [-5, -2, 0, 2, 4]
+    
+    for dz in dz_list:
+        searev_cp = searev.copy()
+        searev_cp.translate_z(dz)
+        hs_output = compute_hydrostatics(searev_cp, 0)
+        
+        hs_output_old = pickle.load(open('hs_output_%s.p'%dz, 'r'))
+        print hs_output, hs_output_old
+    
+    
+    
 
-    vertices, faces = mmio.load_VTP('Cylinder.vtp')
-    cylinder = mesh.Mesh(vertices, faces)
-
-    # SEAREV :
-    disp = 2000
-    CG = np.array([-1, 0, -3])
+    # vertices, faces = mmio.load_VTP('Cylinder.vtp')
+    # cylinder = mesh.Mesh(vertices, faces)
+    #
+    # # SEAREV :
+    # disp = 2000
+    # CG = np.array([-1, 0, -3])
 
 
     # vertices, faces, CGc = compute_equilibrium(searev, disp, CG, rho_water=1023, grav=9.81,
@@ -762,7 +776,7 @@ if __name__ == '__main__':
     #                                 verbose=True, anim=False)
 
 
-    hs_output = compute_hydrostatics(cylinder, CG[-1], verbose=True)
+    # hs_output = compute_hydrostatics(cylinder, CG[-1], verbose=True)
     # print '\nCenter of gravity new_location: ', CG
     # print '\nBuoyancy center               : ', hs_output['B']
 
