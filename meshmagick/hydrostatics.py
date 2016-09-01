@@ -186,8 +186,8 @@ def compute_equilibrium(mymesh, disp, CG, rho_water=1023, grav=9.81,
 
     Parameters
     ----------
-    mesh : Mesh
-        mesh to be analyzed
+    mymesh : Mesh
+        mesh to be placed at hydrostatic equilibrium
     disp : float
         Mass displacement of the floater (in tons)
     CG : ndarray
@@ -445,10 +445,8 @@ def set_displacement(mymesh, disp, rho_water=1023, grav=9.81, abs_tol= 1., iterm
 
     Parameters
     ----------
-    vertices : ndarray
-        Array of the mesh _vertices
-    faces : ndarray
-        Array of the mesh connectivities
+    mymesh : Mesh
+        Mesh to be used for computations
     disp : float
         Mass displacement of the hull (in tons)
     rho_water : float
@@ -597,8 +595,6 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
     ymax = []
 
     polygons = clipper.closed_polygons
-
-    # polygons = clip_infos['PolygonsNewID']
     for polygon in polygons:
         polyverts = clipper.clipped_crown_mesh.vertices[polygon]
 
@@ -658,7 +654,6 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
     a = zg - zb # BG
     GMx = r - a
     GMy = R - a
-    # print 'GMx=%f; GMy=%f' % (GMx, GMy)
 
     # Stiffness matrix coefficients that depend on the position of the gravity center
     S44 = rhog*Vw * GMx
@@ -679,7 +674,7 @@ def compute_hydrostatics(mymesh, zg, rho_water=1023, grav=9.81, verbose=False):
     # Zeroing tiny coefficients
     KH[np.fabs(KH) < eps] = 0.
 
-    # Flotation center _faces:
+    # Flotation center F:
     xF = -S35/S33
     yF =  S34/S33
 
@@ -745,12 +740,14 @@ if __name__ == '__main__':
 
     # The following code are only for testing purpose
     import mmio
-    import pickle
+    # import pickle
 
     vertices, faces = mmio.load_VTP('meshmagick/tests/data/SEAREV.vtp')
     searev = mesh.Mesh(vertices, faces)
     
-    hs_output = compute_hydrostatics(searev, 0, verbose=True)
+    searevc, CGc = compute_equilibrium(searev, 1500, [0., 0, -2], verbose=True)
+    
+    hs_output = compute_hydrostatics(searevc, -2, verbose=True)
     
     
     
