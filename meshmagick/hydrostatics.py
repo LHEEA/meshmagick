@@ -1432,46 +1432,11 @@ def compute_hydrostatics(V, F, zg, rho_water=1023, grav=9.81, verbose=False):
 if __name__ == '__main__':
 
     # The following code are only for testng purpose
+    import pickle
 
-
-    V, F = mm.load_VTP('tests/SEAREV/SEAREV.vtp')
-    # V, F = mm.load_MAR('Cylinder.mar')
-    plane = mm.Plane(np.array([0, 1, 0]))
-    V, F = mm.symmetrize(V, F, plane=plane)
-    # V, F = mm.symmetrize(V, F, plane=mm.Plane())
-    # mm.show(V, F)
-
-    # compute_hydrostatics(V, F, -4.3, verbose=True)
-
-
-    # SEAREV :
-    disp = 2000
-    CG = np.array([-1, 0, -3])
-
-    # show(V, F, CG=CG)
-    # Cylindre
-    # disp = 1100
-    # CG = np.array([0.3, 2, 3])
-    V, F, CGc = compute_equilibrium(V, F, disp, CG, rho_water=1023, grav=9.81,
-                                    reltol=1e-2, itermax=100, max_nb_relaunch=15, theta_relax=1, z_relax=0.1,
-                                    verbose=True, anim=False)
-
-
-    hs_output = compute_hydrostatics(V, F, CGc[-1], verbose=True)
-    print '\nCenter of gravity new_location: ', CGc
-    print '\nBuoyancy center               : ', hs_output['B']
-
-    show(V, F, CG=CGc, B=hs_output['B'])
-
-
-    # target_disp = 750
-    # abs_tol = 1.
-    #
-    # dz, Vc, Fc = set_displacement(V, F, target_disp, abs_tol=abs_tol, verbose=True)
-    #
-    # mm.show(Vc, Fc)
-    #
-    # # Verification
-    # hs_output = compute_hydrostatics(Vc, Fc, 0, verbose=True)
-    # if math.fabs(hs_output['disp'] - target_disp) > abs_tol:
-    #     raise ValueError, 'Convergence problem'
+    V, F = mm.load_VTP('meshmagick/tests/data/SEAREV.vtp')
+    
+    hs_output = compute_hydrostatics(V, F, 0)
+    
+    pickle.dump(hs_output, open('hs_ouput_r177.p', 'w'))
+    
