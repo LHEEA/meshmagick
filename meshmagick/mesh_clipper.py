@@ -152,7 +152,16 @@ class MeshClipper(object):
     @property
     def closed_polygons(self):
         return self.__internals__['closed_polygons']
-
+    
+    @property
+    def closed_polygons_vertices(self):
+        polygons = self.__internals__['closed_polygons']
+        closed_polygons_vertices = []
+        # TODO: voir si on ne peut pas directement indicer par polygons sans boucle for
+        for polygon in polygons:
+            closed_polygons_vertices.append(self.clipped_crown_mesh.vertices[polygon])
+        return closed_polygons_vertices
+    
     @property
     def nb_closed_polygons(self):
         return len(self.__internals__['closed_polygons'])
@@ -160,6 +169,15 @@ class MeshClipper(object):
     @property
     def open_lines(self):
         return self.__internals__['open_lines']
+    
+    @property
+    def open_lines_vertices(self):
+        lines = self.__internals__['open_lines']
+        lines_vertices = []
+        # TODO: voir si on ne peut pas directement indicer par polygons sans boucle for
+        for line in lines:
+            lines_vertices.append(self.clipped_crown_mesh.vertices[line])
+        return lines_vertices
 
     @property
     def nb_open_lines(self):
@@ -176,7 +194,7 @@ class MeshClipper(object):
         vertices = crown_mesh._vertices
         vertices_on_mask = self.__internals__['crown_mesh_on_vertices_mask']
 
-        # TODO: Vertices pre-projection
+        # TODO: Vertices pre-projection to be done here !!!
         # vertices_on = partition['vertices_on']
         # _vertices[vertices_on] = plane.orthogonal_projection_on_plane(_vertices[vertices_on])
         # pos[vertices_on] = 0.
@@ -449,7 +467,7 @@ class MeshClipper(object):
             elif face_type == '300' or face_type == '400':
                 #       *               *-----*
                 #      / \              |     |
-                #     /300\       or    | 400 |
+                #     /300\      or     | 400 |
                 #    *-----*            *-----*
                 # ____________       ______________
                 boundary_edge = None
