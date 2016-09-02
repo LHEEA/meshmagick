@@ -1020,21 +1020,19 @@ class Mesh(object):
             return conformal
 
     def rotate_x(self, thetax):
-        self.rotate([thetax, 0., 0.])
-        return
+        return self.rotate([thetax, 0., 0.])
 
     def rotate_y(self, thetay):
-        self.rotate([0., thetay, 0.])
-        return
+        return self.rotate([0., thetay, 0.])
 
     def rotate_z(self, thetaz):
-        self.rotate([0., 0., thetaz])
+        return self.rotate([0., 0., thetaz])
 
     def rotate(self, angles):
         angles = np.asarray(angles, dtype=np.float)
         theta = np.linalg.norm(angles)
         if theta == 0.:
-            return
+            return np.eye(3)
 
         ctheta = math.cos(theta)
         stheta = math.sin(theta)
@@ -1065,7 +1063,7 @@ class Mesh(object):
             self.__internals__['faces_normals'] = np.transpose(np.dot(R, normals.T))
             self.__internals__['faces_centers'] = np.transpose(np.dot(R, centers.T))
 
-        return
+        return R
 
     # @invalidate_cache
     def translate_x(self, tx):
@@ -1503,7 +1501,7 @@ class Mesh(object):
         #          'sint_x2y', 'sint_y2z', 'sint_z2x')
         #
         # s_int = dict(zip(names, surface_integrals))
-        # self.__internals__.update(s_int)
+        # self.__internals__._update_hydrostatic_properties(s_int)
 
         self.__internals__['surface_integrals'] = surface_integrals
 
