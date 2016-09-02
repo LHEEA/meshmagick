@@ -29,7 +29,7 @@ class HSmesh(mesh.Mesh):
     
     *** Intrinsic mesh properties are
     
-        - mass
+        - _mass
         - cog
         - zg
         - rho_water
@@ -39,7 +39,7 @@ class HSmesh(mesh.Mesh):
         Note that zg is mandatory to get the hydrostatic stiffness matrix. By default, be carefull that it is set to zero at instantiation.
     
     *** Modification of the displacement will produce the mesh to move along z so that
-    it reaches the correct displacement. The mass is then set accordingly and equals the displacement. Note that this is different from modifying the mass and
+    it reaches the correct displacement. The _mass is then set accordingly and equals the displacement. Note that this is different from modifying the _mass and
     
     
     
@@ -54,9 +54,9 @@ class HSmesh(mesh.Mesh):
                  animate=False, mass_unit='tons'):
         
         super(HSmesh, self).__init__(vertices, faces, name=None)
-        self.__internals__['backup'] = dict()
-        self.__internals__['backup']['initial_vertices'] = vertices
-        self.__internals__['backup']['initial_faces'] = faces
+        self.backup = dict()
+        self.backup['initial_vertices'] = vertices
+        self.backup['initial_faces'] = faces
         
         assert mass_unit in ['kg', 'tons']
         
@@ -66,20 +66,28 @@ class HSmesh(mesh.Mesh):
         self._rho_water = rho_water
         self._gravity = grav
         
-        self.__internals__['rhog'] = rho_water*grav
+        self.__internals__['rhog'] = rho_water * grav
         
-        self.__internals__['hs_data'] = dict()
-        self.__internals__['hs_data']['Sw'] = 0.
-        self.__internals__['hs_data']['Vw'] = 0.
-        self.__internals__['hs_data']['disp'] = 0.
-        self.__internals__['hs_data']['B'] = np.zeros(3, dtype=np.float)
-        self.__internals__['hs_data']['Sf'] = 0.
-        self.__internals__['hs_data']['F'] = np.zeros(3, dtype=np.float)
-        self.__internals__['hs_data']['r'] = 0.
-        self.__internals__['hs_data']['R'] = 0.
-        self.__internals__['hs_data']['GMx'] = 0.
-        self.__internals__['hs_data']['GMy'] = 0.
-        self.__internals__['hs_data']['KH'] = np.zeros((3, 3), dtype=np.float)
+        self.hs_data = dict()
+        # self.hs_data['Sw'] = 0.
+        # self.hs_data['Vw'] = 0.
+        # self.hs_data['disp'] = 0.
+        # self.hs_data['B'] = np.zeros(3, dtype=np.float)
+        # self.hs_data['Sf'] = 0.
+        # self.hs_data['F'] = np.zeros(3, dtype=np.float)
+        # self.hs_data['r'] = 0.
+        # self.hs_data['R'] = 0.
+        # self.hs_data['GMx'] = 0.
+        # self.hs_data['GMy'] = 0.
+        # self.hs_data['KH'] = np.zeros((3, 3), dtype=np.float)
+        
+        # Solver parameters
+        self._solver_parameters = {'reltol': 1e-2,
+                                   'itermax': 100,
+                                   'max_nb_relaunch': 10,
+                                   'theta_relax': 2,
+                                   'z_relax': 0.1}
+        
         
         # TODO: ajouter le calcul du tirant d'eau et d'air
         
@@ -88,7 +96,9 @@ class HSmesh(mesh.Mesh):
         if mass:
             self._mass = mass
         else:
-            self._mass = self.__internals__['hs_data']['disp']
+            self._mass = self.hs_data['disp']
+            
+        self.animate = animate
     
     @property
     def gravity(self):
@@ -97,6 +107,7 @@ class HSmesh(mesh.Mesh):
     @gravity.setter
     def gravity(self, value):
         self._gravity = value
+        self.__internals__['rhog'] = self._rho_water * value
         self._update_hydrostatic_properties()
         return
     
@@ -107,6 +118,19 @@ class HSmesh(mesh.Mesh):
     @rho_water.setter
     def rho_water(self, value):
         self._rho_water = value
+        self.__internals__['rhog'] = value * self._gravity
+        self._update_hydrostatic_properties()
+        return
+    
+    @property
+    def gravity_center(self):
+        return self._gravity_center
+    
+    @gravity_center.setter
+    def gravity_center(self, value):
+        value = np.asarray(value, dtype=np.float)
+        assert value.shape[0] == 3
+        self._gravity_center = value
         self._update_hydrostatic_properties()
         return
     
@@ -130,58 +154,56 @@ class HSmesh(mesh.Mesh):
     def mass_in_tons(self):
         self.__internals__['mass_unit'] = 'tons'
     
-    
-    
     @property
     def wetted_surface_area(self):
-        return self.__internals__['hs_data']['Sw']
+        return self.hs_data['Sw']
     
     @property
     def immersed_volume(self):
-        return self.__internals__['hs_data']['Vw']
+        return self.hs_data['Vw']
     
     @property
     def displacement(self):
         if self.mass_unit == 'tons':
-            return self.__internals__['hs_data']['disp'] / 1000.
+            return self.hs_data['disp'] / 1000.
         else:
-            return self.__internals__['hs_data']['disp']
+            return self.hs_data['disp']
     
     @property
     def buoyancy_center(self):
-        return self.__internals__['hs_data']['B']
+        return self.hs_data['B']
     
     @property
     def flotation_surface_area(self):
-        return self.__internals__['hs_data']['Sf']
+        return self.hs_data['Sf']
     
     @property
     def flotation_center(self):
-        return self.__internals__['hs_data']['F']
+        return self.hs_data['F']
     
     @property
     def transversal_metacentric_radius(self):
-        return self.__internals__['hs_data']['r']
+        return self.hs_data['r']
     
     @property
     def longitudinal_metacentric_radius(self):
-        return self.__internals__['hs_data']['R']
+        return self.hs_data['R']
     
     @property
     def transversal_metacentric_height(self):
-        return self.__internals__['hs_data']['GMx']
+        return self.hs_data['GMx']
     
     @property
     def longitudinal_metacentric_height(self):
-        return self.__internals__['hs_data']['GMy']
+        return self.hs_data['GMy']
     
     @property
     def hydrostatic_stiffness_matrix(self):
-        return self.__internals__['hs_data']['KH']
+        return self.hs_data['KH']
     
     def reset(self):
-        vertices = self.__internals__['initial_vertices']
-        faces = self.__internals__['initial_faces']
+        vertices = self.backup['initial_vertices']
+        faces = self.backup['initial_faces']
         self.vertices = vertices
         self.faces = faces
         
@@ -192,24 +214,28 @@ class HSmesh(mesh.Mesh):
         "Computation of hydrostatics"
         data = compute_hydrostatics(self, self.zg, rho_water=self._rho_water, grav=self._gravity)
         # print hs_output
-        self.__internals__['hs_data']['Sw'] = data['Sw']
-        self.__internals__['hs_data']['Vw'] = data['Vw']
-        self.__internals__['hs_data']['disp'] = data['disp']
-        self.__internals__['hs_data']['B'] = data['B']
-        self.__internals__['hs_data']['Sf'] = data['Sf']
-        self.__internals__['hs_data']['F'] = data['F']
-        self.__internals__['hs_data']['r'] = data['r']
-        self.__internals__['hs_data']['R'] = data['R']
-        self.__internals__['hs_data']['GMx'] = data['GMx']
-        self.__internals__['hs_data']['GMy'] = data['GMy']
-        self.__internals__['hs_data']['KH'] = data['KH']
+        self.hs_data.update(data)
+        # self.hs_data['Sw'] = data['Sw']
+        # self.hs_data['Vw'] = data['Vw']
+        # self.hs_data['disp'] = data['disp']
+        # self.hs_data['B'] = data['B']
+        # self.hs_data['Sf'] = data['Sf']
+        # self.hs_data['F'] = data['F']
+        # self.hs_data['r'] = data['r']
+        # self.hs_data['R'] = data['R']
+        # self.hs_data['GMx'] = data['GMx']
+        # self.hs_data['GMy'] = data['GMy']
+        # self.hs_data['KH'] = data['KH']
+        # self.hs_data['Sf_x_lim'] = date['Sf_x_lim']
+        # self.hs_data['Sf_y_lim'] = date['Sf_y_lim']
         
         return
     
     @property
     def residual(self):
-        rhogV = self.__internals__['rhog'] * self.__internals__['hs_data']['Vw']
-        xb, yb, _ = self.__internals__['hs_data']['B']
+        rhogV = self.__internals__['rhog'] * self.hs_data['Vw']
+        xb, yb, _ = self.hs_data['B']
+        xg, yg, _ = self._gravity_center
         mg = self._mass * self._gravity
         
         residual = np.array([rhogV - mg,
@@ -233,9 +259,244 @@ class HSmesh(mesh.Mesh):
         _, _, my = self.residual
         return my
         
+    def available_parameters(self):
+        return self._solver_parameters.keys()
+    
+    def set_solver_parameter(self, name, value):
+        assert name in self._solver_parameters.keys()
+        assert isinstance(value, type(self._solver_parameters[name]))
+        self._solver_parameters[name] = value
+        return
+    
+    def get_solver_parameter(self, name):
+        assert name in self._solver_parameters.keys()
+        return self._solver_parameters[name]
+     
+    def rotate(self, angles, update=True):
+        R = super(HSmesh, self).rotate(angles)
+        self._gravity_center = np.dot(R, self._gravity_center)
+        if update:
+            self._update_hydrostatic_properties()
+        return R
+    
+    def translate_x(self, tx, update=True):
+        super(HSmesh, self).translate_x(tx)
+        self._gravity_center[0] += tx
+        if update:
+            self._update_hydrostatic_properties()
+        return
         
-
-
+    def translate_y(self, ty, update=True):
+        super(HSmesh, self).translate_y(ty)
+        self._gravity_center[1] += ty
+        if update:
+            self._update_hydrostatic_properties()
+        return
+        
+    def translate_z(self, tz, update=True):
+        super(HSmesh, self).translate_z(tz)
+        self._gravity_center[2] += tz
+        if update:
+            self._update_hydrostatic_properties()
+        return
+        
+    def translate(self, t, update=True):
+        super(HSmesh, self).translate(t)
+        self._gravity_center += t
+        if update:
+            self._update_hydrostatic_properties()
+        return
+     
+    def equilibrate(self):
+        
+        z_relax = self._solver_parameters['z_relax']
+        theta_relax = self._solver_parameters['theta_relax']
+        theta_relax_x = math.radians(theta_relax)
+        theta_relax_y = math.radians(theta_relax)
+        
+        itermax = self._solver_parameters['itermax']
+        reltol = self._solver_parameters['reltol']
+        
+        rhog = self.__internals__['rhog']
+        
+        mg = self._mass * self._gravity
+        if self.mass_unit == 'tons':
+            mg *= 1e3
+        
+        dz = thetax = thetay = 0.
+        
+        iter = nb_relaunch = 0
+    
+        # mymesh_c = mymesh.copy()
+        # CGc = np.asarray(CG, dtype=np.float).copy()
+    
+        while True:
+            print '\n', iter
+            if iter == (nb_relaunch + 1) * itermax:
+                # Max iterations reach
+            
+                if nb_relaunch < max_nb_relaunch:
+                    nb_relaunch += 1
+                    # Random on the position of the body
+                    print 'Max iteration reached: relaunching number %u with random orientation' % nb_relaunch
+                    thetax, thetay = np.random.rand(2) * 2 * math.pi
+                    rot = _get_rotation_matrix(thetax, thetay)
+                    Vc = np.transpose(np.dot(rot, Vc.T))
+                    CGc = np.dot(rot, CGc)
+                    # origin = np.dot(rot, origin)
+                    dz = thetax = thetay = 0.
+                else:
+                    code = 0
+                    break
+        
+            # Transformation
+            # rot = mesh._rodrigues(thetax, thetay)
+        
+            # Applying transformation to the mesh
+            self.translate_z(dz, update=False)
+            self.rotate([thetax, thetay, 0.])
+            # Vc = np.transpose(np.dot(rot, Vc.T)) # rotation
+        
+            if self.animate:  # FIXME: IO have been moved to mmio module...
+                mmio.write_VTP('mesh%u.vtp' % iter, mymesh_c.vertices, mymesh_c.faces)
+        
+            # Applying transformation to the center of gravity
+            # CGc[-1] += dz
+            # CGc = np.dot(rot, CGc)
+            xg, yg, zg = self._gravity_center
+        
+            # origin[-1] += dz
+            # origin = np.dot(rot, origin)
+        
+            # Computing hydrostatics
+            # hs_output = compute_hydrostatics(mymesh_c, zg, rho_water=rho_water, grav=grav, verbose=False)
+        
+            # Computing characteristic length
+            # TODO: L et l doivent etre calcules a partir du polygone d'intersection !!!
+            xmin, xmax = self.hs_data['Sf_x_lim']
+            ymin, ymax = self.hs_data['Sf_y_lim']
+            L, l = xmax - xmin, ymax - ymin
+        
+            # xb, yb, zb = self.hs_data['B']
+            KH = self.hs_data['KH'][2:5, 2:5]
+            if KH[1, 1] < 0.:
+                xstable = False
+                print 'Unstable in roll'
+            else:
+                xstable = True
+        
+            if KH[2, 2] < 0.:
+                ystable = False
+                print 'Unstable in pitch'
+            else:
+                ystable = True
+        
+            # Vw = self.hs_data['Vw']
+        
+            # Correcting KH
+            # corr = grav*zg * (rho_water*Vw - disp)
+            # KH[3, 3] += corr
+            # KH[4, 4] += corr
+        
+            # Residual to compensate
+            # rhogV = rhog * self.hs_data['Vw']
+            #
+            # self.residual
+            #
+            # res = np.array([rhogV - mg,
+            #                 rhogV * yb - mg * yg,
+            #                 -rhogV * xb + mg * xg])
+        
+            # Convergence criteria
+            residual = self.residual
+            scale = np.array([mg, mg * l, mg * L])
+            
+            if np.all(np.fabs(residual / scale) < self._solver_parameters['reltol']):
+                # Convergence at an equilibrium
+                if xstable and ystable:
+                    # Stable equilibrium
+                    code = 1
+                    break
+                else:
+                    # code = 2
+                    # if not ystable:
+                    #     print '\nConvergence reach at an unstable configuration in PITCH at iteration %u' % iter
+                    #     print '\t--> Keep going iterations with an opposite orientation\n'
+                    #     # Choose a new position at 180 deg in pitch
+                    #     rot = _get_rotation_matrix(0., math.pi)
+                    #     Vc = np.transpose(np.dot(rot, Vc.T)) # rotation
+                    #     CGc = np.dot(rot, CGc)
+                    #
+                    # if not xstable:
+                    #     print '\nConvergence reach at an unstable configuration in ROLL at iteration %u' % iter
+                    #     print '\t--> Keep going iterations with an opposite orientation\n'
+                    #     # Choose a new position at 180 deg in roll
+                    #     rot = _get_rotation_matrix(math.pi, 0.)
+                    #     Vc = np.transpose(np.dot(rot, Vc.T)) # rotation
+                    #     CGc = np.dot(rot, CGc)
+                
+                    iter += 1
+                    continue
+        
+            dz_old = dz
+            thetax_old = thetax
+            thetay_old = thetay
+        
+            # ESSAI d'utilisation de KH diagonale seulement
+            # KH = np.diag(np.diag(KH))
+        
+            # Computing correction
+            dz, thetax, thetay = np.linalg.solve(KH, residual)
+        
+            # Adaptativity
+            # if dz*dz_old < 0.:
+            #     z_relax /= 2
+            #
+            # if thetax*thetax_old < 0.:
+            #     theta_relax_x /= 2
+            #
+            # if thetay*thetay_old < 0.:
+            #     theta_relax_y /= 2
+        
+            # Relaxation
+            if math.fabs(dz) > z_relax:
+                dz = math.copysign(z_relax, dz)
+        
+            if math.fabs(thetax) > theta_relax_x:
+                thetax = math.copysign(theta_relax_x, thetax)
+        
+            if math.fabs(thetay) > theta_relax_y:
+                thetay = math.copysign(theta_relax_y, thetay)
+            # print dz, thetax, thetay
+        
+            # if z_relax < 1e-4 and theta_relax_x < 1e-3 and theta_relax_y < 1e-3:
+            #     print "Can't converge to a solution better than %f %%" % (np.max(np.fabs(res/scale))*100)
+            #     break
+        
+            iter += 1
+    
+        # Zeroing xcog and ycog
+        self.translate([-self._gravity_center[0], -self._gravity_center[1], 0.])
+        # Vc[:, 0] -= CGc[0]
+        # Vc[:, 1] -= CGc[1]
+        # CGc[0] = CGc[1] = 0.
+    
+        # origin[0] -= CGc[0]
+        # origin[1] -= CGc[1]
+    
+        if self.verbose:
+            if code == 0:
+                # Max iterations
+                print 'No convergence after %u iterations' % itermax
+            elif code == 1:
+                print 'Convergence reached after %u iterations at %f %% of the displacement.' % (iter, reltol * 100)
+            elif code == 2:
+                print 'Convergence reached but at an unstable configuration'
+    
+        # print origin + CGc
+        # print CG
+    
+        return
 
 
 
@@ -975,6 +1236,17 @@ if __name__ == '__main__':
     vertices, faces = mmio.load_VTP('meshmagick/tests/data/SEAREV.vtp')
     
     searev = HSmesh(vertices, faces, name='SEAREV', mass_unit='tons')
+    
+    print searev.displacement
+    
+    searev.mass = 1200
+    searev.zg = -3
+    # searev.equilibrate()
+    
+    
+    # searev.rotate_x(math.radians(90))
+    # searev.show()
+    
     
     
     # print searev.immersed_volume
