@@ -6,7 +6,7 @@ from mesh import *
 
 class MeshClipper(object):
     def __init__(self, source_mesh=None, plane=None, vicinity_tol=1e-4, assert_closed_boundaries=False, verbose=False):
-        source_mesh._verbose = verbose
+        # source_mesh._verbose = verbose
         self._source_mesh = source_mesh
         self._plane = plane
 
