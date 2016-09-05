@@ -17,6 +17,7 @@ mesh_examples/**
 .idea/**
 .cache/**
 UML/**
+pint/**
 meshmagick.egg*
 doc/**
 dist/**

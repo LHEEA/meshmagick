@@ -969,7 +969,6 @@ class Mesh(object):
         (x0, y0, z0) = np.array([xmin+xmax, ymin+ymax, zmin+zmax]) * 0.5
         d = (np.array([xmax-xmin, ymax-ymin, zmax-zmin]) * 0.5).max()
         return (x0-d, x0+d, y0-d, y0+d, z0-d, z0+d)
-        
     
     def is_mesh_closed(self):
         if not self.__internals__.has_key('boundaries'):
@@ -1526,8 +1525,6 @@ class Mesh(object):
     def volume(self):
         return self._compute_volume()
 
-
-
     @staticmethod
     def _compute_triangles_integrals(triangles_vertices, sum_faces_contrib=False):
         """
@@ -1589,66 +1586,3 @@ if __name__ == '__main__':
 
     sys.exit(0)
 
-
-
-    print mesh
-
-    # mesh.verbose_on()
-    #
-    # clipped_mesh, boundaries = mesh.clip_by_plane(plane, return_boundaries=True)
-
-
-
-    sys.exit(0)
-
-#####################################
-
-    plane = Plane()
-
-    # clip_by_plane(_vertices, _faces, plane)
-    # sys.exit(0)
-
-    # _vertices, _faces = mm.symmetrize(_vertices, _faces, plane)
-    # plane.normal = np.array([0, 1, 0])
-    # _vertices, _faces = mm.symmetrize(_vertices, _faces, plane)
-
-    # Rotation aleatoire
-    import hydrostatics as hs
-
-    # R = np.load('buggy_rotation_meshmagick.npy')
-    # _vertices = np.transpose(np.dot(R, _vertices.T))
-    # normal = [0, 0, 1]
-    # c = 0
-    # plane = Plane(normal, c)
-    # crown_face_ids, below_face_ids = partition_mesh(_vertices, _faces, plane)
-    # Vclip, F_crown, boundary_polygons, boundary_line_partition_mesh[crown_face_ids], plane, return_boundaries=True)
-    # sys.exit(0)
-
-    iter = 0
-    while True:
-        iter += 1
-        print '\n', iter
-
-        Vc = V.copy()
-        thetax, thetay = np.random.rand(2) * 2*math.pi
-
-        R = hs._get_rotation_matrix(thetax, thetay)
-        Vc = np.transpose(np.dot(R, Vc.T))
-
-        # mm.show(Vc, _faces)
-        normal = [0, 0, 1]
-        c = 0
-        plane = Plane(normal, c)
-
-        crown_face_ids, below_face_ids = split_mesh(Vc, F, plane)
-
-        try:
-            Vclip, F_crown, boundary_polygons, boundary_lines = _clip(Vc, F[crown_face_ids], plane, return_boundaries=True)
-            # mm.show(Vclip, F_crown)
-        except:
-            np.save('buggy_rotation_meshmagick', R)
-            mm.write_VTP('all.vtp', Vc, F)
-            mm.write_VTP('ring.vtp', Vc, F[crown_face_ids])
-            print R
-            print 'state saved'
-            break
