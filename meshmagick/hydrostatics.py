@@ -20,6 +20,9 @@ from mesh_clipper import MeshClipper
 # Data for DNV standards
 GM_min = 0.15
 
+# TODO: pass this code to a version that only rotates the free surface plane and not the mesh...
+# TODO: throw the transformation needed to get the equilibrium from initial position after a successful equilibrium computation
+# TODO: make the mesh not to diverge from principal axis
 
 class HSmesh(mesh.Mesh):
     """
@@ -92,6 +95,8 @@ class HSmesh(mesh.Mesh):
         self._mg = self._mass * self._gravity
         
         self.animate = animate
+        
+        self._rotation = np.eye(3, dtype=np.float)
     
     @property
     def gravity(self):
@@ -225,12 +230,17 @@ class HSmesh(mesh.Mesh):
         return self.hs_data['hs_mesh']
     
     def reset(self):
+        
+        # TODO: Utiliser plutot la rotation generale pour retrouver le maillage initial
+        
         vertices = self.backup['initial_vertices']
         faces = self.backup['initial_faces']
         self.vertices = vertices
         self.faces = faces
         
         self._update_hydrostatic_properties()
+        
+        self._rotation = np.eye(3, dtype=np.float)
         return
     
     def is_stable_in_roll(self):
@@ -313,7 +323,17 @@ class HSmesh(mesh.Mesh):
         self._gravity_center = np.dot(R, self._gravity_center)
         if update:
             self._update_hydrostatic_properties()
+        self._rotation = np.dot(R, self._rotation)
         return R
+    
+    def rotate_x(self, thetax, update=True):
+        return self.rotate([thetax, 0., 0.], update=update)
+        
+    def rotate_y(self, thetay, update=True):
+        return self.rotate([0., thetay, 0.], update=update)
+    
+    def rotate_z(self, thetaz, update=True):
+        return self.rotate([0., 0., thetaz], update=update)
     
     def translate_x(self, tx, update=True):
         super(HSmesh, self).translate_x(tx)
@@ -594,18 +614,27 @@ class HSmesh(mesh.Mesh):
         rhog = self._rhog
         mg = self._mg
         
+        # Initialization
         dz = thetax = thetay = 0.
         iter = nb_relaunch = 0
+        unstable_config = False
     
         while True:
-            print '\n', iter
-            if iter == (nb_relaunch + 1) * itermax:
+            # print '\n', iter
+            if unstable_config or ( iter == (nb_relaunch + 1) * (itermax-1) ):
+                
+                if unstable_config:
+                    print 'unstable'
+                else:
+                    print 'MAX_ITER'
+                
+                unstable_config = False
+                
                 # Max iterations reach
-            
-                if nb_relaunch < max_nb_relaunch:
+                if nb_relaunch < max_nb_relaunch-1:
                     nb_relaunch += 1
                     # Random on the position of the body
-                    print 'Max iteration reached: relaunching for the %uth time with random orientation' % nb_relaunch
+                    # print 'Max iteration reached: relaunching for the %uth time with random orientation' % nb_relaunch
                     thetax, thetay = np.random.rand(2) * math.pi
                     self.rotate([thetax, thetay, 0.])
                     # self.set_displacement(self.mass)
@@ -619,6 +648,19 @@ class HSmesh(mesh.Mesh):
             # Applying transformation to the mesh
             self.translate_z(dz, update=False)
             self.rotate([thetax, thetay, 0.])
+            
+            self.show()
+            
+            # Experimental: Keeping a consistent principal direction
+            # rot = self._rotation
+            # thetaz = math.atan2(rot[1, 0], rot[0, 0])
+            # self.rotate_z(thetaz)
+            # self.show()
+            
+            
+            
+            
+            
 
             # if self.animate:
             #     mmio.write_VTP('mesh%u.vtp' % iter, mymesh_c.vertices, mymesh_c.faces)
@@ -642,7 +684,8 @@ class HSmesh(mesh.Mesh):
                         break
                     # TODO: mettre une option permettant de choisir si on s'arrete a des configs instables
                     else:
-                        # TODO: voir car
+                        # We force the relaunch with an other random orientaiton
+                        unstable_config = True
                         iter += 1
                         continue
                     
@@ -734,6 +777,7 @@ class HSmesh(mesh.Mesh):
         self.viewer.add_polydata(vtk_polydata)
         
         # Adding the flotation plane
+        # TODO: Use the add_plane method of the viewer...
         plane = vtk.vtkPlaneSource()
         (xmin, xmax, ymin, ymax, _, _) = self.axis_aligned_bbox
         dx = 0.1 * (xmax-xmin)
@@ -853,15 +897,24 @@ if __name__ == '__main__':
     searev = HSmesh(vertices, faces, name='SEAREV')
     
     searev.mass = 2300
-    searev.gravity_center = [0, 0, 5]
+    searev.gravity_center = [1, 3, 5]
     searev.set_solver_parameter('stop_at_unstable', False)
     searev.set_solver_parameter('reltol', 1e-3)
     
     searev.equilibrate()
-    print searev.get_hydrostatic_report()
     searev.show()
     
+    print searev.get_hydrostatic_report()
+    # searev.show()
     
+    # R = searev._rotation.copy()
+    # theta, u = mesh._get_axis_angle_from_rotation_matrix(R)
+    #
+    # searev.reset()
+    #
+    # searev.rotate(theta*u)
+    # searev.set_displacement(2300)
+    # searev.show()
     
     # searev.reset()
     # searev.show()
