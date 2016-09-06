@@ -58,7 +58,7 @@ class MMViewer:
                         "s : surface representation\n" + \
                         "w : wire representation\n" + \
                         "x : save\n" + \
-                        "c : screenchot\n" + \
+                        "c : screenshot\n" + \
                         "q : quit"
 
         corner_annotation = vtk.vtkCornerAnnotation()
@@ -204,6 +204,7 @@ class MMViewer:
         self.renderer.ResetCamera()
         self.render_window.Render()
         self.render_window_interactor.Start()
+        # self.render_window_interactor.Initialize()
 
     def save(self):
         from vtk import vtkXMLPolyDataWriter
@@ -222,20 +223,20 @@ class MMViewer:
         print "File 'mmviewer_save.vtp' written in %s" % getcwd()
         return
 
-    def screenchot(self):
+    def screenshot(self):
         w2if = vtk.vtkWindowToImageFilter()
         w2if.SetInput(self.render_window)
         w2if.Update()
 
         writer = vtk.vtkPNGWriter()
-        writer.SetFileName("screenchot.png")
+        writer.SetFileName("screenshot.png")
         if vtk.VTK_MAJOR_VERSION <= 5:
             writer.SetInput(w2if.GetOutput())
         else:
             writer.SetInputData(w2if.GetOutput())
         writer.Write()
 
-        print "File 'screenchot.png' written in %s" % getcwd()
+        print "File 'screenshot.png' written in %s" % getcwd()
         return
 
     def finalize(self):
@@ -272,5 +273,5 @@ class MMViewer:
 
         elif key == 'c':
             # pass
-            self.screenchot()
+            self.screenshot()
 
