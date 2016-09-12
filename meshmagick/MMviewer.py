@@ -51,12 +51,13 @@ class MMViewer:
                         "right mouse : zoom\n" + \
                         "middle mouse : pan\n" + \
                         "ctrl+left mouse : spin\n" + \
-                        "n : show normals\n" + \
-                        "b : show axes box\n" + \
+                        "n : (un)show normals\n" + \
+                        "b : (un)show axes box\n" + \
                         "f : focus on the mouse cursor\n" + \
                         "r : reset view\n" + \
                         "s : surface representation\n" + \
                         "w : wire representation\n" + \
+                        "h : (un)show Oxy plane\n" + \
                         "x : save\n" + \
                         "c : screenshot\n" + \
                         "q : quit"
@@ -81,15 +82,53 @@ class MMViewer:
 
         self.normals = []
         self.axes = []
+        self.oxy_plane = None
 
         self.polydatas = list()
+        self.hiden = dict() # TODO: A terminer -> cf methode self.hide()
 
     def normals_on(self):
         self.normals = True
 
     def normals_off(self):
         self.normals = False
+    
+    def plane_on(self):
+        pd = self.polydatas[0]
+        
+        plane = vtk.vtkPlaneSource()
+        (xmin, xmax, ymin, ymax, _, _) = pd.GetBounds()
+        
+        dx = 0.1 * (xmax - xmin)
+        dy = 0.1 * (ymax - ymin)
 
+        plane.SetOrigin(xmin - dx, ymax + dy, 0)
+        plane.SetPoint1(xmin - dx, ymin - dy, 0)
+        plane.SetPoint2(xmax + dx, ymax + dy, 0)
+        plane.Update()
+        polydata = plane.GetOutput()
+        
+        mapper = vtk.vtkPolyDataMapper()
+        if vtk.VTK_MAJOR_VERSION <= 5:
+            mapper.SetInput(polydata)
+        else:
+            mapper.SetInputData(polydata)
+            
+        actor = vtk.vtkActor()
+        actor.SetMapper(mapper)
+        
+        color = [0., 102. / 255, 204. / 255]
+        actor.GetProperty().SetColor(color)
+        actor.GetProperty().SetEdgeColor(0, 0, 0)
+        actor.GetProperty().SetLineWidth(1)
+        
+        self.renderer.AddActor(actor)
+        self.renderer.Modified()
+        self.oxy_plane = actor
+        
+        
+        return
+    
     def add_plane(self, center, normal):
         plane = vtk.vtkPlaneSource()
         plane.SetCenter(center)
@@ -206,6 +245,13 @@ class MMViewer:
         self.render_window_interactor.Start()
         # self.render_window_interactor.Initialize()
 
+    def hide(self, id):
+        if id > len(self.polydatas):
+            print "No mesh with id %u" % id
+            return
+        
+        self.hiden
+
     def save(self):
         from vtk import vtkXMLPolyDataWriter
 
@@ -245,7 +291,7 @@ class MMViewer:
 
     def on_key_press(self, obj, event):
         key = obj.GetKeySym()
-
+        
         if key == 'n':
             if self.normals:
                 # self.normals = False
@@ -274,4 +320,12 @@ class MMViewer:
         elif key == 'c':
             # pass
             self.screenshot()
-
+        
+        elif key == 'h':
+            if self.oxy_plane:
+                self.renderer.RemoveActor(self.oxy_plane)
+                self.oxy_plane = None
+            else:
+                self.plane_on()
+        
+        
