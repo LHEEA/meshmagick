@@ -65,9 +65,9 @@ class HSmesh(mesh.Mesh):
         self.backup['initial_vertices'] = vertices
         self.backup['initial_faces'] = faces
         
-        # assert mass_unit in ['kg', 'tons']
-        # self.__internals__['mass_unit'] = mass_unit
-        
+        CG = np.array(CG, dtype=np.float)
+        assert CG.shape[0] == 3
+        self.backup['gravity_center'] = CG
         self._gravity_center = CG
         self._rho_water = rho_water
         self._gravity = grav
@@ -152,6 +152,7 @@ class HSmesh(mesh.Mesh):
     @gravity_center.setter
     def gravity_center(self, value, update=True):
         value = np.asarray(value, dtype=np.float)
+        self.backup['gravity_center'] = value
         assert value.shape[0] == 3
         self._gravity_center = value
         if update:
@@ -232,11 +233,10 @@ class HSmesh(mesh.Mesh):
     def reset(self):
         
         # TODO: Utiliser plutot la rotation generale pour retrouver le maillage initial
-        
-        vertices = self.backup['initial_vertices']
-        faces = self.backup['initial_faces']
-        self.vertices = vertices
-        self.faces = faces
+
+        self.vertices = self.backup['initial_vertices']
+        self.faces = self.backup['initial_faces']
+        self._gravity_center = self.backup['gravity_center']
         
         self._update_hydrostatic_properties()
         
@@ -305,19 +305,79 @@ class HSmesh(mesh.Mesh):
     def S55(self):
         return self.hs_data['KH'][2, 2]
     
-    def available_parameters(self):
-        return self._solver_parameters.keys()
+    @property
+    def reltol(self):
+        return self._solver_parameters['reltol']
     
-    def set_solver_parameter(self, name, value):
-        assert name in self._solver_parameters.keys()
-        assert isinstance(value, type(self._solver_parameters[name]))
-        self._solver_parameters[name] = value
+    @reltol.setter
+    def reltol(self, value):
+        value = float(value)
+        assert value > 0. and value < 1
+        self._solver_parameters['reltol'] = value
         return
     
-    def get_solver_parameter(self, name):
-        assert name in self._solver_parameters.keys()
-        return self._solver_parameters[name]
-     
+    @property
+    def theta_relax(self):
+        return self._solver_parameters['theta_relax']
+    
+    @theta_relax.setter
+    def theta_relax(self, value):
+        value = float(value)
+        assert value > 0. and value < 10
+        self._solver_parameters['theta_relax'] = value
+        return
+        
+    @property
+    def z_relax(self):
+        return self._solver_parameters['z_relax']
+    
+    @z_relax.setter
+    def z_relax(self, value):
+        value = float(value)
+        assert value > 0. and value < 1.
+        self._solver_parameters['z_relax'] = value
+        return
+    
+    @property
+    def max_iterations(self):
+        return self._solver_parameters['itermax']
+    
+    @max_iterations.setter
+    def max_iterations(self, value):
+        value = int(value)
+        assert value > 0
+        self._solver_parameters['itermax'] = value
+        return
+    
+    @property
+    def max_relaunch(self):
+        return self._solver_parameters['max_nb_relaunch']
+    
+    @max_relaunch.setter
+    def max_relaunch(self, value):
+        value = int(value)
+        assert value >= 0
+        self._solver_parameters['max_nb_relaunch'] = value
+        return
+    
+    @property
+    def allow_unstable(self, value):
+        return self._solver_parameters['stop_at_unstable']
+    
+    @allow_unstable.setter
+    def allow_unstable(self, value):
+        value = bool(value)
+        self._solver_parameters['stop_at_unstable'] = value
+        return
+    
+    def allow_unstable_on(self):
+        self.allow_unstable = True
+        return
+    
+    def allow_unstable_off(self):
+        self.allow_unstable = False
+        return
+    
     def rotate(self, angles, update=True):
         R = super(HSmesh, self).rotate(angles)
         self._gravity_center = np.dot(R, self._gravity_center)
@@ -363,9 +423,9 @@ class HSmesh(mesh.Mesh):
             self._update_hydrostatic_properties()
         return
      
-    def solver_stats(self):
-        rep_str = "Last equilibrium obtained after %u iterations and %u relaunch" % (iter, nb_relaunch)
-        return rep_str
+    # def solver_stats(self):
+    #     rep_str = "Last equilibrium obtained after %u iterations and %u relaunch" % (iter, nb_relaunch)
+    #     return rep_str
 
     def _update_hydrostatic_properties(self):
         """
@@ -405,6 +465,8 @@ class HSmesh(mesh.Mesh):
         eps = 1e-4  # For zeroing tiny coefficients in the hydrostatic stiffness matrix
     
         # Clipping the mesh by the Oxy plane
+        # TODO: ne pas recreer une instance de clipper mais la stocker et mettre a jour son maillage source a chaque
+        # fois qu'on appelle update_hydrostatics
         plane = mesh.Plane([0., 0., 1.], 0.)  # Oxy plane
         clipper = MeshClipper(self, plane, assert_closed_boundaries=True, verbose=False)
         clipped_mesh = clipper.clipped_mesh  # TODO: enregistrer le maillage coupe !!!
@@ -413,6 +475,11 @@ class HSmesh(mesh.Mesh):
         areas = clipped_mesh.faces_areas
         normals = clipped_mesh.faces_normals
         centers = clipped_mesh.faces_centers
+        
+        if np.any(areas == 0.): # TODO: bloc a retirer
+            print 'probleme de facette'
+            self.quick_save()
+            raise Exception
         
         # Storing clipped mesh
         self.hs_data['hs_mesh'] = clipped_mesh
@@ -574,6 +641,7 @@ class HSmesh(mesh.Mesh):
         iter = 0
 
         while True:
+            # print iter
             if iter == itermax:
                 if self.verbose:
                     print 'No convergence of the displacement after %u iterations' % itermax
@@ -596,6 +664,11 @@ class HSmesh(mesh.Mesh):
         return
         
     def equilibrate(self):
+        
+        if self.verbose:
+            print '\nComputing equilibrium form  initial condition.'
+            print '----------------------------------------------'
+        #     if self.un
         
         # Initial displacement equilibrium
         self.set_displacement(self.mass)
@@ -622,11 +695,14 @@ class HSmesh(mesh.Mesh):
         while True:
             # print '\n', iter
             if unstable_config or ( iter == (nb_relaunch + 1) * (itermax-1) ):
-                
-                if unstable_config:
-                    print 'unstable'
-                else:
-                    print 'MAX_ITER'
+                if self.verbose:
+                    if unstable_config:
+                        print 'Unstable equilibrium reached.'
+                        print '\t-> Keep searching a stable configuration by random relaunch number %u.' % (nb_relaunch+1)
+                    else:
+                        print 'Failed to find an equilibrium configuration with these initial conditions in %u ' \
+                              'iterations.' % itermax
+                        print '\t-> Keep searching by random relaunch number %u.' % (nb_relaunch+1)
                 
                 unstable_config = False
                 
@@ -645,21 +721,9 @@ class HSmesh(mesh.Mesh):
                     code = 0
                     break
         
-            # Applying transformation to the mesh
+            # Applying transformation to the mesh, hydrostatics is automatically updated
             self.translate_z(dz, update=False)
             self.rotate([thetax, thetay, 0.])
-            
-            self.show()
-            
-            # Experimental: Keeping a consistent principal direction
-            # rot = self._rotation
-            # thetaz = math.atan2(rot[1, 0], rot[0, 0])
-            # self.rotate_z(thetaz)
-            # self.show()
-            
-            
-            
-            
             
 
             # if self.animate:
@@ -674,12 +738,17 @@ class HSmesh(mesh.Mesh):
             if np.all(np.fabs(self.residual / scale) < reltol):
             #     # Convergence at an equilibrium
                 if self.isstable():
-            #         # Stable equilibrium
+                    # Stable equilibrium
+                    if self.verbose:
+                        print "Stable equilibrium reached after %u iterations and %u random relaunch" % (iter,
+                                                                                                       nb_relaunch)
                     code = 1
                     break
                 else:
-                    print 'Equilibrium at an unstable configuration reached.'
                     if self._solver_parameters['stop_at_unstable']:
+                        if self.verbose:
+                            print 'Unstable equilibrium reached after %u iterations and %u random relaunch' % (
+                            iter, nb_relaunch)
                         code = 2
                         break
                     # TODO: mettre une option permettant de choisir si on s'arrete a des configs instables
@@ -690,7 +759,7 @@ class HSmesh(mesh.Mesh):
                         continue
                     
             # Computing correction
-            # TODO: voir pour une resolution ne faisant pas intervenir np.linalg
+            # TODO: voir pour une resolution ne faisant pas intervenir np.linalg ?
             dz, thetax, thetay = np.linalg.solve(self.hs_data['KH'], residual)
         
             # Relaxation
@@ -708,16 +777,16 @@ class HSmesh(mesh.Mesh):
         # Zeroing xcog and ycog
         self.translate([-self._gravity_center[0], -self._gravity_center[1], 0.])
     
-        if self.verbose:
-            if code == 0:
-                # Max iterations
-                print 'No convergence after %u iterations' % itermax # FIXME: faux, c'est pas itermax
-            elif code == 1:
-                print 'Convergence reached after %u iterations at %f %% of the displacement.' % (iter, reltol * 100)
-            elif code == 2:
-                print 'Convergence reached but at an unstable configuration'
+        # if self.verbose:
+        #     if code == 0:
+        #         # Max iterations
+        #         print 'No convergence after %u iterations' % itermax # FIXME: faux, c'est pas itermax
+        #     elif code == 1:
+        #         print 'Convergence reached after %u iterations at %f %% of the displacement.' % (iter, reltol * 100)
+        #     elif code == 2:
+        #         print 'Convergence reached but at an unstable configuration'
     
-        return
+        return code
 
     def get_hydrostatic_report(self):
         
@@ -776,19 +845,22 @@ class HSmesh(mesh.Mesh):
         self.viewer = MMviewer.MMViewer()
         self.viewer.add_polydata(vtk_polydata)
         
-        # Adding the flotation plane
-        # TODO: Use the add_plane method of the viewer...
-        plane = vtk.vtkPlaneSource()
-        (xmin, xmax, ymin, ymax, _, _) = self.axis_aligned_bbox
-        dx = 0.1 * (xmax-xmin)
-        dy = 0.1 * (ymax-ymin)
+        # Removing the following for the flotation plane as the base class does it now
+        # # Adding the flotation plane
+        self.viewer.plane_on()
         
-        plane.SetOrigin(xmin-dx, ymax+dy, 0)
-        plane.SetPoint1(xmin-dx, ymin-dy, 0)
-        plane.SetPoint2(xmax+dx, ymax+dy, 0)
-        plane.Update()
-        # self.viewer.add_polydata(plane.GetOutput(), color=[0.1, 0.9, 0.7])
-        self.viewer.add_polydata(plane.GetOutput(), color=[0., 102./255, 204./255])
+        # # TODO: Use the add_plane method of the viewer...
+        # plane = vtk.vtkPlaneSource()
+        # (xmin, xmax, ymin, ymax, _, _) = self.axis_aligned_bbox
+        # dx = 0.1 * (xmax-xmin)
+        # dy = 0.1 * (ymax-ymin)
+        #
+        # plane.SetOrigin(xmin-dx, ymax+dy, 0)
+        # plane.SetPoint1(xmin-dx, ymin-dy, 0)
+        # plane.SetPoint2(xmax+dx, ymax+dy, 0)
+        # plane.Update()
+        # # self.viewer.add_polydata(plane.GetOutput(), color=[0.1, 0.9, 0.7])
+        # self.viewer.add_polydata(plane.GetOutput(), color=[0., 102./255, 204./255])
         
         # Adding a point for the origin
         pO = vtk.vtkPoints()
@@ -898,8 +970,8 @@ if __name__ == '__main__':
     
     searev.mass = 2300
     searev.gravity_center = [1, 3, 5]
-    searev.set_solver_parameter('stop_at_unstable', False)
-    searev.set_solver_parameter('reltol', 1e-3)
+    searev.allow_unstable_off()
+    searev.reltol = 1e-3
     
     searev.equilibrate()
     searev.show()
