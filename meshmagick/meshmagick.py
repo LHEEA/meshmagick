@@ -1004,7 +1004,12 @@ def main():
                         normals are the reference axes. Default is Oxz if only -y is specified.
                         Be careful that symmetry is applied before any rotation so as the plane
                         equation is defined in the initial frame of reference.""")
-
+    
+    parser.add_argument('--mirror', nargs='*',
+                        help="""Mirros the mesh about the specified plane. If no plane is given
+                        as argument but the option is not followed by a command-line argument,
+                        the default Oxy plane will be used.""")
+    
     # Arguments concerning the hydrostatics
     # TODO : permettre de specifier un fichier de sortie
     parser.add_argument('-hs', '--hydrostatics', action='store_true',
@@ -1220,9 +1225,51 @@ def main():
                     raise AssertionError, '%s key for plane is not known. Choices are [%s].' % (plane[0], ', '.join(plane_str_list.keys()) )
             else:
                 raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
+    
+    # Mirroring the mesh
+    if args.mirror is not None:
+        if verbose:
+            print 'Mirroring the mesh by a plane'
+        sym_plane = Plane()
 
-
-
+        if len(args.mirror) == 0:
+            # Default mirroring by Oxy
+            sym_plane.normal = [0., 0., 1.]
+            
+        for plane in args.mirror:
+            
+            if isinstance(plane, str):
+                assert plane_str_list.has_key(plane)
+                sym_plane.normal = plane_str_list[plane]
+            
+            # if len(plane) == 1:
+            #     try:
+            #         plane_id = int(plane[0])
+            #         if plane_id < nb_planes:
+            #             sym_plane = planes[plane_id]
+            #         else:
+            #             raise AssertionError, 'Plane with ID %u has not been defined with option --plane' % plane_id
+            #     except:
+            #         # A key string
+            #         if plane_str_list.has_key(plane[0]):
+            #             sym_plane.normal = plane_str_list[plane[0]]
+            #         else:
+            #             raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
+            # elif len(plane) == 4:
+            #     # Plane defined by a normal and a scalar
+            #     try:
+            #         sym_plane.normal = np.array(map(float, plane[:3]), dtype=np.float)
+            #         sym_plane.c = float(plane[3])
+            #     except:
+            #         raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
+            # else:
+            #     raise AssertionError, 'Unknown mean to define a plane for mirroring'
+                
+        mesh.mirror(sym_plane)
+        if verbose:
+            print '\t-> Done.'
+            
+            
     # Symmetrizing the mesh
     if args.symmetrize is not None:
         nb_sym = len(args.symmetrize)
