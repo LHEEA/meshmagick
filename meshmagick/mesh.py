@@ -12,7 +12,7 @@ import copy
 import vtk
 from itertools import count
 from warnings import warn
-import sys # Retirer
+import sys # TODO: Retirer
 
 
 # TODO: les points doivent etre des objects nodes...
@@ -392,39 +392,41 @@ class Plane(object): # TODO: placer cette classe dans un module a part (surface)
             projected_point[:] = point - self.get_point_dist_wrt_plane(point) * self.normal
 
         return projected_points
+    
+    def get_origin(self):
+        return self.c * self.normal
 
-
-class cached_property(object):
-    def __init__(self, func):
-        self.__doc__ = getattr(func, '__doc__')
-        self.func = func
-
-    def __get__(self, obj, cls):
-        try:
-            return obj._cached_properties[self.func.__name__]
-        except:
-            # print 'Computing %s and caching it' % self.func.__name__
-            value = self.func(obj)
-            try:
-                obj._cached_properties[self.func.__name__] = value # FIXME: les valeurs sont enregistrees deux fois...
-            except AttributeError:
-                obj._cached_properties = {self.func.__name__: value}
-            return value
-
-
-class invalidate_cache(object):
-    def __init__(self, func):
-        self.__doc__ = getattr(func, '__doc__')
-        self.func = func
-
-
-    def __call__(self, cls, *args):
-        self.func(cls, *args)
-        # print 'Invalidation of the cache'
-        try:
-            cls._cached_properties.clear()
-        except:
-            cls._cached_properties = dict()
+# class cached_property(object):
+#     def __init__(self, func):
+#         self.__doc__ = getattr(func, '__doc__')
+#         self.func = func
+#
+#     def __get__(self, obj, cls):
+#         try:
+#             return obj._cached_properties[self.func.__name__]
+#         except:
+#             # print 'Computing %s and caching it' % self.func.__name__
+#             value = self.func(obj)
+#             try:
+#                 obj._cached_properties[self.func.__name__] = value # FIXME: les valeurs sont enregistrees deux fois...
+#             except AttributeError:
+#                 obj._cached_properties = {self.func.__name__: value}
+#             return value
+#
+#
+# class invalidate_cache(object):
+#     def __init__(self, func):
+#         self.__doc__ = getattr(func, '__doc__')
+#         self.func = func
+#
+#
+#     def __call__(self, cls, *args):
+#         self.func(cls, *args)
+#         # print 'Invalidation of the cache'
+#         try:
+#             cls._cached_properties.clear()
+#         except:
+#             cls._cached_properties = dict()
 
 
 class _3DPointsArray(np.ndarray):
@@ -454,9 +456,12 @@ class Mesh(object):
         """
 
         self.__internals__ = dict()
-
-        self._vertices = vertices
-        self._faces = faces
+        
+        assert np.array(vertices).shape[1] == 3
+        assert np.array(faces).shape[1] == 4
+        
+        self._vertices = np.array(vertices, dtype=np.float)
+        self._faces = np.array(faces, dtype=np.int)
         self._id = self._ids.next()
 
         if not name:
@@ -667,7 +672,7 @@ class Mesh(object):
         a2 = np.linalg.norm(np.cross(self._vertices[quads[:, 3]] - self._vertices[quads[:, 0]],
                                      self._vertices[quads[:, 2]] - self._vertices[quads[:, 0]]), axis=1) * 0.5
         faces_areas[quads_id] = a1 + a2
-
+        
         C1 = np.sum(self._vertices[quads[:, :3]], axis=1) / 3.
         C2 = (np.sum(self._vertices[quads[:, 2:4]], axis=1) + self._vertices[quads[:, 0]]) / 3.
 
@@ -1457,7 +1462,6 @@ class Mesh(object):
         # Symmetrizing the nodes
         V, F = self._vertices, self._faces
 
-        # normal = plane.normal / np.dot(plane.normal, plane.normal)
         V = np.concatenate((V, V - 2 * np.outer(np.dot(V, plane.normal) - plane.c, plane.normal)))
         F = np.concatenate((F, np.fliplr(F.copy() + self.nb_vertices)))
 
@@ -1467,7 +1471,12 @@ class Mesh(object):
         self.merge_duplicates()
         self.verbose = verbose
         return
-
+    
+    def mirror(self, plane):
+        self._vertices = self._vertices - 2 * np.outer(np.dot(self._vertices, plane.normal) - plane.c, plane.normal)
+        self.flip_normals()
+        return
+    
     def _compute_faces_integrals(self, sum_faces_contrib=False): # TODO: implementer le sum_surface_contrib
 
         # TODO: faire la machinerie pour pour
@@ -1524,7 +1533,14 @@ class Mesh(object):
     @property
     def volume(self):
         return self._compute_volume()
-
+    
+    def _edges_stats(self):
+        pass
+    
+    @property
+    def min_edge_length(self):
+        pass
+    
     @staticmethod
     def _compute_triangles_integrals(triangles_vertices, sum_faces_contrib=False):
         """
@@ -1571,7 +1587,19 @@ class Mesh(object):
         s_int[14] = delta * ( P0.x*g0[:, 2] + P1.x*g1[:, 2] + P2.x*g2[:, 2]) / 60.
 
         return s_int
-
+    
+    def quick_save(self, filename=None):
+        if not filename:
+            filename = 'quick_save.vtp'
+        
+        if not filename.endswith('.vtp'):
+            filename += '.vtp'
+        try:
+            import mmio
+            mmio.write_VTP(filename, self.vertices, self.faces)
+            print 'File %s written' % filename
+        except:
+            print 'mmio module not found'
 
 
 if __name__ == '__main__':
