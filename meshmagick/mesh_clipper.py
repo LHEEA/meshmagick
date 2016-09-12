@@ -5,7 +5,7 @@ from mesh import *
 
 
 class MeshClipper(object):
-    def __init__(self, source_mesh=None, plane=None, vicinity_tol=1e-4, assert_closed_boundaries=False, verbose=False):
+    def __init__(self, source_mesh=None, plane=None, vicinity_tol=1e-3, assert_closed_boundaries=False, verbose=False):
         # source_mesh._verbose = verbose
         self._source_mesh = source_mesh
         self._plane = plane
@@ -407,8 +407,10 @@ class MeshClipper(object):
                 #       /   \
                 #     1/     \2
                 # ----*-------*----
-                face = np.roll(face, -v_above_face[0])
-                boundary_edge = [face[1], face[2]]
+                # face = np.roll(face, -v_above_face[0])
+                # boundary_edge = [face[1], face[2]]
+                # FIXME: quick fix here : robust ?
+                boundary_edge = None
 
             elif face_type == '021':  # Done
                 #  ----*-------*----
@@ -448,9 +450,12 @@ class MeshClipper(object):
                 #     |     |
                 #    1|     |2
                 # ----*-----*----
-                if v_above_face[1] == v_above_face[0] + 1:
-                    face = np.roll(face, -v_above_face[1])
-                boundary_edge = [face[1], face[2]]
+                
+                # if v_above_face[1] == v_above_face[0] + 1:
+                #     face = np.roll(face, -v_above_face[1])
+                # boundary_edge = [face[1], face[2]]
+                # FIXME: quick fix here : robust ?
+                boundary_edge = None
 
             elif face_type == '121':  # Done
                 #       *0
@@ -491,6 +496,20 @@ class MeshClipper(object):
                 #      *-----*
                 boundary_edge = None
                 crown_faces.append(list(face))
+                
+            elif face_type == '030' or face_type == '040':
+                # Face is totally on the plane --> rare case...
+                boundary_edge = None
+                
+            else:
+                try:
+                    import mmio
+                    mmio.write_VTP('full_debug.vtp', self.source_mesh.vertices, self.source_mesh.faces)
+                    # mmio.write_VTP('clipped_crown_debug.vtp', clipped_crown_mesh.vertices, clipped_crown_mesh.faces)
+                    mmio.write_VTP('crown_debug.vtp', crown_mesh.vertices, crown_mesh.faces)
+                except:
+                    pass
+                raise Exception("Face %u clipping case %s not known." % (face_id, face_type))
 
             # Building boundary connectivity
             if boundary_edge is not None:
@@ -499,13 +518,15 @@ class MeshClipper(object):
 
         if len(intersections) > 0:
             vertices = np.concatenate((vertices, intersections))
-
+        
+        
         clipped_crown_mesh = Mesh(vertices, crown_faces)
 
         # TODO: faire un merge uniquement sur la liste instersections et non sur tout le maillage clipped_crown
         # FIXME: potentiellement, un bug a ete introduit ici !!! --> l'update n'est plus bon sur les dictionnaires...
         # Le nonuveau merge_duplicates (avec np.unique) ne fonctionne pas !!!!
-        newID = clipped_crown_mesh.merge_duplicates(return_index=True, decimals=6)
+        newID = clipped_crown_mesh.merge_duplicates(return_index=True, decimals=5)  # Warning: choosing a lower value
+        #  for decimals results in vertices that are merged but should not...
 
         # Updating dictionaries
         direct_boundary_edges = dict(
@@ -542,13 +563,21 @@ class MeshClipper(object):
                                 except:
                                     queue.reverse()
                                     line = queue + line
+                                    
+                                    # Trying to see if both end of line are not connected
+                                    pstart = clipped_crown_mesh.vertices[line[0]]
+                                    pend = clipped_crown_mesh.vertices[line[-1]]
+                                    
+                                    d = np.linalg.norm(pstart-pend)
+                                    print d
+                                    
                                     open_lines.append(line)
                                     break
                         else:
                             closed_polygons.append(line)
                         break
 
-            except:
+            except: # FIXME: specifier quelle exception est attendue ici !
                 # TODO: retirer les deux lines suivantes
                 if self._verbose:
                     print "%u closed polygon\n%u open curve" % (len(closed_polygons), len(open_lines))
@@ -556,8 +585,18 @@ class MeshClipper(object):
 
                 if self._assert_closed_boundaries:
                     if len(open_lines) > 0:
-                        # mm.write_VTP('mesh_clip.vtp', _vertices, crown_faces)
-                        raise RuntimeError, 'Open intersection curve found'
+                        try:
+                            import mmio
+                            mmio.write_VTP('full_debug.vtp', self.source_mesh.vertices, self.source_mesh.faces)
+                            mmio.write_VTP('clipped_crown_debug.vtp', clipped_crown_mesh.vertices, clipped_crown_mesh.faces)
+                            mmio.write_VTP('crown_debug.vtp', crown_mesh.vertices, crown_mesh.faces)
+                        except:
+                            pass
+                        
+                        for line in open_lines:
+                            print line
+                            
+                        raise RuntimeError, 'Open intersection curve found with assert_closed_boundaries option enabled. Files full_debug.vtp, crown_debug.vtp and clipped_crown_debug.vtp written.'
 
                 break
         boundaries = {
@@ -588,43 +627,6 @@ if __name__ == '__main__':
 
     import mmio
 
-    V, F = mmio.load_VTP('SEAREV.vtp')
+    V, F = mmio.load_VTP('full_debug.vtp')
     mymesh = Mesh(V, F)
 
-    plane = Plane()
-
-    clipper = MeshClipper(mymesh, plane, assert_closed_boundaries=False, verbose=True)
-
-
-    # lower_mesh = clipper.lower_mesh
-    # upper_mesh = clipper.upper_mesh
-    # crown_mesh = clipper.crown_mesh
-    #
-    #
-    # mmio.write_VTP('lower.vtp', lower_mesh._vertices, lower_mesh._faces)
-    # mmio.write_VTP('crown.vtp', crown_mesh._vertices, crown_mesh._faces)
-    # mmio.write_VTP('upper.vtp', upper_mesh._vertices, upper_mesh._faces)
-    #
-    # print lower_mesh.faces_areas.sum() + clipped_crown_mesh.faces_areas.sum()
-    # # print
-    # print clipped_mesh.faces_areas.sum()
-
-    for iter in xrange(100):
-        print iter
-        thetax, thetay = np.random.rand(2)*2*math.pi
-        plane.rotate_normal(thetax, thetay)
-        clipper.plane = plane
-        # clipper.clipped_mesh.show()
-        # print clipper.lower_mesh
-        # mmio.write_VTP('mesh_%u.vtp'%iter, clipper.clipped_mesh._vertices, clipper.clipped_mesh._faces)
-
-
-    # print clipped_mesh.faces_areas.sum()
-    # clipped_mesh = clipper.clip()
-    # clipped_mesh.show()
-    #
-    # plane.normal = [1, 1, 1]
-    # clipper.plane = plane
-    #
-    # clipped_mesh = clipper.clip()
-    # clipped_mesh.show()
