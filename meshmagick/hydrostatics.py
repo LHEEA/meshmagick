@@ -95,8 +95,23 @@ class HSmesh(mesh.Mesh):
         self._mg = self._mass * self._gravity
         
         self.animate = animate
-        
+            
+        if animate:
+            import MMviewer
+            import zmq
+            port = MMviewer.animation(self)
+            
+            context = zmq.Context()
+            pub_socket = context.socket(zmq.PUB)
+            pub_socket.connect("tcp://127.0.0.1:%u" % port)
+            
+            self.pub_socket = pub_socket
+            
+            
         self._rotation = np.eye(3, dtype=np.float)
+    
+        
+    # TODO: Reimplementer __str__()
     
     @property
     def gravity(self):
@@ -378,6 +393,17 @@ class HSmesh(mesh.Mesh):
         self.allow_unstable = False
         return
     
+    # def transform(self, rotation=None, translation=None, update=True):
+    #     if translation:
+    #         assert len(translation) == 3
+    #         self.translate(translation, update=False)
+    #
+    #     if rotation:
+    #         assert len(rotation) == 3
+    #         self.rotate(rotation, update=True)
+    #
+    #     return
+    
     def rotate(self, angles, update=True):
         R = super(HSmesh, self).rotate(angles)
         self._gravity_center = np.dot(R, self._gravity_center)
@@ -422,7 +448,7 @@ class HSmesh(mesh.Mesh):
         if update:
             self._update_hydrostatic_properties()
         return
-     
+    
     # def solver_stats(self):
     #     rep_str = "Last equilibrium obtained after %u iterations and %u relaunch" % (iter, nb_relaunch)
     #     return rep_str
@@ -630,7 +656,9 @@ class HSmesh(mesh.Mesh):
         """
         
         # FIXME: disp must be given in tons
-        
+        if self.verbose:
+            print '\nAdjusting displacement to mass along z.'
+            print '-------------------------------------------'
         self.mass = disp
         
         itermax = self._solver_parameters['itermax']
@@ -649,6 +677,11 @@ class HSmesh(mesh.Mesh):
             
             # Translating the mesh
             self.translate_z(dz)
+            
+            
+            if self.animate:
+                msg = 'viz translate 0. 0. %f' % dz
+                self.pub_socket.send(msg)
     
             residual = self.delta_fz
             if math.fabs(residual/self._mg) < reltol:
@@ -668,7 +701,6 @@ class HSmesh(mesh.Mesh):
         if self.verbose:
             print '\nComputing equilibrium form  initial condition.'
             print '----------------------------------------------'
-        #     if self.un
         
         # Initial displacement equilibrium
         self.set_displacement(self.mass)
@@ -966,15 +998,24 @@ if __name__ == '__main__':
     
     vertices, faces = mmio.load_VTP('meshmagick/tests/data/SEAREV.vtp')
     
-    searev = HSmesh(vertices, faces, name='SEAREV')
+    searev = HSmesh(vertices, faces, name='SEAREV', animate=True)
     
     searev.mass = 2300
     searev.gravity_center = [1, 3, 5]
     searev.allow_unstable_off()
     searev.reltol = 1e-3
     
-    searev.equilibrate()
-    searev.show()
+    
+    while True:
+        searev.set_displacement(2650)
+        searev.set_displacement(100)
+        searev.set_displacement(2000)
+        searev.set_displacement(1500)
+        searev.set_displacement(5)
+    
+    
+    # searev.equilibrate()
+    # searev.show()
     
     print searev.get_hydrostatic_report()
     # searev.show()
