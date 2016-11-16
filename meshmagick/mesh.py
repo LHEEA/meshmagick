@@ -124,7 +124,6 @@ def _get_axis_angle_from_rotation_matrix(rot):
     return theta, direction
 
 
-
 # Classes
 class Plane(object): # TODO: placer cette classe dans un module a part (surface) --> utilise dans meshmagick aussi...
     """
@@ -395,38 +394,6 @@ class Plane(object): # TODO: placer cette classe dans un module a part (surface)
     
     def get_origin(self):
         return self.c * self.normal
-
-# class cached_property(object):
-#     def __init__(self, func):
-#         self.__doc__ = getattr(func, '__doc__')
-#         self.func = func
-#
-#     def __get__(self, obj, cls):
-#         try:
-#             return obj._cached_properties[self.func.__name__]
-#         except:
-#             # print 'Computing %s and caching it' % self.func.__name__
-#             value = self.func(obj)
-#             try:
-#                 obj._cached_properties[self.func.__name__] = value # FIXME: les valeurs sont enregistrees deux fois...
-#             except AttributeError:
-#                 obj._cached_properties = {self.func.__name__: value}
-#             return value
-#
-#
-# class invalidate_cache(object):
-#     def __init__(self, func):
-#         self.__doc__ = getattr(func, '__doc__')
-#         self.func = func
-#
-#
-#     def __call__(self, cls, *args):
-#         self.func(cls, *args)
-#         # print 'Invalidation of the cache'
-#         try:
-#             cls._cached_properties.clear()
-#         except:
-#             cls._cached_properties = dict()
 
 
 class _3DPointsArray(np.ndarray):
