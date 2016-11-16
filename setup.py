@@ -1,108 +1,71 @@
-"""Setup file for meshmagick.
+"""Setup script for meshmagick."""
+from __future__ import print_function
+from setuptools import setup
+from setuptools.command.test import test as TestCommand
+import codecs
+import os
+import sys
+import re
 
-See:
+HERE = os.path.abspath(os.path.dirname(__file__))
 
-"""
+def read(*parts):
+    """Return multiple read calls to different readable objects as a single
+    string."""
+    # intentionally *not* adding an encoding option to open
+    return codecs.open(os.path.join(HERE, *parts), 'r').read()
 
-# Always prefer setuptools over distutils
-from setuptools import setup, find_packages
-# To use a consistent encoding
-from codecs import open
-from os import path
+LONG_DESCRIPTION = read('README.rst')
 
-here = path.abspath(path.dirname(__file__))
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = [
+            '--strict',
+            '--verbose',
+            '--tb=long',
+            'tests']
+        self.test_suite = True
 
-# Get the long description from the relevant file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+    def run_tests(self):
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
 
-# TODO : Here, put the script to make the windows fix concerning the registry key
 
 setup(
     name='meshmagick',
-
-    # Versions should comply with PEP440.  For a discussion on single-sourcing
-    # the version across setup.py and the project code, see
-    # https://packaging.python.org/en/latest/single_source_version.html
     version='1.0',
-
-    description="""An utility for unstructured mesh conversion and manipulation
-                   for the hydrodynamic community""",
-    long_description=long_description,
-
-    # The project's main homepage.
     url='https://', # TODO : A completer
-
-    # Author details
     author='Francois Rongere -- Ecole Centrale de Nantes',
     author_email='Francois.Rongere@ec-nantes.fr',
-
-    # Choose your license
+    description="""An utility for unstructured mesh conversion and manipulation
+                   for the hydrodynamic community""",
+    long_description=LONG_DESCRIPTION,
     license='CeCILL-2.1',
-
-    # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
-    classifiers=[
-        # How mature is this project? Common values are
-        #   3 - Alpha
-        #   4 - Beta
-        #   5 - Production/Stable
-        'Development Status :: 4 - Beta',
-
-        # Indicate who your project is intended for
-        'Intended Audience :: Science/Research',
-        'Topic :: Scientific/Engineering',
-
-        # Pick your license as you wish (should match "license" above)
-        'License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)',
-
-        # Specify the Python versions you support here. In particular, ensure
-        # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2',# TODO : tester avec un virtualenv !
-        'Programming Language :: Python :: 2.6',# TODO : tester avec un virtualenv !
-        'Programming Language :: Python :: 2.7',
-    ],
-
-    # What does your project relate to?
     keywords='hydrodynamics, unstructured mesh, conversion, manipulation',
-
-    # You can just specify the packages manually here if your project is
-    # simple. Or you can use find_packages().
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-
-    # List run-time dependencies here.  These will be installed by pip when
-    # your project is installed. For an analysis of "install_requires" vs pip's
-    # requirements files see:
-    # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['argparse', 'argcomplete', 'numpy'],
-
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax,
-    # for example:
-    # $ pip install -e .[dev,test]
-    # extras_require={
-    #     'dev': ['check-manifest'],
-    #     'test': ['coverage'],
-    # },
-
-    # If there are data files included in your packages that need to be
-    # installed, specify them here.  If using Python 2.6 or less, then these
-    # have to be included in MANIFEST.in as well.
-    # package_data={
-    #     'sample': ['package_data.dat'],
-    # },
-
-    # Although 'package_data' is the preferred approach, in some case you may
-    # need to place data files outside of your packages. See:
-    # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files # noqa
-    # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
-    # data_files=[('my_data', ['data/data_file'])],
-
-    # To provide executable scripts, use entry points in preference to the
-    # "scripts" keyword. Entry points provide cross-platform support and allow
-    # pip to create the appropriate form of executable for the target platform.
+    tests_require=['pytest', 'pytest-cov'],
+    install_requires=[
+        'argparse',
+        'argcomplete',
+        'numpy'
+        ],
+    cmdclass={'test': PyTest}
     entry_points={
         'console_scripts': [
             'meshmagick=meshmagick:main',
         ],
     },
+    classifiers=[
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Development Status :: 4 - Beta',
+        'Natural Language :: English',
+        'Intended Audience :: Science/Research',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)',
+        'Operating System :: OS Independent',
+    ],
 )
