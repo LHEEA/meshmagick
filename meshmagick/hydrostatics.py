@@ -165,7 +165,7 @@ class HSmesh(mesh.Mesh):
     
     @zg.setter
     def zg(self, value, update=True):
-        self._gravity_center[-1] = value
+        self._gravity_center[-1] = float(value)
         if update:
             self._update_hydrostatic_properties()
         return
@@ -629,7 +629,9 @@ class HSmesh(mesh.Mesh):
             Fc : ndarray
         """
         
-        # FIXME: disp must be given in tons
+        if self.verbose:
+            print "\nComplying with a displacement of %.3f tons" % disp
+            print "-------------------------------------------------------"
         
         self.mass = disp
         
@@ -644,7 +646,7 @@ class HSmesh(mesh.Mesh):
             # print iter
             if iter == itermax:
                 if self.verbose:
-                    print 'No convergence of the displacement after %u iterations' % itermax
+                    print '\t-> No convergence of the displacement after %u iterations' % itermax
                 break
             
             # Translating the mesh
@@ -652,6 +654,8 @@ class HSmesh(mesh.Mesh):
     
             residual = self.delta_fz
             if math.fabs(residual/self._mg) < reltol:
+                if self.verbose:
+                    print '\t-> Convergence obtained after %u iterations' % iter
                 break
             
             dz = residual / (self._rhog * self.flotation_surface_area)
@@ -663,15 +667,18 @@ class HSmesh(mesh.Mesh):
         
         return
         
-    def equilibrate(self):
+    def equilibrate(self, init_disp=True):
         
         if self.verbose:
             print '\nComputing equilibrium form  initial condition.'
             print '----------------------------------------------'
-        #     if self.un
         
         # Initial displacement equilibrium
-        self.set_displacement(self.mass)
+        if init_disp:
+            verbose = self.verbose
+            self.verbose = False
+            self.set_displacement(self.mass)
+            self.verbose = verbose
         
         
         # Retrieving solver parameters

@@ -14,11 +14,13 @@ from itertools import count
 from warnings import warn
 import sys # TODO: Retirer
 
+# TODO: Use traitlets to manage updates into the Mesh class
 
 # TODO: les points doivent etre des objects nodes...
 # TODO: On doit pouvoir specifier des objets frame
 
 # TODO: voir si on ne peut pas mettre ces fonctions dans un module dedie --> module rotation !!!
+
 def _rodrigues(thetax, thetay):
     """
     Computes the rotation matrix corresponding to angles thetax and thetay using the Olinde-Rodrigues formula
@@ -129,9 +131,9 @@ class Plane(object): # TODO: placer cette classe dans un module a part (surface)
     """
     Class to handle planes for clipping purposes
     """
-    def __init__(self, normal=[0., 0., 1.], scalar=0.):
+    def __init__(self, normal=[0., 0., 1.], scalar=0., name=None):
         """
-        Plane constructor
+        Plane initialization
 
         Parameters
         ----------
@@ -154,9 +156,15 @@ class Plane(object): # TODO: placer cette classe dans un module a part (surface)
         # Shall be _update in methods !!! --> using decorator ?
         thetax, thetay = self.get_normal_orientation_wrt_z()
         self._rot = _get_rotation_matrix(thetax, thetay)
-
+        
+        self.name = str(name)
+        
         return
-
+    
+    def __str__(self):
+        str_repr = "Plane{normal=[%f, %f, %f], scalar=%f}" % (self._normal[0], self._normal[1], self._normal[2], self._scalar)
+        return str_repr
+    
     @property
     def normal(self):
         """
@@ -1000,11 +1008,14 @@ class Mesh(object):
         return self.rotate([0., 0., thetaz])
 
     def rotate(self, angles):
+        # TODO: docstring
+        # FIXME : code en doublon par rapport a la fonction _rodrigues du debut de module
+        
         angles = np.asarray(angles, dtype=np.float)
         theta = np.linalg.norm(angles)
         if theta == 0.:
             return np.eye(3)
-
+        
         ctheta = math.cos(theta)
         stheta = math.sin(theta)
 
@@ -1023,10 +1034,12 @@ class Mesh(object):
           + stheta * np.array([[0., -nz, ny],
                                [nz, 0., -nx],
                                [-ny, nx, 0.]])
-
+        
+        # TODO: travailler avec une classe rotation
         self._vertices = np.transpose(np.dot(R, self._vertices.copy().T))
 
         # Updating _faces properties if any
+        # TODO: use traitlets...
         if self._has_faces_properties():
             # Rotating normals and centers too
             normals = self.__internals__['faces_normals']
@@ -1093,8 +1106,39 @@ class Mesh(object):
         return
 
     def scale(self, alpha):
+        # TODO: voir pourquoi il est fait une copie ici...
         V = self._vertices.copy()
         V *= alpha
+        self._vertices = V
+
+        if self._has_faces_properties():
+            self._remove_faces_properties()
+
+        return
+
+    def scalex(self, alpha):
+        V = self._vertices.copy()
+        V[:, 0] *= alpha
+        self._vertices = V
+
+        if self._has_faces_properties():
+            self._remove_faces_properties()
+
+        return
+
+    def scaley(self, alpha):
+        V = self._vertices.copy()
+        V[:, 1] *= alpha
+        self._vertices = V
+
+        if self._has_faces_properties():
+            self._remove_faces_properties()
+
+        return
+
+    def scalez(self, alpha):
+        V = self._vertices.copy()
+        V[:, 2] *= alpha
         self._vertices = V
 
         if self._has_faces_properties():

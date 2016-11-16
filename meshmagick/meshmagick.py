@@ -23,15 +23,18 @@ to user and 1-indexing may not be present outside the I/O functions
 
 # TODO: move meshmagick.py at the root level of the project ?
 
-from mesh import *
-import mmio
-
 import os, sys
-import numpy as np
 import numpy as np
 import math
 from datetime import datetime
-from numpy.core.multiarray import dtype
+from warnings import warn
+
+from mesh import *
+import mmio
+from mesh_clipper import MeshClipper
+import hydrostatics as hs
+
+
 
 __year__ = datetime.now().year
 
@@ -45,526 +48,10 @@ __email__      = "Francois.Rongere@ec-nantes.fr"
 __status__     = "Development"
 
 
-# _mult_surf = np.array([1/6., 1/6., 1/6., 1/12., 1/12., 1/12., 1/12., 1/12., 1/12., 1/20., 1/20., 1/20., 1/60., 1/60., 1/60.], dtype=float) # Defines the array coefficient to compute surface integrals efficiently
-# def _get_surface_integrals(V, F, sum=True):
-#     """_get_surface_integrals(_vertices, _faces, sum=True)
-#
-#     Internal function
-#     Computes all the _faces' integrals that may be used in several computations such
-#     as inertial properties of meshes. This function is partly based on the work of
-#     David Eberly:
-#     ...
-#
-#     Parameters:
-#         V: ndarray
-#             numpy array of the mesh's nodes coordinates
-#         F: ndarray
-#             numpy array of the mesh's _faces nodes connectivity
-#         sum[optional]: bool
-#             if let to True, the results will be summed over all _faces.
-#             Otherwise, no sum will be performed and individual integral
-#             on _faces will be returned
-#
-#     Return:
-#         sint: ndarray
-#             numpy array of shape (nf, 15) that contains different integrals
-#             over the mesh _faces. If sum is False, nf is equal to the number
-#             of _faces in the mesh. Otherwise, nf=1.
-#
-#             The different integrals that sint contains are:
-#
-#              sint[0]  = \int x dS
-#              sint[1]  = \int y dS
-#              sint[2]  = \int z dS
-#              sint[3]  = \int yz dS
-#              sint[4]  = \int xz dS
-#              sint[5]  = \int xy dS
-#              sint[6]  = \int x^2 dS
-#              sint[7]  = \int y^2 dS
-#              sint[8]  = \int z^2 dS
-#              sint[9]  = \int x^3 dS
-#              sint[10] = \int y^3 dS
-#              sint[11] = \int z^3 dS
-#              sint[12] = \int x^2y dS
-#              sint[13] = \int y^2z dS
-#              sint[14] = \int z^2x dS
-#     """
-#
-#     # TODO : put reference to the Eberly's work in the docstring
-#
-#     nf = F.shape[0]
-#
-#     if sum:
-#         sint = np.zeros(15, dtype=float)
-#     else:
-#         sint = np.zeros((nf, 15), dtype=float)
-#
-#     tri1 = [0, 1, 2]
-#     tri2 = [0, 2, 3]
-#
-#     cross = np.cross
-#
-#     sint_tmp = np.zeros(15)
-#     for (iface, face) in enumerate(F):
-#         sint_tmp *= 0.
-#         # sint_tmp = np.zeros(15) # FIXME : Essai, la version precedente serait mieux !
-#
-#         if face[0] == face[-1]:
-#             nb = 1
-#         else:
-#             nb = 2
-#
-#         _vertices = V[face]
-#
-#         # Loop on triangles of the face
-#         for itri in xrange(nb):
-#             if itri == 0:
-#                 triangle = tri1
-#             else:
-#                 triangle = tri2
-#
-#             V0, V1, V2 = _vertices[triangle]
-#             x0, y0, z0 = V0
-#             x1, y1, z1 = V1
-#             x2, y2, z2 = V2
-#
-#             d0, d1, d2 = cross(V1-V0, V2-V0)
-#             e1_c_e2 = math.sqrt(d0**2 + d1**2 + d2**2)
-#
-#             temp0 = V0 + V1
-#             f1 = temp0 + V2
-#             temp1 = V0*V0
-#             temp2 = temp1 + V1*temp0
-#             f2 = temp2 + V2*f1
-#             f3 = V0*temp1 + V1*temp2 + V2*f2
-#             g0 = f2 + V0*(f1+V0)
-#             g1 = f2 + V1*(f1+V1)
-#             g2 = f2 + V2*(f1+V2)
-#
-#             yz = z0*(4*y0 - y1 - y2)  - y0*(z1+z2) + 3*(y1*z1 + y2*z2)
-#             xz = x0*(4*z0 - z1 - z2)  - z0*(x1+x2) + 3*(x1*z1 + x2*z2)
-#             xy = y0*(4*x0 - x1 - x2)  - x0*(y1+y2) + 3*(x1*y1 + x2*y2)
-#
-#             # Update integrals
-#             sint_tmp[0] += d0 * f1[0] # order 1 in vol, x in surf
-#             sint_tmp[1] += d1 * f1[1] # order 1 in vol, y in surf
-#             sint_tmp[2] += d2 * f1[2] # order 1 in vol, z in surf
-#
-#             sint_tmp[3] +=  d0 * yz # order yz in surf
-#             sint_tmp[4] +=  d1 * xz # order xz in surf
-#             sint_tmp[5] +=  d2 * xy # order xy in surf
-#
-#             sint_tmp[6] += d0 * f2[0] # order x in vol, x**2 in surf
-#             sint_tmp[7] += d1 * f2[1] # order y in vol, y**2 in surf
-#             sint_tmp[8] += d2 * f2[2] # order z in vol, z**2 in surf
-#             sint_tmp[9] += d0 * f3[0] # order x**2 in vol, x**3 in surf
-#             sint_tmp[10] += d1 * f3[1] # order y**2 in vol, y**3 in surf
-#             sint_tmp[11] += d2 * f3[2] # order z**2 in vol, z**3 in surf
-#             sint_tmp[12] += d0 * (y0*g0[0] + y1*g1[0] + y2*g2[0]) # order xy in vol, x**2*y in surf
-#             sint_tmp[13] += d1 * (z0*g0[1] + z1*g1[1] + z2*g2[1]) # order yz in vol, y**2*z in surf
-#             sint_tmp[14] += d2 * (x0*g0[2] + x1*g1[2] + x2*g2[2]) # order zx in vol, z**2*x in surf
-#
-#             if sum:
-#                 sint += sint_tmp
-#             else:
-#                 sint[iface] = sint_tmp
-#
-#     if sum:
-#         sint *= _mult_surf
-#     else:
-#         sint = np.array([sint[j]*_mult_surf for j in xrange(nf)], dtype=float)
-#
-#     return sint
-#
-#
-# def get_mass_cog(V, F, rho=1.):
-#     """get_mass_cog(_vertices, _faces, rho=1.)
-#
-#     Returns the mass and the center of gravity of a mesh
-#
-#     Parameters:
-#         V: ndarray
-#             numpy array of the coordinates of the mesh's nodes
-#         F: ndarray
-#             numpy array of the _faces' nodes connectivities
-#         rho[optional]: float
-#             specifies the density of the material enclosed by the mesh
-#
-#     Returns:
-#
-#     """
-#     # TODO: allow to specify as mush as options as in get_inertial_properties... or remove this function !
-#
-#     return get_inertial_properties(V, F, rho=rho)[:2]
-#
-#
-# _mult_vol = np.array([1., 1., 1., 1., 1., 1., 1/2., 1/2., 1/2., 1/3., 1/3., 1/3., 1/2., 1/2., 1/2.]) # Defines the array coefficient to compute volume integrals on meshes
-# def get_inertial_properties(V, F, rho=7500., mass=None, thickness=None, shell=False, verbose=False):
-#     """get_inertial_properties(_vertices, _faces, rho=7500., mass=None, thickness=None, shell=False, verbose=False)
-#
-#     Returns the inertial properties of a mesh. The mesh may be considred as being
-#     filled with homogeneous material or as being a shell.
-#
-#     Parameters:
-#         V: ndarray
-#             numpy array of the coordinates of the mesh's nodes
-#         F: ndarray
-#             numpy array of the _faces' nodes connectivities
-#         rho[optional]: float
-#             the density of the material. By default, it is the steel density
-#             (7500 kg/m**3)
-#         mass[optional]: float
-#             the mass of the mesh. If it is specified, it will overwrite
-#             the density (even if explicitely given)
-#         thickness[optional]: float
-#             specifies the thickness of the hull. Used if shell is set to True.
-#         shell[optional]: bool
-#             if set to True, the mesh will be considered as a shell
-#         verbose[optional]: bool
-#             if set to True, the function will display a report on inertial
-#             properties of the mesh
-#
-#     Returns:
-#         mass: float
-#             The mass of the mesh (computed or given...)
-#         cog: ndarray
-#             The coordinates of the center of gravity of the mesh
-#         inertia_matrix: ndarray
-#             The inertia matrix of the mesh expressed at the center
-#              of gravity
-#
-#     """
-#     # TODO : allow to specify a reduction point...
-#     # The default density rho is that of steel
-#
-#     tol = 1e-8
-#
-#     # FIXME : la gestion des options n'est pas claire ici !!! Remettre les choses a plat
-#
-#     if shell: # The geometry is a shell with homogeneous thickness and density.
-#         areas, normals = get_all_faces_properties(V, F)[:2]
-#         St = areas.sum() # Total surface
-#         # The geometry is considered as being a shell with thickness given
-#         if mass is None:
-#
-#             # FIXME : may not work if thickness is not given !!
-#
-#             # if thickness is None:
-#             #     # Assuming a standard thickness of 1cm
-#             #     thickness = 1e-2
-#
-#             sigma = thickness * rho
-#             mass = St*sigma
-#
-#         else:# A mass has been specified
-#             sigma = mass/St # Surfacic density
-#
-#             if thickness is None:
-#                 # Computing the equivalent thickness
-#                 thickness = sigma / rho
-#             else:
-#                 # thickness has been given, overwriting the density of the medium accordingly
-#                 rho_tmp = sigma / thickness
-#                 rho = rho_tmp
-#
-#         # Getting surface integrals
-#         sint = _get_surface_integrals(V, F, sum=False)
-#
-#         normals[normals==0.] = 1. # To avoid division by zero
-#         # Correcting these integrals by normals
-#         sint[:, :3] /= normals
-#         sint[:, 3:6] /= normals
-#         sint[:, 6:9] /= normals
-#         sint[:, 9:12] /= normals
-#         sint[:, 12:15] /= normals
-#
-#         nu = sint.sum(axis=0)
-#
-#         cog = np.array([nu[0], nu[1], nu[2]], dtype=np.float) * sigma / mass
-#
-#         inertia_matrix = np.array([
-#             [nu[7]+nu[8] ,   -nu[5]   ,   -nu[4]],
-#             [  -nu[5]    , nu[6]+nu[8],   -nu[3]],
-#             [  -nu[4]    ,   -nu[3]   , nu[6]+nu[7]]
-#         ], dtype=np.float) * sigma
-#
-#         if verbose:
-#             print '\nPrincipal inertia parameters report:'
-#             print '------------------------------------\n'
-#             print 'Total surface         : %f m**2' % St
-#             print 'Thickness             : %f m' % thickness
-#             print 'Density               : %f kg/m**3' % rho
-#             print 'Surface density       : %f kg/m**2' % sigma
-#
-#     else:
-#         # The geometry is full
-#         sint = _get_surface_integrals(V, F)
-#
-#         # Appliying multipliers
-#         sint *= _mult_vol
-#
-#         # We take the mean of 3 possible computations from surface integrals
-#         vol = (sint[0] + sint[1] + sint[2]) / 3.
-#         cog = np.array([sint[6]/vol, sint[7]/vol, sint[8]/vol], dtype=float)
-#
-#         # Inertia matrix is expressed for the moment in O
-#         # xx = sint[10] + sint[11] - vol*(cog[1]**2 + cog[2]**2)
-#         # yy = sint[9] + sint[11] - vol*(cog[2]**2 + cog[0]**2)
-#         # zz = sint[9] + sint[10] - vol*(cog[0]**2 + cog[1]**2)
-#         # xy = -(sint[12] - vol*cog[0]*cog[1])
-#         # yz = -(sint[13] - vol*cog[1]*cog[2])
-#         # xz = -(sint[14] - vol*cog[2]*cog[0])
-#
-#         # Inertia matrix expressed in cog
-#         xx = sint[10] + sint[11]
-#         yy = sint[9] + sint[11]
-#         zz = sint[9] + sint[10]
-#         xy = -sint[12]
-#         yz = -sint[13]
-#         xz = -sint[14]
-#
-#         mass = rho * vol
-#         # The inertia matrix is expressed in
-#         inertia_matrix = rho * np.array(
-#             [
-#                 [xx, xy, xz],
-#                 [xy, yy, yz],
-#                 [xz, yz, zz]
-#             ], dtype=np.float)
-#
-#     # Cleaning
-#     cog[np.fabs(cog) < tol] = 0.
-#     inertia_matrix[np.fabs(inertia_matrix) < tol] = 0.
-#
-#     if verbose:
-#         print 'Mass                  : %f kg' % mass
-#         print 'COG                   : (%f, %f, %f) m' % tuple(cog)
-#         print 'Inertia matrix in COG : '
-#         print '\t%E, %E, %E\n\t%E, %E, %E\n\t%E, %E, %E\n' % tuple(inertia_matrix.flatten())
-#
-#     return mass, cog, inertia_matrix
-#
-#
-# def transport_inertia_matrix(mass, cog, Ig, point, rot=np.eye(3, dtype=np.float)):
-#     """transport_inertia_matrix(mass, cog, Ig, point, rot)
-#
-#     Performs the transport of the inertia matrix of a mesh at an other
-#     reduction point
-#
-#     Parameters:
-#         mass: float
-#             The mass of the mesh
-#         cog: ndarray
-#             The coordinates of the center of gravity
-#         Ig: ndarray
-#             The 3x3 inertia matrix of the mesh expressed at cog
-#         point: ndarray
-#             The coordinates of the reduction point
-#         rot: ndarray
-#             The rotation matrix defining the orientation of the
-#             new axis system with respect to the current
-#
-#     Returns:
-#         Ipoint:
-#             The 3x3 inertia matrix of the mesh expressed at the
-#             new reduction point and in a frame rotated by rot with
-#             respect to the initial coordinate system
-#     """
-#
-#     point_cog = cog - point
-#     Ipoint = rot * Ig * rot.T + \
-#              mass * (np.eye(3, dtype=float) * np.dot(point_cog, point_cog)
-#                      - np.outer(point_cog, point_cog))
-#     return Ipoint
-#
-#
-# def get_volume(V, F):
-#     """get_volume(_vertices, _faces)
-#
-#     Returns the volume of the mesh
-#
-#     Parameters:
-#         V: ndarray
-#             numpy array of the coordinates of the mesh's nodes
-#         F: ndarray
-#             numpy array of the _faces' nodes connectivities
-#
-#     Returns:
-#         vol: float
-#             The volume of the mesh
-#     """
-#     return _get_surface_integrals(V, F)[0]
-#
-#
-# def get_COM(V, F):
-#     """get_COM(_vertices, _faces)
-#
-#     Returns the center of mass (center of gravity) of the mesh
-#
-#     Parameters:
-#         V: ndarray
-#             numpy array of the coordinates of the mesh's nodes
-#         F: ndarray
-#             numpy array of the _faces' nodes connectivities
-#
-#     Returns:
-#         com: ndarray
-#             Coordinates of the center of gravity of the mesh
-#     """
-#     # FIXME: la sortie est tres etonnante. Ne doit pas faire ce que ca dit !!!
-#
-#     return _get_surface_integrals(V, F)
-
-
-# def merge_duplicates2(vertices, tol=1e-8, return_index=False):
-#
-#     vertices = np.asarray(vertices, dtype=np.float)
-#
-#     nv = vertices.shape[0]
-#
-#     index = np.arange(nv)
-#     levels = [[0, nv]]
-#
-#     for idim in xrange(1):
-#         coord = vertices[index, idim].copy()
-#
-#         for level in levels:
-#             isort = coord.argsort()
-#
-#             dist = np.diff(coord[isort])
-#
-#             print np.where(dist > tol)[0]
-#             print nv
-#
-#
-#     if return_index:
-#         return vertices, index
-#     else:
-#         return vertices
-
-
-
-
-
-# def merge_duplicates(V, F=None, verbose=False, tol=1e-8, return_index=False):
-#     """merge_duplicates(_vertices, _faces, verbose=False, tol=1e-8)
-#
-#     Returns a new node array where close nodes have been merged into one node (following tol). It also returns
-#     the connectivity array _faces with the new node IDs.
-#
-#     Parameters:
-#         V: ndarray
-#             numpy array of the coordinates of the mesh's nodes
-#         F: ndarray
-#             numpy array of the _faces' nodes connectivities
-#         verbose[optional]: bool
-#             if set to True, displays information on the merge procedure
-#         tol[optional]: float
-#             the tolerance used to define nodes that are coincident and
-#             that have to be merged
-#
-#     Returns:
-#         _vertices: ndarray
-#             numpy array of the coordinates of the mesh's nodes where
-#             every node is different
-#         _faces: ndarray
-#             numpy array of the _faces' nodes connectivities, accordingly
-#             to the new node list that has been merged
-#     """
-#     # TODO: Refaire la documentation --> les entrees sorties ont change !!
-#
-#     # TODO : Set a tolerance option in command line arguments
-#
-#     # This function is a bottleneck in the clipping routines
-#     # TODO: use np.unique to cluster groups --> acceleration !!
-#     # TODO: Use the trick described here !!!!:
-#     # http://stackoverflow.com/questions/17273022/python-numpy-build-2d-array-without-adding-duplicate-rows-for-triangular-mesh
-#
-#     if verbose:
-#         print "* Removing duplicate vertices:"
-#     nv, nbdim = V.shape
-#
-#     levels = [0, nv]
-#     Vtmp = []
-#     iperm = np.arange(nv)
-#
-#     for dim in range(nbdim):
-#         # Sorting the first dimension
-#         values = V[:, dim].copy()
-#         if dim > 0:
-#             values = values[iperm]
-#         levels_tmp = []
-#         for (ilevel, istart) in enumerate(levels[:-1]):
-#             istop = levels[ilevel+1]
-#
-#             if istop-istart > 1:
-#                 level_values = values[istart:istop]
-#                 iperm_view = iperm[istart:istop]
-#
-#                 iperm_tmp = level_values.argsort()
-#
-#                 level_values[:] = level_values[iperm_tmp]
-#                 iperm_view[:] = iperm_view[iperm_tmp]
-#
-#                 levels_tmp.append(istart)
-#                 vref = values[istart]
-#
-#                 for idx in xrange(istart, istop):
-#                     cur_val = values[idx]
-#                     if np.abs(cur_val - vref) > tol:
-#                         levels_tmp.append(idx)
-#                         vref = cur_val
-#
-#             else:
-#                 levels_tmp.append(levels[ilevel])
-#         if len(levels_tmp) == nv:
-#             # No duplicate _vertices
-#             if verbose:
-#                 print "\t -> No duplicate vertices detected :)"
-#             break
-#
-#         levels_tmp.append(nv)
-#         levels = levels_tmp
-#
-#     else:
-#         # Building the new merged node list
-#         Vtmp = []
-#         newID = np.arange(nv)
-#         for (ilevel, istart) in enumerate(levels[:-1]):
-#             istop = levels[ilevel+1]
-#
-#             Vtmp.append(V[iperm[istart]])
-#             newID[iperm[range(istart, istop)]] = ilevel
-#         V = np.array(Vtmp, dtype=float)
-#         # Applying renumbering to cells
-#         if F is not None:
-#             for cell in F:
-#                 cell[:] = newID[cell]
-#
-#         if verbose:
-#             nv_new = V.shape[0]
-#             print "\t -> Initial number of nodes : {:d}".format(nv)
-#             print "\t -> New number of nodes     : {:d}".format(nv_new)
-#             print "\t -> {:d} nodes have been merged".format(nv-nv_new)
-#
-#     if F is not None:
-#         if return_index:
-#             return V, F, newID
-#         else:
-#             return V, F
-#     else:
-#         if return_index:
-#             return V, newID
-#         else:
-#             return V
-
-
-
-
 #=======================================================================
 #                         MESH MANIPULATION HELPERS
 #=======================================================================
-
+# TODO: those functions should disappear from this module
 
 def _is_point_inside_polygon(point, poly):
     """_is_point_inside_polygon(point, poly)
@@ -579,7 +66,7 @@ def _is_point_inside_polygon(point, poly):
             numpy array of shape (nv, 2) of 2D coordinates
             of the polygon
     """
-
+    # TODO: place this code into a utils module
     # FIXME : Do we have to repeat the first point at the last position
     # of polygon ???
 
@@ -622,7 +109,9 @@ def generate_lid(V, F, max_area=None, verbose=False):
             If set to True, generates output along the processing
 
     """
-
+    
+    # TODO: rely on the wrapper done for the triangle lib that has been done in cython and no more on meshpy.
+    
     # TODO: Put the reference of TRIANGLE and meshpy (authors...) in the docstring
 
     # TODO: remove verbose mode and place it into the main of meshmagick !!!
@@ -833,7 +322,7 @@ def _build_polyline(curve):
 
 
 def main():
-
+    
     import argparse
     import sys
 
@@ -956,6 +445,27 @@ def main():
                         accordingly to the newly scaled mesh.
                         """)
 
+    parser.add_argument('-sx', '--scalex', type=float,
+                        help="""scales the mesh along x axis. CAUTION : if used along
+                         with a translation option, the scaling is done before
+                        the translations. The translation magnitude should be set
+                        accordingly to the newly scaled mesh.
+                        """)
+
+    parser.add_argument('-sy', '--scaley', type=float,
+                        help="""scales the mesh along y axis. CAUTION : if used along
+                         with a translation option, the scaling is done before
+                        the translations. The translation magnitude should be set
+                        accordingly to the newly scaled mesh.
+                        """)
+
+    parser.add_argument('-sz', '--scalez', type=float,
+                        help="""scales the mesh along z axis. CAUTION : if used along
+                         with a translation option, the scaling is done before
+                        the translations. The translation magnitude should be set
+                        accordingly to the newly scaled mesh.
+                        """)
+
     parser.add_argument('-hn', '--heal_normals', action='store_true',
                         help="""Checks and heals the normals consistency and
                         verify if they are outward.
@@ -970,10 +480,10 @@ def main():
                         is a normal vector to the plane and c defines its position
                         following the equation <N|X> = c with X a point belonging
                         to the plane.
-                        It can also be defined by a string among [Oxy, Oxz, Oyz, \Oxy, \Oxz, \Oyz]
+                        It can also be defined by a string among [Oxy, Oxz, Oyz, /Oxy, /Oxz, /Oyz]
                         for quick definition. Several planes may be defined on the same command
-                        line. Planes with a prepended '\' have normals inverted i.e. if Oxy has its
-                        normal pointing upwards, \Oxy has its normal pointing downwards.
+                        line. Planes with a prepended '/' have normals inverted i.e. if Oxy has its
+                        normal pointing upwards, /Oxy has its normal pointing downwards.
                         In that case, the planes are indexed by an integer starting by
                         0 following the order given in the command line.
                         """)
@@ -988,7 +498,7 @@ def main():
 
     parser.add_argument('-md', '--merge-duplicates', nargs='?', const='1e-8', default=None,
                         help="""merges the duplicate nodes in the mesh with the absolute tolerance
-                        given as argument (default 1e-8)""")
+                        given as argument (default 1e-8). Tolerance must be lower than 1""")
 
     parser.add_argument('-tq', '--triangulate_quadrangles', action='store_true',
                         help="""Triangulate all quadrangle _faces by a simple splitting procedure.
@@ -999,87 +509,46 @@ def main():
     parser.add_argument('-sym', '--symmetrize', nargs='*', action='append',
                         help="""Symmetrize the mesh by a plane defined wether by 4 scalars, i.e.
                         the plane normal vector coordinates and a scalar c such as N.X=c is the
-                        plane equation (with X a point of the plane) or a string among Oxz, Oxy
-                        and Oyz which are shortcuts for planes passing by the origin and whose
-                        normals are the reference axes. Default is Oxz if only -y is specified.
+                        plane equation (with X a point of the plane) or a string among ['Oxy',
+                        'Oxz', 'Oyz', '/Oxy', '/Oxz', '/Oyz'] which are shortcuts for planes
+                        passing by the origin and whose normals are the reference axes. Default
+                        is Oxz if no argument is given to --sym option.
                         Be careful that symmetry is applied before any rotation so as the plane
                         equation is defined in the initial frame of reference.""")
     
-    parser.add_argument('--mirror', nargs='*',
-                        help="""Mirros the mesh about the specified plane. If no plane is given
+    parser.add_argument('--mirror', nargs='+',
+                        help="""Mirror the mesh about the specified plane. If no plane is given
                         as argument but the option is not followed by a command-line argument,
                         the default Oxy plane will be used.""")
     
-    # Arguments concerning the hydrostatics
-    # TODO : permettre de specifier un fichier de sortie
+    
+    
+    # Arguments for hydrostatics computations
+    # TODO: l'option -hs devrait etre une sous-commande au sens de argparse
+    # TODO: completer l'aide de -hs
     parser.add_argument('-hs', '--hydrostatics', action='store_true',
-                        help="""Compute hydrostatics. When used with the --verbose option, hydrostatic
-                        data will be shown on the command line.""") # TODO : completer l'aide avec les options
-
-    # parser.add_argument('--mass', default=None, type=float,
-    #                     help="""Specifies the mass of the device for hydrostatics calculations.
-    #                     When used, an hydrostatic equilibrium is resolved. Depending on the join
-    #                     use of --mass, --cog and --zcog options, several behavior may be obtained.
-    #
-    #                     1) --mass is given a value:
-    #
-    #                         This options trigs an equilibrium resolution.
-    #
-    #                         a) No options --cog or --zcog are given:
-    #                             Equilibrium is searched in z only, no hydrostatic stiffness
-    #                             matrix is computed but the stiffness in heave.
-    #                         b) --zcog is given alone:
-    #                             Equilibrium is searched in z only, the hydrostatics stiffness
-    #                             matrix is given.
-    #                         c) --cog is given alone:
-    #                             Equilibrium is searched in 6 dof and the hydrostatics stiffness
-    #                             matrix is given
-    #
-    #                         Note that if both options --cog and --zcog are given, --zcog will
-    #                         be ignored but taken from --cog and the result will be the same as c).
-    #
-    #                     2) --mass is used:
-    #
-    #                         No equilibrium resolution is performed if no mass is specified.
-    #                         Mesh position is considered as being the equilibrium position and
-    #                         hydrostatics data are generated as-is. Mass of the device is then
-    #                         an output and is considered to be the computed displacement * rho_water.
-    #
-    #                         a) No options --cog or --zcog are given:
-    #                             Only the stiffness in heave can be calculated
-    #                         b) --zcog is given alone:
-    #                             The full stiffness matrix is calculated and the estimated cog
-    #                             position is given.
-    #                         c) --cog is given alone:
-    #                             Idem b) but the residual may be not identically 0. as the mesh may
-    #                             not be at equilibrium.
-    #
-    #                         Note that if both options --cog and --zcog are given, --zcog will
-    #                         be ignored but taken from --cog and the result will be the same as c).
-    #                     """)
-
-    # parser.add_argument('--cog', nargs=3, default=None, type=float,
-    #                     help="""Specifies the center of gravity to be used along with the
-    #                     --hydrostatics option. See --mass for more information. See also the
-    #                     --inertias option for side effects.
-    #                     """)
-
+                        help="""Compute hydrostatics data and throws a report on the
+                        command line. When used along with options --disp, --cog or
+                        --zcog, the behaviour is different.""")
+                        
+    parser.add_argument('--disp', default=None, type=float,
+                        help="""Specifies the expected displacement for hydrostatics.
+                            It must be given in tons.
+                            """)
+    
+    parser.add_argument('--cog', nargs='+',
+                        help="""Specifies the 3D position of the center of gravity.
+                        The third coordinate given has priority over the value given
+                        with the --zcog option.""")
+    
     parser.add_argument('--zcog', default=None, type=float,
-                        help="""Specifies the z position of the center of gravity to be used along
-                        the --hydrostatics option.
-                        """)
-
-    # parser.add_argument('--zcog', default=None, type=float,
-    #                     help="""Specifies the z position of the center of gravity to be used along
-    #                     the --hydrostatics option. See --mass for more information. See also the
-    #                     --inertias option for side effects.
-    #                     """)
-
-    # parser.add_argument('--anim', action='store_true',
-    #                     help="""Generates animation files for paraview visualization of the equilibrium
-    #                     resolution.
-    #                     """)
-
+                        help="""Specifies the z position of the center of gravity. This
+                            is the minimal data needed for hydrostatic stiffness matrix
+                            computation. It is however overwriten by the third component
+                            of cog when --cog option is used. If none of these two option
+                            is given, zcog is set to 0.
+                            """)
+    
     parser.add_argument('--rho-water', default=1023., type=float,
                         help="""Specifies the density of salt water. Default is 1023 kg/m**3.
                         """)
@@ -1089,6 +558,8 @@ def main():
                         Default is 9.81 m/s**2.
                         """)
 
+
+    # ARGUMENTS RELATED TO THE COMPUTATION OF INERTIA PARAMETERS
     # parser.add_argument('--rho-medium', default=7500., type=float,
     #                     help="""Specified the density of the medium used for the device. Default
     #                     is steel and is 7500 kg/m**3.
@@ -1127,13 +598,13 @@ def main():
     #                     the material of density rho-medium. It is only used by the --inertias option.
     #                     """)
 
-    parser.add_argument('--lid', nargs='?', const=1., default=None, type=float,
-                        help="""Generate a triangle mesh lid on the mesh clipped by the Oxy plane.
-                        """)
+    # parser.add_argument('--lid', nargs='?', const=1., default=None, type=float,
+    #                     help="""Generate a triangle mesh lid on the mesh clipped by the Oxy plane.
+    #                     """)
 
-    parser.add_argument('--fill-holes', '-fh', action='store_true',
-                        help="""Fill little holes by triangulation if any.
-                        """)
+    # parser.add_argument('--fill-holes', '-fh', action='store_true',
+    #                     help="""Fill little holes by triangulation if any.
+    #                     """)
 
     parser.add_argument('--show', action='store_true',
                         help="""Shows the input mesh in an interactive window""")
@@ -1185,17 +656,19 @@ def main():
     # Merge duplicate _vertices
     if args.merge_duplicates is not None:
         tol = float(args.merge_duplicates)
-        mesh.merge_duplicates(tol=tol)
+        decimals = int(round(math.log10(tol)))
+        mesh.merge_duplicates(decimals=decimals)
 
-    # TODO : put that dict at the begining of the main function
+    # TODO : put that dict at the begining of the main function or in the module
     plane_str_list = {'Oxy':[0.,0.,1.],
                       'Oxz':[0.,1.,0.],
                       'Oyz':[1.,0.,0.],
-                      '\Oxy':[0.,0.,-1.],
-                      '\Oxz':[0.,-1.,0.],
-                      '\Oyz':[-1.,0.,0.]}
+                      '/Oxy':[0.,0.,-1.],
+                      '/Oxz':[0.,-1.,0.],
+                      '/Oyz':[-1.,0.,0.]}
 
     # Defining planes
+    planes = []
     if args.plane is not None:
         nb_planes = len(args.plane)
 
@@ -1204,7 +677,8 @@ def main():
                 verb = 'plane has'
             else:
                 verb = 'planes have'
-            print '\n%u %s been defined' % (nb_planes, verb)
+            print '\n%u %s been defined:' % (nb_planes, verb)
+            # TODO: ajouter un recapitulatif des plans definis
 
         planes = [Plane() for i in xrange(nb_planes)]
         for (iplane, plane) in enumerate(args.plane):
@@ -1212,8 +686,6 @@ def main():
                 # plane is defined by normal and scalar
                 try:
                     planes[iplane] = Plane(normal=map(float, plane[:3]), scalar=plane[3])
-                    # planes[iplane].normal = np.array(map(float, plane[:3]), dtype=np.float)
-                    # planes[iplane].c = float(plane[3])
                 except:
                     raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
 
@@ -1225,95 +697,97 @@ def main():
                     raise AssertionError, '%s key for plane is not known. Choices are [%s].' % (plane[0], ', '.join(plane_str_list.keys()) )
             else:
                 raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
+        if verbose:
+            for plane_id, plane in enumerate(planes):
+                print "\t%u: %s" % (plane_id, plane)
     
     # Mirroring the mesh
     if args.mirror is not None:
-        if verbose:
-            print 'Mirroring the mesh by a plane'
         sym_plane = Plane()
-
-        if len(args.mirror) == 0:
-            # Default mirroring by Oxy
-            sym_plane.normal = [0., 0., 1.]
-            
-        for plane in args.mirror:
-            
-            if isinstance(plane, str):
-                assert plane_str_list.has_key(plane)
-                sym_plane.normal = plane_str_list[plane]
-            
-            # if len(plane) == 1:
-            #     try:
-            #         plane_id = int(plane[0])
-            #         if plane_id < nb_planes:
-            #             sym_plane = planes[plane_id]
-            #         else:
-            #             raise AssertionError, 'Plane with ID %u has not been defined with option --plane' % plane_id
-            #     except:
-            #         # A key string
-            #         if plane_str_list.has_key(plane[0]):
-            #             sym_plane.normal = plane_str_list[plane[0]]
-            #         else:
-            #             raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
-            # elif len(plane) == 4:
-            #     # Plane defined by a normal and a scalar
-            #     try:
-            #         sym_plane.normal = np.array(map(float, plane[:3]), dtype=np.float)
-            #         sym_plane.c = float(plane[3])
-            #     except:
-            #         raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
-            # else:
-            #     raise AssertionError, 'Unknown mean to define a plane for mirroring'
+        print args.mirror
+        
+        if len(args.mirror) == 1:
+            # May be a standard plane or a plane id
+            if len(planes) > 0:
+                try:
+                    plane_id = int(args.mirror[0])
+                    if plane_id >=0 and plane_id < len(planes):
+                        sym_plane = planes[plane_id]
+                    else:
+                        raise AssertionError('Only planes IDs from 0 to %u have been defined. %u is outside the range.' % (len(planes)-1, plane_id))
+                except ValueError:
+                    # Cannot be converted to an int, it should be the key of a plane
+                    try:
+                        sym_plane.normal = plane_str_list[args.mirror[0]]
+                    except KeyError as err:
+                        raise KeyError('%s is not a standard plane identifier' % err)
+            else:
+                try:
+                    sym_plane.normal = plane_str_list[args.mirror[0]]
+                except KeyError as err:
+                    raise KeyError('%s is not a standard plane identifier' % err)
                 
+        elif len(args.mirror) == 4:
+            sym_plane.normal = args.mirror[:3]
+            sym_plane.c = args.mirror[3]
+        else:
+            raise ValueError('Bad plane definition.')
+        
+        if verbose:
+            print 'Mirroring the mesh by :\n\t%s' % sym_plane
+            
         mesh.mirror(sym_plane)
         if verbose:
             print '\t-> Done.'
             
-            
     # Symmetrizing the mesh
     if args.symmetrize is not None:
         nb_sym = len(args.symmetrize)
-
+        for iplane, plane in enumerate(args.symmetrize):
+            if len(plane) == 0:
+                args.symmetrize[iplane] = ['Oxz']
+        
         if verbose:
             if nb_sym == 1:
                 verb = 'plane'
             else:
                 verb = 'planes'
-            print '\nMesh is being symmetrized by %u %s' % (nb_sym, verb)
+            print '\nMesh is being symmetrized by %u %s:' % (nb_sym, verb)
 
-        sym_plane = Plane()
         for plane in args.symmetrize:
-            if len(plane) == 0:
-                # Default symmetry by plane Oxz
-                sym_plane.normal = np.array([0., 1., 0.], dtype=np.float)
-                sym_plane.c = 0.
-            elif len(plane) == 1:
-                try:
-                    # Plane ID
-                    plane_id = int(plane[0])
-                    if plane_id < nb_planes:
-                        sym_plane = planes[plane_id]
-                    else:
-                        raise AssertionError, 'Plane with ID %u has not been defined with option --plane' % plane_id
-                except:
-                    # A key string
-                    if plane_str_list.has_key(plane[0]):
-                        sym_plane.normal = np.asarray(plane_str_list[plane[0]], dtype=np.float)
-                        sym_plane.c = 0.
-                    else:
-                        raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
+            sym_plane = Plane()
+            if len(plane) == 1:
+                if len(planes) > 0:
+                    try:
+                        plane_id = int(plane[0])
+                        if plane_id >= 0 and plane_id < len(planes):
+                            sym_plane = planes[plane_id]
+                        else:
+                            raise AssertionError('Only planes IDs from 0 to %u have been defined. %u is outside the range.' % (
+                            len(planes) - 1, plane_id))
+                    except ValueError:
+                        try:
+                            sym_plane.normal = plane_str_list[plane[0]]
+                        except KeyError as err:
+                            raise KeyError('%s is not a standard plane identifier' % err)
+                else:
+                    try:
+                        sym_plane.normal = plane_str_list[plane[0]]
+                    except KeyError as err:
+                        raise KeyError('%s is not a standard plane identifier' % err)
+                    
             elif len(plane) == 4:
-                # Plane defined by a normal and a scalar
-                try:
-                    sym_plane.normal = np.array(map(float, plane[:3]), dtype=np.float)
-                    sym_plane.c = float(plane[3])
-                except:
-                    raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
+                sym_plane.normal = plane[:3]
+                sym_plane.c = plane[3]
             else:
-                raise AssertionError, 'Unknown mean to define a plane for symmetry'
-            mesh.symmetrize(sym_plane)
+                raise ValueError('Bad plane definition.')
+            
             if verbose:
-                print '\t-> Done.'
+                print '\t%s' % sym_plane
+            mesh.symmetrize(sym_plane)
+            
+        if verbose:
+            print '\t-> Done.'
 
     # Heal normals
     if args.heal_normals:
@@ -1355,7 +829,7 @@ def main():
     # Mesh rotations
     if args.rotate is not None:
         if verbose:
-            print '\nOPERATION: Rotation by [%f, %f, %f]' % tuple(args.rotate)
+            print '\nOPERATION: Rotation by [%f, %f, %f] (degrees)' % tuple(args.rotate)
         mesh.rotate(map(math.radians, args.rotate))
         if verbose:
             print '\t-> Done.'
@@ -1388,6 +862,27 @@ def main():
         if verbose:
             print '\t-> Done.'
 
+    if args.scalex is not None:
+        if verbose:
+            print '\nOPERATION: Scaling by %f along the x axis' % args.scalex
+        mesh.scalex(args.scalex)
+        if verbose:
+            print '\t-> Done.'
+
+    if args.scaley is not None:
+        if verbose:
+            print '\nOPERATION: Scaling by %f along the y axis' % args.scaley
+        mesh.scaley(args.scaley)
+        if verbose:
+            print '\t-> Done.'
+
+    if args.scalez is not None:
+        if verbose:
+            print '\nOPERATION: Scaling by %f along the z axis' % args.scalez
+        mesh.scalez(args.scalez)
+        if verbose:
+            print '\t-> Done.'
+
     if args.flip_normals:
         if verbose:
             print '\nOPERATION: Flipping normals'
@@ -1400,8 +895,10 @@ def main():
 
     # Clipping the mesh
     if args.clip_by_plane is not None:
-        clipping_plane = Plane()
         nb_clip = len(args.clip_by_plane)
+        for iplane, plane in enumerate(args.clip_by_plane):
+            if len(plane) == 0:
+                args.clip_by_plane[iplane] = ['Oxy']
 
         if verbose:
             if nb_clip == 1:
@@ -1411,37 +908,43 @@ def main():
             print '\nMesh is being clipped by %u %s' % (nb_clip, verb)
 
         for plane in args.clip_by_plane:
-            if len(plane) == 0:
-                # Default clipping plane Oxy
-                clipping_plane.normal = np.array([0., 0., 1.], dtype=np.float)
-                clipping_plane.c = 0.
-            elif len(plane) == 1:
-                try:
-                    # Plane ID
-                    plane_id = int(plane[0])
-                    if plane_id < nb_planes:
-                        clipping_plane = planes[plane_id]
-                    else:
-                        raise AssertionError, 'Plane with ID %u has not been defined with option --plane' % plane_id
-                except:
-                    # A key string
-                    if plane_str_list.has_key(plane[0]):
-                        clipping_plane.normal = np.asarray(plane_str_list[plane[0]], dtype=np.float)
-                        clipping_plane.c = 0.
-                    else:
-                        raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
+            clipping_plane = Plane()
+            if len(plane) == 1:
+                if len(planes) > 0:
+                    try:
+                        plane_id = int(plane[0])
+                        if plane_id >= 0 and plane_id < len(planes):
+                            clipping_plane = planes[plane_id]
+                        else:
+                            raise AssertionError(
+                                'Only planes IDs from 0 to %u have been defined. %u is outside the range.' % (
+                                    len(planes) - 1, plane_id))
+                    except ValueError:
+                        try:
+                            clipping_plane.normal = plane_str_list[plane[0]]
+                        except KeyError as err:
+                            raise KeyError('%s is not a standard plane identifier' % err)
+                else:
+                    try:
+                        clipping_plane.normal = plane_str_list[plane[0]]
+                    except KeyError as err:
+                        raise KeyError('%s is not a standard plane identifier' % err)
+
             elif len(plane) == 4:
-                # Plane defined by a normal and a scalar
-                try:
-                    clipping_plane.normal = np.array(map(float, plane[:3]), dtype=np.float)
-                    clipping_plane.c = float(plane[3])
-                except:
-                    raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
+                clipping_plane.normal = plane[:3]
+                clipping_plane.c = plane[3]
             else:
-                raise AssertionError, 'Unknown mean to define a plane for clipping'
-            mesh = mesh.clip(clipping_plane)
+                raise ValueError('Bad plane definition.')
+            
             if verbose:
-                print '\t-> Done.'
+                print '\t%s' % clipping_plane
+            
+            clipper = MeshClipper(mesh, plane=clipping_plane)
+            mesh = clipper.clipped_mesh
+            
+            # mesh = mesh.clip(clipping_plane)
+        if verbose:
+            print '\t-> Done.'
 
     # Compute principal inertia parameters
     # if args.inertias:
@@ -1498,56 +1001,81 @@ def main():
 
     # Compute hydrostatics
     # ESSAI
-    if args.hydrostatics: # TODO: A remettre en place
-        try:
-            import hydrostatics as hs
-        except:
-            raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
-
-        if args.zcog is None:
-            raise ValueError, 'The hydrostatics option shall be used along with the --zcog option for the hydrostatic stiffness matrix to be computed'
-
-        output_hs = hs.compute_hydrostatics(mesh, args.zcog, verbose=verbose)
-        mesh = output_hs['mesh_hs']
-        # _vertices = outputHS['Vc']
-        # _faces = outputHS['Fc']
-
-    # if args.hydrostatics:
-    #     try:
-    #         import hydrostatics as hs
-    #     except:
-    #         raise ImportError, '--hydrostatics option relies on the hydrostatics module that can not be found'
-    #
-    #     if args.anim:
-    #         anim=True
-    #     else:
-    #         anim=False
-    #
-    #     if args.cog is None:
-    #         cog = None
-    #     else:
-    #         cog = np.asarray(args.cog, dtype=np.float)
-    #
-    #     # TODO : Revoir la structure afin de ne jouer que sur l'objet !!
-    #     hsMesh = hs.HydrostaticsMesh(_vertices, _faces, rho_water=args.rho_water, g=args.grav)
-    #     _vertices, _faces = hs.get_hydrostatics(hsMesh,
-    #                                mass=args.mass,
-    #                                zcog=args.zcog,
-    #                                cog=cog,
-    #                                rho_water=args.rho_water,
-    #                                g=args.grav,
-    #                                anim=anim,
-    #                                verbose=verbose)[:2]
-
-
-    # Lid generation on a clipped mesh
-    if args.lid is not None:# TODO: A remettre en place
-        V, F = generate_lid(V, F, max_area=args.lid, verbose=verbose)
-
-    if args.fill_holes:# TODO: A remettre en place
-        V, F = fill_holes(V, F, verbose=verbose)
-
-
+    
+    if args.hydrostatics is not None:
+        grav = args.grav
+        rho_water = args.rho_water
+        
+        hsmesh = hs.HSmesh(mesh.vertices, mesh.faces, name=mesh.name, rho_water=rho_water, grav=grav)
+        hsmesh.verbose = verbose
+        
+        if args.disp is not None:
+            disp = args.disp
+            has_disp = True
+        else:
+            disp = hsmesh.displacement
+            has_disp = False
+        
+        if args.cog is not None:
+            cog = map(float, args.cog)
+            has_cog = True
+        else:
+            cog = hsmesh.gravity_center
+            has_cog = False
+        
+        if args.zcog is not None:
+            zcog = args.zcog
+            has_zcog = True
+        else:
+            zcog = hsmesh.zg
+            has_zcog = False
+        
+        # Overwrite zcog by cog[2] in case both have been given
+        if has_cog and has_zcog:
+            zcog = cog[2]
+        
+        case = (has_disp, has_cog, has_zcog)
+        
+        if case == (True, False, False) or case == (True, False, True):
+            if verbose:
+                print "\nSetting mesh displacement to %.3f tons" % disp
+            hsmesh.zg = zcog
+            hsmesh.set_displacement(disp)
+            
+        msg = """\nWARNING !! : Keep in mind that the mesh may have a new orientation in the Oxy plane so the hydrostatic
+        stiffness matrix may be impractical as not expressed in a convenient axis system. Use the result with caution and
+        have a look at the mesh by using the --show option. This should be fixed in a future release."""
+            
+        if case == (False, True, False) or case == (False, True, True):
+            if verbose:
+                print """\nSetting mesh position so that we are at the current displacement of %.3f tons and in a stable
+configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
+                      % (disp, cog[0], cog[1], cog[2])
+            hsmesh.gravity_center = cog
+            hsmesh.mass = disp
+            hsmesh.equilibrate(init_disp=False)
+            warn(msg)
+        
+        if case == (False, False, True) or case == (False, False, False):
+            print "Generating hydrostatic data for a zcog of %.3f meters." % zcog
+            hsmesh.zg = zcog
+            
+        if case == (True, True, False) or case == (True, True, True):
+            print """\nSetting mesh position so that the displacement is equal to %.3f tons and in a stable
+configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
+                  % (disp, cog[0], cog[1], cog[2])
+            hsmesh.gravity_center = cog
+            hsmesh.mass = disp
+            hsmesh.equilibrate(init_disp=True)
+            warn(msg)
+            
+        # TODO: voir pour une option pour sortir plutot le maillage coupe pour Nemoh
+        mesh = hsmesh
+        
+        if verbose:
+            print hsmesh.get_hydrostatic_report()
+        
+        
     # WARNING : No more mesh modification should be released from this point until the end of the main
 
     if args.info:
@@ -1570,7 +1098,6 @@ def main():
             args.outfilename = '%s.%s' % (base, args.output_format)
     else:
         write_file = True
-
 
     # Writing an output file
     if write_file:
