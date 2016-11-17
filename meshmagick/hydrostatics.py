@@ -8,12 +8,10 @@ __maintainer__ = "Francois Rongere"
 __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
 
-# import meshmagick as mm
 import numpy as np
 import math
 from warnings import warn
 
-import mesh
 import mmio
 from mesh_clipper import MeshClipper
 
@@ -24,7 +22,7 @@ GM_min = 0.15
 # TODO: throw the transformation needed to get the equilibrium from initial position after a successful equilibrium computation
 # TODO: make the mesh not to diverge from principal axis
 
-class HSmesh(mesh.Mesh):
+class Hydrostatics(object):
     """
     Class to perform hydrostatic computations on meshes.
     
@@ -56,14 +54,17 @@ class HSmesh(mesh.Mesh):
     *** Setting the buoyancy center will trig a search for a position of the gravity center that fullfill this hydrostatic property, while keeping the correct displacement. NOT IMPLEMENTED, THIS IS AN ADVANCED FEATURE
     
     """
-    def __init__(self, vertices, faces, name=None,
-                 CG=np.zeros(3, dtype=np.float), zg=0., mass=None, rho_water=1023, grav=9.81,
+    def __init__(self, mesh, CG=np.zeros(3, dtype=np.float), zg=0., mass=None, rho_water=1023, grav=9.81,
                  animate=False):
         
-        super(HSmesh, self).__init__(vertices, faces, name=None)
+        # super(HSmesh, self).__init__(vertices, faces, name=None)
         self.backup = dict()
-        self.backup['initial_vertices'] = vertices
-        self.backup['initial_faces'] = faces
+        
+        # Ajout
+        # init_mesh = mesh.Mesh(vertices, faces, name=name)
+        self.backup['init_mesh'] = mesh
+        self.mesh = mesh.copy()
+        # FIN
         
         CG = np.array(CG, dtype=np.float)
         assert CG.shape[0] == 3
@@ -104,7 +105,7 @@ class HSmesh(mesh.Mesh):
     
     @gravity.setter
     def gravity(self, value):
-        self._gravity = value
+        self._gravity = float(value)
         self._rhog = self._rho_water * value
         self._mg = self._mass * value
         self._update_hydrostatic_properties()
@@ -116,7 +117,7 @@ class HSmesh(mesh.Mesh):
     
     @rho_water.setter
     def rho_water(self, value):
-        self._rho_water = value
+        self._rho_water = float(value)
         self._rhog = value * self._gravity
         self._update_hydrostatic_properties()
         return
@@ -128,7 +129,7 @@ class HSmesh(mesh.Mesh):
     @mass.setter
     def mass(self, value):
         
-        self._mass = value * 1000. # Conversion from tons to kg
+        self._mass = float(value) * 1000. # Conversion from tons to kg
         self._mg = self._mass * self._gravity # SI units
         
         if self.is_sinking():
@@ -137,7 +138,7 @@ class HSmesh(mesh.Mesh):
         return
     
     def _max_displacement(self):
-        return self._rho_water * self._compute_volume() # in kg
+        return self._rho_water * self.mesh._compute_volume() # in kg
     
     def is_sinking(self):
         if self._mass > self._max_displacement():
@@ -233,9 +234,13 @@ class HSmesh(mesh.Mesh):
     def reset(self):
         
         # TODO: Utiliser plutot la rotation generale pour retrouver le maillage initial
-
-        self.vertices = self.backup['initial_vertices']
-        self.faces = self.backup['initial_faces']
+        
+        # Ajout
+        self.mesh = self.backup['init_mesh']
+        # FIN
+        
+        # self.vertices = self.backup['initial_vertices']
+        # self.faces = self.backup['initial_faces']
         self._gravity_center = self.backup['gravity_center']
         
         self._update_hydrostatic_properties()
@@ -281,6 +286,7 @@ class HSmesh(mesh.Mesh):
         _, _, my = self.residual
         return my
     
+    # TODO: create a Hydrostatic stiffness matrix class
     @property
     def S33(self):
         return self.hs_data['KH'][0, 0]
@@ -379,7 +385,8 @@ class HSmesh(mesh.Mesh):
         return
     
     def rotate(self, angles, update=True):
-        R = super(HSmesh, self).rotate(angles)
+        # R = super(HSmesh, self).rotate(angles)
+        R = self.mesh.rotate(angles)
         self._gravity_center = np.dot(R, self._gravity_center)
         if update:
             self._update_hydrostatic_properties()
@@ -396,28 +403,29 @@ class HSmesh(mesh.Mesh):
         return self.rotate([0., 0., thetaz], update=update)
     
     def translate_x(self, tx, update=True):
-        super(HSmesh, self).translate_x(tx)
+        self.mesh.translate_x(tx)
+        # super(HSmesh, self).translate_x(tx)
         self._gravity_center[0] += tx
         if update:
             self._update_hydrostatic_properties()
         return
         
     def translate_y(self, ty, update=True):
-        super(HSmesh, self).translate_y(ty)
+        self.mesh.translate_y(ty)
         self._gravity_center[1] += ty
         if update:
             self._update_hydrostatic_properties()
         return
         
     def translate_z(self, tz, update=True):
-        super(HSmesh, self).translate_z(tz)
+        self.mesh.translate_z(tz)
         self._gravity_center[2] += tz
         if update:
             self._update_hydrostatic_properties()
         return
         
     def translate(self, t, update=True):
-        super(HSmesh, self).translate(t)
+        super(Hydrostatics, self).translate(t)
         self._gravity_center += t
         if update:
             self._update_hydrostatic_properties()
@@ -465,10 +473,10 @@ class HSmesh(mesh.Mesh):
         eps = 1e-4  # For zeroing tiny coefficients in the hydrostatic stiffness matrix
     
         # Clipping the mesh by the Oxy plane
-        # TODO: ne pas recreer une instance de clipper mais la stocker et mettre a jour son maillage source a chaque
-        # fois qu'on appelle update_hydrostatics
-        plane = mesh.Plane([0., 0., 1.], 0.)  # Oxy plane
-        clipper = MeshClipper(self, plane, assert_closed_boundaries=True, verbose=False)
+        # TODO: ne pas recreer une instance de MeshClipper a fois mais la stocker et mettre a jour son maillage ainsi
+        #  que ses donnees
+
+        clipper = MeshClipper(self.mesh, assert_closed_boundaries=True, verbose=False)
         clipped_mesh = clipper.clipped_mesh  # TODO: enregistrer le maillage coupe !!!
         
         # Retrieving faces properties for the clipped mesh
@@ -478,7 +486,7 @@ class HSmesh(mesh.Mesh):
         
         if np.any(areas == 0.): # TODO: bloc a retirer
             print 'probleme de facette'
-            self.quick_save()
+            self.mesh.quick_save()
             raise Exception
         
         # Storing clipped mesh
@@ -631,7 +639,7 @@ class HSmesh(mesh.Mesh):
         
         if self.verbose:
             print "\nComplying with a displacement of %.3f tons" % disp
-            print "-------------------------------------------------------"
+            print "----------------------------------------------"
         
         self.mass = disp
         
@@ -650,10 +658,13 @@ class HSmesh(mesh.Mesh):
                 break
             
             # Translating the mesh
-            self.translate_z(dz)
+            self.mesh.translate_z(dz)
+            self._gravity_center[2] += dz
+            
+            self._update_hydrostatic_properties()
     
             residual = self.delta_fz
-            if math.fabs(residual/self._mg) < reltol:
+            if math.fabs(residual / self._mg) < reltol:
                 if self.verbose:
                     print '\t-> Convergence obtained after %u iterations' % iter
                 break
@@ -675,10 +686,10 @@ class HSmesh(mesh.Mesh):
         
         # Initial displacement equilibrium
         if init_disp:
-            verbose = self.verbose
-            self.verbose = False
+            # verbose = self.verbose
+            # self.verbose = False
             self.set_displacement(self.mass)
-            self.verbose = verbose
+            # self.verbose = verbose
         
         
         # Retrieving solver parameters
@@ -713,25 +724,33 @@ class HSmesh(mesh.Mesh):
                 
                 unstable_config = False
                 
-                # Max iterations reach
+                # Max iterations reached
                 if nb_relaunch < max_nb_relaunch-1:
                     nb_relaunch += 1
                     # Random on the position of the body
                     # print 'Max iteration reached: relaunching for the %uth time with random orientation' % nb_relaunch
                     thetax, thetay = np.random.rand(2) * math.pi
-                    self.rotate([thetax, thetay, 0.])
-                    # self.set_displacement(self.mass)
+                    R = self.mesh.rotate([thetax, thetay, 0.])
+                    self._gravity_center = np.dot(R, self._gravity_center)
+                    self._rotation = np.dot(R, self._rotation)
+                    self._update_hydrostatic_properties()
+                    
                     dz = thetax = thetay = 0.
                     
                 else:
-                    # Max number of relaunch allowed
+                    # Max number of relaunch allowed. Failed to find an equilibrium configuration.
                     code = 0
                     break
         
-            # Applying transformation to the mesh, hydrostatics is automatically updated
-            self.translate_z(dz, update=False)
-            self.rotate([thetax, thetay, 0.])
+            # Applying transformation to the mesh
+            self.mesh.translate_z(dz)
+            self._gravity_center[2] += dz
             
+            R = self.mesh.rotate([thetax, thetay, 0.])
+            self._gravity_center = np.dot(R, self._gravity_center)
+            self._rotation = np.dot(R, self._rotation)
+            
+            self._update_hydrostatic_properties()
 
             # if self.animate:
             #     mmio.write_VTP('mesh%u.vtp' % iter, mymesh_c.vertices, mymesh_c.faces)
@@ -746,21 +765,16 @@ class HSmesh(mesh.Mesh):
             #     # Convergence at an equilibrium
                 if self.isstable():
                     # Stable equilibrium
-                    if self.verbose:
-                        print "Stable equilibrium reached after %u iterations and %u random relaunch" % (iter,
-                                                                                                       nb_relaunch)
                     code = 1
                     break
                 else:
                     if self._solver_parameters['stop_at_unstable']:
-                        if self.verbose:
-                            print 'Unstable equilibrium reached after %u iterations and %u random relaunch' % (
-                            iter, nb_relaunch)
+                        # Unstable configuration reached
                         code = 2
                         break
                     # TODO: mettre une option permettant de choisir si on s'arrete a des configs instables
                     else:
-                        # We force the relaunch with an other random orientaiton
+                        # We force the relaunch with an other random orientation as initial condition
                         unstable_config = True
                         iter += 1
                         continue
@@ -782,17 +796,18 @@ class HSmesh(mesh.Mesh):
             iter += 1
     
         # Zeroing xcog and ycog
-        self.translate([-self._gravity_center[0], -self._gravity_center[1], 0.])
-    
-        # if self.verbose:
-        #     if code == 0:
-        #         # Max iterations
-        #         print 'No convergence after %u iterations' % itermax # FIXME: faux, c'est pas itermax
-        #     elif code == 1:
-        #         print 'Convergence reached after %u iterations at %f %% of the displacement.' % (iter, reltol * 100)
-        #     elif code == 2:
-        #         print 'Convergence reached but at an unstable configuration'
-    
+        self.mesh.translate([-self._gravity_center[0], -self._gravity_center[1], 0.])
+        self.hs_data['buoy_center'][:2] -= self._gravity_center[:2]
+        self._gravity_center[:2] = 0.
+        
+        if self.verbose:
+            if code == 0:
+                print "\t-> Maximum number of relaunch reached. Failed to find an equilibrum position."
+            elif code == 1:
+                print "Stable equilibrium reached after %u iterations and %u random relaunch" % (iter, nb_relaunch)
+            elif code == 2:
+                print 'Unstable equilibrium reached after %u iterations and %u random relaunch' % (iter, nb_relaunch)
+        
         return code
 
     def get_hydrostatic_report(self):
@@ -845,10 +860,12 @@ class HSmesh(mesh.Mesh):
     #     pass
 
     def show(self):
+        # TODO: Ce n'est pas ce module qui doit savoir utiliser vtk !!!
+        
         import MMviewer
         import vtk
         
-        vtk_polydata = self._vtk_polydata()
+        vtk_polydata = self.mesh._vtk_polydata()
         self.viewer = MMviewer.MMViewer()
         self.viewer.add_polydata(vtk_polydata)
         
@@ -973,7 +990,7 @@ if __name__ == '__main__':
     
     vertices, faces = mmio.load_VTP('meshmagick/tests/data/SEAREV.vtp')
     
-    searev = HSmesh(vertices, faces, name='SEAREV')
+    searev = Hydrostatics(vertices, faces, name='SEAREV')
     
     searev.mass = 2300
     searev.gravity_center = [1, 3, 5]

@@ -557,7 +557,8 @@ def main():
                         help="""Specifies the acceleration of gravity on the earth surface.
                         Default is 9.81 m/s**2.
                         """)
-
+    
+    parser.add_argument('--hs_solver_params', nargs='+')
 
     # ARGUMENTS RELATED TO THE COMPUTATION OF INERTIA PARAMETERS
     # parser.add_argument('--rho-medium', default=7500., type=float,
@@ -1006,7 +1007,7 @@ def main():
         grav = args.grav
         rho_water = args.rho_water
         
-        hsmesh = hs.HSmesh(mesh.vertices, mesh.faces, name=mesh.name, rho_water=rho_water, grav=grav)
+        hsmesh = hs.Hydrostatics(mesh, rho_water=rho_water, grav=grav)
         hsmesh.verbose = verbose
         
         if args.disp is not None:
@@ -1043,14 +1044,18 @@ def main():
             hsmesh.set_displacement(disp)
             
         msg = """\nWARNING !! : Keep in mind that the mesh may have a new orientation in the Oxy plane so the hydrostatic
-        stiffness matrix may be impractical as not expressed in a convenient axis system. Use the result with caution and
-        have a look at the mesh by using the --show option. This should be fixed in a future release."""
+        stiffness matrix may be impractical as not expressed in a convenient axis system. Use the result
+        with caution and have a look at the mesh by using the --show option.
+        
+        This should be fixed in a future release."""
             
         if case == (False, True, False) or case == (False, True, True):
             if verbose:
-                print """\nSetting mesh position so that we are at the current displacement of %.3f tons and in a stable
-configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
+                print """
+                \nSetting mesh position so that we are at the current displacement of %.3f tons and in a stable
+                configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
                       % (disp, cog[0], cog[1], cog[2])
+                
             hsmesh.gravity_center = cog
             hsmesh.mass = disp
             hsmesh.equilibrate(init_disp=False)
@@ -1061,8 +1066,9 @@ configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
             hsmesh.zg = zcog
             
         if case == (True, True, False) or case == (True, True, True):
-            print """\nSetting mesh position so that the displacement is equal to %.3f tons and in a stable
-configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
+            print """
+            \nSetting mesh position so that the displacement is equal to %.3f tons and in a stable
+            configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
                   % (disp, cog[0], cog[1], cog[2])
             hsmesh.gravity_center = cog
             hsmesh.mass = disp
