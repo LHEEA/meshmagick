@@ -3,14 +3,14 @@
 # PYTHON_ARGCOMPLTETE_OK
 
 # Python module to manipulate 2D meshes for hydrodynamics purposes
-
+# TODO: Change the following docstring as it is no more up to date
 """
 This module contains utility function to manipulate, load, save and
 convert surface mesh files used by the hydrodynamics community.
-Two numpy arrays are manipulated in this module : _vertices and _faces.
-_vertices is the array of nodes coordinates. It is an array of shape (nv, 3) where
+Two numpy arrays are manipulated in this module : vertices and faces.
+vertices is the array of nodes coordinates. It is an array of shape (nv, 3) where
 nv is the number of nodes in the mesh.
-_faces is the array of cell connectivities. It is an array of shape (nf, 4) where
+faces is the array of cell connectivities. It is an array of shape (nf, 4) where
 nf is the number of cells in the mesh. Not that it has 4 columns as we consider
 flat polygonal cells up to 4 edges (quads). Triangles are obtained by repeating
 the first node at the end of the cell node ID list.
@@ -382,11 +382,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('infilename', # TODO : voir pour un typ=file pour tester l'existence
-                        help='path of the input mesh file in any format')
+                        help='path of the input mesh file in any supported format')
 
     parser.add_argument('-o', '--outfilename', type=str,
                         help="""path of the output mesh file. The format of
-                         this file is determined from the extension given
+                         this file is determined from the given extension.
                          """)
 
     parser.add_argument('-ifmt', '--input-format',
@@ -411,55 +411,55 @@ def main():
                         help="""prints mesh quality""",
                         action='store_true')
 
-    parser.add_argument('-t', '--translate',
+    parser.add_argument('-t', '--translate', metavar=('Tx', 'Ty', 'Tz'),
                         nargs=3, type=float,
                         help="""translates the mesh in 3D
                         Usage -translate tx ty tz""")
 
-    parser.add_argument('-tx', '--translatex', type=float,
+    parser.add_argument('-tx', '--translatex', type=float, metavar='Tx',
                         help="""translates the mesh following the x direction""")
 
-    parser.add_argument('-ty', '--translatey', type=float,
+    parser.add_argument('-ty', '--translatey', type=float, metavar='Ty',
                         help="""translates the mesh following the y direction""")
 
-    parser.add_argument('-tz', '--translatez', type=float,
+    parser.add_argument('-tz', '--translatez', type=float, metavar='Tz',
                         help="""translates the mesh following the z direction""")
 
-    parser.add_argument('-r', '--rotate',
+    parser.add_argument('-r', '--rotate', metavar=('Rx', 'Ry', 'Rz'),
                         nargs=3, type=float,
                         help="""rotates the mesh in 3D""")
 
-    parser.add_argument('-rx', '--rotatex', type=float,
+    parser.add_argument('-rx', '--rotatex', type=float, metavar='Rx',
                         help="""rotates the mesh around the x direction""")
 
-    parser.add_argument('-ry', '--rotatey', type=float,
+    parser.add_argument('-ry', '--rotatey', type=float, metavar='Ry',
                         help="""rotates the mesh around the y direction""")
 
-    parser.add_argument('-rz', '--rotatez', type=float,
+    parser.add_argument('-rz', '--rotatez', type=float, metavar='Rz',
                         help="""rotates the mesh around the z direction""")
 
-    parser.add_argument('-s', '--scale', type=float,
+    parser.add_argument('-s', '--scale', type=float, metavar='S',
                         help="""scales the mesh. CAUTION : if used along
                          with a translation option, the scaling is done before
                         the translations. The translation magnitude should be set
                         accordingly to the newly scaled mesh.
                         """)
 
-    parser.add_argument('-sx', '--scalex', type=float,
+    parser.add_argument('-sx', '--scalex', type=float, metavar='Sx',
                         help="""scales the mesh along x axis. CAUTION : if used along
                          with a translation option, the scaling is done before
                         the translations. The translation magnitude should be set
                         accordingly to the newly scaled mesh.
                         """)
 
-    parser.add_argument('-sy', '--scaley', type=float,
+    parser.add_argument('-sy', '--scaley', type=float, metavar='Sy',
                         help="""scales the mesh along y axis. CAUTION : if used along
                          with a translation option, the scaling is done before
                         the translations. The translation magnitude should be set
                         accordingly to the newly scaled mesh.
                         """)
 
-    parser.add_argument('-sz', '--scalez', type=float,
+    parser.add_argument('-sz', '--scalez', type=float, metavar='Sz',
                         help="""scales the mesh along z axis. CAUTION : if used along
                          with a translation option, the scaling is done before
                         the translations. The translation magnitude should be set
@@ -474,7 +474,7 @@ def main():
     parser.add_argument('-fn', '--flip-normals', action='store_true',
                         help="""flips the normals of the mesh""")
 
-    parser.add_argument('-p', '--plane', nargs='+', action='append',
+    parser.add_argument('-p', '--plane', nargs='+', action='append', metavar='Arg',
                         help="""Defines a plane used by the --clip_by_plane and --symmetrize options.
                         It can be defined by the floats nx ny nz c where [nx, ny, nz]
                         is a normal vector to the plane and c defines its position
@@ -488,7 +488,7 @@ def main():
                         0 following the order given in the command line.
                         """)
 
-    parser.add_argument('-c', '--clip_by_plane', nargs='*', action='append',
+    parser.add_argument('-c', '--clip_by_plane', nargs='*', action='append', metavar='Arg',
                         help="""cuts the mesh with a plane. Is no arguments are given, the Oxy plane
                         is used. If an integer is given, it should correspond to a plane defined with
                         the --plane option. If a key string is given, it should be a valid key (see
@@ -496,7 +496,8 @@ def main():
                         also be given for the plane definition just as for the --plane option. Several
                         clipping planes may be defined on the same command line.""")
 
-    parser.add_argument('-md', '--merge-duplicates', nargs='?', const='1e-8', default=None,
+    parser.add_argument('-md', '--merge-duplicates', nargs='?', const='1e-8',
+                        default=None, metavar='Tol',
                         help="""merges the duplicate nodes in the mesh with the absolute tolerance
                         given as argument (default 1e-8). Tolerance must be lower than 1""")
 
@@ -506,7 +507,7 @@ def main():
                         aspect ratios is kept. This option may be used in conjunction with a
                         mesh export in a format that only deal with triangular cells like STL format.""")
 
-    parser.add_argument('-sym', '--symmetrize', nargs='*', action='append',
+    parser.add_argument('-sym', '--symmetrize', nargs='*', action='append', metavar='Arg',
                         help="""Symmetrize the mesh by a plane defined wether by 4 scalars, i.e.
                         the plane normal vector coordinates and a scalar c such as N.X=c is the
                         plane equation (with X a point of the plane) or a string among ['Oxy',
@@ -516,12 +517,12 @@ def main():
                         Be careful that symmetry is applied before any rotation so as the plane
                         equation is defined in the initial frame of reference.""")
     
-    parser.add_argument('--mirror', nargs='+',
-                        help="""Mirror the mesh about the specified plane. If no plane is given
-                        as argument but the option is not followed by a command-line argument,
-                        the default Oxy plane will be used.""")
-    
-    
+    parser.add_argument('--mirror', nargs='+', metavar='Arg',
+                        help="""Mirror the mesh through the specified plane. Plane may be specified
+                        with reference planes keys (see --plane option), or by 4 scalars, or by the
+                        id of a plane defined with the --plane option. By default, the Oxy plane
+                        is used when the option has no argument.""")
+
     
     # Arguments for hydrostatics computations
     # TODO: l'option -hs devrait etre une sous-commande au sens de argparse
@@ -531,17 +532,17 @@ def main():
                         command line. When used along with options --disp, --cog or
                         --zcog, the behaviour is different.""")
                         
-    parser.add_argument('--disp', default=None, type=float,
+    parser.add_argument('--disp', default=None, type=float, metavar='Disp',
                         help="""Specifies the expected displacement for hydrostatics.
                             It must be given in tons.
                             """)
     
-    parser.add_argument('--cog', nargs='+',
+    parser.add_argument('--cog', nargs=3, metavar=('Xg', 'Yg', 'Zg'),
                         help="""Specifies the 3D position of the center of gravity.
                         The third coordinate given has priority over the value given
                         with the --zcog option.""")
     
-    parser.add_argument('--zcog', default=None, type=float,
+    parser.add_argument('--zcog', default=None, type=float, metavar='Zcog',
                         help="""Specifies the z position of the center of gravity. This
                             is the minimal data needed for hydrostatic stiffness matrix
                             computation. It is however overwriten by the third component
@@ -549,16 +550,45 @@ def main():
                             is given, zcog is set to 0.
                             """)
     
-    parser.add_argument('--rho-water', default=1023., type=float,
+    parser.add_argument('--rho-water', default=1023., type=float, metavar='Rho',
                         help="""Specifies the density of salt water. Default is 1023 kg/m**3.
                         """)
 
-    parser.add_argument('-g', '--grav', default=9.81, type=float,
+    parser.add_argument('-g', '--grav', default=9.81, type=float, metavar='G',
                         help="""Specifies the acceleration of gravity on the earth surface.
                         Default is 9.81 m/s**2.
                         """)
     
-    parser.add_argument('--hs_solver_params', nargs='+')
+    # parser.add_argument('--hs_solver_params', nargs='+')
+    
+    parser.add_argument('-af', '--absolute_force', nargs=6, action='append',
+                        metavar=('X', 'Y', 'Z', 'Fx', 'Fy', 'Fz'),
+                        help="""Add an additional absolute force applied to the mesh in
+                        hydrostatics equilibrium computations. It is absolute as force
+                        orientation does not change during hydrostatic equilibrium
+                        computations, but application point follows the mesh motion.
+                        The option is called with 6 arguments such that:
+                        
+                            -af x y z fx fy fz
+                         
+                        where [x, y, z] are the coordinates of the application point
+                        (in meters) and [fx, fy, fz] are the components of the force.
+                        Those are expressed in the initial mesh frame.
+                         """)
+    
+    parser.add_argument('-rf', '--relative_force', nargs=6, action='append', type=float,
+                        metavar=('X', 'Y', 'Z', 'Fx', 'Fy', 'Fz'),
+                        help="""Add an additional relative force applied to the mesh in
+                        hydrostatics equilibrium computations. It is relative as force
+                        orientation follows the orientation of the mesh during equilibrium
+                        computations. The option is called with 6 arguments such that:
+                         
+                            -af x y z fx fy fz
+                         
+                        where [x, y, z] are the coordinates of the application point
+                        of the force and [fx, fy, fz] are the components of the force.
+                        Those are expressed in the initial mesh frame.
+                         """)
 
     # ARGUMENTS RELATED TO THE COMPUTATION OF INERTIA PARAMETERS
     # parser.add_argument('--rho-medium', default=7500., type=float,
@@ -1003,32 +1033,48 @@ def main():
     # Compute hydrostatics
     # ESSAI
     
+    additional_forces = []
+    if args.relative_force is not None:
+        for item in args.relative_force:
+            force = hs.AdditionalForce(point=map(float, item[:3]), value=map(float, item[3:]), mode='relative')
+            additional_forces.append(force)
+    
+    if args.absolute_force is not None:
+        for item in args.absolute_force:
+            force = hs.AdditionalForce(point=map(float, item[:3]), value=map(float, item[3:]), mode='absolute')
+            additional_forces.append(force)
+        
+        
+    # print args.absolute_force
+    
     if args.hydrostatics is not None:
         grav = args.grav
         rho_water = args.rho_water
         
-        hsmesh = hs.Hydrostatics(mesh, rho_water=rho_water, grav=grav)
-        hsmesh.verbose = verbose
+        hs_solver = hs.Hydrostatics(mesh, rho_water=rho_water, grav=grav, verbose=verbose)
+        
+        for force in additional_forces:
+            hs_solver.add_force(force)
         
         if args.disp is not None:
             disp = args.disp
             has_disp = True
         else:
-            disp = hsmesh.displacement
+            disp = hs_solver.displacement
             has_disp = False
         
         if args.cog is not None:
             cog = map(float, args.cog)
             has_cog = True
         else:
-            cog = hsmesh.gravity_center
+            cog = hs_solver.gravity_center
             has_cog = False
         
         if args.zcog is not None:
             zcog = args.zcog
             has_zcog = True
         else:
-            zcog = hsmesh.zg
+            zcog = hs_solver.zg
             has_zcog = False
         
         # Overwrite zcog by cog[2] in case both have been given
@@ -1040,8 +1086,8 @@ def main():
         if case == (True, False, False) or case == (True, False, True):
             if verbose:
                 print "\nSetting mesh displacement to %.3f tons" % disp
-            hsmesh.zg = zcog
-            hsmesh.set_displacement(disp)
+            hs_solver.zg = zcog
+            hs_solver.set_displacement(disp)
             
         msg = """\nWARNING !! : Keep in mind that the mesh may have a new orientation in the Oxy plane so the hydrostatic
         stiffness matrix may be impractical as not expressed in a convenient axis system. Use the result
@@ -1056,30 +1102,32 @@ def main():
                 configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
                       % (disp, cog[0], cog[1], cog[2])
                 
-            hsmesh.gravity_center = cog
-            hsmesh.mass = disp
-            hsmesh.equilibrate(init_disp=False)
+            hs_solver.gravity_center = cog
+            hs_solver.mass = disp
+            hs_solver.equilibrate(init_disp=False)
             warn(msg)
         
         if case == (False, False, True) or case == (False, False, False):
-            print "Generating hydrostatic data for a zcog of %.3f meters." % zcog
-            hsmesh.zg = zcog
+            if verbose:
+                print "Generating hydrostatic data for a zcog of %.3f meters." % zcog
+            hs_solver.zg = zcog
             
         if case == (True, True, False) or case == (True, True, True):
-            print """
-            \nSetting mesh position so that the displacement is equal to %.3f tons and in a stable
-            configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
-                  % (disp, cog[0], cog[1], cog[2])
-            hsmesh.gravity_center = cog
-            hsmesh.mass = disp
-            hsmesh.equilibrate(init_disp=True)
+            if verbose:
+                print """
+                \nSetting mesh position so that the displacement is equal to %.3f tons and in a stable
+                configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
+                    % (disp, cog[0], cog[1], cog[2])
+            hs_solver.gravity_center = cog
+            hs_solver.mass = disp
+            hs_solver.equilibrate(init_disp=True)
             warn(msg)
             
         # TODO: voir pour une option pour sortir plutot le maillage coupe pour Nemoh
-        mesh = hsmesh
+        mesh = hs_solver
         
         if verbose:
-            print hsmesh.get_hydrostatic_report()
+            print hs_solver.get_hydrostatic_report()
         
         
     # WARNING : No more mesh modification should be released from this point until the end of the main

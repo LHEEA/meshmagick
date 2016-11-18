@@ -22,6 +22,45 @@ GM_min = 0.15
 # TODO: throw the transformation needed to get the equilibrium from initial position after a successful equilibrium computation
 # TODO: make the mesh not to diverge from principal axis
 
+class AdditionalForce(object):
+    def __init__(self, point=[0, 0, 0], value=[0, 0, 0], name='', mode='relative'):
+        
+        assert len(point) == 3
+        assert len(value) == 3
+        assert mode in ('relative', 'absolute')
+        
+        self.point = np.asarray(point, dtype=np.float)
+        self.value = np.asarray(value, dtype=np.float)
+        self.name = str(name)
+        self.mode = mode
+    
+    def __str__(self):
+        str_repr = "Force: %s\n\tPoint: %s\n\tValue: %s\n\tMode: %s" % (self.name, self.point, self.value, self.mode)
+        return str_repr
+    
+    def update(self, dz=0., rot=np.eye(3, dtype=np.float)):
+        self.point[2] += dz
+        self.point = np.dot(rot, self.point)
+        if self.mode == 'relative':
+            self.value = np.dot(rot, self.value)
+        return
+    
+    def update_xy(self, dx, dy):
+        self.point[0] += dx
+        self.point[1] += dy
+        return
+    
+    @property
+    def hs_force(self):
+        Fz = self.value[2]
+        moment = np.cross(self.point, self.value)
+        Mx, My = moment[:2]
+        return np.array([Fz, Mx, My], dtype=np.float)
+    
+    def reset(self): # TODO: a appeler depuis le reset de Hydrostatics
+        raise NotImplementedError
+    
+
 class Hydrostatics(object):
     """
     Class to perform hydrostatic computations on meshes.
@@ -55,7 +94,7 @@ class Hydrostatics(object):
     
     """
     def __init__(self, mesh, CG=np.zeros(3, dtype=np.float), zg=0., mass=None, rho_water=1023, grav=9.81,
-                 animate=False):
+                 verbose=False, animate=False):
         
         # super(HSmesh, self).__init__(vertices, faces, name=None)
         self.backup = dict()
@@ -78,7 +117,7 @@ class Hydrostatics(object):
         # Solver parameters
         self._solver_parameters = {'reltol': 1e-2,
                                    'itermax': 100,
-                                   'max_nb_relaunch': 10,
+                                   'max_nb_restart': 10,
                                    'theta_relax': 2,
                                    'z_relax': 0.1,
                                    'stop_at_unstable': False}
@@ -95,9 +134,26 @@ class Hydrostatics(object):
         
         self._mg = self._mass * self._gravity
         
+        self._verbose = verbose
+        
         self.animate = animate
         
         self._rotation = np.eye(3, dtype=np.float)
+        
+        self.additional_forces = []
+        
+    
+    @property
+    def verbose(self):
+        return self._verbose
+    
+    def verbose_on(self):
+        self._verbose = True
+        return
+    
+    def verbose_off(self):
+        self._verbose = False
+        return
     
     @property
     def gravity(self):
@@ -216,18 +272,6 @@ class Hydrostatics(object):
         return self.hs_data['KH']
 
     @property
-    def residual(self):
-        rhogV = self._rhog * self.hs_data['disp_volume']
-        mg = self._mg
-    
-        xb, yb, _ = self.hs_data['buoy_center']
-        xg, yg, _ = self._gravity_center
-    
-        return np.array([rhogV - mg,
-                         rhogV * yb - mg * yg,
-                         -rhogV * xb + mg * xg])
-    
-    @property
     def hydrostatic_mesh(self):
         return self.hs_data['hs_mesh']
     
@@ -235,12 +279,7 @@ class Hydrostatics(object):
         
         # TODO: Utiliser plutot la rotation generale pour retrouver le maillage initial
         
-        # Ajout
         self.mesh = self.backup['init_mesh']
-        # FIN
-        
-        # self.vertices = self.backup['initial_vertices']
-        # self.faces = self.backup['initial_faces']
         self._gravity_center = self.backup['gravity_center']
         
         self._update_hydrostatic_properties()
@@ -356,14 +395,14 @@ class Hydrostatics(object):
         return
     
     @property
-    def max_relaunch(self):
-        return self._solver_parameters['max_nb_relaunch']
+    def max_restart(self):
+        return self._solver_parameters['max_nb_restart']
     
-    @max_relaunch.setter
-    def max_relaunch(self, value):
+    @max_restart.setter
+    def max_restart(self, value):
         value = int(value)
         assert value >= 0
-        self._solver_parameters['max_nb_relaunch'] = value
+        self._solver_parameters['max_nb_restart'] = value
         return
     
     @property
@@ -431,10 +470,6 @@ class Hydrostatics(object):
             self._update_hydrostatic_properties()
         return
      
-    # def solver_stats(self):
-    #     rep_str = "Last equilibrium obtained after %u iterations and %u relaunch" % (iter, nb_relaunch)
-    #     return rep_str
-
     def _update_hydrostatic_properties(self):
         """
         Computes the hydrostatics properties of a mesh.
@@ -609,6 +644,45 @@ class Hydrostatics(object):
     
         return
     
+    def add_force(self, force):
+        assert isinstance(force, AdditionalForce)
+        self.additional_forces.append(force)
+        return
+    
+    @property
+    def scale(self):
+        mg = self._mg
+        B = self.hs_data['B']
+        Lpp = self.hs_data['Lpp']
+        scale = np.array([mg, mg * B, mg * Lpp])
+        return scale
+
+    @property
+    def residual(self):
+        rhogV = self._rhog * self.hs_data['disp_volume']
+        mg = self._mg
+    
+        xb, yb, _ = self.hs_data['buoy_center']
+        xg, yg, _ = self._gravity_center
+    
+        residual = np.array([rhogV - mg,
+                             rhogV * yb - mg * yg,
+                             -rhogV * xb + mg * xg])
+        
+        for force in self.additional_forces:
+            residual += force.hs_force
+        # # Essai
+        # Fz = hs.force['force'][2]
+        # M = np.cross(hs.force['point'], hs.force['force'])
+        # Mx = M[0]
+        # My = M[1]
+        #
+        # residual += [Fz, Mx, My]
+        #
+        # # FIN
+        
+        return residual
+    
     def set_displacement(self, disp):
         """
         Displaces mesh at a prescribed displacement and returns
@@ -661,6 +735,9 @@ class Hydrostatics(object):
             self.mesh.translate_z(dz)
             self._gravity_center[2] += dz
             
+            for force in self.additional_forces:
+                force.update(dz=dz)
+            
             self._update_hydrostatic_properties()
     
             residual = self.delta_fz
@@ -677,20 +754,19 @@ class Hydrostatics(object):
         # self.mass = self.hs_data['disp_mass']
         
         return
-        
+
     def equilibrate(self, init_disp=True):
-        
-        if self.verbose:
-            print '\nComputing equilibrium form  initial condition.'
-            print '----------------------------------------------'
         
         # Initial displacement equilibrium
         if init_disp:
-            # verbose = self.verbose
-            # self.verbose = False
+            if self.verbose:
+                print "First placing the mesh at the target displacement"
+                print "-------------------------------------------------"
             self.set_displacement(self.mass)
-            # self.verbose = verbose
         
+        if self.verbose:
+            print '\nComputing equilibrium from initial condition.'
+            print '----------------------------------------------'
         
         # Retrieving solver parameters
         z_relax = self._solver_parameters['z_relax']
@@ -700,45 +776,48 @@ class Hydrostatics(object):
         
         itermax = self._solver_parameters['itermax']
         reltol = self._solver_parameters['reltol']
-        max_nb_relaunch = self._solver_parameters['max_nb_relaunch']
+        max_nb_restart = self._solver_parameters['max_nb_restart']
         
         rhog = self._rhog
         mg = self._mg
         
         # Initialization
         dz = thetax = thetay = 0.
-        iter = nb_relaunch = 0
+        iter = nb_restart = 0
         unstable_config = False
     
         while True:
             # print '\n', iter
-            if unstable_config or ( iter == (nb_relaunch + 1) * (itermax-1) ):
+            if unstable_config or ( iter == (nb_restart + 1) * (itermax-1) ):
                 if self.verbose:
                     if unstable_config:
                         print 'Unstable equilibrium reached.'
-                        print '\t-> Keep searching a stable configuration by random relaunch number %u.' % (nb_relaunch+1)
+                        print '\t-> Keep searching a stable configuration by random restart number %u.' % (nb_restart+1)
                     else:
                         print 'Failed to find an equilibrium configuration with these initial conditions in %u ' \
                               'iterations.' % itermax
-                        print '\t-> Keep searching by random relaunch number %u.' % (nb_relaunch+1)
+                        print '\t-> Keep searching by random restart number %u.' % (nb_restart+1)
                 
                 unstable_config = False
                 
                 # Max iterations reached
-                if nb_relaunch < max_nb_relaunch-1:
-                    nb_relaunch += 1
+                if nb_restart < max_nb_restart-1:
+                    nb_restart += 1
                     # Random on the position of the body
-                    # print 'Max iteration reached: relaunching for the %uth time with random orientation' % nb_relaunch
+                    # print 'Max iteration reached: restarting for the %uth time with random orientation' % nb_restart
                     thetax, thetay = np.random.rand(2) * math.pi
                     R = self.mesh.rotate([thetax, thetay, 0.])
                     self._gravity_center = np.dot(R, self._gravity_center)
                     self._rotation = np.dot(R, self._rotation)
                     self._update_hydrostatic_properties()
                     
+                    for force in self.additional_forces:
+                        force.update(rot=R)
+                    
                     dz = thetax = thetay = 0.
                     
                 else:
-                    # Max number of relaunch allowed. Failed to find an equilibrium configuration.
+                    # Max number of restart allowed. Failed to find an equilibrium configuration.
                     code = 0
                     break
         
@@ -750,16 +829,17 @@ class Hydrostatics(object):
             self._gravity_center = np.dot(R, self._gravity_center)
             self._rotation = np.dot(R, self._rotation)
             
+            # Updating force data
+            for force in self.additional_forces:
+                force.update(dz=dz, rot=R)
+            
             self._update_hydrostatic_properties()
 
             # if self.animate:
             #     mmio.write_VTP('mesh%u.vtp' % iter, mymesh_c.vertices, mymesh_c.faces)
         
             residual = self.residual
-            
-            B = self.hs_data['B']
-            Lpp = self.hs_data['Lpp']
-            scale = np.array([mg, mg * B, mg * Lpp])
+            scale = self.scale
             
             if np.all(np.fabs(self.residual / scale) < reltol):
             #     # Convergence at an equilibrium
@@ -774,7 +854,7 @@ class Hydrostatics(object):
                         break
                     # TODO: mettre une option permettant de choisir si on s'arrete a des configs instables
                     else:
-                        # We force the relaunch with an other random orientation as initial condition
+                        # We force the restart with an other random orientation as initial condition
                         unstable_config = True
                         iter += 1
                         continue
@@ -799,14 +879,16 @@ class Hydrostatics(object):
         self.mesh.translate([-self._gravity_center[0], -self._gravity_center[1], 0.])
         self.hs_data['buoy_center'][:2] -= self._gravity_center[:2]
         self._gravity_center[:2] = 0.
+        for force in self.additional_forces:
+            force.update_xy(-self._gravity_center[0], -self._gravity_center[1])
         
         if self.verbose:
             if code == 0:
-                print "\t-> Maximum number of relaunch reached. Failed to find an equilibrum position."
+                print "\t-> Maximum number of restart reached. Failed to find an equilibrum position."
             elif code == 1:
-                print "Stable equilibrium reached after %u iterations and %u random relaunch" % (iter, nb_relaunch)
+                print "Stable equilibrium reached after %u iterations and %u random restart" % (iter, nb_restart)
             elif code == 2:
-                print 'Unstable equilibrium reached after %u iterations and %u random relaunch' % (iter, nb_relaunch)
+                print 'Unstable equilibrium reached after %u iterations and %u random restart' % (iter, nb_restart)
         
         return code
 
@@ -814,8 +896,10 @@ class Hydrostatics(object):
         
         msg = '\n'
         
-        msg += ('Wetted surface area = %f (m**2)\n' % self.wetted_surface_area)
-        msg += ('Displacement volume = %f (m**3)\n' % self.displacement_volume)
+        msg += ('Gravity acceleration = %.2f m/s**2\n' % self.gravity)
+        msg += ('Density of water = %.2f (kg/m**3)\n' % self.rho_water)
+        msg += ('Wetted surface area = %.2f (m**2)\n' % self.wetted_surface_area)
+        msg += ('Displacement volume = %.2f (m**3)\n' % self.displacement_volume)
         msg += ('Displacement = %.3f (tons)\n' % (self.displacement))
         xb, yb, zb = self.buoyancy_center
         xg, yg, zg = self.gravity_center
@@ -833,16 +917,16 @@ class Hydrostatics(object):
         msg += ('Transverse metacentric height GMx = %.3f (m)\n' % GMx)
         if GMx < 0.:
             msg += ('\t --> Unstable in roll !\n')
-            msg += ('\t     To be stable, you should have at least zg < %f (m)\n' % (r + zb))
-            msg += ('\t     DNV Standards say : zg < %f (m) to get GMx > %f m\n' % (r + zb - GM_min, GM_min))
+            msg += ('\t     To be stable, you should have at least zg < %.3f (m)\n' % (r + zb))
+            msg += ('\t     DNV Standards say : zg < %.3f (m) to get GMx > %.3f m\n' % (r + zb - GM_min, GM_min))
         else:
             msg += ('\t --> Stable in roll\n')
     
         msg += ('Longitudinal metacentric height GMy = %.3f (m)\n' % GMy)
         if GMy < 0.:
             msg += ('\t --> Unstable in pitch !\n')
-            msg += ('\t     To be stable, you should have at least zg < %f (m)\n' % (R + zb))
-            msg += ('\t     DNV Standards say : zg < %f (m) to get GMy > %f m\n' % (R + zb - GM_min, GM_min))
+            msg += ('\t     To be stable, you should have at least zg < %.3f (m)\n' % (R + zb))
+            msg += ('\t     DNV Standards say : zg < %.3f (m) to get GMy > %.3f m\n' % (R + zb - GM_min, GM_min))
         else:
             msg += ('\t --> Stable in pitch\n')
     
@@ -850,15 +934,22 @@ class Hydrostatics(object):
         KH = self.hydrostatic_stiffness_matrix
         for row in KH:
             msg += ('%.4E\t%.4E\t%.4E\n' % (row[0], row[1], row[2]))
-            
+        
+        residual = self.residual
+        msg += ('\nResidual:\n')
+        msg += ('Delta Fz = %.3f N\n' % residual[0])
+        msg += ('Delta Mx = %.3f Nm\n' % residual[1])
+        msg += ('Delta My = %.3f Nm\n' % residual[2])
+        
+        rel_res = residual / self.scale
+        msg += ('\nRelative residual:\n')
+        msg += ('Delta Fz = %E\n' % rel_res[0])
+        msg += ('Delta Mx = %E\n' % rel_res[1])
+        msg += ('Delta My = %E\n' % rel_res[2])
+        msg += ('Relative tolerance of the solver: %.1E' % self.reltol)
+        
         return msg
     
-    # def __str__(self):
-    #     pass
-    #
-    # def __repr__(self):
-    #     pass
-
     def show(self):
         # TODO: Ce n'est pas ce module qui doit savoir utiliser vtk !!!
         
@@ -963,7 +1054,7 @@ class Hydrostatics(object):
         lines_pd.SetLines(lines)
 
         self.viewer.add_polydata(lines_pd, color=[0, 0, 0])
-
+        
         # Adding corner annotation
         ca = vtk.vtkCornerAnnotation()
         ca.SetLinearFontScaleFactor(2)
@@ -981,43 +1072,37 @@ class Hydrostatics(object):
         return
 
 
-
 if __name__ == '__main__':
 
     # The following code are only for testing purpose
     import mmio
     import sys
+    import mesh
     
     vertices, faces = mmio.load_VTP('meshmagick/tests/data/SEAREV.vtp')
     
-    searev = Hydrostatics(vertices, faces, name='SEAREV')
+    searev = mesh.Mesh(vertices, faces, name='SEAREV')
     
-    searev.mass = 2300
-    searev.gravity_center = [1, 3, 5]
-    searev.allow_unstable_off()
-    searev.reltol = 1e-3
+    hs = Hydrostatics(searev)
+    hs.verbose_on()
     
-    searev.equilibrate()
-    searev.show()
+    # hs.mass = 2300
+    hs.gravity_center = [0, 0, -2]
+    hs.allow_unstable_off()
+    hs.reltol = 1e-3
     
-    print searev.get_hydrostatic_report()
-    # searev.show()
-    
-    # R = searev._rotation.copy()
-    # theta, u = mesh._get_axis_angle_from_rotation_matrix(R)
-    #
-    # searev.reset()
-    #
-    # searev.rotate(theta*u)
-    # searev.set_displacement(2300)
-    # searev.show()
-    
-    # searev.reset()
-    # searev.show()
-    
-    # print searev.get_hydrostatic_report()
+    F = [0, 0, -50e3*9.81]
+    force1 = AdditionalForce(point=[0, 0, 5], value=[0, 1e7, 0], mode='relative')
+    # force2 = AdditionalForce(point=[0, 15, -5], value=[0, 0, -50e3*9.81], mode='absolute')
+    # force = AdditionalForce(point=[0, 0, 3], value=[0, 1e7, 0], mode='absolute')
+    hs.add_force(force1)
+    # hs.add_force(force2)
     
     
+    hs.equilibrate()
+    hs.show()
+    
+    print hs.get_hydrostatic_report()
     
     print 'Done !'
     
