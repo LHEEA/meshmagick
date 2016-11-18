@@ -946,7 +946,7 @@ class Hydrostatics(object):
         msg += ('Delta Fz = %E\n' % rel_res[0])
         msg += ('Delta Mx = %E\n' % rel_res[1])
         msg += ('Delta My = %E\n' % rel_res[2])
-        msg += ('Relative tolerance of the solver: %.1E' % self.reltol)
+        msg += ('Relative tolerance of the solver: %.1E\n' % self.reltol)
         
         return msg
     

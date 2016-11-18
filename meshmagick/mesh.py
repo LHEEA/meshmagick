@@ -480,9 +480,12 @@ class Mesh(object):
     def print_quality(self):
         # This function is reproduced from
         # http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py
-
+        polydata = self._vtk_polydata()
         quality = vtk.vtkMeshQuality()
-        quality.SetInput(self._vtk_polydata)
+        if vtk.VTK_MAJOR_VERSION <= 5:
+            quality.SetInput(polydata)
+        else:
+            quality.SetInputData(polydata)
 
         def DumpQualityStats(iq, arrayname):
             an = iq.GetOutput().GetFieldData().GetArray(arrayname)
@@ -523,7 +526,7 @@ class Mesh(object):
              ]
         ]
 
-        if self._vtk_polydata.GetNumberOfCells() > 0:
+        if polydata.GetNumberOfCells() > 0:
             res = ''
             for meshType in meshTypes:
                 res += '\n%s%s' % (meshType[1], ' quality of the mesh ')
@@ -1544,6 +1547,38 @@ class Mesh(object):
     @property
     def volume(self):
         return self._compute_volume()
+    
+    def eval_plain_mesh_inertias(self, rho_medium=1023.):
+        
+        volume = self.volume
+        mass = rho_medium * volume
+        
+        integrals = self.get_surface_integrals()[6:15]
+        sigma_6_8 = integrals[:3]
+        
+        normals = self.faces_normals.T
+        
+        cog = (normals * sigma_6_8).sum(axis=1) / (2*volume)
+        
+        sigma9, sigma10, sigma11 = (normals * integrals[3:6]).sum(axis=1)
+        sigma12, sigma13, sigma14 = (normals * integrals[6:10]).sum(axis=1)
+
+        Ixx = rho_medium * (sigma10 + sigma11) / 3.
+        Iyy = rho_medium * (sigma9 + sigma11) / 3.
+        Izz = rho_medium * (sigma9 + sigma10) / 3.
+        Ixy = rho_medium * sigma12 / 2.
+        Ixz = rho_medium * sigma14 / 2.
+        Iyz = rho_medium * sigma13 / 2.
+
+        inertia_matrix = np.array([[Ixx, -Ixy, -Ixz],
+                                  [-Ixy, Iyy, -Iyz],
+                                  [-Ixz, -Iyz, Izz]], dtype=np.float)
+        
+        inertia_data = {'mass':mass,
+                        'gravity_center':cog,
+                        'inertia_matrix':inertia_matrix
+                        }
+        return inertia_data
     
     def _edges_stats(self):
         pass
