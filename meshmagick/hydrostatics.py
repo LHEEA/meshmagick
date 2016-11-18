@@ -189,7 +189,7 @@ class Hydrostatics(object):
         self._mg = self._mass * self._gravity # SI units
         
         if self.is_sinking():
-            warn('%s is sinking as it is too heavy.' % self.name)
+            raise ValueError('%s is sinking as it is too heavy.' % self.mesh.name)
         
         return
     
