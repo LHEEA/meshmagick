@@ -22,7 +22,7 @@ GM_min = 0.15
 # TODO: throw the transformation needed to get the equilibrium from initial position after a successful equilibrium computation
 # TODO: make the mesh not to diverge from principal axis
 
-class AdditionalForce(object):
+class Force(object):
     def __init__(self, point=[0, 0, 0], value=[0, 0, 0], name='', mode='relative'):
         
         assert len(point) == 3
@@ -644,8 +644,16 @@ class Hydrostatics(object):
     
         return
     
+    def get_gravity_force(self):
+        return Force(point=self._gravity_center, value=[0, 0, -self._mass*self._gravity], mode='absolute')
+    
+    def get_buoyancy_force(self):
+        value = [0, 0, self.rho_water*self._gravity*self.displacement_volume]
+        return Force(point=self.buoyancy_center, value=value, mode='absolute')
+            
     def add_force(self, force):
-        assert isinstance(force, AdditionalForce)
+        # TODO: allow to remove those forces...
+        assert isinstance(force, Force)
         self.additional_forces.append(force)
         return
     
@@ -669,17 +677,9 @@ class Hydrostatics(object):
                              rhogV * yb - mg * yg,
                              -rhogV * xb + mg * xg])
         
+        # Accounting for additional forces in the static equilibrium
         for force in self.additional_forces:
             residual += force.hs_force
-        # # Essai
-        # Fz = hs.force['force'][2]
-        # M = np.cross(hs.force['point'], hs.force['force'])
-        # Mx = M[0]
-        # My = M[1]
-        #
-        # residual += [Fz, Mx, My]
-        #
-        # # FIN
         
         return residual
     
@@ -750,8 +750,6 @@ class Hydrostatics(object):
             if math.fabs(dz) > z_relax:
                 dz = math.copysign(z_relax, dz)
             iter += 1
-        
-        # self.mass = self.hs_data['disp_mass']
         
         return
 
@@ -878,9 +876,11 @@ class Hydrostatics(object):
         # Zeroing xcog and ycog
         self.mesh.translate([-self._gravity_center[0], -self._gravity_center[1], 0.])
         self.hs_data['buoy_center'][:2] -= self._gravity_center[:2]
-        self._gravity_center[:2] = 0.
+        
         for force in self.additional_forces:
             force.update_xy(-self._gravity_center[0], -self._gravity_center[1])
+            
+        self._gravity_center[:2] = 0.
         
         if self.verbose:
             if code == 0:
@@ -950,6 +950,9 @@ class Hydrostatics(object):
         
         return msg
     
+    
+    # FIXME: la methode show ne devrait pas faire appel explicitement a des fonctions vtk...
+    # Tout devrait etre gere dans MMViewer
     def show(self):
         # TODO: Ce n'est pas ce module qui doit savoir utiliser vtk !!!
         
@@ -962,7 +965,7 @@ class Hydrostatics(object):
         
         # Removing the following for the flotation plane as the base class does it now
         # # Adding the flotation plane
-        self.viewer.plane_on()
+        # self.viewer.plane_on()
         
         # # TODO: Use the add_plane method of the viewer...
         # plane = vtk.vtkPlaneSource()
@@ -977,84 +980,34 @@ class Hydrostatics(object):
         # # self.viewer.add_polydata(plane.GetOutput(), color=[0.1, 0.9, 0.7])
         # self.viewer.add_polydata(plane.GetOutput(), color=[0., 102./255, 204./255])
         
-        # Adding a point for the origin
-        pO = vtk.vtkPoints()
-        vO = vtk.vtkCellArray()
-
-        iO = pO.InsertNextPoint([0, 0, 0])
-        vO.InsertNextCell(1)
-        vO.InsertCellPoint(iO)
-
-        pdO = vtk.vtkPolyData()
-        pdO.SetPoints(pO)
-        pdO.SetVerts(vO)
-
-        self.viewer.add_polydata(pdO, color=[0, 0, 0])
+        pd_orig = self.viewer.add_point([0, 0, 0], color=[0, 0, 0])
         
-        # Adding the center of gravity
-        pCG = vtk.vtkPoints()
-        vCG = vtk.vtkCellArray()
-
-        iCG = pCG.InsertNextPoint(self.gravity_center)
-        vCG.InsertNextCell(1)
-        vCG.InsertCellPoint(iCG)
-
-        pdCG = vtk.vtkPolyData()
-        pdCG.SetPoints(pCG)
-        pdCG.SetVerts(vCG)
-
-        self.viewer.add_polydata(pdCG, color=[1, 0, 0])
-
-        # Ploting also a line between O and CG
-        points = vtk.vtkPoints()
-        points.InsertNextPoint(0, 0, 0)
-        points.InsertNextPoint(self.gravity_center)
-
-        line = vtk.vtkLine()
-        line.GetPointIds().SetId(0, 0)
-        line.GetPointIds().SetId(1, 1)
-
-        lines = vtk.vtkCellArray()
-        lines.InsertNextCell(line)
-
-        lines_pd = vtk.vtkPolyData()
-        lines_pd.SetPoints(points)
-        lines_pd.SetLines(lines)
-
-        self.viewer.add_polydata(lines_pd, color=[0, 0, 0])
+        pd_cog = self.viewer.add_point(self.gravity_center, color=[1, 0, 0])
         
-        # Adding the buoyancy center
-        pB = vtk.vtkPoints()
-        vB = vtk.vtkCellArray()
-
-        iB = pB.InsertNextPoint(self.buoyancy_center)
-        vB.InsertNextCell(1)
-        vB.InsertCellPoint(iB)
-
-        pdB = vtk.vtkPolyData()
-        pdB.SetPoints(pB)
-        pdB.SetVerts(vB)
-
-        self.viewer.add_polydata(pdB, color=[0, 1, 0])
-
-        # Ploting also a line between O and B
-        points = vtk.vtkPoints()
-        points.InsertNextPoint(0, 0, 0)
-        points.InsertNextPoint(self.buoyancy_center)
-
-        line = vtk.vtkLine()
-        line.GetPointIds().SetId(0, 0)
-        line.GetPointIds().SetId(1, 1)
-
-        lines = vtk.vtkCellArray()
-        lines.InsertNextCell(line)
-
-        lines_pd = vtk.vtkPolyData()
-        lines_pd.SetPoints(points)
-        lines_pd.SetLines(lines)
-
-        self.viewer.add_polydata(lines_pd, color=[0, 0, 0])
+        pd_orig_cog = self.viewer.add_line([0, 0, 0], self.gravity_center, color=[1, 0, 0])
         
+        pd_buoy = self.viewer.add_point(self.buoyancy_center, color=[0, 1, 0])
+
+        pd_orig_buoy = self.viewer.add_line([0, 0, 0], self.buoyancy_center, color=[0, 1, 0])
+        
+        
+        scale = self.mass*1000
+        
+        # Adding glyph for gravity force
+        gforce = self.get_gravity_force()
+        self.viewer.add_vector(gforce.point, gforce.value, scale=scale, color=[1, 0, 0])
+        
+        # Adding glyph for buoyancy force
+        bforce = self.get_buoyancy_force()
+        self.viewer.add_vector(bforce.point, bforce.value, scale=scale, color=[0, 1, 0])
+        
+        # Adding glyph for additional forces
+        for force in self.additional_forces:
+            self.viewer.add_point(force.point, color=[0, 0, 1])
+            self.viewer.add_vector(force.point, force.value, scale=scale, color=[0, 0, 1])
+        
+        
+        # TODO: mettre la suite dans une methode de MMViewer
         # Adding corner annotation
         ca = vtk.vtkCornerAnnotation()
         ca.SetLinearFontScaleFactor(2)
@@ -1092,7 +1045,7 @@ if __name__ == '__main__':
     hs.reltol = 1e-3
     
     F = [0, 0, -50e3*9.81]
-    force1 = AdditionalForce(point=[0, 0, 5], value=[0, 1e7, 0], mode='relative')
+    force1 = Force(point=[0, 0, 5], value=[0, 1e7, 0], mode='relative')
     # force2 = AdditionalForce(point=[0, 15, -5], value=[0, 0, -50e3*9.81], mode='absolute')
     # force = AdditionalForce(point=[0, 0, 3], value=[0, 1e7, 0], mode='absolute')
     hs.add_force(force1)

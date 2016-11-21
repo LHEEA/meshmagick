@@ -536,9 +536,10 @@ def main():
                         help="""Compute hydrostatics data and throws a report on the
                         command line. When used along with options --disp, --cog or
                         --zcog, the behaviour is different.""")
-                        
+    
+    # TODO: replace disp by mass as it is more correct...
     parser.add_argument('--disp', default=None, type=float, metavar='Disp',
-                        help="""Specifies the expected displacement for hydrostatics.
+                        help="""Specifies the mass of the mesh for hydrostatic computations.
                             It must be given in tons.
                             """)
     
@@ -1047,10 +1048,10 @@ def main():
     if args.plain_inertia is not None:
         inertia_params = mesh.eval_plain_mesh_inertias(args.plain_inertia)
         
-        if args.hydrostatics:
-            print "\nWARNING: Taking inertia computed values to perform further hydrostatics"
-            args.disp = inertia_params['mass']
-            args.cog = inertia_params['gravity_center']
+        # if args.hydrostatics:
+        #     print "\nWARNING: Taking inertia computed values to perform further hydrostatics"
+        #     args.disp = inertia_params['mass']
+        #     args.cog = inertia_params['gravity_center']
         
         if verbose:
             print "\nInertial parameters for a uniform distribution of a medium of density %.3f kg/m**3 in the mesh:\n" % args.plain_inertia
@@ -1058,7 +1059,7 @@ def main():
             cog = inertia_params['gravity_center']
             print "\tCOG (m):\n\t\txg = %.3f\n\t\tyg = %.3f\n\t\tzg = %.3f" % (cog[0], cog[1], cog[2])
             mat = inertia_params['inertia_matrix']
-            print "\tInertia matrix:"
+            print "\tInertia matrix (SI):"
             print "\t\t%.3E\t%.3E\t%.3E" % (mat[0, 0], mat[0, 1], mat[0, 2])
             print "\t\t%.3E\t%.3E\t%.3E" % (mat[1, 0], mat[1, 1], mat[1, 2])
             print "\t\t%.3E\t%.3E\t%.3E" % (mat[2, 0], mat[2, 1], mat[2, 2])
@@ -1067,17 +1068,14 @@ def main():
     additional_forces = []
     if args.relative_force is not None:
         for item in args.relative_force:
-            force = hs.AdditionalForce(point=map(float, item[:3]), value=map(float, item[3:]), mode='relative')
+            force = hs.Force(point=map(float, item[:3]), value=map(float, item[3:]), mode='relative')
             additional_forces.append(force)
     
     if args.absolute_force is not None:
         for item in args.absolute_force:
-            force = hs.AdditionalForce(point=map(float, item[:3]), value=map(float, item[3:]), mode='absolute')
+            force = hs.Force(point=map(float, item[:3]), value=map(float, item[3:]), mode='absolute')
             additional_forces.append(force)
         
-        
-    # print args.absolute_force
-    
     if args.hydrostatics:
         grav = args.grav
         rho_water = args.rho_water

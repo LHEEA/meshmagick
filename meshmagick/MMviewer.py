@@ -129,6 +129,95 @@ class MMViewer:
         
         return
     
+    def add_point(self, pos, color=[0, 0, 0]):
+        
+        assert len(pos) == 3
+        
+        p = vtk.vtkPoints()
+        v = vtk.vtkCellArray()
+    
+        i = p.InsertNextPoint(pos)
+        v.InsertNextCell(1)
+        v.InsertCellPoint(i)
+    
+        pd = vtk.vtkPolyData()
+        pd.SetPoints(p)
+        pd.SetVerts(v)
+    
+        self.add_polydata(pd, color=color)
+        
+        return pd
+    
+    def add_line(self, p0, p1, color=[0, 0, 0]):
+        
+        assert len(p0) == 3 and len(p1) == 3
+
+        points = vtk.vtkPoints()
+        points.InsertNextPoint(p0)
+        points.InsertNextPoint(p1)
+
+        line = vtk.vtkLine()
+        line.GetPointIds().SetId(0, 0)
+        line.GetPointIds().SetId(1, 1)
+
+        lines = vtk.vtkCellArray()
+        lines.InsertNextCell(line)
+
+        lines_pd = vtk.vtkPolyData()
+        lines_pd.SetPoints(points)
+        lines_pd.SetLines(lines)
+
+        self.add_polydata(lines_pd, color=color)
+        
+        return lines_pd
+    
+    def add_vector(self, point, value, scale=1, color=[0, 0, 0]):
+
+        # gforce = self.get_gravity_force()
+        
+        points = vtk.vtkPoints()
+        idx = points.InsertNextPoint(point)
+        
+        vert = vtk.vtkCellArray()
+        vert.InsertNextCell(1)
+        vert.InsertCellPoint(idx)
+        pd_point = vtk.vtkPolyData()
+        pd_point.SetPoints(points)
+        pd_point.SetVerts(vert)
+        
+        arrow = vtk.vtkArrowSource()
+        arrow.SetTipResolution(16)
+        arrow.SetTipLength(0.1)
+        arrow.SetTipRadius(0.02)
+        arrow.SetShaftRadius(0.005)
+
+        vec = vtk.vtkFloatArray()
+        vec.SetNumberOfComponents(3)
+        v0, v1, v2 = value / scale
+        vec.InsertTuple3(idx, v0, v1, v2)
+        pd_point.GetPointData().SetVectors(vec)
+
+        g_glyph = vtk.vtkGlyph3D()
+        # g_glyph.SetScaleModeToDataScalingOff()
+        g_glyph.SetVectorModeToUseVector()
+        g_glyph.SetInputData(pd_point)
+        g_glyph.SetSourceConnection(arrow.GetOutputPort())
+        g_glyph.SetScaleModeToScaleByVector()
+        # g_glyph.SetScaleFactor(10)
+        g_glyph.ScalingOn()
+        g_glyph.Update()
+
+        g_glyph_mapper = vtk.vtkPolyDataMapper()
+        g_glyph_mapper.SetInputConnection(g_glyph.GetOutputPort())
+
+        g_glyph_actor = vtk.vtkActor()
+        g_glyph_actor.SetMapper(g_glyph_mapper)
+        g_glyph_actor.GetProperty().SetColor(color)
+
+        self.renderer.AddActor(g_glyph_actor)
+        
+        return
+    
     def add_plane(self, center, normal):
         plane = vtk.vtkPlaneSource()
         plane.SetCenter(center)
@@ -139,11 +228,16 @@ class MMViewer:
             mapper.SetInput(plane.GetOutput())
         else:
             mapper.SetInputData(plane.GetOutput())
+            
+        # FIXME: terminer l'implementation et l'utiliser pour le plan de la surface libre
+            
+        return
 
-    def add_polydata(self, polydata, color=[1, 1, 0]):
-        if not isinstance(polydata, vtk.vtkPolyData):
-            raise TypeError, 'polydata must be a vtkPolyData object'
-
+    def add_polydata(self, polydata, color=[1, 1, 0], repr='surface'):
+        
+        assert isinstance(polydata, vtk.vtkPolyData)
+        assert repr in ('surface', 'wireframe')
+        
         self.polydatas.append(polydata)
 
         # Building mapper
@@ -163,6 +257,8 @@ class MMViewer:
         actor.GetProperty().SetEdgeColor(0, 0, 0)
         actor.GetProperty().SetLineWidth(1)
         actor.GetProperty().SetPointSize(10)
+        if repr == 'wireframe':
+            actor.GetProperty().SetRepresentationToWireframe()
 
         self.renderer.AddActor(actor)
         self.renderer.Modified()
