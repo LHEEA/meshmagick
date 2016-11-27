@@ -1550,6 +1550,8 @@ class Mesh(object):
     
     def eval_plain_mesh_inertias(self, rho_medium=1023.):
         
+        # TODO: allow to specify an other point for inertia matrix expression
+        # TODO: manipuler plutot un objet inertia --> creer une classe !
         volume = self.volume
         mass = rho_medium * volume
         
@@ -1574,10 +1576,30 @@ class Mesh(object):
                                   [-Ixy, Iyy, -Iyz],
                                   [-Ixz, -Iyz, Izz]], dtype=np.float)
         
-        inertia_data = {'mass':mass,
+        # Generalized Huygens relation
+        inertia_matrix -= mass * (np.dot(cog, cog)*np.eye(3) - np.outer(cog, cog))
+        
+        Ixx = inertia_matrix[0, 0]
+        Iyy = inertia_matrix[1, 1]
+        Izz = inertia_matrix[2, 2]
+        Ixy = -inertia_matrix[0, 1]
+        Ixz = -inertia_matrix[0, 2]
+        Iyz = -inertia_matrix[1, 2]
+
+        coeffs = {'Ixx': Ixx,
+                  'Iyy': Iyy,
+                  'Izz': Izz,
+                  'Ixy': Ixy,
+                  'Ixz': Ixz,
+                  'Iyz': Iyz}
+        
+        inertia_data = {'volume':volume,
+                        'mass':mass,
                         'gravity_center':cog,
-                        'inertia_matrix':inertia_matrix
+                        'inertia_matrix':inertia_matrix,
+                        'coeffs':coeffs
                         }
+        
         return inertia_data
     
     def _edges_stats(self):
@@ -1596,6 +1618,9 @@ class Mesh(object):
         dimension 0 : informations sur chaque facette -- triangles_vertices[0] -> facette 0)
         dimension 1 : informations sur chaque vertex de la facette -- triangles_vertices[0, 1] -> vertex 1 de la facette 0
         dimension 2 : information sur chacune des coordonnées des vertex -- triangles_vertices[0, 1, 2] -> coordonnee z du vertex 1 de la facette 0
+        
+        s_int[0] =
+        
         """
 
 
@@ -1646,6 +1671,8 @@ class Mesh(object):
             print 'File %s written' % filename
         except:
             print 'mmio module not found'
+
+
 
 
 if __name__ == '__main__':
