@@ -835,6 +835,27 @@ def load_WRL(filename):
 
     return _dump_vtk(dataset)
 
+def load_NEM(filename):
+    check_file(filename)
+    
+    ifile = open(filename, 'r')
+    
+    nv = int(ifile.readline())
+    nf = int(ifile.readline())
+    
+    vertices = []
+    for ivertex in xrange(nv):
+        vertices.append(map(float, ifile.readline().split()))
+    vertices = np.asarray(vertices, dtype=np.float)
+    
+    faces = []
+    for iface in xrange(nf):
+        faces.append(map(int, ifile.readline().split()))
+    faces = np.asarray(faces, dtype=np.int)
+    faces -= 1
+    
+    return vertices, faces
+             
 
 #=======================================================================
 #                             MESH WRITERS
@@ -1261,6 +1282,26 @@ def write_NAT(filename, V, F):
 
     return 1
 
+def write_NEM(filename, V, F):
+    
+    ofile = open(filename, 'w')
+    
+    ofile.write('%u\n' % V.shape[0])
+    ofile.write('%u\n' % F.shape[0])
+    
+    for vertex in V:
+        ofile.write('%15.6f\t%15.6f\t%15.6f\n' % (vertex[0], vertex[1], vertex[2]))
+    
+    for face in F+1:
+        ofile.write('%10u\t%10u\t%10u\t%10u\n' % (face[0], face[1], face[2], face[3]))
+        
+    ofile.close()
+    
+    return
+    
+    
+    
+
 def write_GDF(filename, V, F):
     """write_GDF(filename, _vertices, _faces)
 
@@ -1416,6 +1457,8 @@ def write_WRL(filename, V, F):
     raise NotImplementedError, 'MED writer is not implemented yet'
 
 
+    
+
 def know_extension(ext):
     return extension_dict.has_key(ext)
 
@@ -1445,5 +1488,6 @@ extension_dict = {  # keyword,  reader,   writer
     'med': (load_MED, write_MED),
     'salome': (load_MED, write_MED),
     'vrml': (load_WRL, write_WRL),
-    'wrl': (load_WRL, write_WRL)
+    'wrl': (load_WRL, write_WRL),
+    'nem': (load_NEM, write_NEM)
 }
