@@ -28,6 +28,7 @@ import numpy as np
 import math
 from datetime import datetime
 from warnings import warn
+from time import strftime
 
 from mesh import *
 import mmio
@@ -357,6 +358,7 @@ def main():
                     |   .vtp    |    R/W     | PARAVIEW (6)    | vtp                  |
                     |   .vtk    |    R/W     | PARAVIEW (6)    | paraview-legacy, vtk |
                     |   .tec    |    R/W     | TECPLOT (7)     | tecplot, tec         |
+                    |   .med    |    R       | SALOME (8)      | med, salome          |
                     *---------- *-----------------------------------------------------*
 
                     By default, Meshmagick uses the filename extensions to choose the
@@ -375,11 +377,15 @@ def main():
                     (6) PARAVIEW is an open source visualization software developped by
                         Kitware
                     (7) TECPLOT is a visualization software developped by Tecplot
+                    (8) SALOME-MECA is an open source software for computational mechanics
+                        developped by EDF-R&D
 
 
                     """,
         epilog='--  Copyright 2014-2015  -  Francois Rongere  /  Ecole Centrale de Nantes  --',
         formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    # TODO: ajouter option pour voir l'ensemble des formats de fichier geres par meshmagick avec une explication du logiciel utilise
 
     parser.add_argument('infilename', # TODO : voir pour un typ=file pour tester l'existence
                         help='path of the input mesh file in any supported format')
@@ -466,7 +472,7 @@ def main():
                         accordingly to the newly scaled mesh.
                         """)
 
-    parser.add_argument('-hn', '--heal_normals', action='store_true',
+    parser.add_argument('-hn', '--heal-normals', action='store_true',
                         help="""Checks and heals the normals consistency and
                         verify if they are outward.
                         """)
@@ -488,7 +494,7 @@ def main():
                         0 following the order given in the command line.
                         """)
 
-    parser.add_argument('-c', '--clip_by_plane', nargs='*', action='append', metavar='Arg',
+    parser.add_argument('-c', '--clip-by-plane', nargs='*', action='append', metavar='Arg',
                         help="""cuts the mesh with a plane. Is no arguments are given, the Oxy plane
                         is used. If an integer is given, it should correspond to a plane defined with
                         the --plane option. If a key string is given, it should be a valid key (see
@@ -501,7 +507,7 @@ def main():
                         help="""merges the duplicate nodes in the mesh with the absolute tolerance
                         given as argument (default 1e-8). Tolerance must be lower than 1""")
 
-    parser.add_argument('-tq', '--triangulate_quadrangles', action='store_true',
+    parser.add_argument('-tq', '--triangulate-quadrangles', action='store_true',
                         help="""Triangulate all quadrangle _faces by a simple splitting procedure.
                         Twho triangles are generated and from both solution, the one with the best
                         aspect ratios is kept. This option may be used in conjunction with a
@@ -523,7 +529,7 @@ def main():
                         id of a plane defined with the --plane option. By default, the Oxy plane
                         is used when the option has no argument.""")
     
-    parser.add_argument('-pi', '--plain_inertia', type=float, metavar='rho_medium',
+    parser.add_argument('-pi', '--plain-inertia', type=float, metavar='rho_medium',
                         help="""Evaluates the inertia properties of the mesh condidering it as
                         uniformly plain of a medium of density rho_medium in kg/m**3. Default
                         is 1023 kg/m**3.""")
@@ -567,7 +573,7 @@ def main():
     
     # parser.add_argument('--hs_solver_params', nargs='+')
     
-    parser.add_argument('-af', '--absolute_force', nargs=6, action='append',
+    parser.add_argument('-af', '--absolute-force', nargs=6, action='append',
                         metavar=('X', 'Y', 'Z', 'Fx', 'Fy', 'Fz'),
                         help="""Add an additional absolute force applied to the mesh in
                         hydrostatics equilibrium computations. It is absolute as force
@@ -582,7 +588,7 @@ def main():
                         Those are expressed in the initial mesh frame.
                          """)
     
-    parser.add_argument('-rf', '--relative_force', nargs=6, action='append', type=float,
+    parser.add_argument('-rf', '--relative-force', nargs=6, action='append', type=float,
                         metavar=('X', 'Y', 'Z', 'Fx', 'Fy', 'Fz'),
                         help="""Add an additional relative force applied to the mesh in
                         hydrostatics equilibrium computations. It is relative as force
@@ -596,7 +602,7 @@ def main():
                         Those are expressed in the initial mesh frame.
                          """)
     
-    parser.add_argument('--hs_report', type=str, metavar='filename',
+    parser.add_argument('--hs-report', type=str, metavar='filename',
                         help="""Write the hydrostatic report into the file given as an argument""")
     
     # ARGUMENTS RELATED TO THE COMPUTATION OF INERTIA PARAMETERS
@@ -684,7 +690,12 @@ def main():
     # Loading mesh elements from file
     if os.path.isfile(args.infilename):
         V, F = mmio.load_mesh(args.infilename, format)
-        mesh = Mesh(V, F)
+        
+        # Give the name of the mesh the filename
+        basename = os.path.basename(args.infilename)
+        mesh_name, _ = os.path.splitext(basename)
+        
+        mesh = Mesh(V, F, name=mesh_name)
         # Ensuring triangles are following the right convention (last id = first id)
         mesh.heal_triangles()
         if verbose:
@@ -1162,8 +1173,10 @@ def main():
             with open(args.hs_report, 'w') as f:
                 f.write('==============================================\n')
                 f.write('Hydrostatic report generated by Meshmagick\n')
+                f.write('Meshfile: %s\n' % os.path.abspath(args.infilename))
+                f.write('%s\n' % strftime('%c'))
                 f.write('meshmagick - version %s\n%s\n' % (__version__, __copyright__))
-                f.write('==============================================\n\n')
+                f.write('==============================================\n')
                 f.write(hs_solver.get_hydrostatic_report())
                 
         
