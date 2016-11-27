@@ -302,8 +302,8 @@ class Hydrostatics(object):
         
         mg = self._mg
         B = self.hs_data['B']
-        Lpp = self.hs_data['Lpp']
-        scale = np.array([mg, mg * B, mg * Lpp])
+        LWL = self.hs_data['LWL']
+        scale = np.array([mg, mg * B, mg * LWL])
         
         if np.all(np.fabs(residual/scale) < self._solver_parameters['reltol']):
             return True
@@ -532,29 +532,66 @@ class Hydrostatics(object):
     
         # TODO: utiliser des formules analytiques et non approchees comme celles-ci !
         # Volume displacement
-        disp_volume = (areas * (normals * centers).sum(axis=1)).sum() / 3.  # Formule approchee mais moyennee
+        # disp_volume = (areas * (normals * centers).sum(axis=1)).sum() / 3.  # Formule approchee mais moyennee
     
         # Buoyancy center calculation
-        xb = (areas * normals[:, 1] * centers[:, 1] * centers[:, 0]).sum() / disp_volume
-        yb = (areas * normals[:, 2] * centers[:, 2] * centers[:, 1]).sum() / disp_volume
-        zb = (areas * normals[:, 1] * centers[:, 1] * centers[:, 2]).sum() / disp_volume
-    
+        # xb = (areas * normals[:, 1] * centers[:, 1] * centers[:, 0]).sum() / disp_volume
+        # yb = (areas * normals[:, 2] * centers[:, 2] * centers[:, 1]).sum() / disp_volume
+        # zb = (areas * normals[:, 1] * centers[:, 1] * centers[:, 2]).sum() / disp_volume
+        
+        inertia_data = clipped_mesh.eval_plain_mesh_inertias(rho_medium=self.rho_water)
+        xb, yb, zb = inertia_data['gravity_center']
+        disp_volume = inertia_data['volume']
+        
         # Computing quantities from intersection polygons
-        sigma0 = 0.  # \int_{Aw} dS = Aw
-        sigma1 = 0.  # \int_{Aw} x dS
-        sigma2 = 0.  # \int_{Aw} y dS
-        sigma3 = 0.  # \int_{Aw} xy dS
-        sigma4 = 0.  # \int_{Aw} x^2 dS
-        sigma5 = 0.  # \int_{Aw} y^2 dS
+        sigma0 = 0.  # \iint_{Aw} dS = Aw
+        sigma1 = 0.  # \iint_{Aw} x dS
+        sigma2 = 0.  # \iint_{Aw} y dS
+        sigma3 = 0.  # \iint_{Aw} xy dS
+        sigma4 = 0.  # \iint_{Aw} x^2 dS
+        sigma5 = 0.  # \iint_{Aw} y^2 dS
+        
+        
+        # sigma0_ = 0.  # \int_{Aw} dS = Aw
+        # sigma1_ = 0.  # \int_{Aw} x dS
+        # sigma2_ = 0.  # \int_{Aw} y dS
+        # sigma3_ = 0.  # \int_{Aw} xy dS
+        # sigma4_ = 0.  # \int_{Aw} x^2 dS
+        # sigma5_ = 0.  # \int_{Aw} y^2 dS
     
         xmin = []
         xmax = []
         ymin = []
         ymax = []
-    
+        
+        # import pytriangle as pt
+        # from mesh import Mesh
+        
         polygons = clipper.closed_polygons
         for polygon in polygons:
             polyverts = clipper.clipped_crown_mesh.vertices[polygon]
+            
+            # n = polyverts.shape[0]
+            # triangulator = pt.Triangulator(polyverts[:n-1, :2].copy())
+            # triangulator.max_area=0.01
+            # triangulator.preserve_boundary=False
+            # triangulator.quality_meshing=True
+            #
+            # # triangulator.run()
+            # # vertices, faces = triangulator.get_mesh()
+            # vertices, faces = triangulator.get_mesh()
+            # # triangulator.__dealloc__()
+            # # triangulator.get_mesh()
+            # vertices = np.concatenate((vertices, np.zeros((vertices.shape[0], 1))), axis=1)
+            # mymesh = Mesh(vertices, faces)
+            # # mymesh.show()
+            #
+            # sigma0_ += mymesh.faces_areas.sum()
+            # sigma1_ += (mymesh.faces_centers[:, 0] * mymesh.faces_areas).sum()
+            # sigma2_ += (mymesh.faces_centers[:, 1] * mymesh.faces_areas).sum()
+            # sigma3_ += (mymesh.faces_centers[:, 0] * mymesh.faces_centers[:, 1] * mymesh.faces_areas).sum()
+            # sigma4_ += (mymesh.faces_centers[:, 0]**2 * mymesh.faces_areas).sum()
+            # sigma5_ += (mymesh.faces_centers[:, 1]**2 * mymesh.faces_areas).sum()
         
             # TODO: voir si on conserve ce test...
             if np.any(np.fabs(polyverts[:, 2]) > 1e-3):
@@ -594,7 +631,14 @@ class Hydrostatics(object):
     
         # Flotation surface
         Aw = sigma0
-    
+        
+        # print sigma0- sigma0_
+        # print sigma1- sigma1_
+        # print sigma2- sigma2_
+        # print sigma3- sigma3_
+        # print sigma4- sigma4_
+        # print sigma5- sigma5_
+
         # Stiffness matrix coefficients that do not depend on the position of the gravity center
         rhog = self._rhog
         S33 = rhog * Aw
@@ -626,7 +670,12 @@ class Hydrostatics(object):
         # Flotation center F:
         xF = -S35 / S33
         yF = S34 / S33
-    
+        
+        
+        xmin, xmax, ymin, ymax, zmin, zmax = clipped_mesh.axis_aligned_bbox
+        
+        
+        
         # Storing data
         self.hs_data['Sw'] = Sw
         self.hs_data['disp_volume'] = disp_volume
@@ -639,8 +688,20 @@ class Hydrostatics(object):
         self.hs_data['GMx'] = GMx
         self.hs_data['GMy'] = GMy
         self.hs_data['KH'] = KH
-        self.hs_data['Lpp'] = maxx - minx
+        self.hs_data['LWL'] = maxx - minx
+        self.hs_data['LOS'] = xmax - xmin
+        self.hs_data['BOS'] = ymax - ymin
+        self.hs_data['draught'] = math.fabs(zmin)
+        self.hs_data['FP'] = maxx
         self.hs_data['B'] = maxy - miny
+        
+        coeffs = inertia_data['coeffs']
+        self.hs_data['Ixx'] = coeffs['Ixx']
+        self.hs_data['Iyy'] = coeffs['Iyy']
+        self.hs_data['Izz'] = coeffs['Izz']
+        self.hs_data['Ixy'] = coeffs['Ixy']
+        self.hs_data['Ixz'] = coeffs['Ixz']
+        self.hs_data['Iyz'] = coeffs['Iyz']
     
         return
     
@@ -661,8 +722,8 @@ class Hydrostatics(object):
     def scale(self):
         mg = self._mg
         B = self.hs_data['B']
-        Lpp = self.hs_data['Lpp']
-        scale = np.array([mg, mg * B, mg * Lpp])
+        LWL = self.hs_data['LWL']
+        scale = np.array([mg, mg * B, mg * LWL])
         return scale
 
     @property
@@ -894,59 +955,117 @@ class Hydrostatics(object):
 
     def get_hydrostatic_report(self):
         
+        lwidth = 40
+        rwidth = 50
+        
+        def header(title):
+            head = '\t-----------------------------------------------------\n'
+            head += '\t* {0}\n'.format(title.upper())
+            head += '\t-----------------------------------------------------\n'
+            return head
+        
+        def hspace():
+            return '\n'
+        
+        def build_line(text, data, precision=3, dtype='f'):
+            # TODO: ajouter unit
+            textwidth = 40
+            try:
+                line = '\t{:-<{textwidth}}>  {:< .{precision}{dtype}}\n'.format(str(text).upper(), data,
+                                                                         precision=precision, textwidth=textwidth,
+                                                                         dtype=dtype
+                                                                        )
+            except ValueError:
+                if isinstance(data, np.ndarray):
+                    if data.ndim == 1:
+                        data_str = ''.join(['{:< 10.{precision}{dtype}}'.format(val, precision=precision, dtype=dtype)
+                                            for val in data])
+                        line = '\t{:-<{textwidth}}>  {}\n'.format(str(text).upper(), data_str, textwidth=textwidth)
+                        
+                    # else:
+                    #     print data
+            
+            return line
+        
+        # TODO: ajouter la reference au point de calcul de la matrice raideur
+        
         msg = '\n'
+        # title = 'Hydrostatic report ({0})\n\tGenerated by meshmagick on {1}'.format(self.mesh.name, strftime('%c')).upper()
+        # msg += header(title)
         
-        msg += ('Gravity acceleration = %.2f m/s**2\n' % self.gravity)
-        msg += ('Density of water = %.2f (kg/m**3)\n' % self.rho_water)
-        msg += ('Wetted surface area = %.2f (m**2)\n' % self.wetted_surface_area)
-        msg += ('Displacement volume = %.2f (m**3)\n' % self.displacement_volume)
-        msg += ('Displacement = %.3f (tons)\n' % (self.displacement))
-        xb, yb, zb = self.buoyancy_center
-        xg, yg, zg = self.gravity_center
-        msg += ('Buoyancy center (m): xb=%.3f, yb=%.3f, zb=%.3f\n' % (xb, yb, zb))
-        msg += ('Gravity center (m):  xg=%.3f, yg=%.3f, zg=%.3f\n' % (xg, yg, zg))
-        msg += ('Flottation surface = %f (m**2)\n' % self.flotation_surface_area)
-        xF, yF, _ = self.flotation_center
-        msg += ('Flotation center (m): xf=%.3f, yf=%.3f\n' % (xF, yF))
-        r = self.transversal_metacentric_radius
-        R = self.longitudinal_metacentric_radius
-        GMx = self.transversal_metacentric_height
-        GMy = self.longitudinal_metacentric_height
-        msg += ('Transverse metacentric radius = %.3f (m)\n' % r)
-        msg += ('Longitudinal metacentric radius = %.3f (m)\n' % R)
-        msg += ('Transverse metacentric height GMx = %.3f (m)\n' % GMx)
-        if GMx < 0.:
-            msg += ('\t --> Unstable in roll !\n')
-            msg += ('\t     To be stable, you should have at least zg < %.3f (m)\n' % (r + zb))
-            msg += ('\t     DNV Standards say : zg < %.3f (m) to get GMx > %.3f m\n' % (r + zb - GM_min, GM_min))
-        else:
-            msg += ('\t --> Stable in roll\n')
-    
-        msg += ('Longitudinal metacentric height GMy = %.3f (m)\n' % GMy)
-        if GMy < 0.:
-            msg += ('\t --> Unstable in pitch !\n')
-            msg += ('\t     To be stable, you should have at least zg < %.3f (m)\n' % (R + zb))
-            msg += ('\t     DNV Standards say : zg < %.3f (m) to get GMy > %.3f m\n' % (R + zb - GM_min, GM_min))
-        else:
-            msg += ('\t --> Stable in pitch\n')
-    
-        msg += ('\nHydrostatic stiffness matrix:\n')
-        KH = self.hydrostatic_stiffness_matrix
-        for row in KH:
-            msg += ('%.4E\t%.4E\t%.4E\n' % (row[0], row[1], row[2]))
+        msg += hspace()
+        msg += build_line('Gravity acceleration (M/S**2)', self.gravity, precision=2)
+        msg += build_line('Density of water (kg/M**3)', self.rho_water, precision=1)
         
-        residual = self.residual
-        msg += ('\nResidual:\n')
-        msg += ('Delta Fz = %.3f N\n' % residual[0])
-        msg += ('Delta Mx = %.3f Nm\n' % residual[1])
-        msg += ('Delta My = %.3f Nm\n' % residual[2])
+        msg += hspace()
+        msg += build_line('Waterplane area (M**2)', self.flotation_surface_area, precision=1)
+        msg += build_line('Waterplane center (M)', self.flotation_center[:2], precision=3)
+        msg += build_line('Wet area (M**2)', self.wetted_surface_area, precision=1)
+        msg += build_line('Displacement volume (M**3)', self.displacement_volume, precision=3)
+        msg += build_line('Displacement mass (tons)', self.displacement, precision=3)
+        msg += build_line('Buoyancy center (M)', self.buoyancy_center, precision=3)
+        msg += build_line('Center of gravity (M)', self.gravity_center, precision=3)
         
-        rel_res = residual / self.scale
-        msg += ('\nRelative residual:\n')
-        msg += ('Delta Fz = %E\n' % rel_res[0])
-        msg += ('Delta Mx = %E\n' % rel_res[1])
-        msg += ('Delta My = %E\n' % rel_res[2])
-        msg += ('Relative tolerance of the solver: %.1E\n' % self.reltol)
+        msg += hspace()
+        msg += build_line('Draught (M)', self.hs_data['draught'], precision=3) # TODO
+        msg += build_line('Length overall submerged (M)', self.hs_data['LOS'], precision=2)
+        msg += build_line('Breadth overall submerged (M)', self.hs_data['BOS'], precision=2)
+        msg += build_line('Length at Waterline LWL (M)', self.hs_data['LWL'], precision=2)
+        msg += build_line('Forward perpendicular (M)', self.hs_data['FP'], precision=2)
+        
+        msg += hspace()
+        msg += build_line('Transversal metacentric radius (M)', self.transversal_metacentric_radius, precision=3)
+        msg += build_line('Transversal metacentric height GMt (M)', self.transversal_metacentric_height, precision=3)
+        msg += build_line('Longitudinal metacentric radius (M)', self.longitudinal_metacentric_radius, precision=3)
+        msg += build_line('Longitudinal metacentric height GMl (M)', self.longitudinal_metacentric_height, precision=3)
+        
+        # msg += hspace()
+        # msg += build_line('Center of lateral resistance (M)', np.zeros(3), precision=3)
+        # msg += build_line('Lateral wetted area (M**2)', 0., precision=1)
+        
+        # msg += hspace()
+        # msg += '\tINERTIAS\n'
+        # msg += build_line()
+        
+        msg += hspace()
+        msg += '\tHYDROSTATIC STIFFNESS COEFFICIENTS:\n'
+        msg += build_line('K33 (N/M)', self.S33, precision=4, dtype='E')
+        msg += build_line('K34 (N)', self.S34, precision=4, dtype='E')
+        msg += build_line('K35 (N)', self.S35, precision=4, dtype='E')
+        msg += build_line('K44 (N.M)', self.S44, precision=4, dtype='E')
+        msg += build_line('K45 (N.M)', self.S45, precision=4, dtype='E')
+        msg += build_line('K55 (N.M)', self.S55, precision=4, dtype='E')
+        
+        # Il faut faire une correction avec le plan de la flottaison de certains coeffs
+        msg += hspace()
+        # FIXME: C'est sur clipped mesh qu'il faut calculer les inerties !!!
+        # inertia_data = self.mesh.eval_plain_mesh_inertias(rho_medium=1.)
+        # coeffs = inertia_data['coeffs']
+        # print inertia_data
+        msg += '\tINERTIAS:\n'
+        msg += build_line('Ixx', self.hs_data['Ixx'], precision=3, dtype='E')
+        msg += build_line('Ixy', self.hs_data['Ixy'], precision=3, dtype='E')
+        msg += build_line('Ixz', self.hs_data['Ixz'], precision=3, dtype='E')
+        msg += build_line('Iyy', self.hs_data['Iyy'], precision=3, dtype='E')
+        msg += build_line('Iyz', self.hs_data['Iyz'], precision=3, dtype='E')
+        msg += build_line('Izz', self.hs_data['Izz'], precision=3, dtype='E')
+        
+        
+        
+        
+        #
+        # residual = self.residual
+        # msg += ('\nResidual:\n')
+        # msg += ('Delta Fz = %.3f N\n' % residual[0])
+        # msg += ('Delta Mx = %.3f Nm\n' % residual[1])
+        # msg += ('Delta My = %.3f Nm\n' % residual[2])
+        #
+        # rel_res = residual / self.scale
+        # msg += ('\nRelative residual:\n')
+        # msg += ('Delta Fz = %E\n' % rel_res[0])
+        # msg += ('Delta Mx = %E\n' % rel_res[1])
+        # msg += ('Delta My = %E\n' % rel_res[2])
+        # msg += ('Relative tolerance of the solver: %.1E\n' % self.reltol)
         
         return msg
     
