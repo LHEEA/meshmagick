@@ -3,7 +3,7 @@
 
 import mesh
 import nodes
-import inertia
+import unitinertia
 import frame
 from itertools import count
 from warnings import warn
@@ -206,8 +206,8 @@ class PlainRigidBody(RigidBody):
         inertia_name = '_'.join((self._name, 'rotational_inertia'))
 
         warn('Implementation non terminee, non robustifiee')
-        self._inertia = inertia.RigidBodyInertia(inertia_name, Ixx=Ixx, Iyy=Iyy, Izz=Izz, Ixy=Ixy, Ixz=Ixz, Iyz=Iyz,
-                                         parent=self)
+        self._inertia = unitinertia.RigidBodyInertia(inertia_name, Ixx=Ixx, Iyy=Iyy, Izz=Izz, Ixy=Ixy, Ixz=Ixz, Iyz=Iyz,
+                                                     parent=self)
         # print self._inertia
 
         return
