@@ -1000,62 +1000,6 @@ def main():
         if verbose:
             print '\t-> Done.'
 
-    # Compute principal inertia parameters
-    # if args.inertias:
-    #     # TODO : completer l'aide avec la logique de cette fonction !!
-    #     if verbose:
-    #         print '\n------------------'
-    #         print 'Computing inertias'
-    #         print '------------------'
-    #     if args.no_hull:
-    #         hull = False
-    #     else:
-    #         hull = True
-    #
-    #     mass, cog, inertia_matrix = get_inertial_properties(_vertices, _faces,
-    #                                     rho=args.rho_medium,
-    #                                     mass=args.mass,
-    #                                     thickness=args.thickness,
-    #                                     shell=hull,
-    #                                     verbose=verbose)
-    #     # Replacing values in command line arguments in the eventuality of hydrostatics computations
-    #     args.mass = mass
-    #     args.cog = cog
-    #     if verbose:
-    #         print '\t-> Done.'
-
-    # if args.gz_curves is not None:
-    #     if verbose:
-    #         print '\n-------------------'
-    #         print 'Computing GZ curves'
-    #         print '-------------------'
-    #
-    #     spacing = args.gz_curves
-    #     try:
-    #         import hydrostatics as hs
-    #     except:
-    #         raise ImportError, '--gz-curves option relies on the hydrostatics module that can not be found'
-    #
-    #     # if args.hydrostatics:
-    #     #     raise RuntimeError, """GZ computations can not be performed at the same time as a hydrostatics equilibrium
-    #     #                            resolution as it needs a full mesh to perform clipping at different angles"""
-    #
-    #     if args.zcog is None:
-    #         raise RuntimeError, 'For the GZ computations, the --zcog option is mandatory'
-    #
-    #     hsMesh = hs.HydrostaticsMesh(_vertices, _faces, rho_water=args.rho_water, g=args.grav)
-    #     hs.get_GZ_curves(hsMesh, args.zcog,
-    #                      spacing=spacing,
-    #                      rho_water=args.rho_water,
-    #                      g=args.grav,
-    #                      verbose=verbose)
-    #     if verbose:
-    #         print '\t-> Done.'
-
-
-    # Compute hydrostatics
-    # ESSAI
-    
     if args.plain_inertia is not None:
         inertia_params = mesh.eval_plain_mesh_inertias(args.plain_inertia)
         
