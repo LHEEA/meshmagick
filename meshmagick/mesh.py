@@ -4,8 +4,7 @@
 This module is part of meshmagick software. It provides functions for mesh clipping purpose.
 """
 
-from tools import merge_duplicate_rows
-import MMviewer
+
 import numpy as np
 import math
 import copy
@@ -13,6 +12,10 @@ import vtk
 from itertools import count
 from warnings import warn
 import sys # TODO: Retirer
+
+from tools import merge_duplicate_rows
+import MMviewer
+from inertia_parameters import InertiaParameters
 
 # TODO: Use traitlets to manage updates into the Mesh class
 
@@ -669,9 +672,12 @@ class Mesh(object):
         return self.__internals__.has_key('faces_areas')
 
     def _remove_faces_properties(self):
-        del self.__internals__['faces_areas']
-        del self.__internals__['faces_centers']
-        del self.__internals__['faces_normals']
+        if self._has_faces_properties():
+            del self.__internals__['faces_areas']
+            del self.__internals__['faces_centers']
+            del self.__internals__['faces_normals']
+        if self.has_surface_integrals():
+            del self.__internals__['surface_integrals']
         return
 
     @property
@@ -1011,6 +1017,9 @@ class Mesh(object):
         return self.rotate([0., 0., thetaz])
 
     def rotate(self, angles):
+        
+        if self.has_surface_integrals():
+            self._remove_surface_integrals()
         # TODO: docstring
         # FIXME : code en doublon par rapport a la fonction _rodrigues du debut de module
         
@@ -1049,7 +1058,10 @@ class Mesh(object):
             centers = self.__internals__['faces_centers']
             self.__internals__['faces_normals'] = np.transpose(np.dot(R, normals.T))
             self.__internals__['faces_centers'] = np.transpose(np.dot(R, centers.T))
-
+            
+        if self.has_surface_integrals():
+            self._remove_surface_integrals()
+            
         return R
 
     # @invalidate_cache
@@ -1063,7 +1075,10 @@ class Mesh(object):
             centers = self.__internals__['faces_centers']
             centers[:, 0] += tx
             self.__internals__['faces_centers'] = centers
-
+            
+        if self.has_surface_integrals():
+            self._remove_surface_integrals()
+            
         return
 
     def translate_y(self, ty):
@@ -1076,6 +1091,10 @@ class Mesh(object):
             centers = self.__internals__['faces_centers']
             centers[:, 1] += ty
             self.__internals__['faces_centers'] = centers
+            
+        if self.has_surface_integrals():
+            self._remove_surface_integrals()
+            
         return
 
     def translate_z(self, tz):
@@ -1088,6 +1107,10 @@ class Mesh(object):
             centers = self.__internals__['faces_centers']
             centers[:, 2] += tz
             self.__internals__['faces_centers'] = centers
+            
+        if self.has_surface_integrals():
+            self._remove_surface_integrals()
+            
         return
 
     def translate(self, t):
@@ -1106,6 +1129,10 @@ class Mesh(object):
             centers[:, 1] += ty
             centers[:, 2] += tz
             self.__internals__['faces_centers'] = centers
+        
+        if self.has_surface_integrals():
+            self._remove_surface_integrals()
+            
         return
 
     def scale(self, alpha):
@@ -1116,7 +1143,7 @@ class Mesh(object):
 
         if self._has_faces_properties():
             self._remove_faces_properties()
-
+            
         return
 
     def scalex(self, alpha):
@@ -1155,6 +1182,9 @@ class Mesh(object):
 
         if self._has_faces_properties():
             self.__internals__['faces_normals'] *= -1
+        
+        if self.has_surface_integrals():
+            self._remove_surface_integrals()
 
         return
 
@@ -1165,44 +1195,10 @@ class Mesh(object):
         # new_mesh.merge_duplicates()
         new_mesh._verbose = self._verbose or mesh_to_add._verbose
 
-        # TODO: exporter les pptes de facette si elles sont presentes dans les 2 maillages
-        # if hasattr(self, '_cached_properties') and hasattr(mesh_to_add, '_cached_properties'):
-        #     if self._cached_properties.has_key('_faces_properties') and mesh_to_add._cached_properties.has_key('_faces_properties'):
-        #         new_mesh._cached_properties['_faces_properties']['areas'] = \
-        #             np.concatenate(self.faces_areas, mesh_to_add.faces_areas)
-        #         new_mesh._cached_properties['_faces_properties']['centers'] = \
-        #             np.concatenate(self.faces_centers, mesh_to_add.faces_centers)
-        #         new_mesh._cached_properties['_faces_properties']['normals'] = \
-        #             np.concatenate(self.faces_normals, mesh_to_add.faces_normals)
-
         return new_mesh
 
     def copy(self):
         return copy.deepcopy(self)
-
-    # def merge_duplicates(self, tol=1e-8, return_index=False):
-    #     # TODO: voir ou mettre l'implementation de la fonction merge_duplicates
-    #     output = mm.merge_duplicates(self._vertices, self._faces, verbose=False, tol=tol, return_index=return_index)
-    #     if return_index:
-    #         V, F, newID = output
-    #     else:
-    #         V, F = output
-    #     if self._verbose:
-    #         print "* Merging duplicate vertices"
-    #         delta_n = self.nb_vertices - V.shape[0]
-    #         if delta_n > 0:
-    #             print "\t--> %u vertices have been merged" % delta_n
-    #         else:
-    #             print "\t--> No duplicate vertices have been found"
-    #     self._vertices, self._faces = V, F
-    #
-    #     if self._has_connectivity():
-    #         self._remove_connectivity()
-    #
-    #     if return_index:
-    #         return newID
-    #     else:
-    #         return
 
     def merge_duplicates(self, decimals=8, return_index=False):
         uniq, newID = merge_duplicate_rows(self._vertices, decimals=decimals, return_index=True)
@@ -1387,7 +1383,10 @@ class Mesh(object):
         return
 
     def heal_triangles(self):
-
+        
+        if self._has_faces_properties():
+            self._remove_faces_properties()
+        
         F = self._faces
 
         quads = F[:, 0] != F[:, -1]
@@ -1431,9 +1430,15 @@ class Mesh(object):
                 print '\t--> No degenerated _faces'
 
         self._faces = F
+        
+        if self._has_faces_properties():
+            self._remove_faces_properties()
+            
         return
 
     def heal_mesh(self):
+        if self._has_faces_properties():
+            self._remove_faces_properties()
         self.remove_unused_vertices()
         self.remove_degenerated_faces()
         self.merge_duplicates()
@@ -1443,7 +1448,7 @@ class Mesh(object):
 
     def triangulate_quadrangles(self):
         # TODO: Ensure the best quality aspect ratio of generated triangles
-
+        
         # Defining both triangles id lists to be generated from quadrangles
         T1 = (0, 1, 2)
         T2 = (0, 2, 3)
@@ -1472,7 +1477,7 @@ class Mesh(object):
         return F
 
     def symmetrize(self, plane):
-
+        
         # Symmetrizing the nodes
         V, F = self._vertices, self._faces
 
@@ -1484,11 +1489,15 @@ class Mesh(object):
         self.verbose_off()
         self.merge_duplicates()
         self.verbose = verbose
+
+        self.__internals__.clear()
+            
         return
     
     def mirror(self, plane):
         self._vertices = self._vertices - 2 * np.outer(np.dot(self._vertices, plane.normal) - plane.c, plane.normal)
         self.flip_normals()
+        self.__internals__.clear()
         return
     
     def _compute_faces_integrals(self, sum_faces_contrib=False): # TODO: implementer le sum_surface_contrib
@@ -1528,12 +1537,19 @@ class Mesh(object):
         self.__internals__['surface_integrals'] = surface_integrals
 
         return
-
+    
+    def _remove_surface_integrals(self):
+        del self.__internals__['surface_integrals']
+        return
+    
     def has_surface_integrals(self):
         return self.__internals__.has_key('surface_integrals')
 
     def get_surface_integrals(self):
+        if not self.has_surface_integrals():
+            self._compute_faces_integrals()
         return self.__internals__['surface_integrals']
+            
 
     def _compute_volume(self):
         if not self.has_surface_integrals():
@@ -1565,43 +1581,16 @@ class Mesh(object):
         sigma9, sigma10, sigma11 = (normals * integrals[3:6]).sum(axis=1)
         sigma12, sigma13, sigma14 = (normals * integrals[6:10]).sum(axis=1)
 
-        Ixx = rho_medium * (sigma10 + sigma11) / 3.
-        Iyy = rho_medium * (sigma9 + sigma11) / 3.
-        Izz = rho_medium * (sigma9 + sigma10) / 3.
-        Ixy = rho_medium * sigma12 / 2.
-        Ixz = rho_medium * sigma14 / 2.
-        Iyz = rho_medium * sigma13 / 2.
+        xx = rho_medium * (sigma10 + sigma11) / 3.
+        yy = rho_medium * (sigma9 + sigma11) / 3.
+        zz = rho_medium * (sigma9 + sigma10) / 3.
+        xy = rho_medium * sigma12 / 2.
+        xz = rho_medium * sigma14 / 2.
+        yz = rho_medium * sigma13 / 2.
 
-        inertia_matrix = np.array([[Ixx, -Ixy, -Ixz],
-                                  [-Ixy, Iyy, -Iyz],
-                                  [-Ixz, -Iyz, Izz]], dtype=np.float)
+        return InertiaParameters(mass, cog, xx, yy, zz, yz, xz, xy, point=[0, 0, 0])
         
-        # Generalized Huygens relation
-        inertia_matrix -= mass * (np.dot(cog, cog)*np.eye(3) - np.outer(cog, cog))
         
-        Ixx = inertia_matrix[0, 0]
-        Iyy = inertia_matrix[1, 1]
-        Izz = inertia_matrix[2, 2]
-        Ixy = -inertia_matrix[0, 1]
-        Ixz = -inertia_matrix[0, 2]
-        Iyz = -inertia_matrix[1, 2]
-
-        coeffs = {'Ixx': Ixx,
-                  'Iyy': Iyy,
-                  'Izz': Izz,
-                  'Ixy': Ixy,
-                  'Ixz': Ixz,
-                  'Iyz': Iyz}
-        
-        inertia_data = {'volume':volume,
-                        'mass':mass,
-                        'gravity_center':cog,
-                        'inertia_matrix':inertia_matrix,
-                        'coeffs':coeffs
-                        }
-        
-        return inertia_data
-    
     def _edges_stats(self):
         pass
     
