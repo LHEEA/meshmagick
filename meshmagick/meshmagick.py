@@ -529,10 +529,27 @@ def main():
                         id of a plane defined with the --plane option. By default, the Oxy plane
                         is used when the option has no argument.""")
     
-    parser.add_argument('-pi', '--plain-inertia', type=float, metavar='rho_medium',
+    # FIXME: on devrait pouvoir laisser les valeurs par defaut --> creer une option --rho-medium
+    parser.add_argument('-pi', '--plain-inertia', action='store_true',
                         help="""Evaluates the inertia properties of the mesh condidering it as
                         uniformly plain of a medium of density rho_medium in kg/m**3. Default
                         is 1023 kg/m**3.""")
+    
+    # TODO: creer une option --thickness
+    parser.add_argument('-si', '--shell-inertia', action='store_true',
+                        help="""Evaluates the inertia properties of the mesh condidering it as
+                        uniformly plain of a medium of density rho_medium in kg/m**3. Default
+                        is 1023 kg/m**3.""")
+    
+    parser.add_argument('--rho-medium', type=float,
+                        help="""The density (in kg/m**3) of the medium used for evaluation of
+                        inertia parameters of the mesh. For the hypothesis of plain homogeneous
+                        mesh, the default is that of salt water (1023 kg/m**3) . For the
+                        hypothesis of a shell, default is that of steel (7850 kg/m**3)""")
+    
+    parser.add_argument('--thickness', type=float,
+                        help="""The thickness of the shell used for the evaluation of inertia
+                        parameters of the mesh. The default value is 0.02m.""")
     
     
     # Arguments for hydrostatics computations
@@ -1000,25 +1017,59 @@ def main():
         if verbose:
             print '\t-> Done.'
 
-    if args.plain_inertia is not None:
-        inertia_params = mesh.eval_plain_mesh_inertias(args.plain_inertia)
+    if args.plain_inertia:
+        if args.rho_medium is None:
+            rho_medium = 1023.
+        else:
+            rho_medium = args.rho_medium
+            
+        inertia = mesh.eval_plain_mesh_inertias(rho_medium=rho_medium)
         
         # if args.hydrostatics:
         #     print "\nWARNING: Taking inertia computed values to perform further hydrostatics"
         #     args.disp = inertia_params['mass']
         #     args.cog = inertia_params['gravity_center']
-        
+        # FIXME: Ce qui suit n'est plus d'actualite !!!
         if verbose:
-            print "\nInertial parameters for a uniform distribution of a medium of density %.3f kg/m**3 in the mesh:\n" % args.plain_inertia
-            print "\tMass = %.3f tons" % (inertia_params['mass']/1000.)
-            cog = inertia_params['gravity_center']
+            print "\nInertial parameters for a uniform distribution of a medium of density %.1f kg/m**3 in the mesh:\n" % rho_medium
+            print "\tMass = %.3f tons" % (inertia.mass/1000.)
+            cog = inertia.gravity_center
             print "\tCOG (m):\n\t\txg = %.3f\n\t\tyg = %.3f\n\t\tzg = %.3f" % (cog[0], cog[1], cog[2])
-            mat = inertia_params['inertia_matrix']
+            mat = inertia.inertia_matrix
             print "\tInertia matrix (SI):"
             print "\t\t%.3E\t%.3E\t%.3E" % (mat[0, 0], mat[0, 1], mat[0, 2])
             print "\t\t%.3E\t%.3E\t%.3E" % (mat[1, 0], mat[1, 1], mat[1, 2])
             print "\t\t%.3E\t%.3E\t%.3E" % (mat[2, 0], mat[2, 1], mat[2, 2])
+            point = inertia.reduction_point
+            print "\tExpressed at point : \t\t%.3E\t%.3E\t%.3E" % (point[0], point[1], point[2])
+    
+    
+    if args.shell_inertia:
+        # TODO: permettre de regler les parametres
+        if args.rho_medium is None:
+            rho_medium = 7850.
+        else:
+            rho_medium = args.rho_medium
+        if args.thickness is None:
+            thickness = 0.02
+        else:
+            thickness = args.thickness
+            
+        inertia = mesh.eval_shell_mesh_inertias(rho_medium=rho_medium, thickness=thickness)
         
+        if verbose:
+            print "\nInertial parameters for a shell distribution of a medium of density %.1f kg/m**3 and a thickness of %.3f m over the mesh:\n" % (rho_medium, thickness)
+            print "\tMass = %.3f tons" % (inertia.mass/1000.)
+            cog = inertia.gravity_center
+            print "\tCOG (m):\n\t\txg = %.3f\n\t\tyg = %.3f\n\t\tzg = %.3f" % (cog[0], cog[1], cog[2])
+            mat = inertia.inertia_matrix
+            print "\tInertia matrix (SI):"
+            print "\t\t%.3E\t%.3E\t%.3E" % (mat[0, 0], mat[0, 1], mat[0, 2])
+            print "\t\t%.3E\t%.3E\t%.3E" % (mat[1, 0], mat[1, 1], mat[1, 2])
+            print "\t\t%.3E\t%.3E\t%.3E" % (mat[2, 0], mat[2, 1], mat[2, 2])
+            point = inertia.reduction_point
+            print "\tExpressed at point : \t\t%.3E\t%.3E\t%.3E" % (point[0], point[1], point[2])
+    
     
     additional_forces = []
     if args.relative_force is not None:
