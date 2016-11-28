@@ -34,7 +34,7 @@ densities = {'CONCRETE': 2300.,
 
 # TODO: indiquer une frame d'expression ...
 
-class Inertia(object):
+class InertiaParameters(object):
     def __init__(self, mass, cog, xx, yy, zz, yz, xz, xy, point=None):
         
         self._mass = float(mass)
@@ -156,7 +156,7 @@ def right_circular_cylinder(radius, length, density=1.):
     Ixx = Iyy = mass * (3 * radius ** 2 + length ** 2) / 12.
     Izz = mass * radius ** 2 / 2.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def hollow_right_circular_cylinder(int_radius, ext_radius, length, density=1.):
@@ -167,7 +167,7 @@ def hollow_right_circular_cylinder(int_radius, ext_radius, length, density=1.):
     Ixx = Iyy = mass * (3 * R2r2 + length ** 2) / 12.
     Izz = mass * R2r2 / 2.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def right_circular_cone(radius, length, density=1.):
@@ -180,7 +180,7 @@ def right_circular_cone(radius, length, density=1.):
     Ixx = Iyy = 3 * mass * (radius ** 2 + length ** 2/4.) / 20.
     Izz = 3. * mass * radius ** 2 / 10.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def sphere(radius, density=1.):
@@ -188,7 +188,7 @@ def sphere(radius, density=1.):
     mass = density * vol
     
     Ixx = Iyy = Izz = 2 * mass * radius ** 2 / 5.
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0., 0., 0.)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0., 0., 0.)
 
 
 def hollow_sphere(int_radius, ext_radius, density=1.):
@@ -196,7 +196,7 @@ def hollow_sphere(int_radius, ext_radius, density=1.):
     mass = density * vol
     
     Ixx = Iyy = Izz = 2 * mass * (ext_radius ** 5 - int_radius ** 5) / (ext_radius ** 3 - int_radius ** 3) / 5
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0., 0., 0.)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0., 0., 0.)
 
 
 def hemisphere(radius, density=1.):
@@ -208,7 +208,7 @@ def hemisphere(radius, density=1.):
     
     Ixx = Iyy = Izz = 0.26 * mass * radius ** 2
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def elliptical_cylinder(a, b, length, density=1.):
@@ -226,7 +226,7 @@ def elliptical_cylinder(a, b, length, density=1.):
     Iyy = mass * (3 * a ** 2 + length ** 2) / 12.
     Izz = mass * (a ** 2 + b ** 2) / 4.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def ellipsoid(a, b, c, density=1.):
@@ -242,7 +242,7 @@ def ellipsoid(a, b, c, density=1.):
     Iyy = mass * (a ** 2 + b ** 2) / 5.
     Izz = mass * (b ** 2 + c ** 2) / 5.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def torus(chord_radius, tube_radius, density=1.):
     vol = 2*pi**2 * tube_radius**2 * chord_radius
@@ -251,7 +251,7 @@ def torus(chord_radius, tube_radius, density=1.):
     Ixx = Izz = mass * (4*chord_radius**2 + 5*tube_radius**2) / 8.
     Iyy = mass * (4*chord_radius**2 + 3*tube_radius**2) / 4.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def right_angle_wedge(base, height, length, density=1.):
@@ -262,7 +262,7 @@ def right_angle_wedge(base, height, length, density=1.):
     Iyy = mass * (base**2 + height**2) / 18.
     Izz = mass * (2*base**2 + 3*length**2) / 36.
 
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def isoceles_wedge(base, height, length, density=1.):
     vol = base * height * length / 2.
@@ -272,7 +272,7 @@ def isoceles_wedge(base, height, length, density=1.):
     Iyy = mass * (4*height**2 + 3*base**2) / 72.
     Izz = mass * (2 * length**2 + base**2) / 24.
 
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def right_rectangular_pyramid(a, b, height, density=1.):
     """Note
@@ -285,14 +285,14 @@ def right_rectangular_pyramid(a, b, height, density=1.):
     Iyy = mass * (a**2 + 3*height**2/4.) / 20.
     Izz = mass * (a**2 + b**2) / 20.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def cube(a, density=1.):
     vol = a**3
     mass = density * vol
     
     Ixx = Iyy = Izz = mass * a**2 / 6.
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def rectangular_prism(a, b, h, density=1.):
     """Note:
@@ -306,7 +306,7 @@ def rectangular_prism(a, b, h, density=1.):
     Iyy = mass * (a**2 + h**2) / 12.
     Izz = mass * (a**2 + b**2) / 12.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def circular_cone_shell(R, height, density=densities['STEEL'], thickness=0.02):
     """Note
@@ -319,7 +319,7 @@ def circular_cone_shell(R, height, density=densities['STEEL'], thickness=0.02):
     Ixx = Iyy = mass * (R**2 + 2*height**2/9.) / 4.
     Izz = mass * R**2 / 2.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
     
 
@@ -334,7 +334,7 @@ def frustrum_of_circular_cone_shell(r, R, height, density=densities['STEEL'], th
     Ixx = Iyy = mass * (R**2+r**2)/4. + mass * height**2 * (1+2*R*r/(R+r)**2) / 18.
     Izz = mass * (R**2+r**2) / 2.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def lateral_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
     surface = 2*pi*R*H
@@ -344,7 +344,7 @@ def lateral_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
     Ixx = Iyy = mass * (R**2 + H**2/6.) / 2.
     Izz = mass * R**2
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def total_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
     surface = 2 * pi * R * (R + H)
@@ -354,7 +354,7 @@ def total_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
     Ixx = Iyy = mass * (2*R**2*(R+2*H) + H**2*(3*R+H)) / 12. / (R+H)
     Izz = mass * R**2 * ((R+2*H) / (R+H)) / 2.
     
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def spherical_shell(R, density=densities['STEEL'] ,thickness=0.02):
     surface = 4*pi*R**2
@@ -362,7 +362,7 @@ def spherical_shell(R, density=densities['STEEL'] ,thickness=0.02):
     mass = sigma * surface
     
     Ixx = Iyy = Izz = 2 * mass*R**2 / 3.
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def hemispherical_shell(R, density=densities['STEEL'], thickness=0.02):
     """Note
@@ -374,13 +374,13 @@ def hemispherical_shell(R, density=densities['STEEL'], thickness=0.02):
     
     Ixx = Iyy = 5 * mass * R ** 2 / 12.
     Izz = 2 * mass * R ** 2 / 3.
-    return Inertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 
 
 if __name__ == '__main__':
-    inertia = Inertia(1, [0, 0, 0], 1, 2, 3, 4, 5, 6, point=[1, 2, 3])
+    inertia = InertiaParameters(1, [0, 0, 0], 1, 2, 3, 4, 5, 6, point=[1, 2, 3])
     
     # print inertia.inertia_matrix
     # print inertia.reduction_point
