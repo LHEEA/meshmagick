@@ -539,9 +539,9 @@ class Hydrostatics(object):
         # yb = (areas * normals[:, 2] * centers[:, 2] * centers[:, 1]).sum() / disp_volume
         # zb = (areas * normals[:, 1] * centers[:, 1] * centers[:, 2]).sum() / disp_volume
         
-        inertia_data = clipped_mesh.eval_plain_mesh_inertias(rho_medium=self.rho_water)
-        xb, yb, zb = inertia_data['gravity_center']
-        disp_volume = inertia_data['volume']
+        inertia = clipped_mesh.eval_plain_mesh_inertias(rho_medium=self.rho_water)
+        xb, yb, zb = inertia.gravity_center
+        disp_volume = inertia.mass / self.rho_water
         
         # Computing quantities from intersection polygons
         sigma0 = 0.  # \iint_{Aw} dS = Aw
@@ -695,13 +695,13 @@ class Hydrostatics(object):
         self.hs_data['FP'] = maxx
         self.hs_data['B'] = maxy - miny
         
-        coeffs = inertia_data['coeffs']
-        self.hs_data['Ixx'] = coeffs['Ixx']
-        self.hs_data['Iyy'] = coeffs['Iyy']
-        self.hs_data['Izz'] = coeffs['Izz']
-        self.hs_data['Ixy'] = coeffs['Ixy']
-        self.hs_data['Ixz'] = coeffs['Ixz']
-        self.hs_data['Iyz'] = coeffs['Iyz']
+        inertia = inertia.at_cog
+        self.hs_data['Ixx'] = inertia.xx
+        self.hs_data['Iyy'] = inertia.yy
+        self.hs_data['Izz'] = inertia.zz
+        self.hs_data['Ixy'] = inertia.xy
+        self.hs_data['Ixz'] = inertia.xz
+        self.hs_data['Iyz'] = inertia.yz
     
         return
     
