@@ -1568,6 +1568,8 @@ class Mesh(object):
         
         # TODO: allow to specify an other point for inertia matrix expression
         # TODO: manipuler plutot un objet inertia --> creer une classe !
+        rho_medium = float(rho_medium)
+        
         volume = self.volume
         mass = rho_medium * volume
         
@@ -1589,6 +1591,29 @@ class Mesh(object):
         yz = rho_medium * sigma13 / 2.
 
         return InertiaParameters(mass, cog, xx, yy, zz, yz, xz, xy, point=[0, 0, 0])
+    
+    def eval_shell_mesh_inertias(self, rho_medium=7850., thickness=0.02):
+        
+        rho_medium = float(rho_medium)
+        thickness = float(thickness)
+        surf_density = rho_medium * thickness
+        
+        surface = self.faces_areas.sum()
+        mass = surf_density * surface
+
+        s0, s1, s2, s3, s4, s5, s6, s7, s8 = self.get_surface_integrals()[:9].sum(axis=1)
+        
+        cog = np.array([s0, s1, s2], dtype=np.float) / mass
+        
+        xx = surf_density * (s7 + s8)
+        yy = surf_density * (s6 + s8)
+        zz = surf_density * (s6 + s7)
+        yz = surf_density * s3
+        xz = surf_density * s4
+        xy = surf_density * s5
+        
+        return InertiaParameters(mass, cog, xx, yy, zz, yz, xz, xy, point=[0, 0, 0])
+        
         
         
     def _edges_stats(self):
