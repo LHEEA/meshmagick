@@ -15,7 +15,7 @@ import sys # TODO: Retirer
 
 from tools import merge_duplicate_rows
 import MMviewer
-from inertia_parameters import InertiaParameters
+from inertia import RigidBodyInertia
 
 # TODO: Use traitlets to manage updates into the Mesh class
 
@@ -1593,7 +1593,7 @@ class Mesh(object):
         xz = rho_medium * sigma14 / 2.
         yz = rho_medium * sigma13 / 2.
 
-        return InertiaParameters(mass, cog, xx, yy, zz, yz, xz, xy, point=[0, 0, 0])
+        return RigidBodyInertia(mass, cog, xx, yy, zz, yz, xz, xy, point=[0, 0, 0])
     
     def eval_shell_mesh_inertias(self, rho_medium=7850., thickness=0.02):
         
@@ -1615,7 +1615,7 @@ class Mesh(object):
         xz = surf_density * s4
         xy = surf_density * s5
         
-        return InertiaParameters(mass, cog, xx, yy, zz, yz, xz, xy, point=[0, 0, 0])
+        return RigidBodyInertia(mass, cog, xx, yy, zz, yz, xz, xy, point=[0, 0, 0])
         
         
         

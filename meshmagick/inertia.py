@@ -5,36 +5,18 @@ import numpy as np
 from math import pi, sqrt
 from copy import deepcopy
 
+from densities import densities
 
 # FIXME: attention, changer les signes pour les produits d'inertie !
 
 # TODO: ajouter la production d'inerties de solides connus --> utile pour comparaison !!
 
 
-densities = {'CONCRETE': 2300.,
-             'REINFORCED_CONCRETE': 2400.,
-             'FRESH_WATER': 1000.,
-             'SALT_WATER': 1025.,
-             'SAND': 1600.,
-             'STEEL': 7850.,
-             'ALUMINUM': 2700.,
-             'LEAD': 11350.,
-             'TITANIUM': 4500.,
-             'POLYSTYRENE': 1050.,
-             'GASOLINE': 750.,
-             'DIESEL_FUEL': 850.,
-             'ETHANOL': 789.,
-             'AIR_20DEGC': 1.204,
-             'BUTANE': 2.7,
-             'PROPANE': 2.01,
-             'HYDROGEN_-252DEGC': 70.,
-             'NITROGEN_-195DEGC': 810.
-             }
-
 
 # TODO: indiquer une frame d'expression ...
 
-class InertiaParameters(object):
+
+class RigidBodyInertia(object):
     def __init__(self, mass, cog, xx, yy, zz, yz, xz, xy, point=None):
         
         self._mass = float(mass)
@@ -156,7 +138,7 @@ def right_circular_cylinder(radius, length, density=1.):
     Ixx = Iyy = mass * (3 * radius ** 2 + length ** 2) / 12.
     Izz = mass * radius ** 2 / 2.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def hollow_right_circular_cylinder(int_radius, ext_radius, length, density=1.):
@@ -167,7 +149,7 @@ def hollow_right_circular_cylinder(int_radius, ext_radius, length, density=1.):
     Ixx = Iyy = mass * (3 * R2r2 + length ** 2) / 12.
     Izz = mass * R2r2 / 2.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def right_circular_cone(radius, length, density=1.):
@@ -180,7 +162,7 @@ def right_circular_cone(radius, length, density=1.):
     Ixx = Iyy = 3 * mass * (radius ** 2 + length ** 2/4.) / 20.
     Izz = 3. * mass * radius ** 2 / 10.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def sphere(radius, density=1.):
@@ -188,7 +170,7 @@ def sphere(radius, density=1.):
     mass = density * vol
     
     Ixx = Iyy = Izz = 2 * mass * radius ** 2 / 5.
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0., 0., 0.)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0., 0., 0.)
 
 
 def hollow_sphere(int_radius, ext_radius, density=1.):
@@ -196,7 +178,7 @@ def hollow_sphere(int_radius, ext_radius, density=1.):
     mass = density * vol
     
     Ixx = Iyy = Izz = 2 * mass * (ext_radius ** 5 - int_radius ** 5) / (ext_radius ** 3 - int_radius ** 3) / 5
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0., 0., 0.)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0., 0., 0.)
 
 
 def hemisphere(radius, density=1.):
@@ -208,7 +190,7 @@ def hemisphere(radius, density=1.):
     
     Ixx = Iyy = Izz = 0.26 * mass * radius ** 2
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def elliptical_cylinder(a, b, length, density=1.):
@@ -226,7 +208,7 @@ def elliptical_cylinder(a, b, length, density=1.):
     Iyy = mass * (3 * a ** 2 + length ** 2) / 12.
     Izz = mass * (a ** 2 + b ** 2) / 4.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def ellipsoid(a, b, c, density=1.):
@@ -242,7 +224,7 @@ def ellipsoid(a, b, c, density=1.):
     Iyy = mass * (a ** 2 + b ** 2) / 5.
     Izz = mass * (b ** 2 + c ** 2) / 5.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def torus(chord_radius, tube_radius, density=1.):
     vol = 2*pi**2 * tube_radius**2 * chord_radius
@@ -251,7 +233,7 @@ def torus(chord_radius, tube_radius, density=1.):
     Ixx = Izz = mass * (4*chord_radius**2 + 5*tube_radius**2) / 8.
     Iyy = mass * (4*chord_radius**2 + 3*tube_radius**2) / 4.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
 def right_angle_wedge(base, height, length, density=1.):
@@ -262,7 +244,7 @@ def right_angle_wedge(base, height, length, density=1.):
     Iyy = mass * (base**2 + height**2) / 18.
     Izz = mass * (2*base**2 + 3*length**2) / 36.
 
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def isoceles_wedge(base, height, length, density=1.):
     vol = base * height * length / 2.
@@ -272,7 +254,7 @@ def isoceles_wedge(base, height, length, density=1.):
     Iyy = mass * (4*height**2 + 3*base**2) / 72.
     Izz = mass * (2 * length**2 + base**2) / 24.
 
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def right_rectangular_pyramid(a, b, height, density=1.):
     """Note
@@ -285,14 +267,14 @@ def right_rectangular_pyramid(a, b, height, density=1.):
     Iyy = mass * (a**2 + 3*height**2/4.) / 20.
     Izz = mass * (a**2 + b**2) / 20.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def cube(a, density=1.):
     vol = a**3
     mass = density * vol
     
     Ixx = Iyy = Izz = mass * a**2 / 6.
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def rectangular_prism(a, b, h, density=1.):
     """Note:
@@ -306,7 +288,7 @@ def rectangular_prism(a, b, h, density=1.):
     Iyy = mass * (a**2 + h**2) / 12.
     Izz = mass * (a**2 + b**2) / 12.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def circular_cone_shell(R, height, density=densities['STEEL'], thickness=0.02):
     """Note
@@ -319,7 +301,7 @@ def circular_cone_shell(R, height, density=densities['STEEL'], thickness=0.02):
     Ixx = Iyy = mass * (R**2 + 2*height**2/9.) / 4.
     Izz = mass * R**2 / 2.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
     
 
@@ -334,7 +316,7 @@ def frustrum_of_circular_cone_shell(r, R, height, density=densities['STEEL'], th
     Ixx = Iyy = mass * (R**2+r**2)/4. + mass * height**2 * (1+2*R*r/(R+r)**2) / 18.
     Izz = mass * (R**2+r**2) / 2.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def lateral_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
     surface = 2*pi*R*H
@@ -344,7 +326,7 @@ def lateral_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
     Ixx = Iyy = mass * (R**2 + H**2/6.) / 2.
     Izz = mass * R**2
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def total_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
     surface = 2 * pi * R * (R + H)
@@ -354,7 +336,7 @@ def total_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
     Ixx = Iyy = mass * (2*R**2*(R+2*H) + H**2*(3*R+H)) / 12. / (R+H)
     Izz = mass * R**2 * ((R+2*H) / (R+H)) / 2.
     
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def spherical_shell(R, density=densities['STEEL'] ,thickness=0.02):
     surface = 4*pi*R**2
@@ -362,7 +344,7 @@ def spherical_shell(R, density=densities['STEEL'] ,thickness=0.02):
     mass = sigma * surface
     
     Ixx = Iyy = Izz = 2 * mass*R**2 / 3.
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def hemispherical_shell(R, density=densities['STEEL'], thickness=0.02):
     """Note
@@ -374,13 +356,136 @@ def hemispherical_shell(R, density=densities['STEEL'], thickness=0.02):
     
     Ixx = Iyy = 5 * mass * R ** 2 / 12.
     Izz = 2 * mass * R ** 2 / 3.
-    return InertiaParameters(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+    return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+
+
+
+
+# TODO: placer cette classe tout en haut du module
+# TODO: faire une methode pour templater a partir d'un array preexistant
+# TODO: voir comment on gere les signes des produits d'inertie
+
+class RotationalInertia3D(np.ndarray):
+    
+    __array_priority__ = 15
+    
+    def __new__(cls, xx, xy, yy, xz, yz, zz, point):
+        
+        lower_triangular = np.array([xx, xy, yy, xz, yz, zz], dtype=np.float)
+        obj = lower_triangular.view(cls)
+        
+        return obj
+    
+    @property
+    def array(self):
+        print "generating full array"
+        array = np.asarray(self, dtype=np.float)[[0, 1, 3, 1, 2, 4, 3, 4, 5]]
+        array[[1, 2, 3, 5, 6, 7]] *= -1
+        return array.reshape((3, 3))
+    
+    # def __mul__(self, other):
+    #     print '\nOperation %s * %s' % (repr(self), repr(other))
+    #
+    #     if np.isscalar(other):
+    #         return np.multiply(self, other)
+    #
+    #     elif isinstance(other, AngularVelocityVector):
+    #         return np.dot(self.array, other)
+    #
+    #     else:
+    #         raise RuntimeError('Operation not allowed: %s * %s') % (type(self), type(other))
+    #
+    #
+    #     # return np.multiply(self, other)
+    #
+    # def __rmul__(self, other):
+    #     print '\nRMUL %s * %s' % (repr(other), repr(self))
+    # #
+    # #     if isinstance(other, (float, int)):
+    # #         return np.multiply(other, self)
+    # #     elif isinstance(other, RotationalInertia3D):
+    # #         print "I*I"
+    # #         return
+    # #     else:
+    # #         return NotImplemented
+    
+    def __numpy_ufunc__(self, ufunc, method, i, inputs, **kwargs):
+        print "In __numpy_ufunc__"
+        return NotImplemented
+    
+    
+    
+    # def __array_finalize(self, obj):
+    #     print "In __array_finalize__ :"
+    #     print '\tself is %s' % repr(self)
+    #     print '\tobj is %s' % repr(obj)
+    #     if obj is None: return
+    
+    # def __array_prepare__(self, array, context=None):
+    #     print "In __array_prepare__:"
+    #     (func, args, _) = context
+    #     print func
+    #     print args
+        
+    
+
+    # def __array_wrap__(self, obj, context=None):
+    #     print 'In __array_wrap__ :'
+    #     print '\tself is %s' % repr(self)
+    #     print '\tobj: %s' % repr(obj)
+    #     print '\tcontext: ', context
+    #
+    #     (func, args, _) = context
+    #     print func, args
+    #
+    #
+    #     return np.ndarray.__array_wrap__(self, obj, context)
+    
+    # def __array__(self):
+    #     print "In __array__"
+    
+    # def __getitem__(self, key):
+    #     print 'In __getitem__ with key :'
+    #     print key
+    #     return super(RotationalInertia3D, self).__getitem__(key)
+
+
+
+
+class AngularVelocityVector(np.ndarray):
+    __array_priority__ = 15
+    def __new__(cls, array):
+        assert len(array) == 3
+        return np.asarray(array, dtype=np.float).view(cls)
 
 
 
 
 if __name__ == '__main__':
-    inertia = InertiaParameters(1, [0, 0, 0], 1, 2, 3, 4, 5, 6, point=[1, 2, 3])
+    
+    # inertia = RigidBodyInertia(1, [0, 0, 0], 1, 2, 3, 4, 5, 6)
+    
+    inertia = RotationalInertia3D(1, 2, 3, 4, 5, 6, [0, 0, 0])
+    
+    w = AngularVelocityVector([1, 1, 1])
+    
+    # print inertia.array
+    # print inertia * 2
+    # print inertia.__array_priority__
+    # print w.__array_priority__
+    print inertia * 2
+    # print w*inertia
+    # print inertia*2
+    
+    
+    # print type(inertia.array)
+    # print inertia.array
+    # print inertia.array is inertia
+    #
+    # print inertia[:3]
+    
+    
+    # inertia = RigidBodyInertia(1, [0, 0, 0], 1, 2, 3, 4, 5, 6, point=[1, 2, 3])
     
     # print inertia.inertia_matrix
     # print inertia.reduction_point
@@ -395,20 +500,20 @@ if __name__ == '__main__':
     #
     # print inertia
     
-    R = 5
-    r = 4.5
-    R1 = 4.75
-    h = 20
-    rho = 8000
-    
-    e = 0.0001
-    r_point = [4, 3, -h/2]
-    
-    rcyl = hollow_right_circular_cylinder(r, R, h, density=rho)
-    rcyl.reduction_point = r_point
-    
-    lcyl = lateral_cylindrical_shell(R1, h, rho*(R**2-r**2) / (2*R1*e), e)
-    lcyl.reduction_point = r_point
-    
-    print rcyl
-    print lcyl
+    # R = 5
+    # r = 4.5
+    # R1 = 4.75
+    # h = 20
+    # rho = 8000
+    #
+    # e = 0.0001
+    # r_point = [4, 3, -h/2]
+    #
+    # rcyl = hollow_right_circular_cylinder(r, R, h, density=rho)
+    # rcyl.reduction_point = r_point
+    #
+    # lcyl = lateral_cylindrical_shell(R1, h, rho*(R**2-r**2) / (2*R1*e), e)
+    # lcyl.reduction_point = r_point
+    #
+    # print rcyl
+    # print lcyl

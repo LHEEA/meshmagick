@@ -1024,11 +1024,6 @@ def main():
             
         inertia = mesh.eval_plain_mesh_inertias(rho_medium=rho_medium)
         
-        # if args.hydrostatics:
-        #     print "\nWARNING: Taking inertia computed values to perform further hydrostatics"
-        #     args.disp = inertia_params['mass']
-        #     args.cog = inertia_params['gravity_center']
-        # FIXME: Ce qui suit n'est plus d'actualite !!!
         if verbose:
             print "\nInertial parameters for a uniform distribution of a medium of density %.1f kg/m**3 in the mesh:\n" % rho_medium
             print "\tMass = %.3f tons" % (inertia.mass/1000.)
@@ -1044,7 +1039,6 @@ def main():
     
     
     if args.shell_inertia:
-        # TODO: permettre de regler les parametres
         if args.rho_medium is None:
             rho_medium = 7850.
         else:
@@ -1068,7 +1062,6 @@ def main():
             print "\t\t%.3E\t%.3E\t%.3E" % (mat[2, 0], mat[2, 1], mat[2, 2])
             point = inertia.reduction_point
             print "\tExpressed at point : \t\t%.3E\t%.3E\t%.3E" % (point[0], point[1], point[2])
-    
     
     additional_forces = []
     if args.relative_force is not None:
@@ -1143,7 +1136,7 @@ def main():
         
         if case == (False, False, True) or case == (False, False, False):
             if verbose:
-                print "Generating hydrostatic data for a zcog of %.3f meters." % zcog
+                print "\nGenerating hydrostatic data for a zcog of %.3f meters." % zcog
             hs_solver.zg = zcog
             
         if case == (True, True, False) or case == (True, True, True):
