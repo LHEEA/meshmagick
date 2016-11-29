@@ -1,5 +1,5 @@
 .meshmagick:
-    script: &test_script¬
+    script: &build_script¬
     - source /home/dice/anaconda2/bin/activate python2¬
     - cd meshmagick¬
     - pytest¬
@@ -7,6 +7,6 @@
 
 meshmagick:¬
     stage: test¬
-    script: *test_script¬
+    script: *build_script¬
 
 
