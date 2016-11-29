@@ -207,13 +207,12 @@ class Hydrostatics(object):
         return self._gravity_center
     
     @gravity_center.setter
-    def gravity_center(self, value, update=True):
+    def gravity_center(self, value):
         value = np.asarray(value, dtype=np.float)
         self.backup['gravity_center'] = value
         assert value.shape[0] == 3
         self._gravity_center = value
-        if update:
-            self._update_hydrostatic_properties()
+        self._update_hydrostatic_properties()
         return
     
     @property
@@ -221,10 +220,9 @@ class Hydrostatics(object):
         return self._gravity_center[-1]
     
     @zg.setter
-    def zg(self, value, update=True):
+    def zg(self, value):
         self._gravity_center[-1] = float(value)
-        if update:
-            self._update_hydrostatic_properties()
+        self._update_hydrostatic_properties()
         return
     
     @property
@@ -281,6 +279,7 @@ class Hydrostatics(object):
         
         self.mesh = self.backup['init_mesh']
         self._gravity_center = self.backup['gravity_center']
+        self._reinit_clipper()
         
         self._update_hydrostatic_properties()
         
@@ -423,53 +422,13 @@ class Hydrostatics(object):
         self.allow_unstable = False
         return
     
-    def rotate(self, angles, update=True):
-        # R = super(HSmesh, self).rotate(angles)
-        R = self.mesh.rotate(angles)
-        self._gravity_center = np.dot(R, self._gravity_center)
-        if update:
-            self._update_hydrostatic_properties()
-        self._rotation = np.dot(R, self._rotation)
-        return R
+    def _reinit_clipper(self):
+        try:
+            del self.hs_data['clipper']
+        except KeyError:
+            pass
+        return
     
-    def rotate_x(self, thetax, update=True):
-        return self.rotate([thetax, 0., 0.], update=update)
-        
-    def rotate_y(self, thetay, update=True):
-        return self.rotate([0., thetay, 0.], update=update)
-    
-    def rotate_z(self, thetaz, update=True):
-        return self.rotate([0., 0., thetaz], update=update)
-    
-    def translate_x(self, tx, update=True):
-        self.mesh.translate_x(tx)
-        # super(HSmesh, self).translate_x(tx)
-        self._gravity_center[0] += tx
-        if update:
-            self._update_hydrostatic_properties()
-        return
-        
-    def translate_y(self, ty, update=True):
-        self.mesh.translate_y(ty)
-        self._gravity_center[1] += ty
-        if update:
-            self._update_hydrostatic_properties()
-        return
-        
-    def translate_z(self, tz, update=True):
-        self.mesh.translate_z(tz)
-        self._gravity_center[2] += tz
-        if update:
-            self._update_hydrostatic_properties()
-        return
-        
-    def translate(self, t, update=True):
-        super(Hydrostatics, self).translate(t)
-        self._gravity_center += t
-        if update:
-            self._update_hydrostatic_properties()
-        return
-     
     def _update_hydrostatic_properties(self):
         """
         Computes the hydrostatics properties of a mesh.
@@ -510,10 +469,17 @@ class Hydrostatics(object):
         # Clipping the mesh by the Oxy plane
         # TODO: ne pas recreer une instance de MeshClipper a fois mais la stocker et mettre a jour son maillage ainsi
         #  que ses donnees
-
-        clipper = MeshClipper(self.mesh, assert_closed_boundaries=True, verbose=False)
-        clipped_mesh = clipper.clipped_mesh  # TODO: enregistrer le maillage coupe !!!
         
+        # FIXME: on ne devrait recouper le maillage que si ce dernier a ete modifie !!!
+        try:
+            clipper = self.hs_data['clipper']
+            clipped_mesh = clipper.clipped_mesh
+        except KeyError:
+            clipper = MeshClipper(self.mesh, assert_closed_boundaries=True, verbose=False)
+            self.hs_data['clipper'] = clipper
+            clipped_mesh = clipper.clipped_mesh
+            
+            
         # Retrieving faces properties for the clipped mesh
         areas = clipped_mesh.faces_areas
         normals = clipped_mesh.faces_normals
@@ -523,9 +489,6 @@ class Hydrostatics(object):
             print 'probleme de facette'
             self.mesh.quick_save()
             raise Exception
-        
-        # Storing clipped mesh
-        self.hs_data['hs_mesh'] = clipped_mesh
         
         # Wetted surface area
         Sw = areas.sum()
@@ -695,7 +658,7 @@ class Hydrostatics(object):
         self.hs_data['FP'] = maxx
         self.hs_data['B'] = maxy - miny
         
-        inertia = inertia.at_cog
+        inertia.shift_at_cog()
         self.hs_data['Ixx'] = inertia.xx
         self.hs_data['Iyy'] = inertia.yy
         self.hs_data['Izz'] = inertia.zz
@@ -799,6 +762,7 @@ class Hydrostatics(object):
             for force in self.additional_forces:
                 force.update(dz=dz)
             
+            self._reinit_clipper()
             self._update_hydrostatic_properties()
     
             residual = self.delta_fz
@@ -868,6 +832,7 @@ class Hydrostatics(object):
                     R = self.mesh.rotate([thetax, thetay, 0.])
                     self._gravity_center = np.dot(R, self._gravity_center)
                     self._rotation = np.dot(R, self._rotation)
+                    self._reinit_clipper()
                     self._update_hydrostatic_properties()
                     
                     for force in self.additional_forces:
@@ -892,6 +857,7 @@ class Hydrostatics(object):
             for force in self.additional_forces:
                 force.update(dz=dz, rot=R)
             
+            self._reinit_clipper()
             self._update_hydrostatic_properties()
 
             # if self.animate:
