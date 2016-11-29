@@ -1,5 +1,12 @@
-before_script:
-  - apt-get update -qq && apt-get install -y -qq python2 python2-dev
+.meshmagick:¬
+    script: &test_script¬
+    - source /home/dice/anaconda2/bin/activate python2¬
+    - cd meshmagick¬
+    - pytest¬
+    - cd ..¬
 
+meshmagick:¬
+    stage: test¬
+    script: *test_script¬
 
 
