@@ -724,8 +724,7 @@ def main():
     # Merge duplicate _vertices
     if args.merge_duplicates is not None:
         tol = float(args.merge_duplicates)
-        decimals = int(round(math.log10(tol)))
-        mesh.merge_duplicates(decimals=decimals)
+        mesh.merge_duplicates(atol=tol)
 
     # TODO : put that dict at the begining of the main function or in the module
     plane_str_list = {'Oxy':[0.,0.,1.],
@@ -1016,7 +1015,7 @@ def main():
             # mesh = mesh.clip(clipping_plane)
         if verbose:
             print '\t-> Done.'
-
+    
     if args.plain_inertia:
         if args.rho_medium is None:
             rho_medium = 1023.

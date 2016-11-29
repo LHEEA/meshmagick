@@ -450,13 +450,15 @@ class Mesh(object):
         self._verbose = False
 
     def __str__(self):
+        xmin, xmax, ymin, ymax, zmin, zmax = self.axis_aligned_bbox
+        
         str_repr = """
         --------------------------------------------
         \tMESH NAME : %s
         --------------------------------------------
 
-        Number of _vertices: %u
-        Number of _faces:    %u
+        Number of vertices: %u
+        Number of faces:    %u
 
         Number of triangles:   %u
         Number of quadrangles: %u
@@ -471,12 +473,9 @@ class Mesh(object):
                self.nb_faces,
                self.nb_triangles,
                self.nb_quadrangles,
-               self._vertices[:, 0].min(),
-               self._vertices[:, 0].max(),
-               self._vertices[:, 1].min(),
-               self._vertices[:, 1].max(),
-               self._vertices[:, 2].min(),
-               self._vertices[:, 2].max(),
+               xmin, xmax,
+               ymin, ymax,
+               zmin, zmax
                )
         return str_repr
 
@@ -947,10 +946,13 @@ class Mesh(object):
     
     @property
     def axis_aligned_bbox(self):
-        x, y, z = self._vertices.T
-        return (x.min(), x.max(),
-                y.min(), y.max(),
-                z.min(), z.max())
+        if self.nb_vertices > 0:
+            x, y, z = self._vertices.T
+            return (x.min(), x.max(),
+                    y.min(), y.max(),
+                    z.min(), z.max())
+        else:
+            return tuple([0. for i in xrange(6)])
     
     @property
     def squared_axis_aligned_bbox(self):
@@ -1192,7 +1194,7 @@ class Mesh(object):
         V = np.concatenate((self._vertices, mesh_to_add._vertices), axis=0)
         F = np.concatenate((self._faces, mesh_to_add._faces + self.nb_vertices), axis=0)
         new_mesh = Mesh(V, F, name='_'.join([self.name, mesh_to_add.name]))
-        # new_mesh.merge_duplicates()
+        new_mesh.merge_duplicates()
         new_mesh._verbose = self._verbose or mesh_to_add._verbose
 
         return new_mesh
@@ -1200,8 +1202,8 @@ class Mesh(object):
     def copy(self):
         return copy.deepcopy(self)
 
-    def merge_duplicates(self, decimals=8, return_index=False):
-        uniq, newID = merge_duplicate_rows(self._vertices, decimals=decimals, return_index=True)
+    def merge_duplicates(self, atol=1e-8, return_index=False):
+        uniq, newID = merge_duplicate_rows(self._vertices, atol=1e-8, return_index=True)
 
         nv_init = self.nb_vertices
 
@@ -1212,7 +1214,7 @@ class Mesh(object):
         nv_final = self.nb_vertices
 
         if self._verbose:
-            print "* Merging duplicate vertices that are close to %u decimals..." % decimals
+            print "* Merging duplicate vertices that lie in an absolute proximity of %.1E..." % atol
             delta_n = nv_init - nv_final
             if delta_n == 0:
                 print "\t--> No duplicate vertices have been found"
@@ -1564,6 +1566,7 @@ class Mesh(object):
     def volume(self):
         return self._compute_volume()
     
+    # TODO: add the possibility to compute the inertia to an other point than [0, 0, 0]
     def eval_plain_mesh_inertias(self, rho_medium=1023.):
         
         # TODO: allow to specify an other point for inertia matrix expression

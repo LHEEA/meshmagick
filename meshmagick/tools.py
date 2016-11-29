@@ -27,10 +27,10 @@ import numpy as np
 #         return uniq
 
 
-def merge_duplicate_rows(arr, decimals=8, return_index=False):
-    """merge_duplicates(_vertices, _faces, verbose=False, tol=1e-8)
+def merge_duplicate_rows(arr, atol=1e-8, return_index=False):
+    """merge_duplicates(_vertices, _faces, verbose=False, atol=1e-8)
 
-    Returns a new node array where close nodes have been merged into one node (following tol). It also returns
+    Returns a new node array where close nodes have been merged into one node (following atol). It also returns
     the connectivity array _faces with the new node IDs.
 
     Parameters:
@@ -38,7 +38,7 @@ def merge_duplicate_rows(arr, decimals=8, return_index=False):
             numpy array of the coordinates of the mesh's nodes
         verbose[optional]: bool
             if set to True, displays information on the merge procedure
-        tol[optional]: float
+        atol[optional]: float
             the tolerance used to define nodes that are coincident and
             that have to be merged
 
@@ -57,7 +57,7 @@ def merge_duplicate_rows(arr, decimals=8, return_index=False):
     # This function is a bottleneck in the clipping routines
     # TODO: use np.unique to cluster groups --> acceleration !!
 
-    tol = pow(10, -decimals)
+    # atol = pow(10, -decimals)
 
     nv, nbdim = arr.shape
 
@@ -87,7 +87,7 @@ def merge_duplicate_rows(arr, decimals=8, return_index=False):
 
                 for idx in xrange(istart, istop):
                     cur_val = values[idx]
-                    if np.abs(cur_val - vref) > tol:
+                    if np.abs(cur_val - vref) > atol:
                         levels_tmp.append(idx)
                         vref = cur_val
 
