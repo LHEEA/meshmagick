@@ -33,15 +33,11 @@ UNIX
 
 You can install MESHMAGICK with the following command issued:
 
-``
-$ pip install .
-``
+``$ pip install .``
 
 Updating installation with a new version
 ----------------------------------------
 
 The best way to update your MESHMAGICK installation is to issue the following command in the meshmagick download directory:
 
-``
-$ pip install . --upgrade
-``
+``$ pip install . --upgrade``
