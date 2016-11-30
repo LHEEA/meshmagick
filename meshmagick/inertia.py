@@ -5,7 +5,7 @@ import numpy as np
 from math import pi, sqrt
 from copy import deepcopy
 
-from densities import densities
+import densities
 
 # FIXME: attention, changer les signes pour les produits d'inertie !
 
@@ -290,7 +290,7 @@ def rectangular_prism(a, b, h, density=1.):
     
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
-def circular_cone_shell(R, height, density=densities['STEEL'], thickness=0.02):
+def circular_cone_shell(R, height, density=densities.get_density('STEEL'), thickness=0.02):
     """Note
     The center of gravity is located at an altitude of z=H/3 over the circular basis center
     """
@@ -305,7 +305,7 @@ def circular_cone_shell(R, height, density=densities['STEEL'], thickness=0.02):
 
     
 
-def frustrum_of_circular_cone_shell(r, R, height, density=densities['STEEL'], thickness=0.02):
+def frustrum_of_circular_cone_shell(r, R, height, density=densities.get_density('STEEL'), thickness=0.02):
     """Note:
     The center of gravity is located at an altitude of z=(H/3)*(2*r+R)/(r+R)
     """
@@ -318,7 +318,7 @@ def frustrum_of_circular_cone_shell(r, R, height, density=densities['STEEL'], th
     
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
-def lateral_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
+def lateral_cylindrical_shell(R, H, density=densities.get_density('STEEL'), thickness=0.02):
     surface = 2*pi*R*H
     sigma = density * thickness
     mass = sigma * surface
@@ -328,7 +328,7 @@ def lateral_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
     
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
-def total_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
+def total_cylindrical_shell(R, H, density=densities.get_density('STEEL'), thickness=0.02):
     surface = 2 * pi * R * (R + H)
     sigma = density * thickness
     mass = sigma * surface
@@ -338,7 +338,7 @@ def total_cylindrical_shell(R, H, density=densities['STEEL'], thickness=0.02):
     
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
-def spherical_shell(R, density=densities['STEEL'] ,thickness=0.02):
+def spherical_shell(R, density=densities.get_density('STEEL') ,thickness=0.02):
     surface = 4*pi*R**2
     sigma = density * thickness
     mass = sigma * surface
@@ -346,7 +346,7 @@ def spherical_shell(R, density=densities['STEEL'] ,thickness=0.02):
     Ixx = Iyy = Izz = 2 * mass*R**2 / 3.
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
-def hemispherical_shell(R, density=densities['STEEL'], thickness=0.02):
+def hemispherical_shell(R, density=densities.get_density('STEEL'), thickness=0.02):
     """Note
     The center of gravity is located at an altitude of z=R/2 over the circular basis center
     """

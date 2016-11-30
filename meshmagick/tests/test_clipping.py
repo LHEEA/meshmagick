@@ -4,13 +4,13 @@
 import numpy as np
 import math
 
-import mmio
-from mesh import Mesh, Plane
-import mesh_clipper as mc
+import meshmagick.mmio as mmio
+from meshmagick.mesh import Mesh, Plane
+import meshmagick.mesh_clipper as mc
 
 
 def test_clipper():
-    vertices, faces = mmio.load_VTP('tests/data/SEAREV.vtp')
+    vertices, faces = mmio.load_VTP('meshmagick/tests/data/SEAREV.vtp')
     searev = Mesh(vertices, faces)
     
     plane = Plane()

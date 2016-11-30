@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 #  -*- coding: utf-8 -*-
 
-import mmio
-from mesh import Mesh
-from math import pi
-from mesh_clipper import MeshClipper
+import meshmagick.mmio as mmio
+from meshmagick.mesh import Mesh
+from math import pi, fabs
 
 vertices, faces = mmio.load_VTP('meshmagick/tests/data/Cylinder.vtp')
 cylinder = Mesh(vertices, faces)
@@ -19,11 +18,8 @@ def test_cylinder_inertia():
     Ixx = Iyy = V*(R**2+h**2/3)/4
     Izz = V*R**2/2
     
-    inertia_data = cylinder.eval_plain_mesh_inertias(rho_medium=1.)
-    coeffs = inertia_data['coeffs']
-    print coeffs['Ixx'] ,  Ixx
-    print coeffs['Izz'] , Izz
+    inertia = cylinder.eval_plain_mesh_inertias(rho_medium=1.)
     
-
-if __name__ == '__main__':
-    test_cylinder_inertia()
+    assert fabs(inertia.xx - Ixx) < 1000
+    assert fabs(inertia.zz - Izz) < 1000
+    

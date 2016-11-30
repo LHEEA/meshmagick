@@ -301,7 +301,7 @@ def load_INP(filename):
         if field['type'] == 'NODE':
             nodes = np.asarray(meshfiles[file]['NODE_SECTION'], dtype=np.float)
             # Translation of nodes according to frame option id any
-            nodes = translate(nodes, frames[field['FRAME']])  # TODO: s'assurer que frame est une options obligatoire...
+            nodes += frames[field['FRAME']]  # TODO: s'assurer que frame est une options obligatoire...
 
             if nbNodes == 0:
                 V = nodes.copy()
