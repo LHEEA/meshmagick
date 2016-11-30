@@ -1,4 +1,5 @@
-## MESHMAGICK
+MESHMAGICK
+==========
 
 *MESHMAGICK* is a command line utility as well as a python module for the manipulation of meshes encountered in the hydrodynamics community.
 
@@ -13,24 +14,31 @@ It also comes with an automatic meshing of lids capability, which is usefull for
 Meshmagick is developped at LHEEA lab (Ecole Centrale de Nantes) in Python. It is released under the open source CeCILL licence which in practice is very similar to GPL: http://www.cecill.info/index.en.html
 
 
-## Basic Usage
+Basic Usage
+===========
 
 Complete this section
 
-## Installation
+Installation
+============
 
-### Windows¶
+Windows
+-------
 
 You can install meshmagick by double-clicking on the install.bat file.
 That's it.
 
-### UNIX
+UNIX
+----
+
 You can install MESHMAGICK with the following command issued:
 ```shell
 $ pip install .
 ```
 
-### Updating installation with a new version
+Updating installation with a new version
+----------------------------------------
+
 The best way to update your MESHMAGICK installation is to issue the following command in the meshmagick download directory:
 
 ```shell

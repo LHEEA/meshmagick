@@ -1,6 +1,6 @@
 """Setup script for meshmagick."""
 from __future__ import print_function
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 import codecs
 import os
@@ -32,7 +32,6 @@ class PyTest(TestCommand):
         errno = pytest.main(self.test_args)
         sys.exit(errno)
 
-
 setup(
     name='meshmagick',
     version='1.0',
@@ -51,7 +50,7 @@ setup(
         'argcomplete',
         'numpy'
         ],
-    cmdclass={'test': PyTest}
+    cmdclass={'test': PyTest},
     entry_points={
         'console_scripts': [
             'meshmagick=meshmagick:main',
