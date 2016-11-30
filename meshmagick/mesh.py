@@ -1023,17 +1023,6 @@ class Mesh(object):
 
             return conformal
 
-    def transform(self, rotation=None, translation=None):
-        if translation:
-            assert len(translation) == 3
-            self.translate(translation)
-        
-        if rotation:
-            assert len(rotation) == 3
-            self.rotate(rotation)
-            
-        return
-
     def rotate_x(self, thetax):
         return self.rotate([thetax, 0., 0.])
 
