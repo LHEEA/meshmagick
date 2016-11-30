@@ -1,0 +1,13 @@
+.meshmagick:
+    script: &test_script
+    - source /home/dice/anaconda2/bin/activate python2
+    - cd meshmagick
+    - export PYTHONPATH=`pwd`:$PYTHONPATH
+    - pytest
+    - cd ..
+
+meshmagick:
+    stage: test
+    script: *test_script
+
+
