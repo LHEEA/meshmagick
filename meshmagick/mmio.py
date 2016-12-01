@@ -37,9 +37,8 @@ def load_mesh(filename, file_format):
             numpy array of the _faces' nodes connectivities
     """
     check_file(filename)
-    os.path.isfile(filename)
 
-    if not file_format not in extension_dict:
+    if file_format not in extension_dict:
         raise IOError('Extension ".%s" is not known' % file_format)
 
     loader = extension_dict[file_format][0]
@@ -796,8 +795,8 @@ def load_MED(filename):
     """
     try:
         import h5py
-    except ImportError as ie:
-        raise('MED file format reader needs h5py module to be installed')
+    except ImportError:
+        raise ImportError('MED file format reader needs h5py module to be installed')
 
     check_file(filename)
 
@@ -1256,7 +1255,7 @@ def _build_vtkPolyData(vertices, faces):
         points.InsertNextPoint(point)
 
     # Create a vtkCellArray to store _faces
-    faces = vtk.vtkCellArray()
+    cell_array = vtk.vtkCellArray()
     for face_ids in faces:
         if face_ids[0] == face_ids[-1]:
             # Triangle
@@ -1270,13 +1269,13 @@ def _build_vtkPolyData(vertices, faces):
         for idx, id in enumerate(curface):
             vtk_face.GetPointIds().SetId(idx, id)
 
-        faces.InsertNextCell(vtk_face)
+        cell_array.InsertNextCell(vtk_face)
 
-    polyDataMesh = vtk.vtkPolyData()
-    polyDataMesh.SetPoints(points)
-    polyDataMesh.SetPolys(faces)
+    polydata_mesh = vtk.vtkPolyData()
+    polydata_mesh.SetPoints(points)
+    polydata_mesh.SetPolys(cell_array)
 
-    return polyDataMesh
+    return polydata_mesh
 
 
 def write_NAT(filename, vertices, faces):
