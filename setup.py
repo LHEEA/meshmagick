@@ -1,7 +1,6 @@
 """Setup script for meshmagick."""
 from __future__ import print_function
 from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
 import codecs
 import os
 import sys
@@ -17,21 +16,6 @@ def read(*parts):
 
 LONG_DESCRIPTION = read('README.rst')
 
-class PyTest(TestCommand):
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = [
-            '--strict',
-            '--verbose',
-            '--tb=long',
-            'tests']
-        self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-        errno = pytest.main(self.test_args)
-        sys.exit(errno)
-
 setup(
     name='meshmagick',
     version='1.0',
@@ -44,13 +28,13 @@ setup(
     license='CeCILL-2.1',
     keywords='hydrodynamics, unstructured mesh, conversion, manipulation',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    setup_requires=['pytest-runner'],
     tests_require=['pytest', 'pytest-cov'],
     install_requires=[
         'argparse',
         'argcomplete',
         'numpy'
         ],
-    cmdclass={'test': PyTest},
     entry_points={
         'console_scripts': [
             'meshmagick=meshmagick:main',
