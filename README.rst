@@ -1,3 +1,6 @@
+[![build status](https://d-ice.githost.io/meshmagick/meshmagick/badges/release1.0/build.svg)](https://d-ice.githost.io/meshmagick/meshmagick/commits/release1.0)
+[![coverage report](https://d-ice.githost.io/meshmagick/meshmagick/badges/release1.0/coverage.svg)](https://d-ice.githost.io/meshmagick/meshmagick/commits/release1.0)
+
 MESHMAGICK
 ==========
 
