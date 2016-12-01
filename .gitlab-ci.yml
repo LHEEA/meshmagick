@@ -2,6 +2,7 @@
     script: &test_script
     - source /home/dice/anaconda2/bin/activate python2
     - cd meshmagick
+    - pip install -e .
     - export PYTHONPATH=`pwd`:$PYTHONPATH
     - pytest
     - cd ..
