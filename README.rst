@@ -1,7 +1,7 @@
 MESHMAGICK
 ==========
 
-|Build Status| |Coverage Statu|
+|Build Status| |Coverage Status|
 
 *MESHMAGICK* is a command line utility as well as a python module for the manipulation of meshes encountered in the hydrodynamics community.
 
