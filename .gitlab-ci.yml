@@ -1,10 +1,9 @@
 .meshmagick:
     script: &test_script
     - source /home/dice/anaconda2/bin/activate python2
-    - pip install -e .
     - cd meshmagick
     - export PYTHONPATH=`pwd`:$PYTHONPATH
-    - pytest
+    - python setup.py test
     - cd ..
 
 meshmagick:
