@@ -1,8 +1,7 @@
-[![build status](https://d-ice.githost.io/meshmagick/meshmagick/badges/release1.0/build.svg)](https://d-ice.githost.io/meshmagick/meshmagick/commits/release1.0)
-[![coverage report](https://d-ice.githost.io/meshmagick/meshmagick/badges/release1.0/coverage.svg)](https://d-ice.githost.io/meshmagick/meshmagick/commits/release1.0)
-
 MESHMAGICK
 ==========
+
+|Build Status| |Coverage Status|
 
 *MESHMAGICK* is a command line utility as well as a python module for the manipulation of meshes encountered in the hydrodynamics community.
 
@@ -44,3 +43,9 @@ Updating installation with a new version
 The best way to update your MESHMAGICK installation is to issue the following command in the meshmagick download directory:
 
 ``$ pip install . --upgrade``
+
+
+.. |Build Status| image:: https://d-ice.githost.io/meshmagick/meshmagick/badges/release1.0/build.svg
+   :target: https://d-ice.githost.io/meshmagick/meshmagick/commits/release1.0
+.. |Coverage Status| image:: https://d-ice.githost.io/meshmagick/meshmagick/badges/release1.0/coverage.svg
+     :target: (https://d-ice.githost.io/meshmagick/meshmagick/commits/release1.0
