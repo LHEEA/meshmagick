@@ -2,6 +2,8 @@
     script: &test_script
     - source /home/dice/anaconda2/bin/activate python2
     - python setup.py test
+    - coverage run setup.py test
+    - coverage report
 
 meshmagick:
     stage: test
