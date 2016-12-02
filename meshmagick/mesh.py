@@ -1213,7 +1213,7 @@ class Mesh(object):
         return copy.deepcopy(self)
 
     def merge_duplicates(self, atol=1e-8, return_index=False):
-        uniq, new_id = merge_duplicate_rows(self._vertices, atol=1e-8, return_index=True)
+        uniq, new_id = merge_duplicate_rows(self._vertices, atol=atol, return_index=True)
 
         nv_init = self.nb_vertices
 
