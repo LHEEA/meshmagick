@@ -1085,7 +1085,7 @@ def write_TEC(filename, vertices, faces):
 
     ofile.write('VARIABLES = \"X\",\"Y\",\"Z\" \n')
     ofile.write('ZONE T=\"MESH\" \n')
-    ofile.write('N={nv:10d} ,E={nf:10d} , faces=FEPOINT, ET=QUADRILATERAL\n'.format(nv=nv, nf=nf))
+    ofile.write('N={nv:10d} ,E={nf:10d} , F=FEPOINT, ET=QUADRILATERAL\n'.format(nv=nv, nf=nf))
 
     node_block = '\n'.join( # block
         ''.join(
@@ -1454,7 +1454,9 @@ def write_STL(filename, vertices, faces):
               perform a prior triangulation of the mesh""")
 
         # Computing normal
-        v0, v1, v2 = vertices.T
+        v0 = vertices[face[0], :]
+        v1 = vertices[face[1], :]
+        v2 = vertices[face[2], :]
 
         n = np.cross(v1 - v0, v2 - v0)
         n /= np.linalg.norm(n)
