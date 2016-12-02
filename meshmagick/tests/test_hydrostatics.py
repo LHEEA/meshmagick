@@ -71,15 +71,12 @@ def test_set_displacement():
     disp = hs_cylinder.displacement
     hs_cylinder.set_displacement(1.1*disp)
     hs_cylinder.reset()
-    # hs_cylinder.show()
     return
 
 def test_equilibrate():
     hs_cylinder.gravity_center = [0, 0, 3]
     hs_cylinder.equilibrate()
-    hs_cylinder.show()
     hs_cylinder.reset()
-    # hs_cylinder.show()
     return
 
 def test_hydrostatic_report():
@@ -112,13 +109,3 @@ def test_searev_base_hydrostatics():
     assert fabs(hs_data['wet_surface_area'] - 550) < 1
     assert fabs(hs_data['disp_volume'] - 1177) < 1
 
-
-
-
-# def test_displacement_equilibrium():
-#
-#     disp = 2000
-#     CG = [-1, 0, -3]
-#
-#     cylinder_eq, CGc = hs.compute_equilibrium(searev, disp, CG, rho_water=1023, anim=True)
-    
