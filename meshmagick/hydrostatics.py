@@ -1,4 +1,10 @@
 
+import numpy as np
+import math
+from warnings import warn
+
+from mesh_clipper import MeshClipper
+
 __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
 __credits__ = "Francois Rongere"
@@ -8,12 +14,6 @@ __maintainer__ = "Francois Rongere"
 __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
 
-import numpy as np
-import math
-from warnings import warn
-
-import mmio
-from mesh_clipper import MeshClipper
 
 # Data for DNV standards
 GM_min = 0.15
@@ -22,8 +22,9 @@ GM_min = 0.15
 # TODO: throw the transformation needed to get the equilibrium from initial position after a successful equilibrium computation
 # TODO: make the mesh not to diverge from principal axis
 
+
 class Force(object):
-    def __init__(self, point=[0, 0, 0], value=[0, 0, 0], name='', mode='relative'):
+    def __init__(self, point=(0, 0, 0), value=(0, 0, 0), name='', mode='relative'):
         
         assert len(point) == 3
         assert len(value) == 3
@@ -52,16 +53,17 @@ class Force(object):
     
     @property
     def hs_force(self):
-        Fz = self.value[2]
+        fz = self.value[2]
         moment = np.cross(self.point, self.value)
-        Mx, My = moment[:2]
-        return np.array([Fz, Mx, My], dtype=np.float)
+        mx, my = moment[:2]
+        return np.array([fz, mx, my], dtype=np.float)
     
     def reset(self): # TODO: a appeler depuis le reset de Hydrostatics
         raise NotImplementedError
     
 
 class Hydrostatics(object):
+    # TODO: refactor this docstring
     """
     Class to perform hydrostatic computations on meshes.
     
@@ -86,29 +88,22 @@ class Hydrostatics(object):
     it reaches the correct displacement. The _mass is then set accordingly and equals the displacement. Note that this is different from modifying the _mass and
     
     
-    
-    
-    
-    
     *** Setting the buoyancy center will trig a search for a position of the gravity center that fullfill this hydrostatic property, while keeping the correct displacement. NOT IMPLEMENTED, THIS IS AN ADVANCED FEATURE
     
     """
-    def __init__(self, mesh, CG=np.zeros(3, dtype=np.float), zg=0., mass=None, rho_water=1023, grav=9.81,
+    def __init__(self, mesh, cog=np.zeros(3, dtype=np.float), zg=0., mass=None, rho_water=1023, grav=9.81,
                  verbose=False, animate=False):
         
-        # super(HSmesh, self).__init__(vertices, faces, name=None)
+        # FIXME: l'argument zg n'est pas utilise !
         self.backup = dict()
         
-        # Ajout
-        # init_mesh = mesh.Mesh(vertices, faces, name=name)
-        self.backup['init_mesh'] = mesh
+        self.backup['init_mesh'] = mesh.copy()
         self.mesh = mesh.copy()
-        # FIN
         
-        CG = np.array(CG, dtype=np.float)
-        assert CG.shape[0] == 3
-        self.backup['gravity_center'] = CG
-        self._gravity_center = CG
+        cog = np.array(cog, dtype=np.float)
+        assert cog.shape[0] == 3
+        self.backup['gravity_center'] = cog.copy()
+        self._gravity_center = cog.copy()
         self._rho_water = rho_water
         self._gravity = grav
         
@@ -121,7 +116,6 @@ class Hydrostatics(object):
                                    'theta_relax': 2,
                                    'z_relax': 0.1,
                                    'stop_at_unstable': False}
-        
         
         # TODO: ajouter le calcul du tirant d'eau et d'air
         self.hs_data = dict()
@@ -142,7 +136,6 @@ class Hydrostatics(object):
         
         self.additional_forces = []
         
-    
     @property
     def verbose(self):
         return self._verbose
@@ -185,8 +178,8 @@ class Hydrostatics(object):
     @mass.setter
     def mass(self, value):
         
-        self._mass = float(value) * 1000. # Conversion from tons to kg
-        self._mg = self._mass * self._gravity # SI units
+        self._mass = float(value) * 1000.  # Conversion from tons to kg
+        self._mg = self._mass * self._gravity  # SI units
         
         if self.is_sinking():
             raise ValueError('%s is sinking as it is too heavy.' % self.mesh.name)
@@ -226,8 +219,8 @@ class Hydrostatics(object):
         return
     
     @property
-    def wetted_surface_area(self):
-        return self.hs_data['Sw']
+    def wet_surface_area(self):
+        return self.hs_data['wet_surface_area']
     
     @property
     def displacement_volume(self):
@@ -243,42 +236,42 @@ class Hydrostatics(object):
     
     @property
     def flotation_surface_area(self):
-        return self.hs_data['Aw']
+        return self.hs_data['waterplane_area']
     
     @property
     def flotation_center(self):
-        return self.hs_data['flot_center']
+        return self.hs_data['flotation_center']
     
     @property
     def transversal_metacentric_radius(self):
-        return self.hs_data['r']
+        return self.hs_data['transversal_metacentric_radius']
     
     @property
     def longitudinal_metacentric_radius(self):
-        return self.hs_data['R']
+        return self.hs_data['longitudinal_metacentric_radius']
     
     @property
     def transversal_metacentric_height(self):
-        return self.hs_data['GMx']
+        return self.hs_data['gm_x']
     
     @property
     def longitudinal_metacentric_height(self):
-        return self.hs_data['GMy']
+        return self.hs_data['gm_y']
     
     @property
     def hydrostatic_stiffness_matrix(self):
-        return self.hs_data['KH']
+        return self.hs_data['stiffness_matrix']
 
     @property
     def hydrostatic_mesh(self):
-        return self.hs_data['hs_mesh']
+        return self.hs_data['clipper'].clipped_mesh
     
     def reset(self):
         
         # TODO: Utiliser plutot la rotation generale pour retrouver le maillage initial
         
-        self.mesh = self.backup['init_mesh']
-        self._gravity_center = self.backup['gravity_center']
+        self.mesh = self.backup['init_mesh'].copy()
+        self._gravity_center = self.backup['gravity_center'].copy()
         self._reinit_clipper()
         
         self._update_hydrostatic_properties()
@@ -300,9 +293,9 @@ class Hydrostatics(object):
         residual = self.residual
         
         mg = self._mg
-        B = self.hs_data['B']
-        LWL = self.hs_data['LWL']
-        scale = np.array([mg, mg * B, mg * LWL])
+        breadth = self.hs_data['breadth']
+        lwl = self.hs_data['lwl']
+        scale = np.array([mg, mg * breadth, mg * lwl])
         
         if np.all(np.fabs(residual/scale) < self._solver_parameters['reltol']):
             return True
@@ -324,30 +317,30 @@ class Hydrostatics(object):
         _, _, my = self.residual
         return my
     
-    # TODO: create a Hydrostatic stiffness matrix class
+    # TODO: create a Hydrostatic stiffness matrix class which should be a symmetric array class
     @property
     def S33(self):
-        return self.hs_data['KH'][0, 0]
+        return self.hs_data['stiffness_matrix'][0, 0]
     
     @property
     def S34(self):
-        return self.hs_data['KH'][0, 1]
+        return self.hs_data['stiffness_matrix'][0, 1]
     
     @property
     def S35(self):
-        return self.hs_data['KH'][0, 2]
+        return self.hs_data['stiffness_matrix'][0, 2]
     
     @property
     def S44(self):
-        return self.hs_data['KH'][1, 1]
+        return self.hs_data['stiffness_matrix'][1, 1]
     
     @property
     def S45(self):
-        return self.hs_data['KH'][1, 2]
+        return self.hs_data['stiffness_matrix'][1, 2]
     
     @property
     def S55(self):
-        return self.hs_data['KH'][2, 2]
+        return self.hs_data['stiffness_matrix'][2, 2]
     
     @property
     def reltol(self):
@@ -356,7 +349,7 @@ class Hydrostatics(object):
     @reltol.setter
     def reltol(self, value):
         value = float(value)
-        assert value > 0. and value < 1
+        assert 0. < value < 1.
         self._solver_parameters['reltol'] = value
         return
     
@@ -367,7 +360,7 @@ class Hydrostatics(object):
     @theta_relax.setter
     def theta_relax(self, value):
         value = float(value)
-        assert value > 0. and value < 10
+        assert 0. < value < 10.
         self._solver_parameters['theta_relax'] = value
         return
         
@@ -378,7 +371,7 @@ class Hydrostatics(object):
     @z_relax.setter
     def z_relax(self, value):
         value = float(value)
-        assert value > 0. and value < 1.
+        assert 0. < value < 1.
         self._solver_parameters['z_relax'] = value
         return
     
@@ -389,7 +382,7 @@ class Hydrostatics(object):
     @max_iterations.setter
     def max_iterations(self, value):
         value = int(value)
-        assert value > 0
+        assert value > 0.
         self._solver_parameters['itermax'] = value
         return
     
@@ -400,12 +393,12 @@ class Hydrostatics(object):
     @max_restart.setter
     def max_restart(self, value):
         value = int(value)
-        assert value >= 0
+        assert value >= 0.
         self._solver_parameters['max_nb_restart'] = value
         return
     
     @property
-    def allow_unstable(self, value):
+    def allow_unstable(self):
         return self._solver_parameters['stop_at_unstable']
     
     @allow_unstable.setter
@@ -430,39 +423,8 @@ class Hydrostatics(object):
         return
     
     def _update_hydrostatic_properties(self):
+        """Updates the hydrostatics properties of the mesh.
         """
-        Computes the hydrostatics properties of a mesh.
-
-        Parameters
-        ----------
-        mymesh : Mesh
-            Mesh object for hydrostatic computations
-        zg : float
-            Vertical position of the center of gravity
-        rho_water : float
-            Density of water (default: 2013 kg/m**3)
-        grav : float
-            Gravity acceleration (default: 9.81 m/s**2)
-        verbose : bool, optional
-            False by default. If True, the hydrostatic report is printed on screen.
-
-        Returns
-        -------
-        output : dict
-            Dictionary containing the hydrosatic properties and whose keys are:
-                'Sw': (float) Wet surface area (in m**2)
-                'disp_volume': (float) Immersed volume (in m**3)
-                'disp_mass': (float) Displacement (in Tons)
-                'B': (ndarray) Coordinates of the buoyancy center (in m)
-                'F': (ndarray) Coordinates of the center of flotation (in m)
-                'Aw': (float) Area of the flotation surface (in m**2)
-                'r': (float) Transverse metacentric radius (in m)
-                'R': (float) Longitudinal metacentrix radius (in m)
-                'GMx': (float) Transverse metacentric height (in m)
-                'GMy': (float) Longitudinal metacentric height (in m)
-                'KH': (ndarray) Hydrostatic stiffness matrix
-
-            """
     
         eps = 1e-4  # For zeroing tiny coefficients in the hydrostatic stiffness matrix
     
@@ -479,83 +441,39 @@ class Hydrostatics(object):
             self.hs_data['clipper'] = clipper
             clipped_mesh = clipper.clipped_mesh
             
-            
         # Retrieving faces properties for the clipped mesh
         areas = clipped_mesh.faces_areas
-        normals = clipped_mesh.faces_normals
-        centers = clipped_mesh.faces_centers
+        # normals = clipped_mesh.faces_normals
+        # centers = clipped_mesh.faces_centers
         
-        if np.any(areas == 0.): # TODO: bloc a retirer
+        if np.any(np.fabs(areas) < 1e-10):  # TODO: bloc a retirer
             print 'probleme de facette'
             self.mesh.quick_save()
             raise Exception
         
-        # Wetted surface area
-        Sw = areas.sum()
+        wet_surface_area = areas.sum()
     
-        # TODO: utiliser des formules analytiques et non approchees comme celles-ci !
-        # Volume displacement
-        # disp_volume = (areas * (normals * centers).sum(axis=1)).sum() / 3.  # Formule approchee mais moyennee
-    
-        # Buoyancy center calculation
-        # xb = (areas * normals[:, 1] * centers[:, 1] * centers[:, 0]).sum() / disp_volume
-        # yb = (areas * normals[:, 2] * centers[:, 2] * centers[:, 1]).sum() / disp_volume
-        # zb = (areas * normals[:, 1] * centers[:, 1] * centers[:, 2]).sum() / disp_volume
-        
         inertia = clipped_mesh.eval_plain_mesh_inertias(rho_medium=self.rho_water)
         xb, yb, zb = inertia.gravity_center
         disp_volume = inertia.mass / self.rho_water
         
         # Computing quantities from intersection polygons
-        sigma0 = 0.  # \iint_{Aw} dS = Aw
-        sigma1 = 0.  # \iint_{Aw} x dS
-        sigma2 = 0.  # \iint_{Aw} y dS
-        sigma3 = 0.  # \iint_{Aw} xy dS
-        sigma4 = 0.  # \iint_{Aw} x^2 dS
-        sigma5 = 0.  # \iint_{Aw} y^2 dS
+        sigma0 = 0.  # \iint_{waterplane_area} dS = waterplane_area
+        sigma1 = 0.  # \iint_{waterplane_area} x dS
+        sigma2 = 0.  # \iint_{waterplane_area} y dS
+        sigma3 = 0.  # \iint_{waterplane_area} xy dS
+        sigma4 = 0.  # \iint_{waterplane_area} x^2 dS
+        sigma5 = 0.  # \iint_{waterplane_area} y^2 dS
         
-        
-        # sigma0_ = 0.  # \int_{Aw} dS = Aw
-        # sigma1_ = 0.  # \int_{Aw} x dS
-        # sigma2_ = 0.  # \int_{Aw} y dS
-        # sigma3_ = 0.  # \int_{Aw} xy dS
-        # sigma4_ = 0.  # \int_{Aw} x^2 dS
-        # sigma5_ = 0.  # \int_{Aw} y^2 dS
-    
         xmin = []
         xmax = []
         ymin = []
         ymax = []
         
-        # import pytriangle as pt
-        # from mesh import Mesh
-        
         polygons = clipper.closed_polygons
         for polygon in polygons:
             polyverts = clipper.clipped_crown_mesh.vertices[polygon]
             
-            # n = polyverts.shape[0]
-            # triangulator = pt.Triangulator(polyverts[:n-1, :2].copy())
-            # triangulator.max_area=0.01
-            # triangulator.preserve_boundary=False
-            # triangulator.quality_meshing=True
-            #
-            # # triangulator.run()
-            # # vertices, faces = triangulator.get_mesh()
-            # vertices, faces = triangulator.get_mesh()
-            # # triangulator.__dealloc__()
-            # # triangulator.get_mesh()
-            # vertices = np.concatenate((vertices, np.zeros((vertices.shape[0], 1))), axis=1)
-            # mymesh = Mesh(vertices, faces)
-            # # mymesh.show()
-            #
-            # sigma0_ += mymesh.faces_areas.sum()
-            # sigma1_ += (mymesh.faces_centers[:, 0] * mymesh.faces_areas).sum()
-            # sigma2_ += (mymesh.faces_centers[:, 1] * mymesh.faces_areas).sum()
-            # sigma3_ += (mymesh.faces_centers[:, 0] * mymesh.faces_centers[:, 1] * mymesh.faces_areas).sum()
-            # sigma4_ += (mymesh.faces_centers[:, 0]**2 * mymesh.faces_areas).sum()
-            # sigma5_ += (mymesh.faces_centers[:, 1]**2 * mymesh.faces_areas).sum()
-        
             # TODO: voir si on conserve ce test...
             if np.any(np.fabs(polyverts[:, 2]) > 1e-3):
                 print 'The intersection polygon is not on the plane z=0'
@@ -593,71 +511,62 @@ class Hydrostatics(object):
         sigma5 /= -12
     
         # Flotation surface
-        Aw = sigma0
+        waterplane_area = sigma0
         
-        # print sigma0- sigma0_
-        # print sigma1- sigma1_
-        # print sigma2- sigma2_
-        # print sigma3- sigma3_
-        # print sigma4- sigma4_
-        # print sigma5- sigma5_
-
         # Stiffness matrix coefficients that do not depend on the position of the gravity center
         rhog = self._rhog
-        S33 = rhog * Aw
-        S34 = rhog * sigma2
-        S35 = -rhog * sigma1
-        S45 = -rhog * sigma3
+        s33 = rhog * waterplane_area
+        s34 = rhog * sigma2
+        s35 = -rhog * sigma1
+        s45 = -rhog * sigma3
     
         # Metacentric radius (Bouguer formulae)
-        r = sigma5 / disp_volume  # Around Ox
-        R = sigma4 / disp_volume  # Around Oy
+        transversal_metacentric_radius = sigma5 / disp_volume  # Around Ox
+        longitudinal_metacentric_radius = sigma4 / disp_volume  # Around Oy
     
         # Metacentric height
         a = self.zg - zb  # BG
-        GMx = r - a
-        GMy = R - a
+        gm_x = transversal_metacentric_radius - a
+        gm_y = longitudinal_metacentric_radius - a
     
         # Stiffness matrix coefficients that depend on the position of the gravity center
-        S44 = rhog * disp_volume * GMx
-        S55 = rhog * disp_volume * GMy
+        s44 = rhog * disp_volume * gm_x
+        s55 = rhog * disp_volume * gm_y
     
         # Assembling stiffness matrix
-        KH = np.array([[S33, S34, S35],
-                       [S34, S44, S45],
-                       [S35, S45, S55]], dtype=np.float)
+        stiffness_matrix = np.array([[s33, s34, s35],
+                                     [s34, s44, s45],
+                                     [s35, s45, s55]], dtype=np.float)
         
         # Zeroing tiny coefficients
-        KH[np.fabs(KH) < eps] = 0.
+        stiffness_matrix[np.fabs(stiffness_matrix) < eps] = 0.
     
         # Flotation center F:
-        xF = -S35 / S33
-        yF = S34 / S33
-        
+        x_f = -s35 / s33
+        y_f = s34 / s33
         
         xmin, xmax, ymin, ymax, zmin, zmax = clipped_mesh.axis_aligned_bbox
         
-        
-        
         # Storing data
-        self.hs_data['Sw'] = Sw
+        self.hs_data['wet_surface_area'] = wet_surface_area
         self.hs_data['disp_volume'] = disp_volume
         self.hs_data['disp_mass'] = self._rho_water * disp_volume
         self.hs_data['buoy_center'] = np.array([xb, yb, zb], dtype=np.float)
-        self.hs_data['flot_center'] = np.array([xF, yF, 0.], dtype=np.float)
-        self.hs_data['Aw'] = Aw
-        self.hs_data['r'] = r
-        self.hs_data['R'] = R
-        self.hs_data['GMx'] = GMx
-        self.hs_data['GMy'] = GMy
-        self.hs_data['KH'] = KH
-        self.hs_data['LWL'] = maxx - minx
-        self.hs_data['LOS'] = xmax - xmin
-        self.hs_data['BOS'] = ymax - ymin
+        self.hs_data['flotation_center'] = np.array([x_f, y_f, 0.], dtype=np.float)
+        self.hs_data['waterplane_area'] = waterplane_area
+        self.hs_data['transversal_metacentric_radius'] = transversal_metacentric_radius
+        self.hs_data['longitudinal_metacentric_radius'] = longitudinal_metacentric_radius
+        self.hs_data['gm_x'] = gm_x
+        self.hs_data['gm_y'] = gm_y
+        self.hs_data['stiffness_matrix'] = stiffness_matrix
+        self.hs_data['lwl'] = maxx - minx
+        self.hs_data['los'] = xmax - xmin
+        self.hs_data['bos'] = ymax - ymin
         self.hs_data['draught'] = math.fabs(zmin)
-        self.hs_data['FP'] = maxx
-        self.hs_data['B'] = maxy - miny
+        self.hs_data['fp'] = maxx
+        self.hs_data['breadth'] = maxy - miny
         
+        # TODO: we should better store the inertia object !
         inertia.shift_at_cog()
         self.hs_data['Ixx'] = inertia.xx
         self.hs_data['Iyy'] = inertia.yy
@@ -684,22 +593,22 @@ class Hydrostatics(object):
     @property
     def scale(self):
         mg = self._mg
-        B = self.hs_data['B']
-        LWL = self.hs_data['LWL']
-        scale = np.array([mg, mg * B, mg * LWL])
+        breadth = self.hs_data['breadth']
+        lwl = self.hs_data['lwl']
+        scale = np.array([mg, mg * breadth, mg * lwl])
         return scale
 
     @property
     def residual(self):
-        rhogV = self._rhog * self.hs_data['disp_volume']
+        rhog_v = self._rhog * self.hs_data['disp_volume']
         mg = self._mg
     
         xb, yb, _ = self.hs_data['buoy_center']
         xg, yg, _ = self._gravity_center
     
-        residual = np.array([rhogV - mg,
-                             rhogV * yb - mg * yg,
-                             -rhogV * xb + mg * xg])
+        residual = np.array([rhog_v - mg,
+                             rhog_v * yb - mg * yg,
+                             -rhog_v * xb + mg * xg])
         
         # Accounting for additional forces in the static equilibrium
         for force in self.additional_forces:
@@ -713,26 +622,8 @@ class Hydrostatics(object):
 
         Parameters
         ----------
-        mymesh : Mesh
-            Mesh to be used for computations
         disp : float
             Mass displacement of the hull (in tons)
-        rho_water : float
-            Density of water (in kg/m**3)
-        grav : float
-            Acceleration of gravity (in m/s**2)
-        abs_tol : float
-            absolute tolerance on the volume (in m**3)
-        itermax : int
-            Maximum number of iterations
-        verbose : bool
-            False by default. If True, a convergence report is printed on the screen
-        Returns
-        -------
-            dz : float
-                The quantity necessary to
-            Vc : ndarray
-            Fc : ndarray
         """
         
         if self.verbose:
@@ -811,7 +702,7 @@ class Hydrostatics(object):
     
         while True:
             # print '\n', iter
-            if unstable_config or ( iter == (nb_restart + 1) * (itermax-1) ):
+            if unstable_config or (iter == (nb_restart + 1) * (itermax-1)):
                 if self.verbose:
                     if unstable_config:
                         print 'Unstable equilibrium reached.'
@@ -827,16 +718,15 @@ class Hydrostatics(object):
                 if nb_restart < max_nb_restart-1:
                     nb_restart += 1
                     # Random on the position of the body
-                    # print 'Max iteration reached: restarting for the %uth time with random orientation' % nb_restart
                     thetax, thetay = np.random.rand(2) * math.pi
-                    R = self.mesh.rotate([thetax, thetay, 0.])
-                    self._gravity_center = np.dot(R, self._gravity_center)
-                    self._rotation = np.dot(R, self._rotation)
+                    rot_matrix = self.mesh.rotate([thetax, thetay, 0.])
+                    self._gravity_center = np.dot(rot_matrix, self._gravity_center)
+                    self._rotation = np.dot(rot_matrix, self._rotation)
                     self._reinit_clipper()
                     self._update_hydrostatic_properties()
                     
                     for force in self.additional_forces:
-                        force.update(rot=R)
+                        force.update(rot=rot_matrix)
                     
                     dz = thetax = thetay = 0.
                     
@@ -849,13 +739,13 @@ class Hydrostatics(object):
             self.mesh.translate_z(dz)
             self._gravity_center[2] += dz
             
-            R = self.mesh.rotate([thetax, thetay, 0.])
-            self._gravity_center = np.dot(R, self._gravity_center)
-            self._rotation = np.dot(R, self._rotation)
+            rot_matrix = self.mesh.rotate([thetax, thetay, 0.])
+            self._gravity_center = np.dot(rot_matrix, self._gravity_center)
+            self._rotation = np.dot(rot_matrix, self._rotation)
             
             # Updating force data
             for force in self.additional_forces:
-                force.update(dz=dz, rot=R)
+                force.update(dz=dz, rot=rot_matrix)
             
             self._reinit_clipper()
             self._update_hydrostatic_properties()
@@ -867,7 +757,7 @@ class Hydrostatics(object):
             scale = self.scale
             
             if np.all(np.fabs(self.residual / scale) < reltol):
-            #     # Convergence at an equilibrium
+                # Convergence at an equilibrium
                 if self.isstable():
                     # Stable equilibrium
                     code = 1
@@ -886,7 +776,8 @@ class Hydrostatics(object):
                     
             # Computing correction
             # TODO: voir pour une resolution ne faisant pas intervenir np.linalg ?
-            dz, thetax, thetay = np.linalg.solve(self.hs_data['KH'], residual)
+            stiffness_matrix = self.hs_data['stiffness_matrix']
+            dz, thetax, thetay = np.linalg.solve(stiffness_matrix, residual)
         
             # Relaxation
             if math.fabs(dz) > z_relax:
@@ -920,9 +811,6 @@ class Hydrostatics(object):
         return code
 
     def get_hydrostatic_report(self):
-        
-        lwidth = 40
-        rwidth = 50
         
         def header(title):
             head = '\t-----------------------------------------------------\n'
@@ -966,7 +854,7 @@ class Hydrostatics(object):
         msg += hspace()
         msg += build_line('Waterplane area (M**2)', self.flotation_surface_area, precision=1)
         msg += build_line('Waterplane center (M)', self.flotation_center[:2], precision=3)
-        msg += build_line('Wet area (M**2)', self.wetted_surface_area, precision=1)
+        msg += build_line('Wet area (M**2)', self.wet_surface_area, precision=1)
         msg += build_line('Displacement volume (M**3)', self.displacement_volume, precision=3)
         msg += build_line('Displacement mass (tons)', self.displacement, precision=3)
         msg += build_line('Buoyancy center (M)', self.buoyancy_center, precision=3)
@@ -974,24 +862,16 @@ class Hydrostatics(object):
         
         msg += hspace()
         msg += build_line('Draught (M)', self.hs_data['draught'], precision=3) # TODO
-        msg += build_line('Length overall submerged (M)', self.hs_data['LOS'], precision=2)
-        msg += build_line('Breadth overall submerged (M)', self.hs_data['BOS'], precision=2)
-        msg += build_line('Length at Waterline LWL (M)', self.hs_data['LWL'], precision=2)
-        msg += build_line('Forward perpendicular (M)', self.hs_data['FP'], precision=2)
+        msg += build_line('Length overall submerged (M)', self.hs_data['los'], precision=2)
+        msg += build_line('Breadth overall submerged (M)', self.hs_data['bos'], precision=2)
+        msg += build_line('Length at Waterline LWL (M)', self.hs_data['lwl'], precision=2)
+        msg += build_line('Forward perpendicular (M)', self.hs_data['fp'], precision=2)
         
         msg += hspace()
         msg += build_line('Transversal metacentric radius (M)', self.transversal_metacentric_radius, precision=3)
         msg += build_line('Transversal metacentric height GMt (M)', self.transversal_metacentric_height, precision=3)
         msg += build_line('Longitudinal metacentric radius (M)', self.longitudinal_metacentric_radius, precision=3)
         msg += build_line('Longitudinal metacentric height GMl (M)', self.longitudinal_metacentric_height, precision=3)
-        
-        # msg += hspace()
-        # msg += build_line('Center of lateral resistance (M)', np.zeros(3), precision=3)
-        # msg += build_line('Lateral wetted area (M**2)', 0., precision=1)
-        
-        # msg += hspace()
-        # msg += '\tINERTIAS\n'
-        # msg += build_line()
         
         msg += hspace()
         msg += '\tHYDROSTATIC STIFFNESS COEFFICIENTS:\n'
@@ -1004,10 +884,6 @@ class Hydrostatics(object):
         
         # Il faut faire une correction avec le plan de la flottaison de certains coeffs
         msg += hspace()
-        # FIXME: C'est sur clipped mesh qu'il faut calculer les inerties !!!
-        # inertia_data = self.mesh.eval_plain_mesh_inertias(rho_medium=1.)
-        # coeffs = inertia_data['coeffs']
-        # print inertia_data
         msg += '\tINERTIAS:\n'
         msg += build_line('Ixx', self.hs_data['Ixx'], precision=3, dtype='E')
         msg += build_line('Ixy', self.hs_data['Ixy'], precision=3, dtype='E')
@@ -1016,10 +892,11 @@ class Hydrostatics(object):
         msg += build_line('Iyz', self.hs_data['Iyz'], precision=3, dtype='E')
         msg += build_line('Izz', self.hs_data['Izz'], precision=3, dtype='E')
         
-        
-        
-        
-        #
+        msg += hspace()
+        msg += '\tRESIDUALS:\n'
+        msg += build_line('Absolute', self.residual, precision=3, dtype='E')
+        msg += build_line('Relative', self.residual/self.scale, precision=3, dtype='E')
+        msg += build_line('Relative tolerance', self.reltol, precision=1, dtype='E')
         # residual = self.residual
         # msg += ('\nResidual:\n')
         # msg += ('Delta Fz = %.3f N\n' % residual[0])
@@ -1048,23 +925,6 @@ class Hydrostatics(object):
         self.viewer = MMviewer.MMViewer()
         self.viewer.add_polydata(vtk_polydata)
         
-        # Removing the following for the flotation plane as the base class does it now
-        # # Adding the flotation plane
-        # self.viewer.plane_on()
-        
-        # # TODO: Use the add_plane method of the viewer...
-        # plane = vtk.vtkPlaneSource()
-        # (xmin, xmax, ymin, ymax, _, _) = self.axis_aligned_bbox
-        # dx = 0.1 * (xmax-xmin)
-        # dy = 0.1 * (ymax-ymin)
-        #
-        # plane.SetOrigin(xmin-dx, ymax+dy, 0)
-        # plane.SetPoint1(xmin-dx, ymin-dy, 0)
-        # plane.SetPoint2(xmax+dx, ymax+dy, 0)
-        # plane.Update()
-        # # self.viewer.add_polydata(plane.GetOutput(), color=[0.1, 0.9, 0.7])
-        # self.viewer.add_polydata(plane.GetOutput(), color=[0., 102./255, 204./255])
-        
         pd_orig = self.viewer.add_point([0, 0, 0], color=[0, 0, 0])
         
         pd_cog = self.viewer.add_point(self.gravity_center, color=[1, 0, 0])
@@ -1074,7 +934,6 @@ class Hydrostatics(object):
         pd_buoy = self.viewer.add_point(self.buoyancy_center, color=[0, 1, 0])
 
         pd_orig_buoy = self.viewer.add_line([0, 0, 0], self.buoyancy_center, color=[0, 1, 0])
-        
         
         scale = self.mass*1000
         
@@ -1090,7 +949,6 @@ class Hydrostatics(object):
         for force in self.additional_forces:
             self.viewer.add_point(force.point, color=[0, 0, 1])
             self.viewer.add_vector(force.point, force.value, scale=scale, color=[0, 0, 1])
-        
         
         # TODO: mettre la suite dans une methode de MMViewer
         # Adding corner annotation
