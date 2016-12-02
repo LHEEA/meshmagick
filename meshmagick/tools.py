@@ -3,52 +3,26 @@
 
 import numpy as np
 
-# def merge_duplicates_rows(arr, decimals=20, return_index=False):
-#     # TODO: ecrire docstring
-#     # FIXME: fonction non robuste !!!
-#     # The technique relies on np.unique and has been proposed in the following post:
-#     # https://stackoverflow.com/questions/17273022/python-numpy-build-2d-array-without-adding-duplicate-rows-for-triangular-mesh
-#
-#     # Rounding array to the specified number of decimals for fair comparison in np.unique
-#     rounded_arr = np.round(arr, decimals=decimals)
-#
-#     # Defining a row_dtype so that the rows are compared as a whole
-#     row_dtype = np.dtype((np.void, (3 * rounded_arr.dtype.itemsize)))
-#     _, index, inv = np.unique(rounded_arr.view(row_dtype), return_index=True, return_inverse=True)
-#
-#     # Re-introducing initial unrounded values
-#     uniq = arr[index]
-#
-#     print "%u rows merged" % (arr.shape[0] - uniq.shape[0])
-#
-#     if return_index:
-#         return uniq, inv
-#     else:
-#         return uniq
-
-
 def merge_duplicate_rows(arr, atol=1e-8, return_index=False):
-    """merge_duplicates(_vertices, _faces, verbose=False, atol=1e-8)
+    """merge_duplicates(arr, atol=1e-8, return_index=False)
 
-    Returns a new node array where close nodes have been merged into one node (following atol). It also returns
-    the connectivity array _faces with the new node IDs.
+    Returns a new node array where close nodes have been merged into one node (following atol).
 
     Parameters:
         arr: ndarray
             numpy array of the coordinates of the mesh's nodes
-        verbose[optional]: bool
-            if set to True, displays information on the merge procedure
         atol[optional]: float
             the tolerance used to define nodes that are coincident and
             that have to be merged
+        return_index: bool
+            If true, it also returns the array for new indices of vertices
 
     Returns:
-        _vertices: ndarray
+        arr: ndarray
             numpy array of the coordinates of the mesh's nodes where
             every node is different
-        _faces: ndarray
-            numpy array of the _faces' nodes connectivities, accordingly
-            to the new node list that has been merged
+        newID: ndarray
+            numpy arrays of the new new vertices IDs
     """
     # TODO: Refaire la documentation --> les entrees sorties ont change !!
 
