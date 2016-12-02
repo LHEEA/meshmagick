@@ -2,7 +2,7 @@
 #  -*- coding: utf-8 -*-
 
 from meshmagick.mmio import *
-
+import os
 
 # Loaders
 # ------------------
@@ -33,7 +33,28 @@ def test_load_MSH():
 
 def test_load_STL():
     load_STL('meshmagick/tests/data/SEAREV.stl')
+
+def test_all_io():
+    vertices, faces = load_VTP('meshmagick/tests/data/SEAREV.vtp')
+    for (loader, writer) in extension_dict.values():
+        try:
+            print writer
+            writer('meshfile', vertices, faces)
+            can_try_to_load = True
+        except NotImplementedError:
+            can_try_to_load = False
+        
+        if can_try_to_load:
+            try:
+                print loader
+                loader('meshfile')
+            except NotImplementedError:
+                pass
     
+    os.remove('meshfile')
+        
+
+
 # def test_load_write_all():
 #     vertices, faces = load_VTP('tests/data/SEAREV.vtp')
 #
