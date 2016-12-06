@@ -191,7 +191,6 @@ class MeshHE:
         self.HE_pHE = np.concatenate((self.HE_pHE, HE_pHE))
         self.HE_edge = np.concatenate((self.HE_edge, HE_edge))
 
-
         self.has_HE_connectivity = True
         if self.verbose:
             print "\t -> Done !\n"
@@ -223,7 +222,6 @@ class MeshHE:
 
         if not self.has_HE_connectivity:
             self.generate_HE_connectivity()
-
 
         # Computing Dihedral Angle (DA) of each edge
         dihedral_angle_edge = np.zeros(self.nb_edges, dtype=np.float)
@@ -327,7 +325,6 @@ class MeshHE:
             else:
                 ambiguous_vertex[iV] = True
 
-
         # Building u-strongness and e-strongness
         sharp_edge = np.zeros(self.nb_edges, dtype=np.bool)
         e_strong_DA_edge = np.zeros(self.nb_edges, dtype=np.bool)
@@ -400,8 +397,8 @@ class MeshHE:
 
                 # Attached
                 if l_strong_DA_HE[iHE] or \
-                    l_strong_OSTA_HE[iHE] or \
-                    has_sharp_edge:
+                   l_strong_OSTA_HE[iHE] or \
+                   has_sharp_edge:
 
                     attached_HE[iHE] = True
 
@@ -410,8 +407,8 @@ class MeshHE:
                     strongly_attached_HE[iHE] = True
 
                 if sharp_edge[iedge] or \
-                    sharp_corner[iV] or \
-                    ambiguous_vertex[iV]:
+                   sharp_corner[iV] or \
+                   ambiguous_vertex[iV]:
 
                     attached_HE[iHE] = True
                     strongly_attached_HE[iHE] = True
@@ -679,7 +676,6 @@ class MeshHE:
                 # We're done, every obscure curve has been removed
                 break
 
-
         print ICH
 
         # Building feature curves from ICH list, starting from each end half_edge
@@ -718,7 +714,6 @@ class MeshHE:
                         # Curve traversal is finished with an end edge
                         curves.append(curve)
                         break
-
 
         # ----------------------
         # Post_processing curves
@@ -785,7 +780,6 @@ class MeshHE:
         #     _tmp_viewer.show()
         #     _tmp_viewer.finalize()
 
-
         # long_surface = []
         # for i, surface in enumerate(surfaces):
         #     long_surface += surface
@@ -830,12 +824,10 @@ class MeshHE:
             if color is not None:
                 colors.InsertNextTupleValue(color)
 
-
         half_edges.SetLines(lines)
 
         if color is not None:
             half_edges.GetCellData().SetScalars(colors)
-
 
         writer = vtk.vtkXMLPolyDataWriter()
         writer.SetFileName(filename)
@@ -863,7 +855,6 @@ class MeshHE:
 
     def get_HE_vector(self, iHE):
         return self.vertices[self.HE_tV[iHE]] - self.vertices[self.HE_iV[iHE]]
-
 
     def generate_faces_properties(self):
         self.areas, self.normals, self.centers = mm.get_all_faces_properties(self.vertices, self.faces)
