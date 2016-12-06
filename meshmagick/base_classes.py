@@ -8,12 +8,13 @@ and circular dependencies
 """
 from itertools import count
 
-# TODO: Ajouter une transformation pour toutes les frames ! Pour Ground et Null, pas de transformation,
-# ou alors l'identite...
+# TODO: Ajouter une transformation pour toutes les frames ! Pour Ground et Null, pas de transformation ou l'identite...
 
 # -------------------------------------------------------
 # Design Patterns
 # -------------------------------------------------------
+
+
 class _Singleton(type):
     _instances = {}
 
@@ -22,10 +23,12 @@ class _Singleton(type):
             cls._instances[cls] = super(_Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
+
 # -------------------------------------------------------
 # Frames
 # -------------------------------------------------------
 _frames_ids = count(0)
+
 
 class _BaseFrame(object):
     """The base class to represent a Frame in 3D space
@@ -156,7 +159,6 @@ class BodyFixedFrame(_BaseFrame):
 
         super(BodyFixedFrame, self).__init__(name=name, parent_frame=body_owner.reference_frame)
 
-
     def __str__(self):
         str_repr = "Frame '%s' attached to body %s" % (self.name, self._body_owner.name)
         return str_repr
@@ -200,7 +202,7 @@ class _BodyReferenceFrame(BodyFixedFrame):
     @parent_frame.setter
     def parent_frame(self, _parent_frame):
         if not isinstance(_parent_frame, (_BaseFrame, _GroundFrame)):
-            raise TypeError, "Parent Frame of a BodyReferenceFrame must be a _BaseFrame or a _GroundFrame object"
+            raise TypeError("Parent Frame of a BodyReferenceFrame must be a _BaseFrame or a _GroundFrame object")
         self._parent_frame = _parent_frame
 
     @property
@@ -209,7 +211,7 @@ class _BodyReferenceFrame(BodyFixedFrame):
 
     def add_child(self, frame):
         frame_name = frame.name
-        if self._children.has_key(frame_name):
+        if self._children in frame_name:
             err_msg = "Naming clash : A frame with name %s has already " \
                       "been added referenced with respect to %s" % (frame_name, self.name)
             raise ValueError(err_msg)
@@ -221,8 +223,9 @@ class _BodyReferenceFrame(BodyFixedFrame):
 # Bodies
 # -------------------------------------------------------
 _bodies_ids = count(0)
-
 # TODO: il faut un comptage local des frames !!!
+
+
 class _BaseBody(object):
 
     def __init__(self, name=None):
@@ -241,7 +244,6 @@ class _BaseBody(object):
 
         self._reference_frame = _BodyReferenceFrame(self)
 
-
     def __str__(self):
         str_repr = "Body '%s'" % self._name
         return str_repr
@@ -257,7 +259,7 @@ class _BaseBody(object):
         self._name = str(_name)
         return
 
-    @property # No setter as we want to prevent reference frame change from the outside
+    @property  # No setter as we want to prevent reference frame change from the outside
     def reference_frame(self):
         return self._reference_frame
 
