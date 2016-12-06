@@ -12,7 +12,6 @@ import densities
 # TODO: ajouter la production d'inerties de solides connus --> utile pour comparaison !!
 
 
-
 # TODO: indiquer une frame d'expression ...
 
 
@@ -246,6 +245,7 @@ def right_angle_wedge(base, height, length, density=1.):
 
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
+
 def isoceles_wedge(base, height, length, density=1.):
     vol = base * height * length / 2.
     mass = density * vol
@@ -255,6 +255,7 @@ def isoceles_wedge(base, height, length, density=1.):
     Izz = mass * (2 * length**2 + base**2) / 24.
 
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+
 
 def right_rectangular_pyramid(a, b, height, density=1.):
     """Note
@@ -269,12 +270,14 @@ def right_rectangular_pyramid(a, b, height, density=1.):
     
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
+
 def cube(a, density=1.):
     vol = a**3
     mass = density * vol
     
     Ixx = Iyy = Izz = mass * a**2 / 6.
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+
 
 def rectangular_prism(a, b, h, density=1.):
     """Note:
@@ -290,6 +293,7 @@ def rectangular_prism(a, b, h, density=1.):
     
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
+
 def circular_cone_shell(R, height, density=densities.get_density('STEEL'), thickness=0.02):
     """Note
     The center of gravity is located at an altitude of z=H/3 over the circular basis center
@@ -303,7 +307,6 @@ def circular_cone_shell(R, height, density=densities.get_density('STEEL'), thick
     
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
-    
 
 def frustrum_of_circular_cone_shell(r, R, height, density=densities.get_density('STEEL'), thickness=0.02):
     """Note:
@@ -318,6 +321,7 @@ def frustrum_of_circular_cone_shell(r, R, height, density=densities.get_density(
     
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
+
 def lateral_cylindrical_shell(R, H, density=densities.get_density('STEEL'), thickness=0.02):
     surface = 2*pi*R*H
     sigma = density * thickness
@@ -327,6 +331,7 @@ def lateral_cylindrical_shell(R, H, density=densities.get_density('STEEL'), thic
     Izz = mass * R**2
     
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+
 
 def total_cylindrical_shell(R, H, density=densities.get_density('STEEL'), thickness=0.02):
     surface = 2 * pi * R * (R + H)
@@ -338,6 +343,7 @@ def total_cylindrical_shell(R, H, density=densities.get_density('STEEL'), thickn
     
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
+
 def spherical_shell(R, density=densities.get_density('STEEL') ,thickness=0.02):
     surface = 4*pi*R**2
     sigma = density * thickness
@@ -345,6 +351,7 @@ def spherical_shell(R, density=densities.get_density('STEEL') ,thickness=0.02):
     
     Ixx = Iyy = Izz = 2 * mass*R**2 / 3.
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
+
 
 def hemispherical_shell(R, density=densities.get_density('STEEL'), thickness=0.02):
     """Note
@@ -359,11 +366,10 @@ def hemispherical_shell(R, density=densities.get_density('STEEL'), thickness=0.0
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 
-
-
 # TODO: placer cette classe tout en haut du module
 # TODO: faire une methode pour templater a partir d'un array preexistant
 # TODO: voir comment on gere les signes des produits d'inertie
+
 
 class RotationalInertia3D(np.ndarray):
     
@@ -408,13 +414,12 @@ class RotationalInertia3D(np.ndarray):
     # #         return
     # #     else:
     # #         return NotImplemented
-    
+
     def __numpy_ufunc__(self, ufunc, method, i, inputs, **kwargs):
         print "In __numpy_ufunc__"
         return NotImplemented
     
-    
-    
+
     # def __array_finalize(self, obj):
     #     print "In __array_finalize__ :"
     #     print '\tself is %s' % repr(self)
@@ -426,8 +431,7 @@ class RotationalInertia3D(np.ndarray):
     #     (func, args, _) = context
     #     print func
     #     print args
-        
-    
+
 
     # def __array_wrap__(self, obj, context=None):
     #     print 'In __array_wrap__ :'
@@ -450,15 +454,11 @@ class RotationalInertia3D(np.ndarray):
     #     return super(RotationalInertia3D, self).__getitem__(key)
 
 
-
-
 class AngularVelocityVector(np.ndarray):
     __array_priority__ = 15
     def __new__(cls, array):
         assert len(array) == 3
         return np.asarray(array, dtype=np.float).view(cls)
-
-
 
 
 if __name__ == '__main__':
@@ -476,15 +476,13 @@ if __name__ == '__main__':
     print inertia * 2
     # print w*inertia
     # print inertia*2
-    
-    
+
     # print type(inertia.array)
     # print inertia.array
     # print inertia.array is inertia
     #
     # print inertia[:3]
-    
-    
+
     # inertia = RigidBodyInertia(1, [0, 0, 0], 1, 2, 3, 4, 5, 6, point=[1, 2, 3])
     
     # print inertia.inertia_matrix
