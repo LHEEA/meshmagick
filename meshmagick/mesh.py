@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 #  -*- coding: utf-8 -*-
 """
-This module is part of meshmagick software. It provides functions for mesh clipping purpose.
+This module concerns mesh data structures.
+
+TODO: mettre des examples d'utilisation
 """
 
 
@@ -133,10 +135,27 @@ def _get_axis_angle_from_rotation_matrix(rot_matrix):
 
 
 # Classes
-class Plane(object):  # TODO: placer cette classe dans un module a part (genre geometry) --> utilise dans meshmagick
-    # aussi...
-    """Class to handle planes for clipping purposes
+class Plane(object):  # TODO: placer cette classe dans un module a part (genre geometry) --> utilise dans meshmagick aussi...
+    """Class to handle plane geometry.
     
+    A plane is represented by the equation :math:`\\vec{n}.\\vec{x} = c` where :math:`\\vec{n}` is the plane's normal,
+    :math:`\\vec{x}` a point in the space and :math:`c` a scalar parameter being the signed distance between the
+    reference frame origin and the its otrhogonal projection on the plane.
+    
+    Parameters
+    ----------
+    
+    normal : array_like
+        3 component vector of the plane normal
+    scalar : float
+        The scalar parameter of the plane
+    
+    Attributes
+    ----------
+    normal : ndarray
+        The plane's normal
+    c : float
+        The plane's scalar parameter
     """
     def __init__(self, normal=(0., 0., 1.), scalar=0., name=None):
         """
@@ -175,13 +194,13 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
     
     @property
     def normal(self):
-        """
-
-        Returns
-        -------
-        ndarray
-            The 3x1 plane's normal coordinates
-        """
+        # """Returns the normal of the plane
+        #
+        # Returns
+        # -------
+        # ndarray
+        #     The 3x1 plane's normal coordinates
+        # """
         return self._normal
 
     @normal.setter
@@ -192,17 +211,29 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
 
     @property
     def c(self):
-        """
-
-        Returns
-        -------
-        float
-            The plane scalar
-        """
+        # """Returns the scalar parameter of the plane equation
+        #
+        # Returns
+        # -------
+        # float
+        #     The plane scalar
+        # """
         return self._scalar
 
     @c.setter
     def c(self, value):
+        """Set the scalar parameter of the plane equation
+        
+        Parameters
+        ----------
+        value : float
+            scalar parameter of the plane
+
+        Returns
+        -------
+        None
+
+        """
         self._scalar = float(value)
         return
 
@@ -226,28 +257,16 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
         return
 
     def set_normal_from_angles(self, theta_x, theta_y):
-        """
-        Set the normal orientation given angles theta_x and thetay.
-
+        """Set the normal orientation given angles theta_x and theta_y.
+        
         Parameters
         ----------
         theta_x : float
             Angle around Ox (rad)
         theta_y : float
-            Anglearound Oy (rad)
-
-        Notes
-        -----
-        Equations are:
-        .. math::
-         \theta=\sqrt{\theta_x^2 + \theta_y^2}\\
-         \sin{\theta} = \sqrt{n_x^2 + n_y^2}\\
-         \theta_x = -\frac{\theta}{\sin{\theta}} n_y\\
-         \theta_y =  \frac{\theta}{\sin{\theta}} n_x\\
-         n_z = \cos{\theta}
-
+            Angle around Oy (rad)
         """
-
+        
         theta = math.sqrt(theta_x * theta_x + theta_y * theta_y)
 
         if theta == 0.:
@@ -419,22 +438,20 @@ class _3DPointsArray(np.ndarray):
 
 
 class Mesh(object):
+    """A clas to handle unstructured meshes.
+
+    Parameters
+    ----------
+    vertices : ndarray
+        (nv x 3) Array of mesh vertices coordinates. Each line of the array represents one vertex coordinates
+    faces : ndarray
+        Arrays of mesh connectivities for faces. Each line of the array represents indices of vertices that form the face, expressed in counterclockwise order to ensure ourward normals description.
+    name : str, optional
+        The mesh's name. If None, mesh is given an automatic name based on its internal ID.
+    """
     _ids = count(0)
     
     def __init__(self, vertices, faces, name=None):
-        """
-
-        Parameters
-        ----------
-        vertices : ndarray
-            (nv x 3) Array of mesh _vertices coordinates. Each line is a vertex.
-        faces : ndarray
-            Arrays of mesh connectivities for _faces.
-
-        Returns
-        -------
-
-        """
 
         self.__internals__ = dict()
         
@@ -453,6 +470,12 @@ class Mesh(object):
         self._verbose = False
 
     def __str__(self):
+        """String representation of the mesh
+        
+        Returns
+        -------
+        str
+        """
         xmin, xmax, ymin, ymax, zmin, zmax = self.axis_aligned_bbox
         
         str_repr = """
@@ -483,6 +506,10 @@ class Mesh(object):
         return str_repr
 
     def print_quality(self):
+        """Returns data on the mesh quality
+        
+        It uses VTK and is reproduced from http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py
+        """
         # This function is reproduced from
         # http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py
         polydata = self._vtk_polydata()
@@ -561,24 +588,43 @@ class Mesh(object):
 
     @property
     def verbose(self):
+        """Get verbosity
+        
+        Returns
+        -------
+        bool
+        """
         return self._verbose
 
     @verbose.setter
     def verbose(self, value):
         self._verbose = bool(value)
+        return
 
     def verbose_on(self):
+        """Set the verbosity level of the instance to on."""
         self._verbose = True
+        return
 
     def verbose_off(self):
+        """Set the verbosity level of the instance to off."""
         self._verbose = False
+        return
 
     @property
     def id(self):
+        """Get the id of the mesh
+        
+        Returns
+        -------
+        int
+            hash id of the instance
+        """
         return self._id
 
     @property
     def name(self):
+        """Get the name of the mesh"""
         return self._name
 
     @name.setter
@@ -588,18 +634,42 @@ class Mesh(object):
 
     @property
     def nb_vertices(self):
+        """Get the number of vertices in the mesh
+        
+        Returns
+        -------
+        int
+        """
         return self._vertices.shape[0]
 
     @property
     def nb_faces(self):
+        """Get the number of faces in the mesh
+        
+        Returns
+        -------
+        int
+        """
         return self._faces.shape[0]
 
     @property
     def vertices(self):
+        """Get the vertices array coordinate of the mesh
+        
+        Returns
+        -------
+        ndarray
+        """
         return self._vertices
 
     @property
     def faces(self):
+        """Get the faces connectivity array of the mesh
+        
+        Returns
+        -------
+        ndarray
+        """
         return self._faces
 
     @vertices.setter
@@ -617,6 +687,8 @@ class Mesh(object):
         return
 
     def _faces_properties(self):
+        """Updates the faces properties of the mesh"""
+        
         # faces_areas, faces_normals, faces_centers = mm.get_all_faces_properties(self._vertices, self._faces)
         nf = self.nb_faces
 
@@ -684,18 +756,36 @@ class Mesh(object):
 
     @property
     def faces_areas(self):
+        """Get the array of faces areas of the mesh
+        
+        Returns
+        -------
+        ndarray
+        """
         if 'faces_areas' not in self.__internals__:
             self._faces_properties()
         return self.__internals__['faces_areas']
 
     @property
     def faces_centers(self):
+        """Get the array of faces centers of the mesh
+        
+        Returns
+        -------
+        ndarray
+        """
         if 'faces_centers' not in self.__internals__:
             self._faces_properties()
         return self.__internals__['faces_centers']
 
     @property
     def faces_normals(self):
+        """Get the array of faces normals of the mesh
+
+        Returns
+        -------
+        ndarray
+        """
         if 'faces_normals' not in self.__internals__:
             self._faces_properties()
         return self.__internals__['faces_normals']
@@ -719,32 +809,81 @@ class Mesh(object):
 
     @property
     def triangles_ids(self):
+        """Get the array of ids of triangle shaped faces
+        
+        Returns
+        -------
+        ndarray
+        """
         if 'triangles_ids' not in self.__internals__:
             self._triangles_quadrangles()
         return self.__internals__['triangles_ids']
 
     @property
     def nb_triangles(self):
+        """Get the number of triangles in the mesh
+        
+        Returns
+        -------
+        int
+        """
         if 'triangles_ids'not in self.__internals__:
             self._triangles_quadrangles()
         return len(self.__internals__['triangles_ids'])
 
     @property
     def quadrangles_ids(self):
+        """Get the array of ids of qudrangle shaped faces
+
+        Returns
+        -------
+        ndarray
+        """
         if 'triangles_ids' not in self.__internals__:
             self._triangles_quadrangles()
         return self.__internals__['quadrangles_ids']
 
     @property
     def nb_quadrangles(self):
+        """Get the number of quadrangles in the mesh
+
+        Returns
+        -------
+        int
+        """
         if 'triangles_ids' not in self.__internals__:
             self._triangles_quadrangles()
         return len(self.__internals__['quadrangles_ids'])
 
     def is_triangle(self, face_id):
+        """Returns if a face is a triangle
+        
+        Parameters
+        ----------
+        face_id : int
+            Face id
+
+        Returns
+        -------
+        bool
+            True if the face with id face_id is a triangle
+        """
+        assert 0 <= face_id < self.nb_faces
         return self._faces[face_id, 0] == self._faces[face_id, -1]
 
     def get_face(self, face_id):
+        """Get the face described by its vertices connectivity
+        
+        Parameters
+        ----------
+        face_id : int
+            Face id
+
+        Returns
+        -------
+        ndarray
+            If the face is a triangle, the array has 3 components, else it has 4 (quadrangle)
+        """
         if self.is_triangle(face_id):
             return self._faces[face_id, :3]
         else:
@@ -763,7 +902,8 @@ class Mesh(object):
 
         Returns
         -------
-        extracted_mesh : Mesh
+        Mesh
+            A new Mesh instance composed of the extracted faces
         """
         nv = self.nb_vertices
 
@@ -821,6 +961,8 @@ class Mesh(object):
         return vtk_polydata
 
     def show(self):
+        """Shows the mesh in the meshmagick viewer"""
+        
         vtk_polydata = self._vtk_polydata()
         self.viewer = MMviewer.MMViewer()
         self.viewer.add_polydata(vtk_polydata)
@@ -828,7 +970,15 @@ class Mesh(object):
         self.viewer.finalize()
 
     def _connectivity(self):
-
+        """Updates the connectivities of the mesh.
+        
+        It concerns further connectivity than simple faces/vertices connectivities. It computes the vertices / vertices, vertices / faces and faces / faces connectivities.
+        
+        Note
+        ----
+        
+        Note that if the mesh is not conformal, the algorithm may not perform correctly
+        """
         nv = self.nb_vertices
         nf = self.nb_faces
 
@@ -924,36 +1074,80 @@ class Mesh(object):
 
     @property
     def vv(self):
+        """Get the vertex / vertex connectivity dictionary.
+        
+        Returns
+        -------
+        dict
+        """
         if 'v_v' not in self.__internals__:
             self._connectivity()
         return self.__internals__['v_v']
 
     @property
     def vf(self):
+        """Get the vertex / faces connectivity dictionary.
+        
+        Returns
+        -------
+        dict
+        """
         if 'v_f' not in self.__internals__:
             self._connectivity()
         return self.__internals__['v_f']
 
     @property
     def ff(self):
+        """Get the face / faces connectivity dictionary
+        
+        Returns
+        -------
+        dict
+        """
         if 'f_f' not in self.__internals__:
             self._connectivity()
         return self.__internals__['f_f']
 
     @property
     def boundaries(self):
+        """Get the list of boundaries of the mesh.
+        
+        Returns
+        -------
+        list
+            list that stores lists of boundary connected vertices
+        
+        
+        Note
+        ----
+        The computation of boundaries should be in the future computed with help of VTK
+        """
         if 'boundaries' not in self.__internals__:
             self._connectivity()
         return self.__internals__['boundaries']
 
     @property
     def nb_boundaries(self):
+        """Get the number of boundaries in the mesh
+        
+        Returns
+        -------
+        list
+            Number of boundaries
+        """
         if 'boundaries' not in self.__internals__:
             self._connectivity()
         return len(self.__internals__['boundaries'])
     
     @property
     def axis_aligned_bbox(self):
+        """Get the axis aligned bounding box of the mesh.
+        
+        Returns
+        -------
+        tuple
+            (xmin, xmax, ymin, ymax, zmin, zmax)
+        """
         if self.nb_vertices > 0:
             x, y, z = self._vertices.T
             return (x.min(), x.max(),
@@ -964,6 +1158,17 @@ class Mesh(object):
     
     @property
     def squared_axis_aligned_bbox(self):
+        """Get a squared axis aligned bounding box of the mesh.
+        
+        Returns
+        -------
+        tuple
+            (xmin, xmax, ymin, ymax, zmin, zmax)
+            
+        Note
+        ----
+        This method differs from `axis_aligned_bbox()` by the fact that the bounding box that is returned is squared but have the same center as the AABB
+        """
         xmin, xmax, ymin, ymax, zmin, zmax = self.axis_aligned_bbox
         (x0, y0, z0) = np.array([xmin+xmax, ymin+ymax, zmin+zmax]) * 0.5
         d = (np.array([xmax-xmin, ymax-ymin, zmax-zmin]) * 0.5).max()
@@ -971,12 +1176,29 @@ class Mesh(object):
         return x0-d, x0+d, y0-d, y0+d, z0-d, z0+d
     
     def is_mesh_closed(self):
+        """Returns if the mesh is a closed manifold.
+        
+        Returns
+        -------
+        bool
+            True if the mesh is closed (i.e. it has no boundaries)
+        """
         if 'boundaries' not in self.__internals__:
             self._connectivity()
         return len(self.__internals__['boundaries']) == 0
 
     def is_mesh_conformal(self):
-
+        """Returns if the mesh is conformal.
+        
+        Returns
+        -------
+        bool
+            True if the mesh is conformal.
+            
+        Warning
+        -------
+        This method is experimental. Use at your own risk !
+        """
         warn('This method is not stable yet !! Use with caution')
         # FIXME: experimental method
         tol = 1e-7
@@ -1020,16 +1242,63 @@ class Mesh(object):
             return conformal
 
     def rotate_x(self, thetax):
+        """Rotates the mesh around Ox axis.
+        
+        Parameters
+        ----------
+        thetax : float
+            Angle (rad)
+
+        Returns
+        -------
+        ndarray
+            The (3x3) rotation matrix that has been applied to rotate the mesh
+        """
         return self.rotate([thetax, 0., 0.])
 
     def rotate_y(self, thetay):
+        """Rotates the mesh around Oy axis.
+
+        Parameters
+        ----------
+        thetay : float
+            Angle (rad)
+
+        Returns
+        -------
+        ndarray
+            The (3x3) rotation matrix that has been applied to rotate the mesh
+        """
         return self.rotate([0., thetay, 0.])
 
     def rotate_z(self, thetaz):
+        """Rotates the mesh around Oz axis.
+
+        Parameters
+        ----------
+        thetaz : float
+            Angle (rad)
+
+        Returns
+        -------
+        ndarray
+            The (3x3) rotation matrix that has been applied to rotate the mesh
+        """
         return self.rotate([0., 0., thetaz])
 
     def rotate(self, angles):
-        
+        """Rotates the mesh in 3D giving the 3 rotation angles that are defined around fixed axes.
+
+        Parameters
+        ----------
+        angles : array_like
+            The 3 angles of the 3D rotation (rad)
+
+        Returns
+        -------
+        ndarray
+            The (3x3) rotation matrix that has been applied to rotate the mesh
+        """
         if self.has_surface_integrals():
             self._remove_surface_integrals()
         # TODO: docstring
@@ -1077,6 +1346,13 @@ class Mesh(object):
         return rot_matrix
 
     def translate_x(self, tx):
+        """Translates the mesh along the Ox axis.
+        
+        Parameters
+        ----------
+        tx : float
+            Distance
+        """
         vertices = self._vertices
         vertices[:, 0] += tx
         self._vertices = vertices
@@ -1093,6 +1369,13 @@ class Mesh(object):
         return
 
     def translate_y(self, ty):
+        """Translates the mesh along the Oy axis.
+
+        Parameters
+        ----------
+        ty : float
+            Distance
+        """
         vertices = self._vertices.copy()
         vertices[:, 1] += ty
         self._vertices = vertices
@@ -1109,6 +1392,13 @@ class Mesh(object):
         return
 
     def translate_z(self, tz):
+        """Translates the mesh along the Oz axis.
+
+        Parameters
+        ----------
+        tz : float
+            Distance
+        """
         vertices = self._vertices.copy()
         vertices[:, 2] += tz
         self._vertices = vertices
@@ -1125,7 +1415,13 @@ class Mesh(object):
         return
 
     def translate(self, t):
+        """Translates the mesh in 3D giving the 3 distances along coordinate axes.
         
+        Parameters
+        ----------
+        t : array_like
+            translation vector
+        """
         tx, ty, tz = t
         V = self._vertices.copy() # FIXME: why doing a copy ???
         V[:, 0] += tx
@@ -1147,9 +1443,18 @@ class Mesh(object):
         return
 
     def scale(self, alpha):
+        """Scales the mesh.
+        
+        Parameters
+        ----------
+        alpha : float
+            A positive scaling factor
+        """
+        assert 0 < alpha
+        
         # TODO: voir pourquoi il est fait une copie ici...
         vertices = self._vertices.copy()
-        vertices *= alpha
+        vertices *= float(alpha)
         self._vertices = vertices
 
         if self._has_faces_properties():
@@ -1158,8 +1463,17 @@ class Mesh(object):
         return
 
     def scalex(self, alpha):
+        """Scales the mesh along the x axis.
+        
+        Parameters
+        ----------
+        alpha : float
+            A positive scaling factor
+        """
+        assert 0 < alpha
+        
         vertices = self._vertices.copy()
-        vertices[:, 0] *= alpha
+        vertices[:, 0] *= float(alpha)
         self._vertices = vertices
 
         if self._has_faces_properties():
@@ -1168,8 +1482,17 @@ class Mesh(object):
         return
 
     def scaley(self, alpha):
+        """Scales the mesh along the y axis.
+
+        Parameters
+        ----------
+        alpha : float
+            A positive scaling factor
+        """
+        assert 0 < alpha
+        
         vertices = self._vertices.copy()
-        vertices[:, 1] *= alpha
+        vertices[:, 1] *= float(alpha)
         self._vertices = vertices
 
         if self._has_faces_properties():
@@ -1178,8 +1501,17 @@ class Mesh(object):
         return
 
     def scalez(self, alpha):
+        """Scales the mesh along the z axis.
+
+        Parameters
+        ----------
+        alpha : float
+            A positive scaling factor
+        """
+        assert 0 < alpha
+        
         vertices = self._vertices.copy()
-        vertices[:, 2] *= alpha
+        vertices[:, 2] *= float(alpha)
         self._vertices = vertices
 
         if self._has_faces_properties():
@@ -1188,6 +1520,8 @@ class Mesh(object):
         return
 
     def flip_normals(self):
+        """Flips every normals of the mesh."""
+        
         faces = self._faces.copy()
         self._faces = np.fliplr(faces)
 
@@ -1200,6 +1534,23 @@ class Mesh(object):
         return
 
     def __add__(self, mesh_to_add):
+        """Adds two meshes
+        
+        Parameters
+        ----------
+        mesh_to_add : Mesh
+            The other mesh instance to add to the current instance
+
+        Returns
+        -------
+        Mesh
+            The composite mesh
+            
+        Note
+        ----
+        This method should not be called as is but it overides the + binary operator for convenience.
+        """
+        
         assert isinstance(mesh_to_add, Mesh)
         vertices = np.concatenate((self._vertices, mesh_to_add._vertices), axis=0)
         faces = np.concatenate((self._faces, mesh_to_add._faces + self.nb_vertices), axis=0)
@@ -1210,9 +1561,35 @@ class Mesh(object):
         return new_mesh
 
     def copy(self):
+        """Get a copy of the current mesh instance.
+        
+        Returns
+        -------
+        Mesh
+            mesh instance copy
+        """
         return copy.deepcopy(self)
 
     def merge_duplicates(self, atol=1e-8, return_index=False):
+        """Merges the duplicate vertices of the mesh.
+        
+        Parameters
+        ----------
+        atol : float, optional
+            Absolute tolerance. default is 1e-8
+        return_index : bool, optional
+            Flag to return
+
+        Returns
+        -------
+        new_id : ndarray, optional
+            Array of indices that merges the vertices. Returned if return_index = True
+            
+        See Also
+        --------
+        meshmagick.tools.merge_duplicate_rows
+        
+        """
         uniq, new_id = merge_duplicate_rows(self._vertices, atol=atol, return_index=True)
 
         nv_init = self.nb_vertices
@@ -1242,7 +1619,8 @@ class Mesh(object):
             return
 
     def heal_normals(self):
-
+        """Heals the mesh's normals orientations so that they have a consistent orientation and try to make them outward.
+        """
         # TODO: return the different groups of a mesh in case it is made of several unrelated groups
 
         nv = self.nb_vertices
@@ -1361,7 +1739,11 @@ class Mesh(object):
 
         return
 
-    def remove_unused_vertices(self, return_index=False):
+    def remove_unused_vertices(self):
+        """Removes unused vertices in the mesh.
+        
+        Those are vertices that are not used by any face connectivity.
+        """
         # TODO: implementer return_index !!
         nv = self.nb_vertices
         vertices, faces = self._vertices, self._faces
@@ -1393,7 +1775,10 @@ class Mesh(object):
         return
 
     def heal_triangles(self):
+        """Makes the triangle connectivity consistent.
         
+        A general face is stored internally as a 4 integer array. It allows to describe indices of a quadrangle's vertices. For triangles, the first index should be equal to the last. This method ensures that this rule is applied everywhere and correct bad triangles description.
+        """
         if self._has_faces_properties():
             self._remove_faces_properties()
         
@@ -1425,9 +1810,21 @@ class Mesh(object):
         return
 
     def remove_degenerated_faces(self, rtol=1e-5):
-        # TODO: implementer un retour d'index des _faces extraites
+        """Removes tiny triangles from the mesh.
+        
+        Tiny triangles are those whose area is lower than the mean triangle area in the mesh times the relative tolerance given.
+        
+        Parameters
+        ----------
+        rtol : float, optional
+            Positive relative tolerance
+        """
+        
+        assert 0 < rtol
+        
+        # TODO: implementer un retour d'index des faces extraites
         areas = self.faces_areas
-        area_threshold = areas.mean() * rtol
+        area_threshold = areas.mean() * float(rtol)
 
         # Detecting _faces that have null area
         faces = self._faces[np.logical_not(areas < area_threshold)]
@@ -1447,6 +1844,16 @@ class Mesh(object):
         return
 
     def heal_mesh(self):
+        """Heals the mesh for different tests available.
+        
+        It applies:
+        
+        * Unused vertices removal
+        * Degenerate faces removal
+        * Duplicate vertices merging
+        * Triangles healing
+        * Normal healing
+        """
         if self._has_faces_properties():
             self._remove_faces_properties()
         self.remove_unused_vertices()
@@ -1457,6 +1864,14 @@ class Mesh(object):
         return
 
     def triangulate_quadrangles(self):
+        """Triangulates every quadrangles of the mesh by simple spliting.
+        
+        Each quadrangle gives two triangles.
+        
+        Note
+        ----
+        No checking is made on the triangle quality is done.
+        """
         # TODO: Ensure the best quality aspect ratio of generated triangles
         
         # Defining both triangles id lists to be generated from quadrangles
@@ -1487,7 +1902,13 @@ class Mesh(object):
         return faces
 
     def symmetrize(self, plane):
+        """Symmetrize the mesh with respect to a plane.
         
+        Parameters
+        ----------
+        plane : Plane
+            The plane of symmetry
+        """
         # Symmetrizing the nodes
         vertices, faces = self._vertices, self._faces
 
@@ -1505,6 +1926,13 @@ class Mesh(object):
         return
     
     def mirror(self, plane):
+        """Mirrors the mesh instance with respect to a plane.
+        
+        Parameters
+        ----------
+        plane : Plane
+            The mirroring plane
+        """
         self._vertices -= 2 * np.outer(np.dot(self._vertices, plane.normal) - plane.c, plane.normal)
         self.flip_normals()
         self.__internals__.clear()
@@ -1548,6 +1976,15 @@ class Mesh(object):
         return self.__internals__.has_key('surface_integrals')
 
     def get_surface_integrals(self):
+        """Get the mesh surface integrals
+        
+        Returns
+        -------
+        ndarray
+            The mesh surface inegrals array
+        """
+        # TODO: add an option to do the summation
+        # TODO: decrire les integrales de surface en question
         if not self.has_surface_integrals():
             self._compute_faces_integrals()
         return self.__internals__['surface_integrals']
@@ -1563,11 +2000,29 @@ class Mesh(object):
 
     @property
     def volume(self):
+        """Get the mesh enclosed volume
+        
+        Returns
+        -------
+        float
+            The mesh volume
+        """
         return self._compute_volume()
     
     # TODO: add the possibility to compute the inertia to an other point than [0, 0, 0]
     def eval_plain_mesh_inertias(self, rho_medium=1023.):
+        """Evaluates the mesh inertia under the assumption of an enclosed volume made of an homogeneous medium of the given density.
         
+        Parameters
+        ----------
+        rho_medium : float, optional
+            The medium density (kg/m**3). Default is 1023 kg.m**3 (salt water)
+
+        Returns
+        -------
+        RigidBodyInertia
+            The mesh inertia instance expressed at origin (0, 0, 0)
+        """
         # TODO: allow to specify an other point for inertia matrix expression
         # TODO: manipuler plutot un objet inertia --> creer une classe !
         rho_medium = float(rho_medium)
@@ -1595,7 +2050,20 @@ class Mesh(object):
         return RigidBodyInertia(mass, cog, xx, yy, zz, yz, xz, xy, point=[0, 0, 0])
     
     def eval_shell_mesh_inertias(self, rho_medium=7850., thickness=0.02):
-        
+        """Evaluates the mesh inertia under the assumption of an enclosed volume made of an homogeneous    medium of the  given density.
+
+        Parameters
+        ----------
+        rho_medium : float, optional
+            The medium density (kg/m**3). Default is 7850 kg/m**3 (Steel density)
+        thickness : flaot, optional
+            The hull thickness (m). Default is 0.02 m.
+
+        Returns
+        -------
+        RigidBodyInertia
+            The mesh inertia instance expressed at origin (0, 0, 0)
+        """
         rho_medium = float(rho_medium)
         thickness = float(thickness)
         surf_density = rho_medium * thickness
@@ -1670,8 +2138,18 @@ class Mesh(object):
         s_int[14] = delta * (point_0.x*g0[:, 2] + point_1.x*g1[:, 2] + point_2.x*g2[:, 2]) / 60.
 
         return s_int
-    
+
     def quick_save(self, filename=None):
+        """Saves the current mesh instance in a VTK file.
+        
+        It is mainly for debugging purpose.
+        
+        Parameters
+        ----------
+        filename : str
+            If None, the file is automatically saved under the name quick_save.vtp.
+            If the name given does not have a .vtp extension, the latter is appended automatically.
+        """
         if not filename:
             filename = 'quick_save.vtp'
         
