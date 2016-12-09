@@ -3,10 +3,9 @@ from __future__ import print_function
 from setuptools import setup, find_packages
 import codecs
 import os
-import sys
-import re
 
 HERE = os.path.abspath(os.path.dirname(__file__))
+
 
 def read(*parts):
     """Return multiple read calls to different readable objects as a single

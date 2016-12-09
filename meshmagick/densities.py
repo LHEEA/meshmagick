@@ -31,5 +31,6 @@ def get_density(medium):
         raise KeyError('Medium %s not known...' % medium)
     return density
 
+
 def list_mediums():
     return _DENSITIES.keys()
