@@ -9,20 +9,22 @@ def merge_duplicate_rows(arr, atol=1e-8, return_index=False):
     Returns a new node array where close nodes have been merged into one node (following atol).
 
     Parameters:
-        arr: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        atol[optional]: float
-            the tolerance used to define nodes that are coincident and
-            that have to be merged
-        return_index: bool
-            If true, it also returns the array for new indices of vertices
+    -----------
+    arr: array_like
+        numpy array of the coordinates of the mesh's nodes
+    atol[optional]: float
+        the tolerance used to define nodes that are coincident and
+        that have to be merged
+    return_index: bool
+        If true, it also returns the array for new indices of vertices
 
     Returns:
-        arr: ndarray
-            numpy array of the coordinates of the mesh's nodes where
-            every node is different
-        newID: ndarray
-            numpy arrays of the new new vertices IDs
+    --------
+    arr : ndarray
+        numpy array of the coordinates of the mesh's nodes where
+        every node is different
+    newID : ndarray, optional
+        numpy arrays of the new new vertices IDs
     """
     # TODO: Refaire la documentation --> les entrees sorties ont change !!
 
@@ -32,7 +34,9 @@ def merge_duplicate_rows(arr, atol=1e-8, return_index=False):
     # TODO: use np.unique to cluster groups --> acceleration !!
 
     # atol = pow(10, -decimals)
-
+    
+    arr = np.asarray(arr)
+    
     nv, nbdim = arr.shape
 
     levels = [0, nv]
