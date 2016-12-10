@@ -65,13 +65,17 @@ class Hydrostatics(object):
     """
     Class to perform hydrostatic computations on meshes.
     
-    Rules:
-    ------
-    *** At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible directly for this position. The mesh may not be at equilibrium thought and residual force balance between hydrostatic force and gravity force may be not null. To trig the equilibrium computations, we have to call the equilibrate() method.
+    Warnings
+    --------
+    At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible
+    directly for this position. The mesh may not be at equilibrium thought and residual force balance between
+    hydrostatic force and gravity force may be not null. To trig the equilibrium computations, we have to call the
+    equilibrate() method.
     
-       Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally and automatically at each modification.
+    Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally
+    and automatically at each modification.
     
-    *** Intrinsic mesh properties are
+    Intrinsic mesh properties are
     
         - _mass
         - cog
@@ -79,15 +83,18 @@ class Hydrostatics(object):
         - rho_water
         - gravity
         
-        Setting one of these property by its setter will trig a search for a new mesh position that fullfill the hydrostatic equilibrium.
-        Note that zg is mandatory to get the hydrostatic stiffness matrix. By default, be carefull that it is set to zero at instantiation.
+    Setting one of these property by its setter will trig a search for a new mesh position that fullfill the
+    hydrostatic equilibrium.
+    Note that zg is mandatory to get the hydrostatic stiffness matrix. By default, be carefull that it is set to
+    zero at instantiation.
     
-    *** Modification of the displacement will produce the mesh to move along z so that
-    it reaches the correct displacement. The _mass is then set accordingly and equals the displacement. Note that this is different from modifying the _mass and
+    Modification of the displacement will produce the mesh to move along z so that
+    it reaches the correct displacement. The _mass is then set accordingly and equals the displacement. Note that this
+    is different from modifying the _mass and
     
     
-    *** Setting the buoyancy center will trig a search for a position of the gravity center that fullfill this hydrostatic property, while keeping the correct displacement. NOT IMPLEMENTED, THIS IS AN ADVANCED FEATURE
-    
+    Setting the buoyancy center will trig a search for a position of the gravity center that fullfill this
+    hydrostatic property, while keeping the correct displacement. NOT IMPLEMENTED, THIS IS AN ADVANCED FEATURE
     """
 
     def __init__(self, mesh, cog=np.zeros(3, dtype=np.float), zg=0., mass=None, rho_water=1023, grav=9.81,
