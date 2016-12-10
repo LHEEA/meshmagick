@@ -669,8 +669,8 @@ def load_GDF(filename):
     ifile.close()
 
     # Merging duplicates nodes
-    vertices, new_id = merge_duplicate_rows(vertices, return_index=True)
-    faces = new_id[faces]
+    # vertices, new_id = merge_duplicate_rows(vertices, return_index=True)
+    # faces = new_id[faces]
 
     return vertices, faces
 
