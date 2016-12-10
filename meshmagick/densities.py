@@ -25,12 +25,31 @@ _DENSITIES = {'CONCRETE': 2300.,
 
 
 def get_density(medium):
+    """Get the density of medium.
+    
+    Parameters
+    ----------
+    medium : str
+        The medium name
+
+    Returns
+    -------
+    float
+        Density of medium (kg/m**3)
+    """
     try:
-        density = _DENSITIES[medium]
+        density = _DENSITIES[str(medium)]
     except KeyError:
         raise KeyError('Medium %s not known...' % medium)
     return density
 
 
 def list_mediums():
+    """Get the list of available medium.
+    
+    Returns
+    -------
+    list
+        List of available medium
+    """
     return _DENSITIES.keys()
