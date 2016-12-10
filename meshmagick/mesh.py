@@ -891,7 +891,7 @@ class Mesh(object):
 
     def extract_faces(self, id_faces_to_extract, return_index=False):
         """
-        Extracts a new mesh from a selection of _faces ids
+        Extracts a new mesh from a selection of faces ids
 
         Parameters
         ----------
@@ -907,7 +907,7 @@ class Mesh(object):
         """
         nv = self.nb_vertices
 
-        # Determination of the _vertices to keep
+        # Determination of the vertices to keep
         vertices_mask = np.zeros(nv, dtype=bool)
         vertices_mask[self._faces[id_faces_to_extract].flatten()] = True
         id_v = np.arange(nv)[vertices_mask]
@@ -937,7 +937,7 @@ class Mesh(object):
         for point in self._vertices:
             points.InsertNextPoint(point)
 
-        # Create a vtkCellArray to store _faces
+        # Create a vtkCellArray to store faces
         faces = vtk.vtkCellArray()
         for face_ids in self._faces:
             if face_ids[0] == face_ids[-1]:
@@ -1331,7 +1331,7 @@ class Mesh(object):
         # TODO: travailler avec une classe rotation
         self._vertices = np.transpose(np.dot(rot_matrix, self._vertices.copy().T))
 
-        # Updating _faces properties if any
+        # Updating faces properties if any
         # TODO: use traitlets...
         if self._has_faces_properties():
             # Rotating normals and centers too
@@ -1667,7 +1667,7 @@ class Mesh(object):
                 # Removing the other pointer
                 f_f[iadj_f].remove(iface)  # So as it won't go from iadj_f to iface in the future
 
-                # Shared _vertices
+                # Shared vertices
                 adjface = faces[iadj_f]
                 s2 = set(adjface)
                 # try:
@@ -1675,7 +1675,7 @@ class Mesh(object):
                 if len(common_vertices) == 2:
                     i_v1, i_v2 = common_vertices
                 else:
-                    print 'WARNING: _faces %u and %u have more than 2 _vertices in common !' % (iface, iadj_f)
+                    print 'WARNING: faces %u and %u have more than 2 vertices in common !' % (iface, iadj_f)
                     continue
 
                 # Checking normal consistency
@@ -1698,7 +1698,7 @@ class Mesh(object):
         if self._verbose:
             print "* Healing normals to make them consistent and if possible outward"
             if nb_reversed > 0:
-                print '\t--> %u _faces have been reversed to make normals consistent across the mesh' % (nb_reversed)
+                print '\t--> %u faces have been reversed to make normals consistent across the mesh' % (nb_reversed)
             else:
                 print "\t--> Normals orientations are consistent"
 
@@ -1711,7 +1711,7 @@ class Mesh(object):
             areas = self.faces_areas
             normals = self.faces_normals
             centers = self.faces_centers
-            # areas, normals, centers = get_all_faces_properties(_vertices, _faces)
+            # areas, normals, centers = get_all_faces_properties(vertices, faces)
 
             hs = (np.array([(centers[:, 2] - zmax) * areas, ] * 3).T * normals).sum(axis=0)
 
@@ -1761,13 +1761,13 @@ class Mesh(object):
         self._vertices, self._faces = vertices, faces
 
         if self._verbose:
-            print "* Removing unused _vertices in the mesh:"
+            print "* Removing unused vertices in the mesh:"
             if nb_used_v < nv:
                 unused_v = np.where(np.logical_not(used_v))[0]
                 vlist_str = '[' + ', '.join(str(iV) for iV in unused_v) + ']'
-                print "\t--> %u unused _vertices have been removed" % (nv - nb_used_v)
+                print "\t--> %u unused vertices have been removed" % (nv - nb_used_v)
             else:
-                print "\t--> No unused _vertices"
+                print "\t--> No unused vertices"
 
         if self._has_connectivity():
             self._remove_connectivity()
@@ -1812,7 +1812,8 @@ class Mesh(object):
     def remove_degenerated_faces(self, rtol=1e-5):
         """Removes tiny triangles from the mesh.
         
-        Tiny triangles are those whose area is lower than the mean triangle area in the mesh times the relative tolerance given.
+        Tiny triangles are those whose area is lower than the mean triangle area in the mesh times the relative
+        tolerance given.
         
         Parameters
         ----------
@@ -1826,15 +1827,15 @@ class Mesh(object):
         areas = self.faces_areas
         area_threshold = areas.mean() * float(rtol)
 
-        # Detecting _faces that have null area
+        # Detecting faces that have null area
         faces = self._faces[np.logical_not(areas < area_threshold)]
         if self._verbose:
             nb_removed = self.nb_faces - faces.shape[0]
-            print '* Removing degenerated _faces'
+            print '* Removing degenerated faces'
             if nb_removed > 0:
-                print '\t-->%u degenerated _faces have been removed' % nb_removed
+                print '\t-->%u degenerated faces have been removed' % nb_removed
             else:
-                print '\t--> No degenerated _faces'
+                print '\t--> No degenerated faces'
 
         self._faces = faces
         
