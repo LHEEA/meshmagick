@@ -32,7 +32,8 @@ setup(
     install_requires=[
         'argparse',
         'argcomplete',
-        'numpy'
+        'numpy',
+        'sphinx-argparse'
         ],
     entry_points={
         'console_scripts': [
