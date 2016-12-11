@@ -33,7 +33,8 @@ setup(
         'argparse',
         'argcomplete',
         'numpy',
-        'sphinx-argparse'
+        'sphinx-argparse',
+        'sphinxcontrib-programoutput',
         ],
     entry_points={
         'console_scripts': [
