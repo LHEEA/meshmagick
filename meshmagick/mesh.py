@@ -445,7 +445,8 @@ class Mesh(object):
     vertices : ndarray
         (nv x 3) Array of mesh vertices coordinates. Each line of the array represents one vertex coordinates
     faces : ndarray
-        Arrays of mesh connectivities for faces. Each line of the array represents indices of vertices that form the face, expressed in counterclockwise order to ensure ourward normals description.
+        Arrays of mesh connectivities for faces. Each line of the array represents indices of vertices that form the
+        face, expressed in counterclockwise order to ensure outward normals description.
     name : str, optional
         The mesh's name. If None, mesh is given an automatic name based on its internal ID.
     """
