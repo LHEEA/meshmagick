@@ -15,6 +15,15 @@ Using Meshmagick
 
 .. highlight:: bash
 
+Getting help
+------------
+
+You can get command line help by issuing the following command::
+
+    >$ meshmagick -h
+
+The output of this command is reproduced in the :any:`Command Line Interface Reference Guide <cli_reference>`.
+
 Converting a mesh file
 ----------------------
 
@@ -48,37 +57,10 @@ Quick information on a mesh is given by the :abbr:`-i (--info)` option::
 
     >$ meshmagick SEAREV.vtp -i
 
-That gives us the following output::
+That gives us the following output:
 
-    =============================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    =============================================
-    SEAREV.vtp successfully loaded
+.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -i
 
-            --------------------------------------------
-                    MESH NAME : SEAREV
-            --------------------------------------------
-
-            Number of vertices: 14354
-            Number of faces:    15804
-
-            Number of triangles:   2904
-            Number of quadrangles: 12900
-
-            xmin = -4.999371        xmax = 4.998167
-            ymin = -15.000000       ymax = 15.000000
-            zmin = -5.000000        zmax = 6.000000
-
-
-
-
-    =============================================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    Maintainer : Francois Rongere <Francois.Rongere@ec-nantes.fr>
-    Good Bye!
-    =============================================================
 
 Mesh quality metrics
 ~~~~~~~~~~~~~~~~~~~~
@@ -87,71 +69,9 @@ You can get some quality metrics on the mesh by issuing::
 
     >$ meshmagick SEAREV.vtp --quality
 
-that gives::
+that gives:
 
-    =============================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    =============================================
-    SEAREV.vtp successfully loaded
-
-    Triangle quality of the mesh (2904 elements):
-
-     Area Ratio:
-        range: 0.0315238  -  0.104016
-        average: 0.060761  , standard deviation: 0.0129906
-     Edge Ratio:
-        range: 1.0115  -  1.68482
-        average: 1.28402  , standard deviation: 0.135239
-     Aspect Ratio:
-        range: 1.00504  -  1.78696
-        average: 1.17559  , standard deviation: 0.104713
-     Radius Ratio:
-        range: 1.0001  -  1.63074
-        average: 1.06858  , standard deviation: 0.0637777
-     Frobenius Norm:
-        range: 1.00009  -  1.4086
-        average: 1.0574  , standard deviation: 0.0487658
-     Minimal Angle:
-        range: 35.6524  -  59.4647
-        average: 48.5477  , standard deviation: 4.93326
-
-    Quadrilateral quality of the mesh (12900 elements):
-
-     Area Ratio:
-        range: 0.0774506  -  0.0812261
-        average: 0.0797408  , standard deviation: 0.00129459
-     Edge Ratio:
-        range: 1.93626  -  2.03065
-        average: 1.99352  , standard deviation: 0.0323648
-     Aspect Ratio:
-        range: 1.46813  -  1.51532
-        average: 1.49676  , standard deviation: 0.0161824
-     Radius Ratio:
-        range: 1.22636  -  1.26155
-        average: 1.24764  , standard deviation: 0.0120902
-     Average Frobenius Norm:
-        range: 1.22636  -  1.26155
-        average: 1.24764  , standard deviation: 0.0120902
-     Maximal Frobenius Norm:
-        range: 1.22636  -  1.26155
-        average: 1.24764  , standard deviation: 0.0120902
-     Minimal Angle:
-        range: 90  -  90
-        average: 90  , standard deviation: 0
-
-
-    Definition of the different quality measures is given
-            in the verdict library manual :
-            http://www.vtk.org/Wiki/images/6/6b/VerdictManual-revA.pdf
-
-
-    =============================================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    Maintainer : Francois Rongere <Francois.Rongere@ec-nantes.fr>
-    Good Bye!
-    =============================================================
+.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp --quality
 
 .. note::
 
@@ -212,25 +132,9 @@ The :abbr:`-md (--merge-duplicates)` option does this::
 
     >$ meshmagick coque.gdf -md
 
-that gives::
+that gives:
 
-    =============================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    =============================================
-    coque.gdf successfully loaded
-    * Merging duplicate vertices that lie in an absolute proximity of 1.0E-08...
-            --> Initial number of vertices : 15100
-            --> Final number of vertices   : 3911
-            --> 11189 vertices have been merged
-
-
-    =============================================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    Maintainer : Francois Rongere <Francois.Rongere@ec-nantes.fr>
-    Good Bye!
-    =============================================================
+.. program-output:: meshmagick ../meshmagick/tests/data/coque.gdf -md
 
 This allows to generate connectivity tables in the mesh and may drastically reduce the mesh size in memory and on disk.
 
@@ -316,34 +220,9 @@ The command is then::
 
     >$ meshmagick cylinder.msh -hm
 
-that outputs::
+that outputs:
 
-    =============================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    =============================================
-    cylinder.msh successfully loaded
-
-    OPERATION: heal the mesh
-    * Removing unused vertices in the mesh:
-            --> 1 unused vertices have been removed
-    * Removing degenerated faces
-            --> No degenerated faces
-    * Merging duplicate vertices that lie in an absolute proximity of 1.0E-08...
-            --> No duplicate vertices have been found
-    * Ensuring consistent definition of triangles:
-            --> Triangle description is consistent
-    * Healing normals to make them consistent and if possible outward
-            --> 2000 faces have been reversed to make normals consistent across the mesh
-            --> WARNING: the mesh does not seem watertight althought marked as closed...
-            Done.
-
-    =============================================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    Maintainer : Francois Rongere <Francois.Rongere@ec-nantes.fr>
-    Good Bye!
-    =============================================================
+.. program-output:: meshmagick ../meshmagick/tests/data/cylinder.msh -hm
 
 Mesh transformations
 --------------------
@@ -363,41 +242,9 @@ coordinate vector. The invocations are::
 
     >$ meshmagick SEAREV.vtp -t 10 10 10 -i
 
-for translations of 10 along specific axes and along the coordinate vector (10, 10, 10). The last command gives::
+for translations of 10 along specific axes and along the coordinate vector (10, 10, 10). The last command gives:
 
-    =============================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    =============================================
-    SEAREV.vtp successfully loaded
-
-    OPERATION: Translation by [10.000000, 10.000000, 10.000000]
-            -> Done.
-
-            --------------------------------------------
-                    MESH NAME : SEAREV
-            --------------------------------------------
-
-            Number of vertices: 14354
-            Number of faces:    15804
-
-            Number of triangles:   2904
-            Number of quadrangles: 12900
-
-            xmin = 5.000629 xmax = 14.998167
-            ymin = -5.000000        ymax = 25.000000
-            zmin = 5.000000 zmax = 16.000000
-
-
-
-
-    =============================================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    Maintainer : Francois Rongere <Francois.Rongere@ec-nantes.fr>
-    Good Bye!
-    =============================================================
-
+.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -t 10 10 10 -i
 
 Rotations
 ~~~~~~~~~
@@ -407,46 +254,15 @@ The options to use are :abbr:`-rx (--rotatex)`, :abbr:`-ry (--rotatey)`, :abbr:`
 rotation along fixed axis rotation vector. The invocations are::
 
     >$ meshmagick SEAREV.vtp -rx 90
-    >$ meshmagick SEAREV.vtp -ty 90
-    >$ meshmagick SEAREV.vtp -tz 90
+    >$ meshmagick SEAREV.vtp -ry 90
+    >$ meshmagick SEAREV.vtp -rz 90
 
-    >$ meshmagick SEAREV.vtp -t 90 90 90 -i
+    >$ meshmagick SEAREV.vtp -r 90 90 90 -i
 
 for rotations of 90° around specific axes and around the rotation coordinate vector (90, 90, 90). The last command
-gives::
+gives:
 
-    =============================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    =============================================
-    SEAREV.vtp successfully loaded
-
-    OPERATION: Translation by [90.000000, 90.000000, 90.000000]
-            -> Done.
-
-            --------------------------------------------
-                    MESH NAME : SEAREV
-            --------------------------------------------
-
-            Number of vertices: 14354
-            Number of faces:    15804
-
-            Number of triangles:   2904
-            Number of quadrangles: 12900
-
-            xmin = 85.000629        xmax = 94.998167
-            ymin = 75.000000        ymax = 105.000000
-            zmin = 85.000000        zmax = 96.000000
-
-
-
-
-    =============================================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    Maintainer : Francois Rongere <Francois.Rongere@ec-nantes.fr>
-    Good Bye!
-    =============================================================
+.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -r 90 90 90 -i
 
 .. warning::
 
@@ -467,41 +283,9 @@ scaling of the mesh. The invocations are::
 
     >$ meshmagick SEAREV.vtp -s 2 -i
 
-for scaling of 2 along specific axes and of the whole mesh in space. The last command gives::
+for scaling of 2 along specific axes and of the whole mesh in space. The last command gives:
 
-    =============================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    =============================================
-    SEAREV.vtp successfully loaded
-
-    OPERATION: Scaling by 2.000000
-            -> Done.
-
-            --------------------------------------------
-                    MESH NAME : SEAREV
-            --------------------------------------------
-
-            Number of vertices: 14354
-            Number of faces:    15804
-
-            Number of triangles:   2904
-            Number of quadrangles: 12900
-
-            xmin = -9.998741        xmax = 9.996333
-            ymin = -30.000000       ymax = 30.000000
-            zmin = -10.000000       zmax = 12.000000
-
-
-
-
-    =============================================================
-    meshmagick - version 1.0
-    Copyright 2014-2016, Ecole Centrale de Nantes
-    Maintainer : Francois Rongere <Francois.Rongere@ec-nantes.fr>
-    Good Bye!
-
-
+.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -s 2 -i
 
 .. warning::
 
@@ -516,6 +300,8 @@ The :abbr:`-tq (--triangulate-quadrangles)` allows to split every quadrangle fac
     >$ meshmagick cylinder.msh -tq --show
 
 that displays the following:
+
+.. program-output:: meshmagick ../meshmagick/tests/data/cylinder.msh -tq
 
 .. image:: ../img/triangulate.png
 
@@ -654,16 +440,107 @@ making us confident with respect to the normal consistency and orientation (outw
 Getting inertial properties of the mesh
 ---------------------------------------
 
+Meshmagick allows to calculate inertial properties of meshes based on some assumptions on the mass distribution:
+
+* A mesh which is **uniformly filled** with an homogeneous medium with a given density (the practical interest if for
+  e.g. for ballast modeling).
+* A mesh considered as a **shell** having a constant thickness and made in a medium of a given density (approximation
+  for floating structures).
+
+.. todo::
+
+    Ajouter des mots clé pour les matériaux dispos
+
+.. warning::
+
+    * **Inertial properties** are:
+
+        * The **mass** :math:`m` (tons)
+        * The position of the **center of gravity** in the mesh's reference frame :math:`\vec{OG}`
+        * The (3x3) symmetric 3D rotational **inertia matrix** :math:`\mathbf{I}_O`
+
+    * The inertia matrix must be expressed with respect to a *reduction point*. Internally, inertia calculations are
+      done in the mesh's reference frame (where vertices coordinates are expressed) so **the default inertia matrix is
+      expressed at the mesh's origin**. Please see the ``--reduction-point`` and ``--at-cog`` options to specify an
+      other reduction point.
+
+    * Note also that the default unit for mass in Meshmagick is the ton ! This is of practical use in offshore
+      applications.
+
+Defining the medium density
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The medium density, for both assumptions on mass distribution in the mesh, is done by using the ``--rho-medium``
+option::
+
+    >$ meshmagick SEAREV.vtp --rho-medium 1023
+
+.. note::
+
+   Density must be given in kg/m**3 unit.
+
+.. note::
+
+    In the above command line, we specified a meshfile as an option although we have no mesh processing at all, the
+    aim being to get the list of available medium. This is a limitation of the ``argparse`` Python module that is
+    used in Meshmagick to parse command line options and arguments. This module does not allow to define optional
+    arguments that overhelms the mandatoriness of the positional arguments. Except for the ``--help`` command line
+    option, you always have to specify a mesh file while calling Meshmagick.
+
+It is also possible to use some default medium density keywords. These keywords can be retrieved using the
+``--list-medium`` option::
+
+    >$ meshmagick SEAREV.vtp --list-medium
+
+.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp --list-medium
+
+An other solution is to look at the ``--help`` output.
+
+.. todo::
+
+    * Faire que argparse émette un warning si on a des options non reconnues.
+    * Ajouter la possibilité d'exprimer les matrices résultat en un point de réduction particulier. Cette option
+      qu'on nomera --reduction-point (-rp) sera utilisee a la fois par les inerties et par la matrice raideur
+    * On mettra aussi en place une option --at-cog pour que le poitn de reduction soit specifie au cetre de gravite
+
+
 Guessing the mesh is filled with homogeneous medium
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is achieved by using the :abbr:`-pi (--plain-inertia)` option::
+
+    >$ meshmagick SEAREV.vtp -pi --rho-medium 800
+
+that gives:
+
+.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -pi --rho-medium 800
+
+.. note::
+    If the medium's density is not specified, the ``-pi`` option guesses that the medium is salt water and then takes a
+    default density of 1023 kg/m**3.
 
 Guessing the mesh is a shell
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This is achieved by using the :abbr:`-si (--shell-inertia)` option::
 
+    >$ meshmagick SEAREV.vtp -si --rho-medium 5850 --thickness 0.02
+
+that gives:
+
+.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -si --rho-medium 5850 --thickness 0.02
+
+.. note::
+
+    * If the ``--rho-medium`` option is not specified, the medium density is by default considered that of steel (5850
+      kg/m**3)
+    * If the ``--thickness`` option is not specified, the thickness of the shell is by default considered being 0.02
+      meters.
 
 Performing hydrostatics calculations on the mesh
 ------------------------------------------------
+
+
 
 Getting hydrostatics properties of the mesh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

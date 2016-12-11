@@ -42,18 +42,19 @@ Using Meshmagick as a command line tool
     command_line/index
 
 Using Meshmagick as a Python module
------------------------------------
+===================================
 
 .. toctree::
 
     module/module
 
 Meshmagick's API reference
---------------------------
+==========================
 
 .. toctree::
+    :maxdepth: 2
 
-    api/modules
+    api/index
 
 
 
