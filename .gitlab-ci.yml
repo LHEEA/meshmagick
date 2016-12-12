@@ -2,7 +2,7 @@
     script: &test_script
     - /home/dice/anaconda2/bin/conda create -n meshmagick python=2.7
     - source /home/dice/anaconda2/bin/activate meshmagick
-    - /home/dice/anaconda2/bin/conda install -y -n meshmagick pytest pytest-cov vtk
+    - /home/dice/anaconda2/bin/conda install -y -n meshmagick pytest pytest-cov vtk h5py
     - pip install -e .
     - python setup.py test
     - coverage run setup.py test
