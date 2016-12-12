@@ -1,13 +1,14 @@
 .meshmagick:
     script: &test_script
-    - /home/dice/anaconda2/bin/conda create meshmagick -p .venv
-    - source .venv/bin/activate
-    - /home/dice/anaconda2/bin/conda install -y pytest pytest-cov vtk
+    - /home/dice/anaconda2/bin/conda create -n meshmagick python=2.7
+    - source /home/dice/anaconda2/bin/activate meshmagick
+    - /home/dice/anaconda2/bin/conda install -y -n meshmagick pytest pytest-cov vtk
     - pip install -e .
     - python setup.py test
     - coverage run setup.py test
     - coverage report
-    - rm -r .venv
+    - source /home/dice/anaconda2/bin/deactivate meshmagick
+    - /home/dice/anaconda2/bin/conda remove -n meshmagick python=2.7 -all
 
 meshmagick:
     stage: test
