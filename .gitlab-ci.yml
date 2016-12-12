@@ -3,6 +3,7 @@
     - /home/dice/anaconda2/bin/virtualenv .venv
     - source .venv/bin/activate
     - pip install pytest pytest-cov
+    - conda install -y vtk
     - pip install -e .
     - python setup.py test
     - coverage run setup.py test
