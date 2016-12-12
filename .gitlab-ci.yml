@@ -1,9 +1,8 @@
 .meshmagick:
     script: &test_script
-    - /home/dice/anaconda2/bin/virtualenv .venv
+    - /home/dice/anaconda2/bin/conda create meshmagick -p .venv
     - source .venv/bin/activate
-    - pip install pytest pytest-cov
-    - /home/dice/anaconda2/bin/conda install -y vtk
+    - /home/dice/anaconda2/bin/conda install -y pytest pytest-cov vtk
     - pip install -e .
     - python setup.py test
     - coverage run setup.py test
