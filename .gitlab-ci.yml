@@ -2,6 +2,7 @@
     script: &test_script
     - /home/dice/anaconda2/bin/virtualenv .venv
     - source .venv/bin/activate
+    - pip install pytest pytest-cov
     - pip install -e .
     - python setup.py test
     - coverage run setup.py test
