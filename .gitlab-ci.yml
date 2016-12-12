@@ -8,7 +8,7 @@
     - coverage run setup.py test
     - coverage report
     - source /home/dice/anaconda2/bin/deactivate meshmagick
-    - /home/dice/anaconda2/bin/conda remove -n meshmagick python=2.7 -all
+    - /home/dice/anaconda2/bin/conda remove -n meshmagick -all
 
 meshmagick:
     stage: test
