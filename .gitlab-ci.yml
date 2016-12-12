@@ -1,6 +1,6 @@
 .meshmagick:
     script: &test_script
-    - virtualenv .venv
+    - /home/dice/anaconda2/bin/virtualenv .venv
     - source .venv/bin/activate
     - pip install -e .
     - python setup.py test
