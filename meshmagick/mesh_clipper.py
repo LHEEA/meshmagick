@@ -5,6 +5,22 @@ from mesh import *
 
 
 class MeshClipper(object):
+    """A class to perform mesh clipping operations.
+
+    Parameters
+    ----------
+    source_mesh : Mesh
+        The mesh to be clipped
+    plane : Plane, optional
+        The clipping plane. By default, the plane is the Oxy plane.
+    vicinity_tol : float
+        The absolute tolerance to consider en vertex is on the plane. Default is 1z-3.
+    assert_closed_boundaries : bool, optional
+        False by default. When True, the mesh clipper will raise an exception if intersections with the clipping
+        plane are not closed
+    verbose : bool, optional
+        False by default. If True, some messages on operations that are handled are printed.
+    """
     def __init__(self, source_mesh=None, plane=Plane(), vicinity_tol=1e-3, assert_closed_boundaries=False, verbose=False):
         # source_mesh._verbose = verbose
         self._source_mesh = source_mesh

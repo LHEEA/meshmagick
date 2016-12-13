@@ -38,13 +38,13 @@ def get_density(medium):
         Density of medium (kg/m**3)
     """
     try:
-        density = _DENSITIES[str(medium)]
+        density = _DENSITIES[str(medium).upper()]
     except KeyError:
         raise KeyError('Medium %s not known...' % medium)
     return density
 
 
-def list_mediums():
+def list_medium():
     """Get the list of available medium.
     
     Returns
@@ -53,3 +53,22 @@ def list_mediums():
         List of available medium
     """
     return _DENSITIES.keys()
+
+
+# def get_table():
+#
+#     col_width = 22
+#     hline = '+{0:s}+{0:s}+\n'.format('-' * col_width)
+#     table = hline
+#     table += '|{:<{n}s}|{:>{n}s}|\n'.format('NAME', 'DENSITY (KG/M**3)', n=col_width)
+#     table += hline
+#
+#     for key in _DENSITIES:
+#         table +=
+#         table += hline
+#
+#     return table
+#
+# if __name__ == '__main__':
+#
+#     print get_table()

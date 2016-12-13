@@ -35,25 +35,24 @@ import mmio
 from mesh_clipper import MeshClipper
 import hydrostatics as hs
 import argparse
-
-
+import densities
 
 __year__ = datetime.now().year
 
-__author__     = "Francois Rongere"
-__copyright__  = "Copyright 2014-%u, Ecole Centrale de Nantes" % __year__
-__credits__    = "Francois Rongere"
-__licence__    = "CeCILL"
-__version__    = "1.0"
+__author__ = "Francois Rongere"
+__copyright__ = "Copyright 2014-%u, Ecole Centrale de Nantes" % __year__
+__credits__ = "Francois Rongere"
+__licence__ = "CeCILL"
+__version__ = "1.0"
 __maintainer__ = "Francois Rongere"
-__email__      = "Francois.Rongere@ec-nantes.fr"
-__status__     = "Development"
+__email__ = "Francois.Rongere@ec-nantes.fr"
+__status__ = "Development"
 
 __all__ = ['main']
 
-#=======================================================================
+# =======================================================================
 #                         MESH MANIPULATION HELPERS
-#=======================================================================
+# =======================================================================
 # TODO: those functions should disappear from this module
 
 def _is_point_inside_polygon(point, poly):
@@ -82,16 +81,17 @@ def _is_point_inside_polygon(point, poly):
     p1x, p1y = poly[0]
     for i in xrange(n):
         p2x, p2y = poly[i]
-        if y > min(p1y,p2y):
-            if y <= max(p1y,p2y):
-                if x <= max(p1x,p2x):
+        if y > min(p1y, p2y):
+            if y <= max(p1y, p2y):
+                if x <= max(p1x, p2x):
                     if p1y != p2y:
-                        xints = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+                        xints = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
                     if p1x == p2x or x <= xints:
                         inside = not inside
-        p1x,p1y = p2x,p2y
+        p1x, p1y = p2x, p2y
 
     return inside
+
 
 def generate_lid(V, F, max_area=None, verbose=False):
     """generate_lid(_vertices, _faces, max_area=None, verbose=False)
@@ -112,9 +112,9 @@ def generate_lid(V, F, max_area=None, verbose=False):
             If set to True, generates output along the processing
 
     """
-    
+
     # TODO: rely on the wrapper done for the triangle lib that has been done in cython and no more on meshpy.
-    
+
     # TODO: Put the reference of TRIANGLE and meshpy (authors...) in the docstring
 
     # TODO: remove verbose mode and place it into the main of meshmagick !!!
@@ -151,8 +151,9 @@ def generate_lid(V, F, max_area=None, verbose=False):
         points = V[polygon][:, :2]
         n = points.shape[0]
         # Testing the orientation of each polygon by computing the signed area of it
-        signed_area = np.array([points[j][0]*points[j+1][1] - points[j+1][0]*points[j][1] for j in xrange(n-1)],
-                         dtype=np.float).sum()
+        signed_area = np.array(
+            [points[j][0] * points[j + 1][1] - points[j + 1][0] * points[j][1] for j in xrange(n - 1)],
+            dtype=np.float).sum()
         if signed_area < 0.:
             holes.append(polygon)
         else:
@@ -175,7 +176,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
         def pick_point_inside_hole(hole):
 
             # First testing with the geometric center of the hole
-            point = np.array(hole).sum(axis=0)/len(hole)
+            point = np.array(hole).sum(axis=0) / len(hole)
             if not _is_point_inside_polygon(point, hole):
                 # Testing something else
                 raise RuntimeError, 'The algorithm should be refined to more complex polygon topologies... up to you ?'
@@ -185,7 +186,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
         # Assigning holes to boundaries
         if nb_bound == 1 and nb_hole == 1:
             # Obvious case
-            hole_dict[0].append( ( 0, pick_point_inside_hole(V[holes[0]][:, :2]) ) )
+            hole_dict[0].append((0, pick_point_inside_hole(V[holes[0]][:, :2])))
         else:
             # We may do a more elaborate search
             for ihole, hole in enumerate(holes):
@@ -193,21 +194,21 @@ def generate_lid(V, F, max_area=None, verbose=False):
                 # Testing against all boundary polygons
                 for ibound, bound in enumerate(boundaries):
                     if _is_point_inside_polygon(P0, V[bound][:, :2]):
-                        hole_dict[ibound].append( ( ihole, pick_point_inside_hole(V[hole][:, :2]) ) )
+                        hole_dict[ibound].append((ihole, pick_point_inside_hole(V[hole][:, :2])))
                         break
 
     def round_trip_connect(start, end):
-        return [(j, j+1) for j in xrange(start, end)] + [(end, start)]
+        return [(j, j + 1) for j in xrange(start, end)] + [(end, start)]
 
     # Meshing every boundaries, taking into account holes
     for ibound, bound in enumerate(boundaries):
 
-        nvp = len(bound)-1
+        nvp = len(bound) - 1
 
         # Building the loop
         points = map(tuple, list(V[bound][:-1, :2]))
 
-        edges = round_trip_connect(0, nvp-1)
+        edges = round_trip_connect(0, nvp - 1)
 
         info = triangle.MeshInfo()
 
@@ -215,7 +216,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
             for ihole, point in hole_dict[ibound]:
                 hole = holes[ihole]
                 points.extend(map(tuple, list(V[hole][:-1, :2])))
-                edges.extend(round_trip_connect(nvp, len(points)-1))
+                edges.extend(round_trip_connect(nvp, len(points) - 1))
 
                 # Marking the point as a hole
                 info.set_holes([tuple(point)])
@@ -260,8 +261,8 @@ def generate_lid(V, F, max_area=None, verbose=False):
 
     return V, F
 
-def fill_holes(V, F, verbose=False):
 
+def fill_holes(V, F, verbose=False):
     import vtk
 
     if verbose:
@@ -287,12 +288,13 @@ def fill_holes(V, F, verbose=False):
 
     return V, F
 
-def detect_features(V, F, verbose=True):
 
+def detect_features(V, F, verbose=True):
     mesh = Mesh(V, F, verbose=verbose)
     mesh.detect_features(verbose=verbose)
 
     return
+
 
 def _build_polyline(curve):
     import vtk
@@ -318,6 +320,9 @@ def _build_polyline(curve):
 
     return polydata
 
+
+def list_medium():
+    return ', '.join(densities.list_medium())
 
 # =======================================================================
 #                         COMMAND LINE USAGE
@@ -399,7 +404,7 @@ parser = argparse.ArgumentParser(
 
 # TODO: ajouter option pour voir l'ensemble des formats de fichier geres par meshmagick avec une explication du logiciel utilise
 
-parser.add_argument('infilename', # TODO : voir pour un typ=file pour tester l'existence
+parser.add_argument('infilename',  # TODO : voir pour un typ=file pour tester l'existence
                     help='path of the input mesh file in any supported format')
 
 parser.add_argument('-o', '--outfilename', type=str,
@@ -569,7 +574,16 @@ parser.add_argument('--rho-medium', type=float,
                     help="""The density (in kg/m**3) of the medium used for evaluation of
                     inertia parameters of the mesh. For the hypothesis of plain homogeneous
                     mesh, the default is that of salt water (1023 kg/m**3) . For the
-                    hypothesis of a shell, default is that of steel (7850 kg/m**3)""")
+                    hypothesis of a shell, default is that of steel (7850 kg/m**3).
+
+                    It is possible to specify medium by a name. Available medium are
+                    currently: %s
+                    """ % list_medium())
+
+parser.add_argument('--list-medium', action='store_true',
+                    help="""Lists the available medium keywords along with their density.
+                    """
+                    )
 
 parser.add_argument('--thickness', type=float,
                     help="""The thickness of the shell used for the evaluation of inertia
@@ -697,12 +711,11 @@ parser.add_argument('--show', action='store_true',
                     help="""Shows the input mesh in an interactive window""")
 
 parser.add_argument('--version', action='version',
-                    version='meshmagick - version %s\n%s'%(__version__, __copyright__),
+                    version='meshmagick - version %s\n%s' % (__version__, __copyright__),
                     help="""Shows the version number and exit""")
 
 
 def main():
-    
     if acok:
         argcomplete.autocomplete(parser)
 
@@ -725,7 +738,7 @@ def main():
         format = args.input_format
     else:
         # Format based on extension
-        _ ,ext = os.path.splitext(args.infilename)
+        _, ext = os.path.splitext(args.infilename)
         format = ext[1:].lower()
         if format == '':
             raise IOError, 'Unable to determine the input file format from its extension. Please specify an input format.'
@@ -733,11 +746,11 @@ def main():
     # Loading mesh elements from file
     if os.path.isfile(args.infilename):
         V, F = mmio.load_mesh(args.infilename, format)
-        
+
         # Give the name of the mesh the filename
         basename = os.path.basename(args.infilename)
         mesh_name, _ = os.path.splitext(basename)
-        
+
         mesh = Mesh(V, F, name=mesh_name)
         # Ensuring triangles are following the right convention (last id = first id)
         mesh.heal_triangles()
@@ -745,7 +758,7 @@ def main():
             mesh.verbose_on()
             print '%s successfully loaded' % args.infilename
     else:
-        raise IOError, 'file %s not found'%args.infilename
+        raise IOError, 'file %s not found' % args.infilename
 
     # Merge duplicate _vertices
     if args.merge_duplicates is not None:
@@ -753,16 +766,16 @@ def main():
         mesh.merge_duplicates(atol=tol)
 
     # TODO : put that dict at the begining of the main function or in the module
-    plane_str_list = {'Oxy':[0.,0.,1.],
-                      'Oxz':[0.,1.,0.],
-                      'Oyz':[1.,0.,0.],
-                      '/Oxy':[0.,0.,-1.],
-                      '/Oxz':[0.,-1.,0.],
-                      '/Oyz':[-1.,0.,0.]}
-    
+    plane_str_list = {'Oxy': [0., 0., 1.],
+                      'Oxz': [0., 1., 0.],
+                      'Oyz': [1., 0., 0.],
+                      '/Oxy': [0., 0., -1.],
+                      '/Oxz': [0., -1., 0.],
+                      '/Oyz': [-1., 0., 0.]}
+
     if args.quality:
         mesh.print_quality()
-    
+
     # Defining planes
     planes = []
     if args.plane is not None:
@@ -783,34 +796,37 @@ def main():
                 try:
                     planes[iplane] = Plane(normal=map(float, plane[:3]), scalar=plane[3])
                 except:
-                    raise AssertionError, 'Defining a plane by normal and scalar requires four scalars'
+                    raise AssertionError('Defining a plane by normal and scalar requires four scalars')
 
             elif len(plane) == 1:
                 if plane_str_list.has_key(plane[0]):
                     planes[iplane].normal = np.array(plane_str_list[plane[0]], dtype=np.float)
                     planes[iplane].c = 0.
                 else:
-                    raise AssertionError, '%s key for plane is not known. Choices are [%s].' % (plane[0], ', '.join(plane_str_list.keys()) )
+                    raise AssertionError('%s key for plane is not known. Choices are [%s].'
+                                         % (plane[0], ', '.join(plane_str_list.keys())))
             else:
-                raise AssertionError, 'Planes should be defined by a normal and a scalar or by a key to choose among [%s]' % (', '.join(plane_str_list.keys()))
+                raise AssertionError('Planes should be defined by a normal and a scalar '
+                                     'or by a key to choose among [%s]' % (', '.join(plane_str_list.keys())))
         if verbose:
             for plane_id, plane in enumerate(planes):
                 print "\t%u: %s" % (plane_id, plane)
-    
+
     # Mirroring the mesh
     if args.mirror is not None:
         sym_plane = Plane()
         print args.mirror
-        
+
         if len(args.mirror) == 1:
             # May be a standard plane or a plane id
             if len(planes) > 0:
                 try:
                     plane_id = int(args.mirror[0])
-                    if plane_id >=0 and plane_id < len(planes):
+                    if plane_id >= 0 and plane_id < len(planes):
                         sym_plane = planes[plane_id]
                     else:
-                        raise AssertionError('Only planes IDs from 0 to %u have been defined. %u is outside the range.' % (len(planes)-1, plane_id))
+                        raise AssertionError('Only planes IDs from 0 to %u have been defined. %u is outside the range.'
+                                             % (len(planes) - 1, plane_id))
                 except ValueError:
                     # Cannot be converted to an int, it should be the key of a plane
                     try:
@@ -822,27 +838,27 @@ def main():
                     sym_plane.normal = plane_str_list[args.mirror[0]]
                 except KeyError as err:
                     raise KeyError('%s is not a standard plane identifier' % err)
-                
+
         elif len(args.mirror) == 4:
             sym_plane.normal = args.mirror[:3]
             sym_plane.c = args.mirror[3]
         else:
             raise ValueError('Bad plane definition.')
-        
+
         if verbose:
             print 'Mirroring the mesh by :\n\t%s' % sym_plane
-            
+
         mesh.mirror(sym_plane)
         if verbose:
             print '\t-> Done.'
-            
+
     # Symmetrizing the mesh
     if args.symmetrize is not None:
         nb_sym = len(args.symmetrize)
         for iplane, plane in enumerate(args.symmetrize):
             if len(plane) == 0:
                 args.symmetrize[iplane] = ['Oxz']
-        
+
         if verbose:
             if nb_sym == 1:
                 verb = 'plane'
@@ -859,8 +875,9 @@ def main():
                         if plane_id >= 0 and plane_id < len(planes):
                             sym_plane = planes[plane_id]
                         else:
-                            raise AssertionError('Only planes IDs from 0 to %u have been defined. %u is outside the range.' % (
-                            len(planes) - 1, plane_id))
+                            raise AssertionError(
+                                'Only planes IDs from 0 to %u have been defined. %u is outside the range.' % (
+                                    len(planes) - 1, plane_id))
                     except ValueError:
                         try:
                             sym_plane.normal = plane_str_list[plane[0]]
@@ -871,20 +888,20 @@ def main():
                         sym_plane.normal = plane_str_list[plane[0]]
                     except KeyError as err:
                         raise KeyError('%s is not a standard plane identifier' % err)
-                    
+
             elif len(plane) == 4:
                 sym_plane.normal = plane[:3]
                 sym_plane.c = plane[3]
             else:
                 raise ValueError('Bad plane definition.')
-            
+
             if verbose:
                 print '\t%s' % sym_plane
             mesh.symmetrize(sym_plane)
-            
+
         if verbose:
             print '\t-> Done.'
-    
+
     # Globally heal the mesh
     if args.heal_mesh:
         if verbose:
@@ -892,7 +909,7 @@ def main():
         mesh.heal_mesh()
         if verbose:
             print '\tDone.'
-    
+
     # Heal normals
     if args.heal_normals and not args.heal_mesh:
         if verbose:
@@ -1039,28 +1056,42 @@ def main():
                 clipping_plane.c = plane[3]
             else:
                 raise ValueError('Bad plane definition.')
-            
+
             if verbose:
                 print '\t%s' % clipping_plane
-            
+
             clipper = MeshClipper(mesh, plane=clipping_plane)
             mesh = clipper.clipped_mesh
-            
+
             # mesh = mesh.clip(clipping_plane)
         if verbose:
             print '\t-> Done.'
-    
+
+    # Listing available medium
+    if args.list_medium:
+        col_width = 22
+        hline = '+{0:s}+{0:s}+\n'.format('-' * col_width)
+        table = '\n' + hline
+        table += '|{:<{n}s}|{:>{n}s}|\n'.format('NAME', 'DENSITY (KG/M**3)', n=col_width)
+        table += hline
+        for medium in densities.list_medium():
+            table += '|{:<{n}s}|{:>{n}.3f}|\n'.format(medium, densities.get_density(medium), n=col_width)
+            table += hline
+        print table
+
+    # Calculate the plain inertia
     if args.plain_inertia:
         if args.rho_medium is None:
             rho_medium = 1023.
         else:
             rho_medium = args.rho_medium
-            
+
         inertia = mesh.eval_plain_mesh_inertias(rho_medium=rho_medium)
-        
+
         if verbose:
-            print "\nInertial parameters for a uniform distribution of a medium of density %.1f kg/m**3 in the mesh:\n" % rho_medium
-            print "\tMass = %.3f tons" % (inertia.mass/1000.)
+            print "\nInertial parameters for a uniform distribution of a medium of density %.1f kg/m**3 in the mesh:\n" \
+                  % rho_medium
+            print "\tMass = %.3f tons" % (inertia.mass / 1000.)
             cog = inertia.gravity_center
             print "\tCOG (m):\n\t\txg = %.3f\n\t\tyg = %.3f\n\t\tzg = %.3f" % (cog[0], cog[1], cog[2])
             mat = inertia.inertia_matrix
@@ -1070,8 +1101,7 @@ def main():
             print "\t\t%.3E\t%.3E\t%.3E" % (mat[2, 0], mat[2, 1], mat[2, 2])
             point = inertia.reduction_point
             print "\tExpressed at point : \t\t%.3E\t%.3E\t%.3E" % (point[0], point[1], point[2])
-    
-    
+
     if args.shell_inertia:
         if args.rho_medium is None:
             rho_medium = 7850.
@@ -1081,12 +1111,13 @@ def main():
             thickness = 0.02
         else:
             thickness = args.thickness
-            
+
         inertia = mesh.eval_shell_mesh_inertias(rho_medium=rho_medium, thickness=thickness)
-        
+
         if verbose:
-            print "\nInertial parameters for a shell distribution of a medium of density %.1f kg/m**3 and a thickness of %.3f m over the mesh:\n" % (rho_medium, thickness)
-            print "\tMass = %.3f tons" % (inertia.mass/1000.)
+            print "\nInertial parameters for a shell distribution of a medium of density %.1f kg/m**3 and a thickness " \
+                  "of %.3f m over the mesh:\n" % (rho_medium, thickness)
+            print "\tMass = %.3f tons" % (inertia.mass / 1000.)
             cog = inertia.gravity_center
             print "\tCOG (m):\n\t\txg = %.3f\n\t\tyg = %.3f\n\t\tzg = %.3f" % (cog[0], cog[1], cog[2])
             mat = inertia.inertia_matrix
@@ -1096,100 +1127,100 @@ def main():
             print "\t\t%.3E\t%.3E\t%.3E" % (mat[2, 0], mat[2, 1], mat[2, 2])
             point = inertia.reduction_point
             print "\tExpressed at point : \t\t%.3E\t%.3E\t%.3E" % (point[0], point[1], point[2])
-    
+
     additional_forces = []
     if args.relative_force is not None:
         for item in args.relative_force:
             force = hs.Force(point=map(float, item[:3]), value=map(float, item[3:]), mode='relative')
             additional_forces.append(force)
-    
+
     if args.absolute_force is not None:
         for item in args.absolute_force:
             force = hs.Force(point=map(float, item[:3]), value=map(float, item[3:]), mode='absolute')
             additional_forces.append(force)
-        
+
     if args.hydrostatics:
         grav = args.grav
         rho_water = args.rho_water
-        
+
         hs_solver = hs.Hydrostatics(mesh, rho_water=rho_water, grav=grav, verbose=verbose)
-        
+
         for force in additional_forces:
             hs_solver.add_force(force)
-        
+
         if args.disp is not None:
             disp = args.disp
             has_disp = True
         else:
             disp = hs_solver.displacement
             has_disp = False
-        
+
         if args.cog is not None:
             cog = map(float, args.cog)
             has_cog = True
         else:
             cog = hs_solver.gravity_center
             has_cog = False
-        
+
         if args.zcog is not None:
             zcog = args.zcog
             has_zcog = True
         else:
             zcog = hs_solver.zg
             has_zcog = False
-        
+
         # Overwrite zcog by cog[2] in case both have been given
         if has_cog and has_zcog:
             zcog = cog[2]
-        
+
         case = (has_disp, has_cog, has_zcog)
-        
+
         if case == (True, False, False) or case == (True, False, True):
             if verbose:
                 print "\nSetting mesh displacement to %.3f tons" % disp
             hs_solver.zg = zcog
             hs_solver.set_displacement(disp)
-            
+
         msg = """\nWARNING !! : Keep in mind that the mesh may have a new orientation in the Oxy plane so the hydrostatic
         stiffness matrix may be impractical as not expressed in a convenient axis system. Use the result
         with caution and have a look at the mesh by using the --show option.
         
         This should be fixed in a future release."""
-            
+
         if case == (False, True, False) or case == (False, True, True):
             if verbose:
                 print """
                 \nSetting mesh position so that we are at the current displacement of %.3f tons and in a stable
                 configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
                       % (disp, cog[0], cog[1], cog[2])
-                
+
             hs_solver.gravity_center = cog
             hs_solver.mass = disp
             hs_solver.equilibrate(init_disp=False)
             warn(msg)
-        
+
         if case == (False, False, True) or case == (False, False, False):
             if verbose:
                 print "\nGenerating hydrostatic data for a zcog of %.3f meters." % zcog
             hs_solver.zg = zcog
-            
+
         if case == (True, True, False) or case == (True, True, True):
             if verbose:
                 print """
                 \nSetting mesh position so that the displacement is equal to %.3f tons and in a stable
                 configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
-                    % (disp, cog[0], cog[1], cog[2])
+                      % (disp, cog[0], cog[1], cog[2])
             hs_solver.gravity_center = cog
             hs_solver.mass = disp
             hs_solver.equilibrate(init_disp=True)
             warn(msg)
-            
+
         # TODO: voir pour une option pour sortir plutot le maillage coupe pour Nemoh
         mesh = hs_solver
-        
+
         if verbose:
             print hs_solver.get_hydrostatic_report()
-            
+
         if args.hs_report is not None:
             with open(args.hs_report, 'w') as f:
                 f.write('==============================================\n')
@@ -1199,9 +1230,9 @@ def main():
                 f.write('meshmagick - version %s\n%s\n' % (__version__, __copyright__))
                 f.write('==============================================\n')
                 f.write(hs_solver.get_hydrostatic_report())
-                
-        
-        
+
+
+
     # WARNING : No more mesh modification should be released from this point until the end of the main
 
     if args.info:
@@ -1251,6 +1282,7 @@ def main():
         print 'Maintainer : %s <%s>' % (__maintainer__, __email__)
         print 'Good Bye!'
         print '============================================================='
+
 
 if __name__ == '__main__':
     main()
