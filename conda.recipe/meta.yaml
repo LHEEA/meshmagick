@@ -1,0 +1,30 @@
+{% set data = load_setuptools()%}
+package:
+  name: meshmagick
+  version: {{data.get('version')}}
+
+source:
+  git_url: ../
+
+build:
+  entry_points:
+    - meshmagick = meshmagick:main
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - setuptools
+    - argparse
+    - argcomplete
+    - numpy
+    - vtk
+
+about:
+  home: {{data.get('url')}}
+  license: {{data.get('license')}}
+  license_family: GPL
+  license_file: Licence_CeCILL_V2.1-en.txt
+  summary: {{data.get('description')}}
