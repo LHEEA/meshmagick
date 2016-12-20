@@ -21,6 +21,13 @@ for branch in branches.split('\n'):
     if branch.startswith('*'):
         cur_branch = branch[2:]
 
+
+# Retier
+git.commit(m='Update deploy', a=True)
+
+
+sys.exit(0)
+
 # Checking out to master branch
 git.checkout('master')
 
@@ -47,9 +54,14 @@ git.checkout('gh-pages')
 print getcwd()
 
 
-system('rm -rf ./*')
+system('rm -rf ./*')  # TODO: remplacer par des fonctions pures python
 
 copy_tree(tempdir, '.')
+
+
+git.commit("")
+# Commit de tout ca
+
 
 sys.exit(0)
 
