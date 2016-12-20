@@ -1,0 +1,554 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>meshmagick.hydrostatics module &mdash; Meshmagick documentation 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Meshmagick documentation 1.0 documentation" href="../index.html"/>
+        <link rel="up" title="Meshmagick Package" href="index.html"/>
+        <link rel="next" title="meshmagick.MMviewer module" href="meshmagick.MMviewer.html"/>
+        <link rel="prev" title="meshmagick.densities module" href="meshmagick.densities.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Meshmagick documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../module/module.html">Using Meshmagick as a Python module</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.mesh.html">meshmagick.mesh module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.mmio.html">meshmagick.mmio module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.inertia.html">meshmagick.inertia module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.mesh_clipper.html">meshmagick.mesh_clipper module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.densities.html">meshmagick.densities module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">meshmagick.hydrostatics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.MMviewer.html">meshmagick.MMviewer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.tools.html">meshmagick.tools module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Meshmagick documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Meshmagick Package</a> &raquo;</li>
+      
+    <li>meshmagick.hydrostatics module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/meshmagick.hydrostatics.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-meshmagick.hydrostatics">
+<span id="meshmagick-hydrostatics-module"></span><h1>meshmagick.hydrostatics module<a class="headerlink" href="#module-meshmagick.hydrostatics" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="meshmagick.hydrostatics.Force">
+<em class="property">class </em><code class="descclassname">meshmagick.hydrostatics.</code><code class="descname">Force</code><span class="sig-paren">(</span><em>point=(0</em>, <em>0</em>, <em>0)</em>, <em>value=(0</em>, <em>0</em>, <em>0)</em>, <em>name=''</em>, <em>mode='relative'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Force.hs_force">
+<code class="descname">hs_force</code><a class="headerlink" href="#meshmagick.hydrostatics.Force.hs_force" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Force.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Force.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>dz=0.0, rot=array([[ 1.,  0.,  0.],        [ 0.,  1.,  0.],        [ 0.,  0.,  1.]])</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Force.update_xy">
+<code class="descname">update_xy</code><span class="sig-paren">(</span><em>dx</em>, <em>dy</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force.update_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force.update_xy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="meshmagick.hydrostatics.Hydrostatics">
+<em class="property">class </em><code class="descclassname">meshmagick.hydrostatics.</code><code class="descname">Hydrostatics</code><span class="sig-paren">(</span><em>mesh</em>, <em>cog=array([ 0.</em>, <em>0.</em>, <em>0.])</em>, <em>zg=0.0</em>, <em>mass=None</em>, <em>rho_water=1023</em>, <em>grav=9.81</em>, <em>verbose=False</em>, <em>animate=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Class to perform hydrostatic computations on meshes.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible
+directly for this position. The mesh may not be at equilibrium thought and residual force balance between
+hydrostatic force and gravity force may be not null. To trig the equilibrium computations, we have to call the
+equilibrate() method.</p>
+<p>Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally
+and automatically at each modification.</p>
+<p>Intrinsic mesh properties are</p>
+<blockquote>
+<div><ul class="simple">
+<li>_mass</li>
+<li>cog</li>
+<li>zg</li>
+<li>rho_water</li>
+<li>gravity</li>
+</ul>
+</div></blockquote>
+<p>Setting one of these property by its setter will trig a search for a new mesh position that fullfill the
+hydrostatic equilibrium.
+Note that zg is mandatory to get the hydrostatic stiffness matrix. By default, be carefull that it is set to
+zero at instantiation.</p>
+<p class="last">Modification of the displacement will produce the mesh to move along z so that
+it reaches the correct displacement. The _mass is then set accordingly and equals the displacement. Note that this
+is different from modifying the _mass and</p>
+</div>
+<p>Setting the buoyancy center will trig a search for a position of the gravity center that fullfill this
+hydrostatic property, while keeping the correct displacement. NOT IMPLEMENTED, THIS IS AN ADVANCED FEATURE</p>
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.S33">
+<code class="descname">S33</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S33" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.S34">
+<code class="descname">S34</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S34" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.S35">
+<code class="descname">S35</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S35" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.S44">
+<code class="descname">S44</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S44" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.S45">
+<code class="descname">S45</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S45" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.S55">
+<code class="descname">S55</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S55" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.add_force">
+<code class="descname">add_force</code><span class="sig-paren">(</span><em>force</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.add_force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.add_force" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.allow_unstable">
+<code class="descname">allow_unstable</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.allow_unstable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.allow_unstable_off">
+<code class="descname">allow_unstable_off</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.allow_unstable_off"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.allow_unstable_off" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.allow_unstable_on">
+<code class="descname">allow_unstable_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.allow_unstable_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.allow_unstable_on" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.buoyancy_center">
+<code class="descname">buoyancy_center</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.buoyancy_center" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.delta_fz">
+<code class="descname">delta_fz</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.delta_fz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.delta_mx">
+<code class="descname">delta_mx</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.delta_mx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.delta_my">
+<code class="descname">delta_my</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.delta_my" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.displacement">
+<code class="descname">displacement</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.displacement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.displacement_volume">
+<code class="descname">displacement_volume</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.displacement_volume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.equilibrate">
+<code class="descname">equilibrate</code><span class="sig-paren">(</span><em>init_disp=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.equilibrate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.equilibrate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.flotation_center">
+<code class="descname">flotation_center</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.flotation_center" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.flotation_surface_area">
+<code class="descname">flotation_surface_area</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.flotation_surface_area" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.get_buoyancy_force">
+<code class="descname">get_buoyancy_force</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.get_buoyancy_force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.get_buoyancy_force" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.get_gravity_force">
+<code class="descname">get_gravity_force</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.get_gravity_force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.get_gravity_force" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.get_hydrostatic_report">
+<code class="descname">get_hydrostatic_report</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.get_hydrostatic_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.get_hydrostatic_report" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.gravity">
+<code class="descname">gravity</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.gravity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.gravity_center">
+<code class="descname">gravity_center</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.gravity_center" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.hydrostatic_mesh">
+<code class="descname">hydrostatic_mesh</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.hydrostatic_mesh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.hydrostatic_stiffness_matrix">
+<code class="descname">hydrostatic_stiffness_matrix</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.hydrostatic_stiffness_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.is_at_equilibrium">
+<code class="descname">is_at_equilibrium</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_at_equilibrium"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_at_equilibrium" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.is_sinking">
+<code class="descname">is_sinking</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_sinking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_sinking" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.is_stable_in_pitch">
+<code class="descname">is_stable_in_pitch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_stable_in_pitch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_stable_in_pitch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.is_stable_in_roll">
+<code class="descname">is_stable_in_roll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_stable_in_roll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_stable_in_roll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.isstable">
+<code class="descname">isstable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.isstable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.isstable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.longitudinal_metacentric_height">
+<code class="descname">longitudinal_metacentric_height</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.longitudinal_metacentric_height" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.longitudinal_metacentric_radius">
+<code class="descname">longitudinal_metacentric_radius</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.longitudinal_metacentric_radius" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.mass">
+<code class="descname">mass</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.mass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.max_iterations">
+<code class="descname">max_iterations</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.max_iterations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.max_restart">
+<code class="descname">max_restart</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.max_restart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.reltol">
+<code class="descname">reltol</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.reltol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.residual">
+<code class="descname">residual</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.residual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.rho_water">
+<code class="descname">rho_water</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.rho_water" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.scale">
+<code class="descname">scale</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.scale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.set_displacement">
+<code class="descname">set_displacement</code><span class="sig-paren">(</span><em>disp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.set_displacement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.set_displacement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displaces mesh at a prescribed displacement and returns</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>disp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Mass displacement of the hull (in tons)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.show">
+<code class="descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.show" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.theta_relax">
+<code class="descname">theta_relax</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.theta_relax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.transversal_metacentric_height">
+<code class="descname">transversal_metacentric_height</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.transversal_metacentric_height" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.transversal_metacentric_radius">
+<code class="descname">transversal_metacentric_radius</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.transversal_metacentric_radius" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.verbose">
+<code class="descname">verbose</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.verbose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.verbose_off">
+<code class="descname">verbose_off</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.verbose_off"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.verbose_off" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.hydrostatics.Hydrostatics.verbose_on">
+<code class="descname">verbose_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.verbose_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.verbose_on" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.wet_surface_area">
+<code class="descname">wet_surface_area</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.wet_surface_area" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.z_relax">
+<code class="descname">z_relax</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.z_relax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.hydrostatics.Hydrostatics.zg">
+<code class="descname">zg</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.zg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="meshmagick.MMviewer.html" class="btn btn-neutral float-right" title="meshmagick.MMviewer module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="meshmagick.densities.html" class="btn btn-neutral" title="meshmagick.densities module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Ecole Centrale de Nantes.
+      Last updated on Dec 20, 2016.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

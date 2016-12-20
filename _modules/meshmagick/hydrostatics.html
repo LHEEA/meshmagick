@@ -1,0 +1,1208 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>meshmagick.hydrostatics &mdash; Meshmagick documentation 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Meshmagick documentation 1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Meshmagick documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module/module.html">Using Meshmagick as a Python module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Meshmagick documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>meshmagick.hydrostatics</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for meshmagick.hydrostatics</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="k">import</span> <span class="n">warn</span>
+
+<span class="kn">from</span> <span class="nn">mesh_clipper</span> <span class="k">import</span> <span class="n">MeshClipper</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Francois Rongere&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2014-2015, Ecole Centrale de Nantes&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Francois Rongere&quot;</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="s2">&quot;CeCILL&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Francois Rongere&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;Francois.Rongere@ec-nantes.fr&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
+
+<span class="c1"># Data for DNV standards</span>
+<span class="n">GM_min</span> <span class="o">=</span> <span class="mf">0.15</span>
+
+
+<span class="c1"># TODO: pass this code to a version that only rotates the free surface plane and not the mesh...</span>
+<span class="c1"># TODO: throw the transformation needed to get the equilibrium from initial position after a successful equilibrium computation</span>
+<span class="c1"># TODO: make the mesh not to diverge from principal axis</span>
+
+
+<div class="viewcode-block" id="Force"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Force">[docs]</a><span class="k">class</span> <span class="nc">Force</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">value</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;relative&#39;</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+        <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;relative&#39;</span><span class="p">,</span> <span class="s1">&#39;absolute&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">str_repr</span> <span class="o">=</span> <span class="s2">&quot;Force: </span><span class="si">%s</span><span class="se">\n\t</span><span class="s2">Point: </span><span class="si">%s</span><span class="se">\n\t</span><span class="s2">Value: </span><span class="si">%s</span><span class="se">\n\t</span><span class="s2">Mode: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">str_repr</span>
+
+<div class="viewcode-block" id="Force.update"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Force.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dz</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;relative&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Force.update_xy"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Force.update_xy">[docs]</a>    <span class="k">def</span> <span class="nf">update_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dy</span>
+        <span class="k">return</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hs_force</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">moment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">mx</span><span class="p">,</span> <span class="n">my</span> <span class="o">=</span> <span class="n">moment</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fz</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Force.reset"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Force.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># TODO: a appeler depuis le reset de Hydrostatics</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+
+
+<div class="viewcode-block" id="Hydrostatics"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics">[docs]</a><span class="k">class</span> <span class="nc">Hydrostatics</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c1"># TODO: refactor this docstring</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to perform hydrostatic computations on meshes.</span>
+<span class="sd">    </span>
+<span class="sd">    Warnings</span>
+<span class="sd">    --------</span>
+<span class="sd">    At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible</span>
+<span class="sd">    directly for this position. The mesh may not be at equilibrium thought and residual force balance between</span>
+<span class="sd">    hydrostatic force and gravity force may be not null. To trig the equilibrium computations, we have to call the</span>
+<span class="sd">    equilibrate() method.</span>
+<span class="sd">    </span>
+<span class="sd">    Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally</span>
+<span class="sd">    and automatically at each modification.</span>
+<span class="sd">    </span>
+<span class="sd">    Intrinsic mesh properties are</span>
+<span class="sd">    </span>
+<span class="sd">        - _mass</span>
+<span class="sd">        - cog</span>
+<span class="sd">        - zg</span>
+<span class="sd">        - rho_water</span>
+<span class="sd">        - gravity</span>
+<span class="sd">        </span>
+<span class="sd">    Setting one of these property by its setter will trig a search for a new mesh position that fullfill the</span>
+<span class="sd">    hydrostatic equilibrium.</span>
+<span class="sd">    Note that zg is mandatory to get the hydrostatic stiffness matrix. By default, be carefull that it is set to</span>
+<span class="sd">    zero at instantiation.</span>
+<span class="sd">    </span>
+<span class="sd">    Modification of the displacement will produce the mesh to move along z so that</span>
+<span class="sd">    it reaches the correct displacement. The _mass is then set accordingly and equals the displacement. Note that this</span>
+<span class="sd">    is different from modifying the _mass and</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    Setting the buoyancy center will trig a search for a position of the gravity center that fullfill this</span>
+<span class="sd">    hydrostatic property, while keeping the correct displacement. NOT IMPLEMENTED, THIS IS AN ADVANCED FEATURE</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">cog</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">),</span> <span class="n">zg</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rho_water</span><span class="o">=</span><span class="mi">1023</span><span class="p">,</span> <span class="n">grav</span><span class="o">=</span><span class="mf">9.81</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="c1"># FIXME: l&#39;argument zg n&#39;est pas utilise !</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">[</span><span class="s1">&#39;init_mesh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">cog</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cog</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cog</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">[</span><span class="s1">&#39;gravity_center&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span> <span class="o">=</span> <span class="n">cog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rho_water</span> <span class="o">=</span> <span class="n">rho_water</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span> <span class="o">=</span> <span class="n">grav</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span> <span class="o">=</span> <span class="n">rho_water</span> <span class="o">*</span> <span class="n">grav</span>
+
+        <span class="c1"># Solver parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;reltol&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span>
+                                   <span class="s1">&#39;itermax&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                                   <span class="s1">&#39;max_nb_restart&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                                   <span class="s1">&#39;theta_relax&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                                   <span class="s1">&#39;z_relax&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                                   <span class="s1">&#39;stop_at_unstable&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+
+        <span class="c1"># TODO: ajouter le calcul du tirant d&#39;eau et d&#39;air</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">mass</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="mf">1000.</span>  <span class="c1"># conversion in kg</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;disp_mass&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">animate</span> <span class="o">=</span> <span class="n">animate</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_forces</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span>
+
+<div class="viewcode-block" id="Hydrostatics.verbose_on"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.verbose_on">[docs]</a>    <span class="k">def</span> <span class="nf">verbose_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Hydrostatics.verbose_off"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.verbose_off">[docs]</a>    <span class="k">def</span> <span class="nf">verbose_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gravity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span>
+
+    <span class="nd">@gravity</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">gravity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho_water</span> <span class="o">*</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">*</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rho_water</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho_water</span>
+
+    <span class="nd">@rho_water</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rho_water</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rho_water</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">/</span> <span class="mf">1000.</span>
+
+    <span class="nd">@mass</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1000.</span>  <span class="c1"># Conversion from tons to kg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span>  <span class="c1"># SI units</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_sinking</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is sinking as it is too heavy.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_max_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho_water</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">_compute_volume</span><span class="p">()</span>  <span class="c1"># in kg</span>
+
+<div class="viewcode-block" id="Hydrostatics.is_sinking"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.is_sinking">[docs]</a>    <span class="k">def</span> <span class="nf">is_sinking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_displacement</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gravity_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span>
+
+    <span class="nd">@gravity_center</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">gravity_center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">[</span><span class="s1">&#39;gravity_center&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">assert</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">zg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@zg</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">zg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">wet_surface_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;wet_surface_area&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">displacement_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;disp_volume&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;disp_mass&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1000.</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">buoyancy_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;buoy_center&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flotation_surface_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;waterplane_area&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flotation_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;flotation_center&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">transversal_metacentric_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;transversal_metacentric_radius&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">longitudinal_metacentric_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;longitudinal_metacentric_radius&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">transversal_metacentric_height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;gm_x&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">longitudinal_metacentric_height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;gm_y&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hydrostatic_stiffness_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hydrostatic_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;clipper&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">clipped_mesh</span>
+
+<div class="viewcode-block" id="Hydrostatics.reset"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># TODO: Utiliser plutot la rotation generale pour retrouver le maillage initial</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">[</span><span class="s1">&#39;init_mesh&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">[</span><span class="s1">&#39;gravity_center&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reinit_clipper</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Hydrostatics.is_stable_in_roll"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.is_stable_in_roll">[docs]</a>    <span class="k">def</span> <span class="nf">is_stable_in_roll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transversal_metacentric_height</span> <span class="o">&gt;</span> <span class="mf">0.</span></div>
+
+<div class="viewcode-block" id="Hydrostatics.is_stable_in_pitch"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.is_stable_in_pitch">[docs]</a>    <span class="k">def</span> <span class="nf">is_stable_in_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">longitudinal_metacentric_height</span> <span class="o">&gt;</span> <span class="mf">0.</span></div>
+
+<div class="viewcode-block" id="Hydrostatics.isstable"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.isstable">[docs]</a>    <span class="k">def</span> <span class="nf">isstable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stable_in_pitch</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stable_in_roll</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Hydrostatics.is_at_equilibrium"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.is_at_equilibrium">[docs]</a>    <span class="k">def</span> <span class="nf">is_at_equilibrium</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">residual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span>
+
+        <span class="n">mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span>
+        <span class="n">breadth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;breadth&#39;</span><span class="p">]</span>
+        <span class="n">lwl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;lwl&#39;</span><span class="p">]</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">mg</span><span class="p">,</span> <span class="n">mg</span> <span class="o">*</span> <span class="n">breadth</span><span class="p">,</span> <span class="n">mg</span> <span class="o">*</span> <span class="n">lwl</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">residual</span> <span class="o">/</span> <span class="n">scale</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;reltol&#39;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">delta_fz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fz</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span>
+        <span class="k">return</span> <span class="n">fz</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">delta_mx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span>
+        <span class="k">return</span> <span class="n">mx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">delta_my</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">my</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span>
+        <span class="k">return</span> <span class="n">my</span>
+
+    <span class="c1"># TODO: create a Hydrostatic stiffness matrix class which should be a symmetric array class</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">S33</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">S34</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">S35</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">S44</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">S45</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">S55</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reltol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;reltol&#39;</span><span class="p">]</span>
+
+    <span class="nd">@reltol</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">reltol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="mf">0.</span> <span class="o">&lt;</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mf">1.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;reltol&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">theta_relax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;theta_relax&#39;</span><span class="p">]</span>
+
+    <span class="nd">@theta_relax</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">theta_relax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="mf">0.</span> <span class="o">&lt;</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mf">10.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;theta_relax&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">z_relax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;z_relax&#39;</span><span class="p">]</span>
+
+    <span class="nd">@z_relax</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">z_relax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="mf">0.</span> <span class="o">&lt;</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mf">1.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;z_relax&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;itermax&#39;</span><span class="p">]</span>
+
+    <span class="nd">@max_iterations</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;itermax&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;max_nb_restart&#39;</span><span class="p">]</span>
+
+    <span class="nd">@max_restart</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">max_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">value</span> <span class="o">&gt;=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;max_nb_restart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">allow_unstable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;stop_at_unstable&#39;</span><span class="p">]</span>
+
+    <span class="nd">@allow_unstable</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">allow_unstable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;stop_at_unstable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="Hydrostatics.allow_unstable_on"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.allow_unstable_on">[docs]</a>    <span class="k">def</span> <span class="nf">allow_unstable_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allow_unstable</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Hydrostatics.allow_unstable_off"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.allow_unstable_off">[docs]</a>    <span class="k">def</span> <span class="nf">allow_unstable_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allow_unstable</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span></div>
+
+    <span class="k">def</span> <span class="nf">_reinit_clipper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;clipper&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_update_hydrostatic_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Updates the hydrostatics properties of the mesh.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">eps</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span>  <span class="c1"># For zeroing tiny coefficients in the hydrostatic stiffness matrix</span>
+
+        <span class="c1"># Clipping the mesh by the Oxy plane</span>
+        <span class="c1"># TODO: ne pas recreer une instance de MeshClipper a fois mais la stocker et mettre a jour son maillage ainsi</span>
+        <span class="c1">#  que ses donnees</span>
+
+        <span class="c1"># FIXME: on ne devrait recouper le maillage que si ce dernier a ete modifie !!!</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">clipper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;clipper&#39;</span><span class="p">]</span>
+            <span class="n">clipped_mesh</span> <span class="o">=</span> <span class="n">clipper</span><span class="o">.</span><span class="n">clipped_mesh</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">clipper</span> <span class="o">=</span> <span class="n">MeshClipper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">assert_closed_boundaries</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;clipper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clipper</span>
+            <span class="n">clipped_mesh</span> <span class="o">=</span> <span class="n">clipper</span><span class="o">.</span><span class="n">clipped_mesh</span>
+
+        <span class="c1"># Retrieving faces properties for the clipped mesh</span>
+        <span class="n">areas</span> <span class="o">=</span> <span class="n">clipped_mesh</span><span class="o">.</span><span class="n">faces_areas</span>
+        <span class="c1"># normals = clipped_mesh.faces_normals</span>
+        <span class="c1"># centers = clipped_mesh.faces_centers</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">areas</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">10</span><span class="p">):</span>  <span class="c1"># TODO: bloc a retirer</span>
+            <span class="nb">print</span> <span class="s1">&#39;probleme de facette&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">quick_save</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+
+        <span class="n">wet_surface_area</span> <span class="o">=</span> <span class="n">areas</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="n">inertia</span> <span class="o">=</span> <span class="n">clipped_mesh</span><span class="o">.</span><span class="n">eval_plain_mesh_inertias</span><span class="p">(</span><span class="n">rho_medium</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_water</span><span class="p">)</span>
+        <span class="n">xb</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">zb</span> <span class="o">=</span> <span class="n">inertia</span><span class="o">.</span><span class="n">gravity_center</span>
+        <span class="n">disp_volume</span> <span class="o">=</span> <span class="n">inertia</span><span class="o">.</span><span class="n">mass</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_water</span>
+
+        <span class="c1"># Computing quantities from intersection polygons</span>
+        <span class="n">sigma0</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># \iint_{waterplane_area} dS = waterplane_area</span>
+        <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># \iint_{waterplane_area} x dS</span>
+        <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># \iint_{waterplane_area} y dS</span>
+        <span class="n">sigma3</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># \iint_{waterplane_area} xy dS</span>
+        <span class="n">sigma4</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># \iint_{waterplane_area} x^2 dS</span>
+        <span class="n">sigma5</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># \iint_{waterplane_area} y^2 dS</span>
+
+        <span class="n">xmin</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">xmax</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ymin</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ymax</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">polygons</span> <span class="o">=</span> <span class="n">clipper</span><span class="o">.</span><span class="n">closed_polygons</span>
+        <span class="k">for</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="n">polygons</span><span class="p">:</span>
+            <span class="n">polyverts</span> <span class="o">=</span> <span class="n">clipper</span><span class="o">.</span><span class="n">clipped_crown_mesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">polygon</span><span class="p">]</span>
+
+            <span class="c1"># TODO: voir si on conserve ce test...</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">polyverts</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">):</span>
+                <span class="nb">print</span> <span class="s1">&#39;The intersection polygon is not on the plane z=0&#39;</span>
+
+            <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="o">=</span> <span class="n">polyverts</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">xii</span><span class="p">,</span> <span class="n">yii</span><span class="p">)</span> <span class="ow">in</span> <span class="n">polyverts</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">xii</span> <span class="o">-</span> <span class="n">xi</span>
+                <span class="n">dy</span> <span class="o">=</span> <span class="n">yii</span> <span class="o">-</span> <span class="n">yi</span>
+                <span class="n">px</span> <span class="o">=</span> <span class="n">xi</span> <span class="o">+</span> <span class="n">xii</span>
+                <span class="n">py</span> <span class="o">=</span> <span class="n">yi</span> <span class="o">+</span> <span class="n">yii</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">xi</span> <span class="o">*</span> <span class="n">xi</span> <span class="o">+</span> <span class="n">xii</span> <span class="o">*</span> <span class="n">xii</span>
+
+                <span class="n">sigma0</span> <span class="o">+=</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">px</span>
+                <span class="n">sigma1</span> <span class="o">+=</span> <span class="n">dy</span> <span class="o">*</span> <span class="p">(</span><span class="n">px</span> <span class="o">*</span> <span class="n">px</span> <span class="o">-</span> <span class="n">xi</span> <span class="o">*</span> <span class="n">xii</span><span class="p">)</span>
+                <span class="n">sigma2</span> <span class="o">+=</span> <span class="n">dx</span> <span class="o">*</span> <span class="p">(</span><span class="n">py</span> <span class="o">*</span> <span class="n">py</span> <span class="o">-</span> <span class="n">yi</span> <span class="o">*</span> <span class="n">yii</span><span class="p">)</span>
+                <span class="n">sigma3</span> <span class="o">+=</span> <span class="n">dy</span> <span class="o">*</span> <span class="p">(</span><span class="n">py</span> <span class="o">*</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">px</span> <span class="o">*</span> <span class="p">(</span><span class="n">xi</span> <span class="o">*</span> <span class="n">yi</span> <span class="o">+</span> <span class="n">xii</span> <span class="o">*</span> <span class="n">yii</span><span class="p">))</span>
+                <span class="n">sigma4</span> <span class="o">+=</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">px</span>
+                <span class="n">sigma5</span> <span class="o">+=</span> <span class="n">dx</span> <span class="o">*</span> <span class="p">(</span><span class="n">yi</span> <span class="o">*</span> <span class="n">yi</span> <span class="o">+</span> <span class="n">yii</span> <span class="o">*</span> <span class="n">yii</span><span class="p">)</span> <span class="o">*</span> <span class="n">py</span>
+
+                <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="o">=</span> <span class="n">xii</span><span class="p">,</span> <span class="n">yii</span>
+
+            <span class="n">xmin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polyverts</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+            <span class="n">xmax</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polyverts</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="n">ymin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polyverts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+            <span class="n">ymax</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polyverts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">xmin</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">xmax</span><span class="p">)]</span>
+        <span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">ymin</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">ymax</span><span class="p">)]</span>
+
+        <span class="n">sigma0</span> <span class="o">/=</span> <span class="mi">2</span>
+        <span class="n">sigma1</span> <span class="o">/=</span> <span class="mi">6</span>
+        <span class="n">sigma2</span> <span class="o">/=</span> <span class="o">-</span><span class="mi">6</span>
+        <span class="n">sigma3</span> <span class="o">/=</span> <span class="mi">24</span>
+        <span class="n">sigma4</span> <span class="o">/=</span> <span class="mi">12</span>
+        <span class="n">sigma5</span> <span class="o">/=</span> <span class="o">-</span><span class="mi">12</span>
+
+        <span class="c1"># Flotation surface</span>
+        <span class="n">waterplane_area</span> <span class="o">=</span> <span class="n">sigma0</span>
+
+        <span class="c1"># Stiffness matrix coefficients that do not depend on the position of the gravity center</span>
+        <span class="n">rhog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span>
+        <span class="n">s33</span> <span class="o">=</span> <span class="n">rhog</span> <span class="o">*</span> <span class="n">waterplane_area</span>
+        <span class="n">s34</span> <span class="o">=</span> <span class="n">rhog</span> <span class="o">*</span> <span class="n">sigma2</span>
+        <span class="n">s35</span> <span class="o">=</span> <span class="o">-</span><span class="n">rhog</span> <span class="o">*</span> <span class="n">sigma1</span>
+        <span class="n">s45</span> <span class="o">=</span> <span class="o">-</span><span class="n">rhog</span> <span class="o">*</span> <span class="n">sigma3</span>
+
+        <span class="c1"># Metacentric radius (Bouguer formulae)</span>
+        <span class="n">transversal_metacentric_radius</span> <span class="o">=</span> <span class="n">sigma5</span> <span class="o">/</span> <span class="n">disp_volume</span>  <span class="c1"># Around Ox</span>
+        <span class="n">longitudinal_metacentric_radius</span> <span class="o">=</span> <span class="n">sigma4</span> <span class="o">/</span> <span class="n">disp_volume</span>  <span class="c1"># Around Oy</span>
+
+        <span class="c1"># Metacentric height</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zg</span> <span class="o">-</span> <span class="n">zb</span>  <span class="c1"># BG</span>
+        <span class="n">gm_x</span> <span class="o">=</span> <span class="n">transversal_metacentric_radius</span> <span class="o">-</span> <span class="n">a</span>
+        <span class="n">gm_y</span> <span class="o">=</span> <span class="n">longitudinal_metacentric_radius</span> <span class="o">-</span> <span class="n">a</span>
+
+        <span class="c1"># Stiffness matrix coefficients that depend on the position of the gravity center</span>
+        <span class="n">s44</span> <span class="o">=</span> <span class="n">rhog</span> <span class="o">*</span> <span class="n">disp_volume</span> <span class="o">*</span> <span class="n">gm_x</span>
+        <span class="n">s55</span> <span class="o">=</span> <span class="n">rhog</span> <span class="o">*</span> <span class="n">disp_volume</span> <span class="o">*</span> <span class="n">gm_y</span>
+
+        <span class="c1"># Assembling stiffness matrix</span>
+        <span class="n">stiffness_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">s33</span><span class="p">,</span> <span class="n">s34</span><span class="p">,</span> <span class="n">s35</span><span class="p">],</span>
+                                     <span class="p">[</span><span class="n">s34</span><span class="p">,</span> <span class="n">s44</span><span class="p">,</span> <span class="n">s45</span><span class="p">],</span>
+                                     <span class="p">[</span><span class="n">s35</span><span class="p">,</span> <span class="n">s45</span><span class="p">,</span> <span class="n">s55</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+        <span class="c1"># Zeroing tiny coefficients</span>
+        <span class="n">stiffness_matrix</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">stiffness_matrix</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="c1"># Flotation center F:</span>
+        <span class="n">x_f</span> <span class="o">=</span> <span class="o">-</span><span class="n">s35</span> <span class="o">/</span> <span class="n">s33</span>
+        <span class="n">y_f</span> <span class="o">=</span> <span class="n">s34</span> <span class="o">/</span> <span class="n">s33</span>
+
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">clipped_mesh</span><span class="o">.</span><span class="n">axis_aligned_bbox</span>
+
+        <span class="c1"># Storing data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;wet_surface_area&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wet_surface_area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;disp_volume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">disp_volume</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;disp_mass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho_water</span> <span class="o">*</span> <span class="n">disp_volume</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;buoy_center&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xb</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">zb</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;flotation_center&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x_f</span><span class="p">,</span> <span class="n">y_f</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;waterplane_area&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">waterplane_area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;transversal_metacentric_radius&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transversal_metacentric_radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;longitudinal_metacentric_radius&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">longitudinal_metacentric_radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;gm_x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gm_x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;gm_y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gm_y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stiffness_matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;lwl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxx</span> <span class="o">-</span> <span class="n">minx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;los&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;bos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;draught&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">zmin</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;fp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;breadth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxy</span> <span class="o">-</span> <span class="n">miny</span>
+
+        <span class="c1"># TODO: we should better store the inertia object !</span>
+        <span class="n">inertia</span><span class="o">.</span><span class="n">shift_at_cog</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Ixx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inertia</span><span class="o">.</span><span class="n">xx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Iyy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inertia</span><span class="o">.</span><span class="n">yy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Izz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inertia</span><span class="o">.</span><span class="n">zz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Ixy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inertia</span><span class="o">.</span><span class="n">xy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Ixz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inertia</span><span class="o">.</span><span class="n">xz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Iyz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inertia</span><span class="o">.</span><span class="n">yz</span>
+
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="Hydrostatics.get_gravity_force"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.get_gravity_force">[docs]</a>    <span class="k">def</span> <span class="nf">get_gravity_force</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Force</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;absolute&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Hydrostatics.get_buoyancy_force"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.get_buoyancy_force">[docs]</a>    <span class="k">def</span> <span class="nf">get_buoyancy_force</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_water</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">displacement_volume</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Force</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buoyancy_center</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;absolute&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Hydrostatics.add_force"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.add_force">[docs]</a>    <span class="k">def</span> <span class="nf">add_force</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">):</span>
+        <span class="c1"># TODO: allow to remove those forces...</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">force</span><span class="p">,</span> <span class="n">Force</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_forces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span>
+        <span class="n">breadth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;breadth&#39;</span><span class="p">]</span>
+        <span class="n">lwl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;lwl&#39;</span><span class="p">]</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">mg</span><span class="p">,</span> <span class="n">mg</span> <span class="o">*</span> <span class="n">breadth</span><span class="p">,</span> <span class="n">mg</span> <span class="o">*</span> <span class="n">lwl</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">scale</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">residual</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rhog_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;disp_volume&#39;</span><span class="p">]</span>
+        <span class="n">mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span>
+
+        <span class="n">xb</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;buoy_center&#39;</span><span class="p">]</span>
+        <span class="n">xg</span><span class="p">,</span> <span class="n">yg</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span>
+
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rhog_v</span> <span class="o">-</span> <span class="n">mg</span><span class="p">,</span>
+                             <span class="n">rhog_v</span> <span class="o">*</span> <span class="n">yb</span> <span class="o">-</span> <span class="n">mg</span> <span class="o">*</span> <span class="n">yg</span><span class="p">,</span>
+                             <span class="o">-</span><span class="n">rhog_v</span> <span class="o">*</span> <span class="n">xb</span> <span class="o">+</span> <span class="n">mg</span> <span class="o">*</span> <span class="n">xg</span><span class="p">])</span>
+
+        <span class="c1"># Accounting for additional forces in the static equilibrium</span>
+        <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_forces</span><span class="p">:</span>
+            <span class="n">residual</span> <span class="o">+=</span> <span class="n">force</span><span class="o">.</span><span class="n">hs_force</span>
+
+        <span class="k">return</span> <span class="n">residual</span>
+
+<div class="viewcode-block" id="Hydrostatics.set_displacement"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.set_displacement">[docs]</a>    <span class="k">def</span> <span class="nf">set_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displaces mesh at a prescribed displacement and returns</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        disp : float</span>
+<span class="sd">            Mass displacement of the hull (in tons)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Complying with a displacement of </span><span class="si">%.3f</span><span class="s2"> tons&quot;</span> <span class="o">%</span> <span class="n">disp</span>
+            <span class="nb">print</span> <span class="s2">&quot;----------------------------------------------&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">disp</span>
+
+        <span class="n">itermax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;itermax&#39;</span><span class="p">]</span>
+        <span class="n">reltol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;reltol&#39;</span><span class="p">]</span>
+        <span class="n">z_relax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;z_relax&#39;</span><span class="p">]</span>
+
+        <span class="n">dz</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="nb">iter</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># print iter</span>
+            <span class="k">if</span> <span class="nb">iter</span> <span class="o">==</span> <span class="n">itermax</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">-&gt; No convergence of the displacement after </span><span class="si">%u</span><span class="s1"> iterations&#39;</span> <span class="o">%</span> <span class="n">itermax</span>
+                <span class="k">break</span>
+
+            <span class="c1"># Translating the mesh</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">translate_z</span><span class="p">(</span><span class="n">dz</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dz</span>
+
+            <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_forces</span><span class="p">:</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dz</span><span class="o">=</span><span class="n">dz</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reinit_clipper</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
+
+            <span class="n">residual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_fz</span>
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">residual</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">reltol</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">-&gt; Convergence obtained after </span><span class="si">%u</span><span class="s1"> iterations&#39;</span> <span class="o">%</span> <span class="nb">iter</span>
+                <span class="k">break</span>
+
+            <span class="n">dz</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">flotation_surface_area</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">dz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">z_relax</span><span class="p">:</span>
+                <span class="n">dz</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">copysign</span><span class="p">(</span><span class="n">z_relax</span><span class="p">,</span> <span class="n">dz</span><span class="p">)</span>
+            <span class="nb">iter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Hydrostatics.equilibrate"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.equilibrate">[docs]</a>    <span class="k">def</span> <span class="nf">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_disp</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="c1"># Initial displacement equilibrium</span>
+        <span class="k">if</span> <span class="n">init_disp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;First placing the mesh at the target displacement&quot;</span>
+                <span class="nb">print</span> <span class="s2">&quot;-------------------------------------------------&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_displacement</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Computing equilibrium from initial condition.&#39;</span>
+            <span class="nb">print</span> <span class="s1">&#39;----------------------------------------------&#39;</span>
+
+        <span class="c1"># Retrieving solver parameters</span>
+        <span class="n">z_relax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;z_relax&#39;</span><span class="p">]</span>
+        <span class="n">theta_relax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;theta_relax&#39;</span><span class="p">]</span>
+        <span class="n">theta_relax_x</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">theta_relax</span><span class="p">)</span>
+        <span class="n">theta_relax_y</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">theta_relax</span><span class="p">)</span>
+
+        <span class="n">itermax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;itermax&#39;</span><span class="p">]</span>
+        <span class="n">reltol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;reltol&#39;</span><span class="p">]</span>
+        <span class="n">max_nb_restart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;max_nb_restart&#39;</span><span class="p">]</span>
+
+        <span class="n">rhog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span>
+        <span class="n">mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span>
+
+        <span class="c1"># Initialization</span>
+        <span class="n">dz</span> <span class="o">=</span> <span class="n">thetax</span> <span class="o">=</span> <span class="n">thetay</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="nb">iter</span> <span class="o">=</span> <span class="n">nb_restart</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">unstable_config</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># print &#39;\n&#39;, iter</span>
+            <span class="k">if</span> <span class="n">unstable_config</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">iter</span> <span class="o">==</span> <span class="p">(</span><span class="n">nb_restart</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">itermax</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">unstable_config</span><span class="p">:</span>
+                        <span class="nb">print</span> <span class="s1">&#39;Unstable equilibrium reached.&#39;</span>
+                        <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">-&gt; Keep searching a stable configuration by random restart number </span><span class="si">%u</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">nb_restart</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span> <span class="s1">&#39;Failed to find an equilibrium configuration with these initial conditions in </span><span class="si">%u</span><span class="s1"> &#39;</span> \
+                              <span class="s1">&#39;iterations.&#39;</span> <span class="o">%</span> <span class="n">itermax</span>
+                        <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">-&gt; Keep searching by random restart number </span><span class="si">%u</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nb_restart</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+                <span class="n">unstable_config</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="c1"># Max iterations reached</span>
+                <span class="k">if</span> <span class="n">nb_restart</span> <span class="o">&lt;</span> <span class="n">max_nb_restart</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">nb_restart</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="c1"># Random on the position of the body</span>
+                    <span class="n">thetax</span><span class="p">,</span> <span class="n">thetay</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+                    <span class="n">rot_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">rotate</span><span class="p">([</span><span class="n">thetax</span><span class="p">,</span> <span class="n">thetay</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_reinit_clipper</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
+
+                    <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_forces</span><span class="p">:</span>
+                        <span class="n">force</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">rot_matrix</span><span class="p">)</span>
+
+                    <span class="n">dz</span> <span class="o">=</span> <span class="n">thetax</span> <span class="o">=</span> <span class="n">thetay</span> <span class="o">=</span> <span class="mf">0.</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Max number of restart allowed. Failed to find an equilibrium configuration.</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># Applying transformation to the mesh</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">translate_z</span><span class="p">(</span><span class="n">dz</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dz</span>
+
+            <span class="n">rot_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">rotate</span><span class="p">([</span><span class="n">thetax</span><span class="p">,</span> <span class="n">thetay</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span><span class="p">)</span>
+
+            <span class="c1"># Updating force data</span>
+            <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_forces</span><span class="p">:</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dz</span><span class="o">=</span><span class="n">dz</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="n">rot_matrix</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reinit_clipper</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
+
+            <span class="c1"># if self.animate:</span>
+            <span class="c1">#     mmio.write_VTP(&#39;mesh%u.vtp&#39; % iter, mymesh_c.vertices, mymesh_c.faces)</span>
+
+            <span class="n">residual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residual</span> <span class="o">/</span> <span class="n">scale</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">reltol</span><span class="p">):</span>
+                <span class="c1"># Convergence at an equilibrium</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isstable</span><span class="p">():</span>
+                    <span class="c1"># Stable equilibrium</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;stop_at_unstable&#39;</span><span class="p">]:</span>
+                        <span class="c1"># Unstable configuration reached</span>
+                        <span class="n">code</span> <span class="o">=</span> <span class="mi">2</span>
+                        <span class="k">break</span>
+                    <span class="c1"># TODO: mettre une option permettant de choisir si on s&#39;arrete a des configs instables</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># We force the restart with an other random orientation as initial condition</span>
+                        <span class="n">unstable_config</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="nb">iter</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">continue</span>
+
+            <span class="c1"># Computing correction</span>
+            <span class="c1"># TODO: voir pour une resolution ne faisant pas intervenir np.linalg ?</span>
+            <span class="n">stiffness_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">]</span>
+            <span class="n">dz</span><span class="p">,</span> <span class="n">thetax</span><span class="p">,</span> <span class="n">thetay</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">stiffness_matrix</span><span class="p">,</span> <span class="n">residual</span><span class="p">)</span>
+
+            <span class="c1"># Relaxation</span>
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">dz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">z_relax</span><span class="p">:</span>
+                <span class="n">dz</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">copysign</span><span class="p">(</span><span class="n">z_relax</span><span class="p">,</span> <span class="n">dz</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">thetax</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">theta_relax_x</span><span class="p">:</span>
+                <span class="n">thetax</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">copysign</span><span class="p">(</span><span class="n">theta_relax_x</span><span class="p">,</span> <span class="n">thetax</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">thetay</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">theta_relax_y</span><span class="p">:</span>
+                <span class="n">thetay</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">copysign</span><span class="p">(</span><span class="n">theta_relax_y</span><span class="p">,</span> <span class="n">thetay</span><span class="p">)</span>
+
+            <span class="nb">iter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Zeroing xcog and ycog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">translate</span><span class="p">([</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;buoy_center&#39;</span><span class="p">][:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_forces</span><span class="p">:</span>
+            <span class="n">force</span><span class="o">.</span><span class="n">update_xy</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">-&gt; Maximum number of restart reached. Failed to find an equilibrum position.&quot;</span>
+            <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Stable equilibrium reached after </span><span class="si">%u</span><span class="s2"> iterations and </span><span class="si">%u</span><span class="s2"> random restart&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">iter</span><span class="p">,</span> <span class="n">nb_restart</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s1">&#39;Unstable equilibrium reached after </span><span class="si">%u</span><span class="s1"> iterations and </span><span class="si">%u</span><span class="s1"> random restart&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">iter</span><span class="p">,</span> <span class="n">nb_restart</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">code</span></div>
+
+<div class="viewcode-block" id="Hydrostatics.get_hydrostatic_report"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.get_hydrostatic_report">[docs]</a>    <span class="k">def</span> <span class="nf">get_hydrostatic_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">header</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">-----------------------------------------------------</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">head</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">title</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+            <span class="n">head</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">-----------------------------------------------------</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">return</span> <span class="n">head</span>
+
+        <span class="k">def</span> <span class="nf">hspace</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="k">def</span> <span class="nf">build_line</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">):</span>
+            <span class="c1"># TODO: ajouter unit</span>
+            <span class="n">textwidth</span> <span class="o">=</span> <span class="mi">40</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">{:-&lt;</span><span class="si">{textwidth}</span><span class="s1">}&gt;  {:&lt; .</span><span class="si">{precision}{dtype}</span><span class="s1">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">data</span><span class="p">,</span>
+                                                                                <span class="n">precision</span><span class="o">=</span><span class="n">precision</span><span class="p">,</span>
+                                                                                <span class="n">textwidth</span><span class="o">=</span><span class="n">textwidth</span><span class="p">,</span>
+                                                                                <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span>
+                                                                                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">data_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;{:&lt; 10.</span><span class="si">{precision}{dtype}</span><span class="s1">}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">precision</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+                                            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
+                        <span class="n">line</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">{:-&lt;</span><span class="si">{textwidth}</span><span class="s1">}&gt;  </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">data_str</span><span class="p">,</span> <span class="n">textwidth</span><span class="o">=</span><span class="n">textwidth</span><span class="p">)</span>
+
+                        <span class="c1"># else:</span>
+                        <span class="c1">#     print data</span>
+
+            <span class="k">return</span> <span class="n">line</span>
+
+        <span class="c1"># TODO: ajouter la reference au point de calcul de la matrice raideur</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="c1"># title = &#39;Hydrostatic report ({0})\n</span>
+        <span class="c1"># \tGenerated by meshmagick on {1}&#39;.format(self.mesh.name, strftime(&#39;%c&#39;)).upper()</span>
+        <span class="c1"># msg += header(title)</span>
+
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">hspace</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Gravity acceleration (M/S**2)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gravity</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Density of water (kg/M**3)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_water</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">hspace</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Waterplane area (M**2)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flotation_surface_area</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Waterplane center (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flotation_center</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Wet area (M**2)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wet_surface_area</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Displacement volume (M**3)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">displacement_volume</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Displacement mass (tons)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Buoyancy center (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buoyancy_center</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Center of gravity (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gravity_center</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">hspace</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Draught (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;draught&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># TODO</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Length overall submerged (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;los&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Breadth overall submerged (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;bos&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Length at Waterline LWL (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;lwl&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Forward perpendicular (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;fp&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">hspace</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Transversal metacentric radius (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">transversal_metacentric_radius</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Transversal metacentric height GMt (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">transversal_metacentric_height</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Longitudinal metacentric radius (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">longitudinal_metacentric_radius</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Longitudinal metacentric height GMl (M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">longitudinal_metacentric_height</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">hspace</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">HYDROSTATIC STIFFNESS COEFFICIENTS:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;K33 (N/M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">S33</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;K34 (N)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">S34</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;K35 (N)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">S35</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;K44 (N.M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">S44</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;K45 (N.M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">S45</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;K55 (N.M)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">S55</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Il faut faire une correction avec le plan de la flottaison de certains coeffs</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">hspace</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">INERTIAS:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Ixx&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Ixx&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Ixy&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Ixy&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Ixz&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Ixz&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Iyy&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Iyy&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Iyz&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Iyz&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Izz&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;Izz&#39;</span><span class="p">],</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">hspace</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">RESIDUALS:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Absolute&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Relative&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Relative tolerance&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reltol</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="c1"># residual = self.residual</span>
+        <span class="c1"># msg += (&#39;\nResidual:\n&#39;)</span>
+        <span class="c1"># msg += (&#39;Delta Fz = %.3f N\n&#39; % residual[0])</span>
+        <span class="c1"># msg += (&#39;Delta Mx = %.3f Nm\n&#39; % residual[1])</span>
+        <span class="c1"># msg += (&#39;Delta My = %.3f Nm\n&#39; % residual[2])</span>
+        <span class="c1">#</span>
+        <span class="c1"># rel_res = residual / self.scale</span>
+        <span class="c1"># msg += (&#39;\nRelative residual:\n&#39;)</span>
+        <span class="c1"># msg += (&#39;Delta Fz = %E\n&#39; % rel_res[0])</span>
+        <span class="c1"># msg += (&#39;Delta Mx = %E\n&#39; % rel_res[1])</span>
+        <span class="c1"># msg += (&#39;Delta My = %E\n&#39; % rel_res[2])</span>
+        <span class="c1"># msg += (&#39;Relative tolerance of the solver: %.1E\n&#39; % self.reltol)</span>
+
+        <span class="k">return</span> <span class="n">msg</span></div>
+
+    <span class="c1"># FIXME: la methode show ne devrait pas faire appel explicitement a des fonctions vtk...</span>
+    <span class="c1"># Tout devrait etre gere dans MMViewer</span>
+<div class="viewcode-block" id="Hydrostatics.show"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># TODO: Ce n&#39;est pas ce module qui doit savoir utiliser vtk !!!</span>
+
+        <span class="kn">import</span> <span class="nn">MMviewer</span>
+        <span class="kn">import</span> <span class="nn">vtk</span>
+
+        <span class="n">vtk_polydata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">_vtk_polydata</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span> <span class="o">=</span> <span class="n">MMviewer</span><span class="o">.</span><span class="n">MMViewer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_polydata</span><span class="p">(</span><span class="n">vtk_polydata</span><span class="p">)</span>
+
+        <span class="n">pd_orig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_point</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">pd_cog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gravity_center</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">pd_orig_cog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_line</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">gravity_center</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">pd_buoy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buoyancy_center</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">pd_orig_buoy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_line</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">buoyancy_center</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">*</span> <span class="mi">1000</span>
+
+        <span class="c1"># Adding glyph for gravity force</span>
+        <span class="n">gforce</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gravity_force</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_vector</span><span class="p">(</span><span class="n">gforce</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="n">gforce</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Adding glyph for buoyancy force</span>
+        <span class="n">bforce</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_buoyancy_force</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_vector</span><span class="p">(</span><span class="n">bforce</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="n">bforce</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Adding glyph for additional forces</span>
+        <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_forces</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_point</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_vector</span><span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="n">force</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># TODO: mettre la suite dans une methode de MMViewer</span>
+        <span class="c1"># Adding corner annotation</span>
+        <span class="n">ca</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCornerAnnotation</span><span class="p">()</span>
+        <span class="n">ca</span><span class="o">.</span><span class="n">SetLinearFontScaleFactor</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">ca</span><span class="o">.</span><span class="n">SetNonlinearFontScaleFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ca</span><span class="o">.</span><span class="n">SetMaximumFontSize</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="s2">&quot;Origin: Black; Gravity Center: Red; Buoyancy Center: Green</span><span class="se">\n</span><span class="s2">To see points, press &#39;w&#39;&quot;</span>
+        <span class="n">ca</span><span class="o">.</span><span class="n">SetText</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">ca</span><span class="o">.</span><span class="n">GetTextProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddViewProp</span><span class="p">(</span><span class="n">ca</span><span class="p">)</span>
+
+        <span class="c1"># Showing the viewer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+        <span class="k">return</span></div></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># The following code are only for testing purpose</span>
+    <span class="kn">import</span> <span class="nn">mmio</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">mesh</span>
+
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">mmio</span><span class="o">.</span><span class="n">load_VTP</span><span class="p">(</span><span class="s1">&#39;meshmagick/tests/data/SEAREV.vtp&#39;</span><span class="p">)</span>
+
+    <span class="n">searev</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;SEAREV&#39;</span><span class="p">)</span>
+
+    <span class="n">hs</span> <span class="o">=</span> <span class="n">Hydrostatics</span><span class="p">(</span><span class="n">searev</span><span class="p">)</span>
+    <span class="n">hs</span><span class="o">.</span><span class="n">verbose_on</span><span class="p">()</span>
+
+    <span class="c1"># hs.mass = 2300</span>
+    <span class="n">hs</span><span class="o">.</span><span class="n">gravity_center</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">hs</span><span class="o">.</span><span class="n">allow_unstable_off</span><span class="p">()</span>
+    <span class="n">hs</span><span class="o">.</span><span class="n">reltol</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+
+    <span class="n">F</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="n">e3</span> <span class="o">*</span> <span class="mf">9.81</span><span class="p">]</span>
+    <span class="n">force1</span> <span class="o">=</span> <span class="n">Force</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="n">e7</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;relative&#39;</span><span class="p">)</span>
+    <span class="c1"># force2 = AdditionalForce(point=[0, 15, -5], value=[0, 0, -50e3*9.81], mode=&#39;absolute&#39;)</span>
+    <span class="c1"># force = AdditionalForce(point=[0, 0, 3], value=[0, 1e7, 0], mode=&#39;absolute&#39;)</span>
+    <span class="n">hs</span><span class="o">.</span><span class="n">add_force</span><span class="p">(</span><span class="n">force1</span><span class="p">)</span>
+    <span class="c1"># hs.add_force(force2)</span>
+
+    <span class="n">hs</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">()</span>
+    <span class="n">hs</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="n">hs</span><span class="o">.</span><span class="n">get_hydrostatic_report</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;Done !&#39;</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Ecole Centrale de Nantes.
+      Last updated on Dec 20, 2016.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

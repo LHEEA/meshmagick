@@ -1,0 +1,847 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>meshmagick.mmio module &mdash; Meshmagick documentation 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Meshmagick documentation 1.0 documentation" href="../index.html"/>
+        <link rel="up" title="Meshmagick Package" href="index.html"/>
+        <link rel="next" title="meshmagick.inertia module" href="meshmagick.inertia.html"/>
+        <link rel="prev" title="meshmagick.mesh module" href="meshmagick.mesh.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Meshmagick documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../module/module.html">Using Meshmagick as a Python module</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.mesh.html">meshmagick.mesh module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">meshmagick.mmio module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.inertia.html">meshmagick.inertia module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.mesh_clipper.html">meshmagick.mesh_clipper module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.densities.html">meshmagick.densities module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.hydrostatics.html">meshmagick.hydrostatics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.MMviewer.html">meshmagick.MMviewer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.tools.html">meshmagick.tools module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Meshmagick documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Meshmagick Package</a> &raquo;</li>
+      
+    <li>meshmagick.mmio module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/meshmagick.mmio.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-meshmagick.mmio">
+<span id="meshmagick-mmio-module"></span><h1>meshmagick.mmio module<a class="headerlink" href="#module-meshmagick.mmio" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="meshmagick.mmio.check_file">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">check_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#check_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.check_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.know_extension">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">know_extension</code><span class="sig-paren">(</span><em>ext</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#know_extension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.know_extension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_DAT">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_DAT</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_DAT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_DAT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not implemented.
+Intended to load .DAT files used in DIODORE (PRINCIPIA (c))</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_GDF">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_GDF</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_GDF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_GDF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads WAMIT (Wamit INC. (c)) GDF mesh files. As GDF file format maintains
+a redundant set of vertices for each faces of the mesh, it returns a merged
+list of nodes and connectivity array by using the merge_duplicates function.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: GDF files have a 1-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_HST">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_HST</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_HST"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_HST" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads HYDROSTAR (Bureau Veritas (c)) mesh files.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: HST files have a 1-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_INP">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_INP</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_INP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_INP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads DIODORE (PRINCIPIA (c)) configuration file format. It parses
+the .INP file and extract meshes defined in subsequent .DAT files
+using the different informations contained in the .INP file.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: INP/DAT files use a 1-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_MAR">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_MAR</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_MAR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_MAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads Nemoh (Ecole Centrale de Nantes) mesh files.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: MAR files have a 1-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_MED">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_MED</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_MED"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_MED" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads MED mesh files generated by SALOME MECA.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: MED files have a 1-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_MSH">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_MSH</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_MSH"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_MSH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads .MSH mesh files generated by GMSH by C. Geuzaine and J.F. Remacle.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: MSH files have a 1-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_NAT">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_NAT</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_NAT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_NAT" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function loads natural file format for meshes.</p>
+<p>xsym    ysym
+n    m
+x1    y1    z1
+.
+.
+.
+xn    yn    zn
+i1    j1    k1    l1
+.
+.
+.
+im    jm    km    lm
+&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;-</p>
+<p>where :
+n : number of nodes
+m : number of cells
+x1 y1 z1 : cartesian coordinates of node 1
+i1 j1 k1 l1 : counterclock wise Ids of nodes for cell 1
+if cell 1 is a triangle, i1==l1</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: NAT files have a 1-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_NEM">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_NEM</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_NEM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_NEM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_RAD">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_RAD</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_RAD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_RAD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads RADIOSS mesh files. This export file format may be chosen in ICEM
+meshing program.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: RAD files have a 1-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_STL">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_STL</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_STL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_STL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads STL file format. It relies on the reader from the VTK library.
+As STL file format maintains a redundant set of vertices for each faces
+of the mesh, it returns a merged list of nodes and connectivity array
+by using the merge_duplicates function.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: STL files have a 0-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_TEC">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_TEC</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_TEC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_TEC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads TECPLOT (Tecplot (c)) mesh files. It relies on the tecplot file
+reader from the VTK library.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: TEC files have a 1-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_VTK">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_VTK</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_VTK"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_VTK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads VTK file format in the legacy format (vtk file extension).
+It relies on the reader from the VTK library.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: VTU files have a 0-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_VTP">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_VTP</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_VTP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_VTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads VTK file format in the new XML format (vtp file extension for
+polydata meshes). It relies on the reader from the VTK library.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: VTP files have a 0-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_VTU">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_VTU</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_VTU"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_VTU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads VTK file format in the new XML format (vtu file extension for
+unstructured meshes). It relies on the reader from the VTK library.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: VTU files have a 0-indexing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_WRL">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_WRL</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_WRL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_WRL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.load_mesh">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">load_mesh</code><span class="sig-paren">(</span><em>filename</em>, <em>format</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#load_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.load_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Driver function that loads every mesh file format known by meshmagick
+and returns the node list and the connectivity array</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the meh file on disk</dd>
+<dt>file_format: str</dt>
+<dd>format of the mesh defined in the extension_dict dictionary</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_DAT">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_DAT</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_DAT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_DAT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes .DAT file format for the DIODORE (PRINCIPA (c)) software.
+It also displays suggestions for inclusion into the .INP configuration
+file.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_GDF">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_GDF</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_GDF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_GDF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes .gdf file format for the WAMIT (Wamit INC. (c)) BEM software.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_HST">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_HST</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_HST"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_HST" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes .HST file format for the HYDROSTAR (Bureau Veritas (c)) software.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_INP">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_INP</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_INP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_INP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_MAR">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_MAR</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_MAR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_MAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes mesh files to be used with Nemoh BEM software (Ecole Centrale de Nantes)</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_MED">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_MED</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_MED"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_MED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_MSH">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_MSH</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_MSH"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_MSH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_NAT">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_NAT</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_NAT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_NAT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes .nat file format as defined into the load_NAT function.</p>
+<dl class="docutils">
+<dt>See:</dt>
+<dd>load_NAT</dd>
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_NEM">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_NEM</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_NEM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_NEM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_RAD">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_RAD</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_RAD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_RAD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_STL">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_STL</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_STL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_STL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes .stl file format. It relies on the VTK library for its writer.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_TEC">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_TEC</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_TEC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_TEC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes .TEC file format for the TECPLOT (Tecplot (c)) visualisation
+software. It relies on the VTK library for its writer.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_VTK">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_VTK</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_VTK"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_VTK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes .vtk file format for the paraview (Kitware (c)) visualisation
+software. It relies on the VTK library for its writer. VTK files use
+the legagy ASCII file format of the VTK library.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_VTP">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_VTP</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_VTP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_VTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes .vtp file format for the paraview (Kitware (c)) visualisation
+software. It relies on the VTK library for its writer. VTP files use
+the last XML file format of the VTK library and correspond to polydata.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_VTU">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_VTU</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_VTU"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_VTU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes .vtu file format for the paraview (Kitware (c)) visualisation
+software. It relies on the VTK library for its writer. VTU files use
+the last XML file format of the VTK library.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_WRL">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_WRL</code><span class="sig-paren">(</span><em>filename</em>, <em>vertices</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_WRL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_WRL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.mmio.write_mesh">
+<code class="descclassname">meshmagick.mmio.</code><code class="descname">write_mesh</code><span class="sig-paren">(</span><em>filename</em>, <em>file_format</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mmio.html#write_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mmio.write_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Driver function that writes every mesh file file_format known by meshmagick</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>filename: str</dt>
+<dd>name of the mesh file to be written on disk</dd>
+<dt>vertices: ndarray</dt>
+<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
+<dt>faces: ndarray</dt>
+<dd>numpy array of the faces&#8217; nodes connectivities</dd>
+<dt>file_format: str</dt>
+<dd>file_format of the mesh defined in the extension_dict dictionary</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="meshmagick.inertia.html" class="btn btn-neutral float-right" title="meshmagick.inertia module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="meshmagick.mesh.html" class="btn btn-neutral" title="meshmagick.mesh module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Ecole Centrale de Nantes.
+      Last updated on Dec 20, 2016.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
