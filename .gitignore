@@ -22,6 +22,8 @@ sdist/
 var/
 *.egg-info/
 .installed.cfg
+record.txt
+outputdir
 *.egg
 
 # PyInstaller
