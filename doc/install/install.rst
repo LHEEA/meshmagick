@@ -1,38 +1,3 @@
-Meshmagick
-==========
-
-**Meshmagick** is a command line utility as well as a python module for the manipulation of meshes encountered in the
-hydrodynamics community.
-
-Its primary goal was to be a conversion tool between major file formats for hydrodynamic computations tools (Nemoh,
-Wamit, Hydrostar or Diodore) and visualization tools (stl, Tecplot, Paraview). It will be particularly useful for code
-to code comparisons or benchmarking.
-
-**Meshmagick** also comes with several mesh manipulation capabilities: translation, rotation, scaling, clipping by a
-plane, symmetry, normals flipping, normals healing (making them consistent across the mesh and outgoing), cleaning
-(duplicate nodes merging...).
-
-As of the release 1.0, **meshmagick** provides useful options for hydrostatics computations. It can solve for
-hydrostatics equilibrium for a given mass, center of gravity or both and provide the clipped mesh to be used by BEM
-software as well as the hydrostatics parameters (stiffness matrix, position of the center of buoyancy, displacement,
-draft...). Inertial properties of meshes may also be computed, based on assumptions.
-
-**Meshmagick** is primarily a command line utility for everyday hydrodynamicists. However, it also comes with a
-package that can be imported in a python script and give the full access to the command line options, programmatically.
-
-.. note::
-    **Meshmagick is the property of Ecole Centrale de Nantes and is maintained by François Rongère <francois
-    .rongere@ec-nantes.fr>**. It is released under the GNU GPL v3 open source licence (see LICENCE file).
-
-
-Documentation
--------------
-
-https://lheea.github.io/meshmagick
-
-
-Getting Meshmagick
-------------------
 
 .. warning::
     Meshmagick is written in Python 2.7 only. So please ensure that you have a Python 2.7 distribution.
@@ -40,7 +5,7 @@ Getting Meshmagick
 Meshmagick is packaged for every major OS (*nix, Windows, OS/X) for both 32/64 bit systems.
 
 Installing with conda
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 This is the prefered method to get your own packaged copy of Meshmagick as `conda <http://conda.pydata.org/docs/>`_
 is known to deal with every dependencies of Meshmagick. For this, you will need to install
@@ -65,7 +30,7 @@ Updating to the latest meshmagick version is obtained by::
     conda update meshmagick
 
 Installing with pip
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 For those wanting to use pip, just do::
 
@@ -82,7 +47,7 @@ Update to the newest version is achieved by::
     available on Pypi. You will then have to deal with this dependency by yourself.
 
 Installing from source
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 This can be done by checking out the source files from the Git source code repository. This option is mainly for
 those wanting to develop into Meshmagick.
@@ -98,4 +63,3 @@ those wanting to develop into Meshmagick.
     python setup.py install
 
 4. (Optional) Run ``pytest`` if you have `pytest <http://doc.pytest.org/en/latest/>`_ installed.
-
