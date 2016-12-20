@@ -42,7 +42,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.graphviz',
-    # 'sphinxarg.ext',
+    'sphinxarg.ext',
     'sphinxcontrib.programoutput'
 ]
 
@@ -73,7 +73,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Meshmagick documentation'
+project = u"Meshmagick User's Guide"
 copyright = u'%s, Ecole Centrale de Nantes' % datetime.now().year
 author = u'François Rongère'
 

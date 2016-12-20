@@ -1,3 +1,6 @@
+Installation Instructions
+=========================
+
 
 .. warning::
     Meshmagick is written in Python 2.7 only. So please ensure that you have a Python 2.7 distribution.
@@ -58,8 +61,17 @@ those wanting to develop into Meshmagick.
 
 2. Change directory to meshmagick
 
-3. Run::
+3. Install:
 
-    python setup.py install
+    * If you want to install from source for just use meshmagick, it can be achieved by::
+
+        python setup.py install
+
+    * If you want to install from soruce for development purposes, you should better install meshmagick in
+      development mode so that your code modifications are directly taken into account with respect to your install.
+      It is achieved by the command::
+
+        pip install -e .
 
 4. (Optional) Run ``pytest`` if you have `pytest <http://doc.pytest.org/en/latest/>`_ installed.
+

@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Meshmagick's documentation (|version|)
-======================================
+Meshmagick User's Guide (|version|)
+===================================
 
 **Meshmagick** is a command line utility as well as a python module for the manipulation of meshes encountered in the
 hydrodynamics community.
@@ -40,6 +40,7 @@ Getting Meshmagick
 ==================
 
 .. toctree::
+    :maxdepth: 2
 
     install/install
 
