@@ -22,12 +22,6 @@ for branch in branches.split('\n'):
         cur_branch = branch[2:]
 
 
-# Retier
-git.commit(m='Update deploy', a=True)
-
-
-sys.exit(0)
-
 # Checking out to master branch
 git.checkout('master')
 
@@ -51,22 +45,11 @@ chdir('..')
 git.checkout('gh-pages')
 
 # Removing everything here
-print getcwd()
-
-
 system('rm -rf ./*')  # TODO: remplacer par des fonctions pures python
 
 copy_tree(tempdir, '.')
 
-
-git.commit("")
-# Commit de tout ca
-
-
-sys.exit(0)
-
-
-
+git.commit(m='Updating documentation', a=True)
 
 
 # Checking out back to the current branch
