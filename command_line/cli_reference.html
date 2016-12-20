@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Command Line Interface Reference Guide &mdash; Meshmagick documentation 1.0 documentation</title>
+  <title>Command Line Interface Reference Guide &mdash; Meshmagick User&#39;s Guide 1.0 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Meshmagick documentation 1.0 documentation" href="../index.html"/>
+    <link rel="top" title="Meshmagick User&#39;s Guide 1.0 documentation" href="../index.html"/>
         <link rel="up" title="Meshmagick’s Command Line Interface" href="index.html"/>
         <link rel="next" title="Using Meshmagick as a Python module" href="../module/module.html"/>
         <link rel="prev" title="Using Meshmagick" href="cli_usage.html"/> 
@@ -54,7 +54,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Meshmagick documentation
+            <a href="../index.html" class="icon icon-home"> Meshmagick User's Guide
           
 
           
@@ -85,7 +85,10 @@
           
             
             
-                <ul class="current">
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/install.html">Installation Instructions</a></li>
+</ul>
+<ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick&#8217;s Command Line Interface</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="cli_usage.html">Using Meshmagick</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">CLI reference</a></li>
@@ -110,7 +113,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Meshmagick documentation</a>
+        <a href="../index.html">Meshmagick User's Guide</a>
       </nav>
 
 
@@ -145,6 +148,471 @@
             
   <div class="section" id="command-line-interface-reference-guide">
 <h1>Command Line Interface Reference Guide<a class="headerlink" href="#command-line-interface-reference-guide" title="Permalink to this headline">¶</a></h1>
+<p><blockquote>
+<div><dl class="docutils">
+<dt>&#8211;  MESHMAGICK &#8211;</dt>
+<dd><p class="first">A python module and a command line utility to manipulate meshes from
+different format used in hydrodynamics as well as for visualization.</p>
+<p>The formats currently supported by meshmagick are :</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="19%" />
+<col width="27%" />
+<col width="35%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">File
+extension</th>
+<th class="head">R: Reading
+W: writing</th>
+<th class="head">Software</th>
+<th class="head">Keywords</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>.mar</td>
+<td>R/W</td>
+<td>NEMOH <a class="footnote-reference" href="#f1" id="id1">[1]</a></td>
+<td>nemoh, mar</td>
+</tr>
+<tr class="row-odd"><td>.gdf</td>
+<td>R/W</td>
+<td>WAMIT <a class="footnote-reference" href="#f2" id="id2">[2]</a></td>
+<td>wamit, gdf</td>
+</tr>
+<tr class="row-even"><td>.inp</td>
+<td>R</td>
+<td>DIODORE <a class="footnote-reference" href="#f3" id="id3">[3]</a></td>
+<td>diodore-inp, inp</td>
+</tr>
+<tr class="row-odd"><td>.DAT</td>
+<td>W</td>
+<td>DIODORE <a class="footnote-reference" href="#f3" id="id4">[3]</a></td>
+<td>diodore-dat</td>
+</tr>
+<tr class="row-even"><td>.hst</td>
+<td>R/W</td>
+<td>HYDROSTAR <a class="footnote-reference" href="#f4" id="id5">[4]</a></td>
+<td>hydrostar, hst</td>
+</tr>
+<tr class="row-odd"><td>.nat</td>
+<td>R/W</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>natural, nat</td>
+</tr>
+<tr class="row-even"><td>.msh</td>
+<td>R</td>
+<td>GMSH <a class="footnote-reference" href="#f5" id="id6">[5]</a></td>
+<td>gmsh, msh</td>
+</tr>
+<tr class="row-odd"><td>.rad</td>
+<td>R</td>
+<td>RADIOSS</td>
+<td>rad, radioss</td>
+</tr>
+<tr class="row-even"><td>.stl</td>
+<td>R/W</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>stl</td>
+</tr>
+<tr class="row-odd"><td>.vtu</td>
+<td>R/W</td>
+<td>PARAVIEW <a class="footnote-reference" href="#f6" id="id7">[6]</a></td>
+<td>vtu</td>
+</tr>
+<tr class="row-even"><td>.vtp</td>
+<td>R/W</td>
+<td>PARAVIEW <a class="footnote-reference" href="#f6" id="id8">[6]</a></td>
+<td>vtp</td>
+</tr>
+<tr class="row-odd"><td>.vtk</td>
+<td>R/W</td>
+<td>PARAVIEW <a class="footnote-reference" href="#f6" id="id9">[6]</a></td>
+<td>paraview-legacy, vtk</td>
+</tr>
+<tr class="row-even"><td>.tec</td>
+<td>R/W</td>
+<td>TECPLOT <a class="footnote-reference" href="#f7" id="id10">[7]</a></td>
+<td>tecplot, tec</td>
+</tr>
+<tr class="row-odd"><td>.med</td>
+<td>R</td>
+<td>SALOME <a class="footnote-reference" href="#f8" id="id11">[8]</a></td>
+<td>med, salome</td>
+</tr>
+</tbody>
+</table>
+<p>By default, Meshmagick uses the filename extensions to choose the
+appropriate reader/writer. This behaviour might be bypassed using the
+-ifmt and -ofmt optional arguments. When using these options, keywords
+defined in the table above must be used as format identifiers.</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="f1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>NEMOH is an open source BEM Software for seakeeping developped at
+Ecole Centrale de Nantes (LHHEA)</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="f2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>WAMIT is a BEM Software for seakeeping developped by WAMIT, Inc.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="f3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[3]</td><td><em>(<a class="fn-backref" href="#id3">1</a>, <a class="fn-backref" href="#id4">2</a>)</em> DIODORE is a BEM Software for seakeeping developped by PRINCIPIA</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="f4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[4]</a></td><td>HYDROSTAR is a BEM Software for seakeeping developped by
+BUREAU VERITAS</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="f5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[5]</a></td><td>GMSH is an open source meshing software developped by C. Geuzaine
+and J.-_faces. Remacle</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="f6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[6]</td><td><em>(<a class="fn-backref" href="#id7">1</a>, <a class="fn-backref" href="#id8">2</a>, <a class="fn-backref" href="#id9">3</a>)</em> PARAVIEW is an open source visualization software developped by
+Kitware</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="f7" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id10">[7]</a></td><td>TECPLOT is a visualization software developped by Tecplot</td></tr>
+</tbody>
+</table>
+<table class="last docutils footnote" frame="void" id="f8" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id11">[8]</a></td><td>SALOME-MECA is an open source software for computational mechanics
+developped by EDF-R&amp;D</td></tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div></blockquote>
+</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">meshmagick</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTFILENAME</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ifmt</span> <span class="n">INPUT_FORMAT</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">ofmt</span> <span class="n">OUTPUT_FORMAT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">quality</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">t</span> <span class="n">Tx</span> <span class="n">Ty</span> <span class="n">Tz</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">tx</span> <span class="n">Tx</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ty</span> <span class="n">Ty</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">tz</span> <span class="n">Tz</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">Rx</span> <span class="n">Ry</span> <span class="n">Rz</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">rx</span> <span class="n">Rx</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ry</span> <span class="n">Ry</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">rz</span> <span class="n">Rz</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">S</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">sx</span> <span class="n">Sx</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">sy</span> <span class="n">Sy</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">sz</span> <span class="n">Sz</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hn</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">fn</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hm</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">Arg</span> <span class="p">[</span><span class="n">Arg</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="p">[</span><span class="n">Arg</span> <span class="p">[</span><span class="n">Arg</span> <span class="o">...</span><span class="p">]]]</span> <span class="p">[</span><span class="o">-</span><span class="n">md</span> <span class="p">[</span><span class="n">Tol</span><span class="p">]]</span> <span class="p">[</span><span class="o">-</span><span class="n">tq</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">sym</span> <span class="p">[</span><span class="n">Arg</span> <span class="p">[</span><span class="n">Arg</span> <span class="o">...</span><span class="p">]]]</span> <span class="p">[</span><span class="o">--</span><span class="n">mirror</span> <span class="n">Arg</span> <span class="p">[</span><span class="n">Arg</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">-</span><span class="n">pi</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">si</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">rho</span><span class="o">-</span><span class="n">medium</span> <span class="n">RHO_MEDIUM</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">medium</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">thickness</span> <span class="n">THICKNESS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hs</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">disp</span> <span class="n">Disp</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cog</span> <span class="n">Xg</span> <span class="n">Yg</span> <span class="n">Zg</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">zcog</span> <span class="n">Zcog</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">rho</span><span class="o">-</span><span class="n">water</span> <span class="n">Rho</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">g</span> <span class="n">G</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">af</span> <span class="n">X</span> <span class="n">Y</span> <span class="n">Z</span> <span class="n">Fx</span> <span class="n">Fy</span> <span class="n">Fz</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">rf</span> <span class="n">X</span> <span class="n">Y</span> <span class="n">Z</span> <span class="n">Fx</span> <span class="n">Fy</span> <span class="n">Fz</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">hs</span><span class="o">-</span><span class="n">report</span> <span class="n">filename</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">show</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span>
+                  <span class="n">infilename</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Positional arguments:</dt>
+<dd><table class="first last docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd>infilename</kbd></td>
+<td>path of the input mesh file in any supported format</td></tr>
+</tbody>
+</table>
+</dd>
+<dt>Options:</dt>
+<dd><table class="first last docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-o</span>, <span class="option">--outfilename</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>path of the output mesh file. The format of
+                     this file is determined from the given extension.
+                     </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-ifmt</span>, <span class="option">--input-format</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Input format. Meshmagick will read the input file considering the
+                     INPUT_FORMAT rather than using the extension
+                     </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-ofmt</span>, <span class="option">--output-format</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Output format. Meshmagick will write the output file considering
+                    the OUTPUT_FORMAT rather than using the extension
+                    </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-q=False</span>, <span class="option">--quiet=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>switch of verbosity of meshmagick</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-i=False</span>, <span class="option">--info=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>extract informations on the mesh on the standard output</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--quality=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>prints mesh quality</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-t</span>, <span class="option">--translate</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>translates the mesh in 3D
+                    Usage -translate tx ty tz</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-tx</span>, <span class="option">--translatex</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>translates the mesh following the x direction</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-ty</span>, <span class="option">--translatey</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>translates the mesh following the y direction</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-tz</span>, <span class="option">--translatez</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>translates the mesh following the z direction</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-r</span>, <span class="option">--rotate</span></kbd></td>
+<td>rotates the mesh in 3D following a rotation
+                    coordinate vector. It is done around fixed axis. Angles
+                    must be given in degrees.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-rx</span>, <span class="option">--rotatex</span></kbd></td>
+<td>rotates the mesh around the x direction.
+                    Angles must be given in degrees.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-ry</span>, <span class="option">--rotatey</span></kbd></td>
+<td>rotates the mesh around the y direction.
+                    Angles must be given in degrees.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-rz</span>, <span class="option">--rotatez</span></kbd></td>
+<td>rotates the mesh around the z direction.
+                    Angles must be given in degrees.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-s</span>, <span class="option">--scale</span></kbd></td>
+<td>scales the mesh. CAUTION : if used along
+                     with a translation option, the scaling is done before
+                    the translations. The translation magnitude should be set
+                    accordingly to the newly scaled mesh.
+                    </td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-sx</span>, <span class="option">--scalex</span></kbd></td>
+<td>scales the mesh along x axis. CAUTION : if used along
+                     with a translation option, the scaling is done before
+                    the translations. The translation magnitude should be set
+                    accordingly to the newly scaled mesh.
+                    </td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-sy</span>, <span class="option">--scaley</span></kbd></td>
+<td>scales the mesh along y axis. CAUTION : if used along
+                     with a translation option, the scaling is done before
+                    the translations. The translation magnitude should be set
+                    accordingly to the newly scaled mesh.
+                    </td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-sz</span>, <span class="option">--scalez</span></kbd></td>
+<td>scales the mesh along z axis. CAUTION : if used along
+                     with a translation option, the scaling is done before
+                    the translations. The translation magnitude should be set
+                    accordingly to the newly scaled mesh.
+                    </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-hn=False</span>, <span class="option">--heal-normals=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Checks and heals the normals consistency and
+                    verify if they are outward.
+                    </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-fn=False</span>, <span class="option">--flip-normals=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>flips the normals of the mesh</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-hm=False</span>, <span class="option">--heal-mesh=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Applies the following sanity transformation on the
+                    mesh: Removes unused vertices, Removes degenerated faces,
+                    Merge duplicate vertices, Heal triangles description,
+                    Heal normal orientations.
+                    </td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-p</span>, <span class="option">--plane</span></kbd></td>
+<td>Defines a plane used by the &#8211;clip_by_plane and &#8211;symmetrize options.
+                    It can be defined by the floats nx ny nz c where [nx, ny, nz]
+                    is a normal vector to the plane and c defines its position
+                    following the equation &lt;N|X&gt; = c with X a point belonging
+                    to the plane.
+                    It can also be defined by a string among [Oxy, Oxz, Oyz, /Oxy, /Oxz, /Oyz]
+                    for quick definition. Several planes may be defined on the same command
+                    line. Planes with a prepended &#8216;/&#8217; have normals inverted i.e. if Oxy has its
+                    normal pointing upwards, /Oxy has its normal pointing downwards.
+                    In that case, the planes are indexed by an integer starting by
+                    0 following the order given in the command line.
+                    </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-c</span>, <span class="option">--clip-by-plane</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>cuts the mesh with a plane. Is no arguments are given, the Oxy plane
+                    is used. If an integer is given, it should correspond to a plane defined with
+                    the &#8211;plane option. If a key string is given, it should be a valid key (see
+                    help of &#8211;plane option for valid plane keys). A normal and a scalar could
+                    also be given for the plane definition just as for the &#8211;plane option. Several
+                    clipping planes may be defined on the same command line.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-md</span>, <span class="option">--merge-duplicates</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>merges the duplicate nodes in the mesh with the absolute tolerance
+                    given as argument (default 1e-8). Tolerance must be lower than 1</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-tq=False</span>, <span class="option">--triangulate-quadrangles=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Triangulate all quadrangle _faces by a simple splitting procedure.
+                    Twho triangles are generated and from both solution, the one with the best
+                    aspect ratios is kept. This option may be used in conjunction with a
+                    mesh export in a format that only deal with triangular cells like STL format.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-sym</span>, <span class="option">--symmetrize</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Symmetrize the mesh by a plane defined wether by 4 scalars, i.e.
+                    the plane normal vector coordinates and a scalar c such as N.X=c is the
+                    plane equation (with X a point of the plane) or a string among [&#8216;Oxy&#8217;,
+                    &#8216;Oxz&#8217;, &#8216;Oyz&#8217;, &#8216;/Oxy&#8217;, &#8216;/Oxz&#8217;, &#8216;/Oyz&#8217;] which are shortcuts for planes
+                    passing by the origin and whose normals are the reference axes. Default
+                    is Oxz if no argument is given to &#8211;sym option.
+                    Be careful that symmetry is applied before any rotation so as the plane
+                    equation is defined in the initial frame of reference.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--mirror</span></kbd></td>
+<td>Mirror the mesh through the specified plane. Plane may be specified
+                    with reference planes keys (see &#8211;plane option), or by 4 scalars, or by the
+                    id of a plane defined with the &#8211;plane option. By default, the Oxy plane
+                    is used when the option has no argument.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-pi=False</span>, <span class="option">--plain-inertia=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Evaluates the inertia properties of the mesh condidering it as
+                    uniformly plain of a medium of density rho_medium in kg/m**3. Default
+                    is 1023 kg/m**3.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-si=False</span>, <span class="option">--shell-inertia=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Evaluates the inertia properties of the mesh condidering it as
+                    uniformly plain of a medium of density rho_medium in kg/m**3. Default
+                    is 1023 kg/m**3.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--rho-medium</span></kbd></td>
+<td>The density (in kg/m**3) of the medium used for evaluation of
+                    inertia parameters of the mesh. For the hypothesis of plain homogeneous
+                    mesh, the default is that of salt water (1023 kg/m**3) . For the
+                    hypothesis of a shell, default is that of steel (7850 kg/m**3).
+
+                    It is possible to specify medium by a name. Available medium are
+                    currently: STEEL, NITROGEN_-195DEGC, LEAD, ALUMINUM, TITANIUM, PROPANE, REINFORCED_CONCRETE, POLYSTYRENE, GASOLINE, FRESH_WATER, CONCRETE, SAND, AIR_20DEGC, HYDROGEN_-252DEGC, ETHANOL, BUTANE, SALT_WATER, DIESEL_FUEL
+                    </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--list-medium=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Lists the available medium keywords along with their density.
+                    </td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--thickness</span></kbd></td>
+<td>The thickness of the shell used for the evaluation of inertia
+                    parameters of the mesh. The default value is 0.02m.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-hs=False</span>, <span class="option">--hydrostatics=False</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Compute hydrostatics data and throws a report on the
+                    command line. When used along with options &#8211;disp, &#8211;cog or
+                    &#8211;zcog, the behaviour is different.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--disp</span></kbd></td>
+<td>Specifies the mass of the mesh for hydrostatic computations.
+                        It must be given in tons.
+                        </td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--cog</span></kbd></td>
+<td>Specifies the 3D position of the center of gravity.
+                    The third coordinate given has priority over the value given
+                    with the &#8211;zcog option.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--zcog</span></kbd></td>
+<td>Specifies the z position of the center of gravity. This
+                        is the minimal data needed for hydrostatic stiffness matrix
+                        computation. It is however overwriten by the third component
+                        of cog when &#8211;cog option is used. If none of these two option
+                        is given, zcog is set to 0.
+                        </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--rho-water=1023.0</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Specifies the density of salt water. Default is 1023 kg/m**3.
+                    </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-g=9.81</span>, <span class="option">--grav=9.81</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Specifies the acceleration of gravity on the earth surface.
+                    Default is 9.81 m/s**2.
+                    </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-af</span>, <span class="option">--absolute-force</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Add an additional absolute force applied to the mesh in
+                    hydrostatics equilibrium computations. It is absolute as force
+                    orientation does not change during hydrostatic equilibrium
+                    computations, but application point follows the mesh motion.
+                    The option is called with 6 arguments such that:
+                    
+                        -af x y z fx fy fz
+                     
+                    where [x, y, z] are the coordinates of the application point
+                    (in meters) and [fx, fy, fz] are the components of the force.
+                    Those are expressed in the initial mesh frame.
+                     </td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-rf</span>, <span class="option">--relative-force</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Add an additional relative force applied to the mesh in
+                    hydrostatics equilibrium computations. It is relative as force
+                    orientation follows the orientation of the mesh during equilibrium
+                    computations. The option is called with 6 arguments such that:
+                     
+                        -af x y z fx fy fz
+                     
+                    where [x, y, z] are the coordinates of the application point
+                    of the force and [fx, fy, fz] are the components of the force.
+                    Those are expressed in the initial mesh frame.
+                     </td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--hs-report</span></kbd></td>
+<td>Write the hydrostatic report into the file given as an argument</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--show=False</span></kbd></td>
+<td>Shows the input mesh in an interactive window</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--version</span></kbd></td>
+<td>Shows the version number and exit</td></tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p>&#8211;  Copyright 2014-2015  -  Francois Rongere  /  Ecole Centrale de Nantes  &#8211;</p>
 </div>
 
 
