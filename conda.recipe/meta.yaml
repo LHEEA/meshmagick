@@ -4,11 +4,7 @@ package:
   version: {{data.get('version')}}
 
 source:
-  git_url: ../
-
-build:
-  entry_points:
-    - meshmagick = meshmagick:main
+  path: ../
 
 requirements:
   build:
@@ -16,14 +12,21 @@ requirements:
     - setuptools
   run:
     - python
-    - argparse
-    - argcomplete
+    - vtk >=5
     - numpy
-    - vtk
+    - argcomplete
+
+build:
+  entry_points:
+    - meshmagick = meshmagick:main
 
 about:
   home: {{data.get('url')}}
   license: {{data.get('license')}}
-  license_family: GPL
   license_file: Licence_CeCILL_V2.1-en.txt
   summary: {{data.get('description')}}
+
+#// about:
+  #// home: 
+  #// license: BSD
+  #// license_file: LICENSE
