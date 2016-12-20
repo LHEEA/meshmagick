@@ -26,8 +26,8 @@ git.checkout('master')
 
 # Going to doc dir and building documentation
 chdir('doc')
-# system('make clean')
-# system('make html')
+system('make clean')
+system('make html')
 
 # Copying html files into a tempdir
 tempdir = mkdtemp()
@@ -49,7 +49,7 @@ print getcwd()
 
 system('rm -rf ./*')
 
-
+copy_tree(tempdir, '.')
 
 sys.exit(0)
 
