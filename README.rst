@@ -80,15 +80,15 @@ Installing from source
 This can be done by checking out the source files from the Git source code repository. This option is mainly for
 those wanting to develop into Meshmagick.
 
-# Clone the meshmagick repository::
+1. Clone the meshmagick repository::
 
     git clone https://github.com/LHEEA/meshmagick.git
 
-# Change directory to meshmagick
+2. Change directory to meshmagick
 
-# Run::
+3. Run::
 
     python setup.py install
 
-# (Optional) Run ``pytest`` if you have `pytest <http://doc.pytest.org/en/latest/>`_ installed.
+4. (Optional) Run ``pytest`` if you have `pytest <http://doc.pytest.org/en/latest/>`_ installed.
 
