@@ -1,0 +1,441 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>meshmagick.inertia module &mdash; Meshmagick User&#39;s Guide 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Meshmagick User&#39;s Guide 1.0 documentation" href="../index.html"/>
+        <link rel="up" title="Meshmagick Package" href="index.html"/>
+        <link rel="next" title="meshmagick.mesh_clipper module" href="meshmagick.mesh_clipper.html"/>
+        <link rel="prev" title="meshmagick.mmio module" href="meshmagick.mmio.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Meshmagick User's Guide
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/install.html">Installation Instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../module/module.html">Using Meshmagick as a Python module</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.mesh.html">meshmagick.mesh module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.mmio.html">meshmagick.mmio module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">meshmagick.inertia module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.mesh_clipper.html">meshmagick.mesh_clipper module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.densities.html">meshmagick.densities module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.hydrostatics.html">meshmagick.hydrostatics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.MMviewer.html">meshmagick.MMviewer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshmagick.tools.html">meshmagick.tools module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Meshmagick User's Guide</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Meshmagick Package</a> &raquo;</li>
+      
+    <li>meshmagick.inertia module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/meshmagick.inertia.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-meshmagick.inertia">
+<span id="meshmagick-inertia-module"></span><h1>meshmagick.inertia module<a class="headerlink" href="#module-meshmagick.inertia" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="meshmagick.inertia.AngularVelocityVector">
+<em class="property">class </em><code class="descclassname">meshmagick.inertia.</code><code class="descname">AngularVelocityVector</code><a class="reference internal" href="../_modules/meshmagick/inertia.html#AngularVelocityVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.AngularVelocityVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="meshmagick.inertia.RigidBodyInertia">
+<em class="property">class </em><code class="descclassname">meshmagick.inertia.</code><code class="descname">RigidBodyInertia</code><span class="sig-paren">(</span><em>mass</em>, <em>cog</em>, <em>xx</em>, <em>yy</em>, <em>zz</em>, <em>yz</em>, <em>xz</em>, <em>xy</em>, <em>point=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RigidBodyInertia"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.at_cog">
+<code class="descname">at_cog</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.at_cog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.gravity_center">
+<code class="descname">gravity_center</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.gravity_center" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.inertia_matrix">
+<code class="descname">inertia_matrix</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.inertia_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.inertia.RigidBodyInertia.is_at_cog">
+<code class="descname">is_at_cog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RigidBodyInertia.is_at_cog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.is_at_cog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.mass">
+<code class="descname">mass</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.mass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.reduction_point">
+<code class="descname">reduction_point</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.reduction_point" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="meshmagick.inertia.RigidBodyInertia.shift_at_cog">
+<code class="descname">shift_at_cog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RigidBodyInertia.shift_at_cog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.shift_at_cog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.xx">
+<code class="descname">xx</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.xx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.xy">
+<code class="descname">xy</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.xy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.xz">
+<code class="descname">xz</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.xz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.yy">
+<code class="descname">yy</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.yy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.yz">
+<code class="descname">yz</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.yz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="meshmagick.inertia.RigidBodyInertia.zz">
+<code class="descname">zz</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.zz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="meshmagick.inertia.RotationalInertia3D">
+<em class="property">class </em><code class="descclassname">meshmagick.inertia.</code><code class="descname">RotationalInertia3D</code><a class="reference internal" href="../_modules/meshmagick/inertia.html#RotationalInertia3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.RotationalInertia3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></code></p>
+<dl class="attribute">
+<dt id="meshmagick.inertia.RotationalInertia3D.array">
+<code class="descname">array</code><a class="headerlink" href="#meshmagick.inertia.RotationalInertia3D.array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.circular_cone_shell">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">circular_cone_shell</code><span class="sig-paren">(</span><em>R</em>, <em>height</em>, <em>density=7850.0</em>, <em>thickness=0.02</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#circular_cone_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.circular_cone_shell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note
+The center of gravity is located at an altitude of z=H/3 over the circular basis center</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.cube">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">cube</code><span class="sig-paren">(</span><em>a</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#cube"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.cube" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.ellipsoid">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">ellipsoid</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#ellipsoid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.ellipsoid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note
+a is along z axis (ellipse semi axis)
+b is along x axis (ellipse semi axis)
+c is along y axis (ellipse semi axis)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.elliptical_cylinder">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">elliptical_cylinder</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>length</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#elliptical_cylinder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.elliptical_cylinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note :
+The center of gravity is located at an altitude of z=H/2 over the elliptical basis center
+a is along x axis (ellipse semi axis)
+b is along y axis (ellipse semi axis)
+length is along z axis</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.frustrum_of_circular_cone_shell">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">frustrum_of_circular_cone_shell</code><span class="sig-paren">(</span><em>r</em>, <em>R</em>, <em>height</em>, <em>density=7850.0</em>, <em>thickness=0.02</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#frustrum_of_circular_cone_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.frustrum_of_circular_cone_shell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note:
+The center of gravity is located at an altitude of z=(H/3)*(2*r+R)/(r+R)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.hemisphere">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">hemisphere</code><span class="sig-paren">(</span><em>radius</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hemisphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.hemisphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note
+The center of gravity is situated at the altitude of z = 3R/8 over the circular basis center</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.hemispherical_shell">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">hemispherical_shell</code><span class="sig-paren">(</span><em>R</em>, <em>density=7850.0</em>, <em>thickness=0.02</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hemispherical_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.hemispherical_shell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note
+The center of gravity is located at an altitude of z=R/2 over the circular basis center</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.hollow_right_circular_cylinder">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">hollow_right_circular_cylinder</code><span class="sig-paren">(</span><em>int_radius</em>, <em>ext_radius</em>, <em>length</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hollow_right_circular_cylinder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.hollow_right_circular_cylinder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.hollow_sphere">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">hollow_sphere</code><span class="sig-paren">(</span><em>int_radius</em>, <em>ext_radius</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hollow_sphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.hollow_sphere" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.isoceles_wedge">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">isoceles_wedge</code><span class="sig-paren">(</span><em>base</em>, <em>height</em>, <em>length</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#isoceles_wedge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.isoceles_wedge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.lateral_cylindrical_shell">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">lateral_cylindrical_shell</code><span class="sig-paren">(</span><em>R</em>, <em>H</em>, <em>density=7850.0</em>, <em>thickness=0.02</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#lateral_cylindrical_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.lateral_cylindrical_shell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.rectangular_prism">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">rectangular_prism</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>h</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#rectangular_prism"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.rectangular_prism" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note:
+a is along x
+b is along y
+h is along z</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.right_angle_wedge">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">right_angle_wedge</code><span class="sig-paren">(</span><em>base</em>, <em>height</em>, <em>length</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_angle_wedge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.right_angle_wedge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.right_circular_cone">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">right_circular_cone</code><span class="sig-paren">(</span><em>radius</em>, <em>length</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_circular_cone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.right_circular_cone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note:
+The center of gravity is at an altitude of z = H/4 over the circular basis center</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.right_circular_cylinder">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">right_circular_cylinder</code><span class="sig-paren">(</span><em>radius</em>, <em>length</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_circular_cylinder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.right_circular_cylinder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.right_rectangular_pyramid">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">right_rectangular_pyramid</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>height</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_rectangular_pyramid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.right_rectangular_pyramid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note
+The center of gravity is located at the altitude z=H/4 over the rectangular basis center</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.sphere">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">sphere</code><span class="sig-paren">(</span><em>radius</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#sphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.sphere" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.spherical_shell">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">spherical_shell</code><span class="sig-paren">(</span><em>R</em>, <em>density=7850.0</em>, <em>thickness=0.02</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#spherical_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.spherical_shell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.torus">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">torus</code><span class="sig-paren">(</span><em>chord_radius</em>, <em>tube_radius</em>, <em>density=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#torus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.torus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="meshmagick.inertia.total_cylindrical_shell">
+<code class="descclassname">meshmagick.inertia.</code><code class="descname">total_cylindrical_shell</code><span class="sig-paren">(</span><em>R</em>, <em>H</em>, <em>density=7850.0</em>, <em>thickness=0.02</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#total_cylindrical_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.total_cylindrical_shell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="meshmagick.mesh_clipper.html" class="btn btn-neutral float-right" title="meshmagick.mesh_clipper module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="meshmagick.mmio.html" class="btn btn-neutral" title="meshmagick.mmio module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Ecole Centrale de Nantes.
+      Last updated on Dec 21, 2016.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

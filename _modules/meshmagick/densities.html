@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>meshmagick.densities &mdash; Meshmagick User&#39;s Guide 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Meshmagick User&#39;s Guide 1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Meshmagick User's Guide
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/install.html">Installation Instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module/module.html">Using Meshmagick as a Python module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Meshmagick User's Guide</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>meshmagick.densities</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for meshmagick.densities</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#  -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Module to retrieve some densities of different mediums&quot;&quot;&quot;</span>
+
+
+<span class="n">_DENSITIES</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CONCRETE&#39;</span><span class="p">:</span> <span class="mf">2300.</span><span class="p">,</span>
+              <span class="s1">&#39;REINFORCED_CONCRETE&#39;</span><span class="p">:</span> <span class="mf">2400.</span><span class="p">,</span>
+              <span class="s1">&#39;FRESH_WATER&#39;</span><span class="p">:</span> <span class="mf">1000.</span><span class="p">,</span>
+              <span class="s1">&#39;SALT_WATER&#39;</span><span class="p">:</span> <span class="mf">1025.</span><span class="p">,</span>
+              <span class="s1">&#39;SAND&#39;</span><span class="p">:</span> <span class="mf">1600.</span><span class="p">,</span>
+              <span class="s1">&#39;STEEL&#39;</span><span class="p">:</span> <span class="mf">7850.</span><span class="p">,</span>
+              <span class="s1">&#39;ALUMINUM&#39;</span><span class="p">:</span> <span class="mf">2700.</span><span class="p">,</span>
+              <span class="s1">&#39;LEAD&#39;</span><span class="p">:</span> <span class="mf">11350.</span><span class="p">,</span>
+              <span class="s1">&#39;TITANIUM&#39;</span><span class="p">:</span> <span class="mf">4500.</span><span class="p">,</span>
+              <span class="s1">&#39;POLYSTYRENE&#39;</span><span class="p">:</span> <span class="mf">1050.</span><span class="p">,</span>
+              <span class="s1">&#39;GASOLINE&#39;</span><span class="p">:</span> <span class="mf">750.</span><span class="p">,</span>
+              <span class="s1">&#39;DIESEL_FUEL&#39;</span><span class="p">:</span> <span class="mf">850.</span><span class="p">,</span>
+              <span class="s1">&#39;ETHANOL&#39;</span><span class="p">:</span> <span class="mf">789.</span><span class="p">,</span>
+              <span class="s1">&#39;AIR_20DEGC&#39;</span><span class="p">:</span> <span class="mf">1.204</span><span class="p">,</span>
+              <span class="s1">&#39;BUTANE&#39;</span><span class="p">:</span> <span class="mf">2.7</span><span class="p">,</span>
+              <span class="s1">&#39;PROPANE&#39;</span><span class="p">:</span> <span class="mf">2.01</span><span class="p">,</span>
+              <span class="s1">&#39;HYDROGEN_-252DEGC&#39;</span><span class="p">:</span> <span class="mf">70.</span><span class="p">,</span>
+              <span class="s1">&#39;NITROGEN_-195DEGC&#39;</span><span class="p">:</span> <span class="mf">810.</span>
+              <span class="p">}</span>
+
+
+<div class="viewcode-block" id="get_density"><a class="viewcode-back" href="../../api/meshmagick.densities.html#meshmagick.densities.get_density">[docs]</a><span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span><span class="n">medium</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the density of medium.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    medium : str</span>
+<span class="sd">        The medium name</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Density of medium (kg/m**3)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">density</span> <span class="o">=</span> <span class="n">_DENSITIES</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">medium</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Medium </span><span class="si">%s</span><span class="s1"> not known...&#39;</span> <span class="o">%</span> <span class="n">medium</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">density</span></div>
+
+
+<div class="viewcode-block" id="list_medium"><a class="viewcode-back" href="../../api/meshmagick.densities.html#meshmagick.densities.list_medium">[docs]</a><span class="k">def</span> <span class="nf">list_medium</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Get the list of available medium.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list</span>
+<span class="sd">        List of available medium</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_DENSITIES</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+
+<span class="c1"># def get_table():</span>
+<span class="c1">#</span>
+<span class="c1">#     col_width = 22</span>
+<span class="c1">#     hline = &#39;+{0:s}+{0:s}+\n&#39;.format(&#39;-&#39; * col_width)</span>
+<span class="c1">#     table = hline</span>
+<span class="c1">#     table += &#39;|{:&lt;{n}s}|{:&gt;{n}s}|\n&#39;.format(&#39;NAME&#39;, &#39;DENSITY (KG/M**3)&#39;, n=col_width)</span>
+<span class="c1">#     table += hline</span>
+<span class="c1">#</span>
+<span class="c1">#     for key in _DENSITIES:</span>
+<span class="c1">#         table +=</span>
+<span class="c1">#         table += hline</span>
+<span class="c1">#</span>
+<span class="c1">#     return table</span>
+<span class="c1">#</span>
+<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c1">#</span>
+<span class="c1">#     print get_table()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Ecole Centrale de Nantes.
+      Last updated on Dec 21, 2016.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

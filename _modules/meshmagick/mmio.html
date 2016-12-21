@@ -1,0 +1,1731 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>meshmagick.mmio &mdash; Meshmagick User&#39;s Guide 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Meshmagick User&#39;s Guide 1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Meshmagick User's Guide
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/install.html">Installation Instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module/module.html">Using Meshmagick as a Python module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Meshmagick User's Guide</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>meshmagick.mmio</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for meshmagick.mmio</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#  -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">real_str</span> <span class="o">=</span> <span class="s1">r&#39;[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?&#39;</span>  <span class="c1"># Regex for floats</span>
+<span class="c1"># =======================================================================</span>
+<span class="c1"># MESH LOADERS</span>
+<span class="c1"># ======================================================================</span>
+<span class="c1"># Contains here all functions to load meshes from different file formats</span>
+
+
+<div class="viewcode-block" id="check_file"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.check_file">[docs]</a><span class="k">def</span> <span class="nf">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;file </span><span class="si">%s</span><span class="s2"> not found&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="load_mesh"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_mesh">[docs]</a><span class="k">def</span> <span class="nf">load_mesh</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_format</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_mesh(filename, format)</span>
+
+<span class="sd">    Driver function that loads every mesh file format known by meshmagick</span>
+<span class="sd">    and returns the node list and the connectivity array</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+<span class="sd">        file_format: str</span>
+<span class="sd">            format of the mesh defined in the extension_dict dictionary</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">file_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extension_dict</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Extension &quot;.</span><span class="si">%s</span><span class="s1">&quot; is not known&#39;</span> <span class="o">%</span> <span class="n">file_format</span><span class="p">)</span>
+
+    <span class="n">loader</span> <span class="o">=</span> <span class="n">extension_dict</span><span class="p">[</span><span class="n">file_format</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">loader</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<div class="viewcode-block" id="load_RAD"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_RAD">[docs]</a><span class="k">def</span> <span class="nf">load_RAD</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_RAD(filename)</span>
+
+<span class="sd">    Loads RADIOSS mesh files. This export file format may be chosen in ICEM</span>
+<span class="sd">    meshing program.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: RAD files have a 1-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">re</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">ifile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># node_line = r&#39;\s*\d+(?:\s*&#39; + real_str + &#39;){3}&#39;</span>
+    <span class="n">node_line</span> <span class="o">=</span> <span class="s1">r&#39;\s*\d+\s*(&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)\s*(&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)\s*(&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+    <span class="n">node_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">node_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
+
+    <span class="n">elem_line</span> <span class="o">=</span> <span class="s1">r&#39;^\s*(?:\d+\s+)</span><span class="si">{6}</span><span class="s1">\d+\s*[\r\n]+&#39;</span>
+    <span class="n">elem_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">elem_line</span> <span class="o">+</span> <span class="s1">&#39;){3,})&#39;</span>
+
+    <span class="n">pattern_node_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">node_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="c1"># pattern_node_line_group = re.compile(node_line, re.MULTILINE)</span>
+    <span class="n">pattern_elem_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">elem_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">pattern_node_section</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">node_section</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">pattern_elem_section</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">elem_section</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+    <span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">node_section</span> <span class="o">=</span> <span class="n">pattern_node_section</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">pattern_node_line</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">node_section</span><span class="p">):</span>
+        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">groups</span><span class="p">())))</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">elem_section</span> <span class="o">=</span> <span class="n">pattern_elem_section</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">pattern_elem_line</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">elem_section</span><span class="p">):</span>
+        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">:]))</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<div class="viewcode-block" id="load_HST"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_HST">[docs]</a><span class="k">def</span> <span class="nf">load_HST</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_HST(filename)</span>
+
+<span class="sd">    Loads HYDROSTAR (Bureau Veritas (c)) mesh files.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: HST files have a 1-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">ifile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="kn">import</span> <span class="nn">re</span>
+
+    <span class="n">node_line</span> <span class="o">=</span> <span class="s1">r&#39;\s*\d+(?:\s+&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="si">{3}</span><span class="s1">&#39;</span>
+    <span class="n">node_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">node_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
+
+    <span class="n">elem_line</span> <span class="o">=</span> <span class="s1">r&#39;^\s*(?:\d+\s+)</span><span class="si">{3}</span><span class="s1">\d+\s*[\r\n]+&#39;</span>
+    <span class="n">elem_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">elem_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
+
+    <span class="n">pattern_node_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">node_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">pattern_elem_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">elem_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">pattern_node_section</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">node_section</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">pattern_elem_section</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">elem_section</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+    <span class="n">vertices_tmp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nv</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">node_section</span> <span class="ow">in</span> <span class="n">pattern_node_section</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">pattern_node_line</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">node_section</span><span class="p">):</span>
+            <span class="n">vertices_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]))</span>
+        <span class="n">nv_tmp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertices_tmp</span><span class="p">)</span>
+        <span class="n">vertices_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vertices_tmp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nv</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">vertices</span> <span class="o">=</span> <span class="n">vertices_tmp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">nv</span> <span class="o">=</span> <span class="n">nv_tmp</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">vertices</span><span class="p">,</span> <span class="n">vertices_tmp</span><span class="p">))</span>
+            <span class="n">nv</span> <span class="o">+=</span> <span class="n">nv_tmp</span>
+
+    <span class="n">faces_tmp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">elem_section</span> <span class="ow">in</span> <span class="n">pattern_elem_section</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">pattern_elem_line</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">elem_section</span><span class="p">):</span>
+            <span class="n">faces_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+        <span class="n">nf_tmp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">faces_tmp</span><span class="p">)</span>
+        <span class="n">faces_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">faces_tmp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nf</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">faces</span> <span class="o">=</span> <span class="n">faces_tmp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">nf</span> <span class="o">=</span> <span class="n">nf_tmp</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">faces</span><span class="p">,</span> <span class="n">faces_tmp</span><span class="p">))</span>
+            <span class="n">nf</span> <span class="o">+=</span> <span class="n">nf_tmp</span>
+
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="o">-</span><span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="load_DAT"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_DAT">[docs]</a><span class="k">def</span> <span class="nf">load_DAT</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Not implemented.</span>
+<span class="sd">    Intended to load .DAT files used in DIODORE (PRINCIPIA (c))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="load_INP"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_INP">[docs]</a><span class="k">def</span> <span class="nf">load_INP</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_INP(filename)</span>
+
+<span class="sd">    Loads DIODORE (PRINCIPIA (c)) configuration file format. It parses</span>
+<span class="sd">    the .INP file and extract meshes defined in subsequent .DAT files</span>
+<span class="sd">    using the different informations contained in the .INP file.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: INP/DAT files use a 1-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">re</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="c1"># Retrieving frames into a dictionnary frames</span>
+    <span class="n">pattern_frame_str</span> <span class="o">=</span> <span class="s1">r&#39;^\s*\*FRAME,NAME=(.+)[\r\n]+(.*)&#39;</span>
+    <span class="n">pattern_frame</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">pattern_frame_str</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+    <span class="n">frames</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">pattern_frame</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="n">frame_name</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">frame_vector</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">r&#39;[, ]&#39;</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">frames</span><span class="p">[</span><span class="n">frame_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">frame_vector</span><span class="p">))</span>
+
+    <span class="c1"># Storing the inp layout into a list of dictionary</span>
+    <span class="n">pattern_node_elements</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">r&#39;^\s*\*(NODE|ELEMENT),(.*)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mesh_files</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">pattern_node_elements</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="n">field_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">field_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">field_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NODE&#39;</span><span class="p">:</span>
+            <span class="n">field_dict</span><span class="p">[</span><span class="s1">&#39;INCREMENT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NO&#39;</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">pair</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+            <span class="n">field_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="c1"># Retrieving information on mesh files and their usage</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">field_dict</span><span class="p">[</span><span class="s1">&#39;INPUT&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">mesh_files</span><span class="p">:</span>
+            <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="n">field_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_CALL_INP&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;NODE_CALL_INP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;ELEMENT_CALL_INP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="n">field_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_CALL_INP&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">layout</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field_dict</span><span class="p">)</span>
+
+        <span class="c1"># RETRIEVING DATA SECTIONS FROM MESHFILES</span>
+        <span class="c1"># patterns for recognition of sections</span>
+    <span class="n">node_line</span> <span class="o">=</span> <span class="s1">r&#39;\s*\d+(?:\s+&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="si">{3}</span><span class="s1">&#39;</span>
+    <span class="n">node_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">node_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
+    <span class="n">elem_line</span> <span class="o">=</span> <span class="s1">r&#39;^ +\d+(?: +\d+){3,4}[\r\n]+&#39;</span>  <span class="c1"># 3 -&gt; triangle, 4 -&gt; quadrangle</span>
+    <span class="n">elem_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">elem_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
+    <span class="n">pattern_node_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">node_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">pattern_elem_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">elem_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">pattern_node_section</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">node_section</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">pattern_elem_section</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">elem_section</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">mesh_files</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">meshfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="n">file</span> <span class="o">+</span> <span class="s1">&#39;.DAT&#39;</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;File </span><span class="si">{0:s}</span><span class="s1"> not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file</span> <span class="o">+</span> <span class="s1">&#39;.DAT&#39;</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">meshfile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">meshfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="n">node_section</span> <span class="o">=</span> <span class="n">pattern_node_section</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_section</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;Several NODE sections into a .DAT file is not supported by meshmagick</span>
+<span class="s2">                              as it is considered as bad practice&quot;&quot;&quot;</span>
+        <span class="n">node_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">idx_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">pattern_node_line</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">node_section</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">idx_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="n">node_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+        <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;NODE_SECTION&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_array</span>
+
+        <span class="c1"># Detecting renumberings to do</span>
+        <span class="n">real_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># renumberings = []</span>
+        <span class="n">id_new</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">idx_array</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="c1"># FIXME: cette partie est tres buggee !!!</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">idx_array</span><span class="p">):</span>
+            <span class="n">id_new</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+
+        <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;ELEM_SECTIONS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">elem_section</span> <span class="ow">in</span> <span class="n">pattern_elem_section</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+
+            <span class="n">elem_array</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">pattern_elem_line</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">elem_section</span><span class="p">):</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+                <span class="c1"># for node in elem[1:]:</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="n">id_new</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># Case of a triangle, we repeat the first node at the last position</span>
+                    <span class="n">elem</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                <span class="n">elem_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="p">))</span>
+            <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;ELEM_SECTIONS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem_array</span><span class="p">)</span>
+        <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;nb_elem_sections&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;ELEM_SECTIONS&#39;</span><span class="p">])</span>
+
+        <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;nb_elem_sections_used&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">nb_nodes</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nb_elems</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">layout</span><span class="p">:</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;INPUT&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NODE&#39;</span><span class="p">:</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;NODE_SECTION&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+            <span class="c1"># Translation of nodes according to frame option id any</span>
+            <span class="n">nodes</span> <span class="o">+=</span> <span class="n">frames</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;FRAME&#39;</span><span class="p">]]</span>  <span class="c1"># TODO: s&#39;assurer que frame est une options obligatoire...</span>
+
+            <span class="k">if</span> <span class="n">nb_nodes</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">vertices</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">nb_nodes</span> <span class="o">=</span> <span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">increment</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;INCREMENT&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NO&#39;</span><span class="p">:</span>
+                <span class="n">vertices</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">increment</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">vertices</span><span class="p">,</span> <span class="n">nodes</span><span class="p">))</span>
+                <span class="n">nb_nodes</span> <span class="o">=</span> <span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">increment</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># this is an ELEMENT section</span>
+            <span class="n">elem_section</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;ELEM_SECTIONS&#39;</span><span class="p">][</span><span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;nb_elem_sections_used&#39;</span><span class="p">]],</span>
+                                      <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+            <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;nb_elem_sections_used&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;nb_elem_sections_used&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;nb_elem_sections&#39;</span><span class="p">]:</span>
+                <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;nb_elem_sections_used&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># Updating to new id of nodes</span>
+            <span class="n">elems</span> <span class="o">=</span> <span class="n">elem_section</span>
+            <span class="k">if</span> <span class="n">increment</span><span class="p">:</span>
+                <span class="n">elems</span> <span class="o">+=</span> <span class="n">nb_nodes</span>
+
+            <span class="k">if</span> <span class="n">nb_elems</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">faces</span> <span class="o">=</span> <span class="n">elems</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">nb_elems</span> <span class="o">=</span> <span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">faces</span><span class="p">,</span> <span class="n">elems</span><span class="p">))</span>
+                <span class="n">nb_elems</span> <span class="o">=</span> <span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="o">-</span><span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="load_TEC"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_TEC">[docs]</a><span class="k">def</span> <span class="nf">load_TEC</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_TEC(filename)</span>
+
+<span class="sd">        Loads TECPLOT (Tecplot (c)) mesh files. It relies on the tecplot file</span>
+<span class="sd">        reader from the VTK library.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            filename: str</span>
+<span class="sd">                name of the meh file on disk</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            vertices: ndarray</span>
+<span class="sd">                numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">            faces: ndarray</span>
+<span class="sd">                numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">        Note: TEC files have a 1-indexing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">re</span>
+
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">data_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                    <span class="s1">r&#39;ZONE.*\s*N\s*=\s*(\d+)\s*,\s*E=\s*(\d+)\s*,\s*F\s*=\s*FEPOINT\s*,\s*ET\s*=\s*QUADRILATERAL\s+&#39;</span>
+                    <span class="o">+</span> <span class="s1">r&#39;(^(?:\s*&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">r&#39;){3,})\s+&#39;</span>
+                    <span class="o">+</span> <span class="s1">r&#39;(^(?:\s*\d+)*)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">nv</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">data_pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+    <span class="n">nv</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nv</span><span class="p">)</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nf</span><span class="p">)</span>
+
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">vertices</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nv</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">faces</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nf</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<div class="viewcode-block" id="load_VTU"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_VTU">[docs]</a><span class="k">def</span> <span class="nf">load_VTU</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_VTU(filename)</span>
+
+<span class="sd">    Loads VTK file format in the new XML format (vtu file extension for</span>
+<span class="sd">    unstructured meshes). It relies on the reader from the VTK library.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: VTU files have a 0-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkXMLUnstructuredGridReader</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">vtkXMLUnstructuredGridReader</span><span class="p">()</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+    <span class="n">vtk_mesh</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span>
+
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">_dump_vtk</span><span class="p">(</span><span class="n">vtk_mesh</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<div class="viewcode-block" id="load_VTP"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_VTP">[docs]</a><span class="k">def</span> <span class="nf">load_VTP</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_VTP(filename)</span>
+
+<span class="sd">    Loads VTK file format in the new XML format (vtp file extension for</span>
+<span class="sd">    polydata meshes). It relies on the reader from the VTK library.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: VTP files have a 0-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkXMLPolyDataReader</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">vtkXMLPolyDataReader</span><span class="p">()</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+    <span class="n">vtk_mesh</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span>
+
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">_dump_vtk</span><span class="p">(</span><span class="n">vtk_mesh</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<div class="viewcode-block" id="load_VTK"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_VTK">[docs]</a><span class="k">def</span> <span class="nf">load_VTK</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_VTK(filename)</span>
+
+<span class="sd">    Loads VTK file format in the legacy format (vtk file extension).</span>
+<span class="sd">    It relies on the reader from the VTK library.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: VTU files have a 0-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkUnstructuredGridReader</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">vtkUnstructuredGridReader</span><span class="p">()</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+    <span class="n">vtk_mesh</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span>
+
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">_dump_vtk</span><span class="p">(</span><span class="n">vtk_mesh</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<span class="k">def</span> <span class="nf">_dump_vtk</span><span class="p">(</span><span class="n">vtk_mesh</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;_dump_vtk(vtk_mesh)</span>
+
+<span class="sd">    Internal driver function that uses the VTK library to read VTK polydata</span>
+<span class="sd">    or vtk unstructured grid data structures</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">nv</span> <span class="o">=</span> <span class="n">vtk_mesh</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nv</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
+        <span class="n">vertices</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vtk_mesh</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">vtk_mesh</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nf</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nf</span><span class="p">):</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="n">vtk_mesh</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">nv_facet</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv_facet</span><span class="p">):</span>
+            <span class="n">faces</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">GetPointId</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nv_facet</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">faces</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span>
+
+
+<div class="viewcode-block" id="load_STL"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_STL">[docs]</a><span class="k">def</span> <span class="nf">load_STL</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_STL(filename)</span>
+
+<span class="sd">    Loads STL file format. It relies on the reader from the VTK library.</span>
+<span class="sd">    As STL file format maintains a redundant set of vertices for each faces</span>
+<span class="sd">    of the mesh, it returns a merged list of nodes and connectivity array</span>
+<span class="sd">    by using the merge_duplicates function.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: STL files have a 0-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkSTLReader</span>
+    <span class="kn">from</span> <span class="nn">tools</span> <span class="k">import</span> <span class="n">merge_duplicate_rows</span>
+
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">vtkSTLReader</span><span class="p">()</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">GetOutputDataObject</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">nv</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nv</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
+        <span class="n">vertices</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nf</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nf</span><span class="p">):</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cell</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="n">faces</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">GetPointId</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+                <span class="n">faces</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># always repeating the first node as stl is triangle only</span>
+
+    <span class="c1"># Merging duplicates nodes</span>
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">new_id</span> <span class="o">=</span> <span class="n">merge_duplicate_rows</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">new_id</span><span class="p">[</span><span class="n">faces</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<div class="viewcode-block" id="load_NAT"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_NAT">[docs]</a><span class="k">def</span> <span class="nf">load_NAT</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_NAT(filename)</span>
+
+<span class="sd">    This function loads natural file format for meshes.</span>
+
+<span class="sd">    Format spec :</span>
+<span class="sd">    -------------------</span>
+<span class="sd">    xsym    ysym</span>
+<span class="sd">    n    m</span>
+<span class="sd">    x1    y1    z1</span>
+<span class="sd">    .</span>
+<span class="sd">    .</span>
+<span class="sd">    .</span>
+<span class="sd">    xn    yn    zn</span>
+<span class="sd">    i1    j1    k1    l1</span>
+<span class="sd">    .</span>
+<span class="sd">    .</span>
+<span class="sd">    .</span>
+<span class="sd">    im    jm    km    lm</span>
+<span class="sd">    -------------------</span>
+
+<span class="sd">    where :</span>
+<span class="sd">    n : number of nodes</span>
+<span class="sd">    m : number of cells</span>
+<span class="sd">    x1 y1 z1 : cartesian coordinates of node 1</span>
+<span class="sd">    i1 j1 k1 l1 : counterclock wise Ids of nodes for cell 1</span>
+<span class="sd">    if cell 1 is a triangle, i1==l1</span>
+
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: NAT files have a 1-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">ifile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="n">nv</span><span class="p">,</span> <span class="n">nf</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+
+    <span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
+        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nf</span><span class="p">):</span>
+        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+    <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="o">-</span><span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="load_GDF"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_GDF">[docs]</a><span class="k">def</span> <span class="nf">load_GDF</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_GDF(filename)</span>
+
+<span class="sd">    Loads WAMIT (Wamit INC. (c)) GDF mesh files. As GDF file format maintains</span>
+<span class="sd">    a redundant set of vertices for each faces of the mesh, it returns a merged</span>
+<span class="sd">    list of nodes and connectivity array by using the merge_duplicates function.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: GDF files have a 1-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">tools</span> <span class="k">import</span> <span class="n">merge_duplicate_rows</span>
+
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">ifile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>  <span class="c1"># skip one header line</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">ulen</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">grav</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">isx</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">isy</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span> <span class="o">*</span> <span class="n">nf</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nf</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+    <span class="n">iv</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">icell</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nf</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+            <span class="n">iv</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">vertices</span><span class="p">[</span><span class="n">iv</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+            <span class="n">faces</span><span class="p">[</span><span class="n">icell</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">iv</span>
+
+    <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Merging duplicates nodes</span>
+    <span class="c1"># vertices, new_id = merge_duplicate_rows(vertices, return_index=True)</span>
+    <span class="c1"># faces = new_id[faces]</span>
+
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<div class="viewcode-block" id="load_MAR"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_MAR">[docs]</a><span class="k">def</span> <span class="nf">load_MAR</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_MAR(filename)</span>
+
+<span class="sd">    Loads Nemoh (Ecole Centrale de Nantes) mesh files.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: MAR files have a 1-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">ifile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>  <span class="c1"># Skipping the first line of the file</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
+
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+    <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="o">-</span><span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="load_MSH"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_MSH">[docs]</a><span class="k">def</span> <span class="nf">load_MSH</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_MSH(filename)</span>
+
+<span class="sd">    Loads .MSH mesh files generated by GMSH by C. Geuzaine and J.F. Remacle.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: MSH files have a 1-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">re</span>
+
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">nb_nodes</span><span class="p">,</span> <span class="n">nodes_data</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">r&#39;\$Nodes\n(\d+)\n(.+)\$EndNodes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+    <span class="n">nb_elts</span><span class="p">,</span> <span class="n">elts_data</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">r&#39;\$Elements\n(\d+)\n(.+)\$EndElements&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">nodes_data</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))[:,</span> <span class="mi">1</span><span class="p">:]</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Triangles</span>
+    <span class="k">for</span> <span class="n">tri_elt</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">r&#39;(^\d+\s2(?:\s\d+)+?$)&#39;</span><span class="p">,</span> <span class="n">elts_data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>
+        <span class="n">tri_elt</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">tri_elt</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+        <span class="n">triangle</span> <span class="o">=</span> <span class="n">tri_elt</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span>
+        <span class="n">triangle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triangle</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triangle</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">quad_elt</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">r&#39;(^\d+\s3(?:\s\d+)+?$)&#39;</span><span class="p">,</span> <span class="n">elts_data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>
+        <span class="n">quad_elt</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">quad_elt</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+        <span class="n">quadrangle</span> <span class="o">=</span> <span class="n">quad_elt</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quadrangle</span><span class="p">)</span>
+
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<div class="viewcode-block" id="load_MED"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_MED">[docs]</a><span class="k">def</span> <span class="nf">load_MED</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load_MED(filename)</span>
+
+<span class="sd">    Loads MED mesh files generated by SALOME MECA.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the meh file on disk</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note: MED files have a 1-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">h5py</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;MED file format reader needs h5py module to be installed&#39;</span><span class="p">)</span>
+
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">list_of_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">list_of_names</span><span class="o">.</span><span class="n">append</span><span class="p">)</span>
+
+    <span class="c1"># TODO: gerer les cas ou on a que des tris ou que des quads...</span>
+    <span class="n">nb_quadrangles</span> <span class="o">=</span> <span class="n">nb_triangles</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">list_of_names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;/NOE/COO&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="n">vertices</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">nv</span> <span class="o">=</span> <span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;/MAI/TR3/NOD&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="n">triangles</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">nb_triangles</span> <span class="o">=</span> <span class="n">triangles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;/MAI/QU4/NOD&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="n">quadrangles</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">nb_quadrangles</span> <span class="o">=</span> <span class="n">quadrangles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">nb_triangles</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">triangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">triangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">triangles</span><span class="p">,</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">nb_quadrangles</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">quadrangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_triangles</span><span class="o">+</span><span class="n">nb_quadrangles</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">faces</span><span class="p">[:</span><span class="n">nb_triangles</span><span class="p">]</span> <span class="o">=</span> <span class="n">triangles</span>
+    <span class="c1"># faces[:nb_triangles, -1] = triangles[:, 0]</span>
+    <span class="n">faces</span><span class="p">[</span><span class="n">nb_triangles</span><span class="p">:]</span> <span class="o">=</span> <span class="n">quadrangles</span>
+    
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<div class="viewcode-block" id="load_WRL"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_WRL">[docs]</a><span class="k">def</span> <span class="nf">load_WRL</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkVRMLImporter</span>
+    <span class="kn">import</span> <span class="nn">re</span>
+
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    
+    <span class="c1"># Checking version</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">ver</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">r&#39;#VRML\s+V(\d.\d)&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ver</span> <span class="o">==</span> <span class="s1">&#39;2.0&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;VRML loader only supports VRML 2.0 format (version </span><span class="si">%s</span><span class="s1"> given)&#39;</span> <span class="o">%</span> <span class="n">ver</span><span class="p">)</span>
+
+    <span class="n">importer</span> <span class="o">=</span> <span class="n">vtkVRMLImporter</span><span class="p">()</span>
+    <span class="n">importer</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">importer</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+
+    <span class="n">actors</span> <span class="o">=</span> <span class="n">importer</span><span class="o">.</span><span class="n">GetRenderer</span><span class="p">()</span><span class="o">.</span><span class="n">GetActors</span><span class="p">()</span>
+    <span class="n">actors</span><span class="o">.</span><span class="n">InitTraversal</span><span class="p">()</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">actors</span><span class="o">.</span><span class="n">GetNextActor</span><span class="p">()</span><span class="o">.</span><span class="n">GetMapper</span><span class="p">()</span><span class="o">.</span><span class="n">GetInput</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">_dump_vtk</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_NEM"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_NEM">[docs]</a><span class="k">def</span> <span class="nf">load_NEM</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    
+    <span class="n">ifile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    
+    <span class="n">nv</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+    
+    <span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ivertex</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
+        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">iface</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">nf</span><span class="p">):</span>
+        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">faces</span> <span class="o">-=</span> <span class="mi">1</span>
+    
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+             
+
+<span class="c1">#=======================================================================</span>
+<span class="c1">#                             MESH WRITERS</span>
+<span class="c1">#=======================================================================</span>
+<span class="c1"># Contains here all functions to write meshes in different file formats</span>
+
+<div class="viewcode-block" id="write_mesh"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_mesh">[docs]</a><span class="k">def</span> <span class="nf">write_mesh</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">file_format</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_mesh(filename, file_format)</span>
+
+<span class="sd">    Driver function that writes every mesh file file_format known by meshmagick</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+<span class="sd">        file_format: str</span>
+<span class="sd">            file_format of the mesh defined in the extension_dict dictionary</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">file_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extension_dict</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Extension &quot;</span><span class="si">%s</span><span class="s1">&quot; is not known&#39;</span> <span class="o">%</span> <span class="n">file_format</span><span class="p">)</span>
+
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">extension_dict</span><span class="p">[</span><span class="n">file_format</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">writer</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="write_DAT"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_DAT">[docs]</a><span class="k">def</span> <span class="nf">write_DAT</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_DAT(filename, vertices, faces)</span>
+
+<span class="sd">    Writes .DAT file format for the DIODORE (PRINCIPA (c)) software.</span>
+<span class="sd">    It also displays suggestions for inclusion into the .INP configuration</span>
+<span class="sd">    file.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">os</span>
+
+    <span class="n">root_filename</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">root_filename</span> <span class="o">+</span> <span class="n">ext</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">ofile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">$ Data for DIODORE input file : </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ GENERATED BY MESHMAGICK ON </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">$</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%c</span><span class="s1">&#39;</span><span class="p">)))</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ NODE</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">vertex_block</span> <span class="o">=</span> \
+        <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="s1">&#39;</span><span class="si">{:8d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                            <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:13.5E}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">node</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span>
+                <span class="p">),</span>
+
+                <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">*RETURN</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">vertex_block</span><span class="p">)</span>
+
+    <span class="n">quad_block</span> <span class="o">=</span> <span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">$ ELEMENT,TYPE=Q4C000,ELSTRUCTURE=</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+    <span class="n">tri_block</span> <span class="o">=</span> <span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">$ ELEMENT,TYPE=T3C000,ELSTRUCTURE=</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+    <span class="n">nq</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nt</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">faces</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">cell</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="c1"># quadrangle</span>
+            <span class="n">nq</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">quad_block</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">quad_block</span><span class="p">,</span>
+                    <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;</span><span class="si">{:8d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                    <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:8d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">cell</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Triangle</span>
+            <span class="n">nt</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">tri_block</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">tri_block</span><span class="p">,</span>
+                    <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;</span><span class="si">{:8d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                    <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:8d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">cell</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;-------------------------------------------------&#39;</span>
+    <span class="nb">print</span> <span class="s1">&#39;Suggestion for .inp DIODORE input file :&#39;</span>
+    <span class="nb">print</span> <span class="s1">&#39;&#39;</span>
+    <span class="nb">print</span> <span class="s1">&#39;*NODE,INPUT=</span><span class="si">{0}</span><span class="s1">,FRAME=???&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">nq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">quad_block</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">quad_block</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">*RETURN</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">quad_block</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s1">&#39;*ELEMENT,TYPE=Q4C000,ELSTRUCTURE=</span><span class="si">{0}</span><span class="s1">,INPUT=</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">tri_block</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">tri_block</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">*RETURN</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tri_block</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s1">&#39;*ELEMENT,TYPE=T3C000,ELSTRUCTURE=</span><span class="si">{0}</span><span class="s1">,INPUT=</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;&#39;</span>
+    <span class="nb">print</span> <span class="s1">&#39;-------------------------------------------------&#39;</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="write_HST"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_HST">[docs]</a><span class="k">def</span> <span class="nf">write_HST</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_HST(filename, vertices, faces)</span>
+
+<span class="sd">    Writes .HST file format for the HYDROSTAR (Bureau Veritas (c)) software.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: allow many bodies</span>
+
+    <span class="n">ofile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span>
+        <span class="s1">&#39;PROJECT:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;USERS:   meshmagick</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;NBODY   1</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;RHO   1025.0</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;GRAVITY   9.81</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+    <span class="p">)))</span>
+
+    <span class="n">coordinates_block</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span>  <span class="c1"># block</span>
+            <span class="s1">&#39;COORDINATES</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>  <span class="c1"># line</span>
+                <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="s1">&#39;</span><span class="si">{:10d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>  <span class="c1"># index</span>
+                        <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:16.6E}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">node</span><span class="p">)</span>  <span class="c1"># node coordinates</span>
+                    <span class="p">)</span>
+                <span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">ENDCOORDINATES</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+    <span class="p">))</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">coordinates_block</span><span class="p">)</span>
+
+    <span class="n">cells_coordinates</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span>  <span class="c1"># block</span>
+        <span class="s1">&#39;PANEL TYPE 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>  <span class="c1"># line</span>
+            <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">{:10d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node_idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">node_idx</span> <span class="ow">in</span> <span class="n">cell</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">faces</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="p">),</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">ENDPANEL</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+    <span class="p">))</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cells_coordinates</span><span class="p">)</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ENDFILE</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="write_TEC"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_TEC">[docs]</a><span class="k">def</span> <span class="nf">write_TEC</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_TEC(filename, vertices, faces)</span>
+
+<span class="sd">    Writes .TEC file format for the TECPLOT (Tecplot (c)) visualisation</span>
+<span class="sd">    software. It relies on the VTK library for its writer.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ofile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="n">nv</span> <span class="o">=</span> <span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;TITLE = </span><span class="se">\&quot;</span><span class="s1"> THIS FILE WAS GENERATED BY MESHMAGICK - FICHIER : </span><span class="si">{}</span><span class="s1"> </span><span class="se">\&quot;</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;VARIABLES = </span><span class="se">\&quot;</span><span class="s1">X</span><span class="se">\&quot;</span><span class="s1">,</span><span class="se">\&quot;</span><span class="s1">Y</span><span class="se">\&quot;</span><span class="s1">,</span><span class="se">\&quot;</span><span class="s1">Z</span><span class="se">\&quot;</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ZONE T=</span><span class="se">\&quot;</span><span class="s1">MESH</span><span class="se">\&quot;</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;N=</span><span class="si">{nv:10d}</span><span class="s1"> ,E=</span><span class="si">{nf:10d}</span><span class="s1"> , F=FEPOINT, ET=QUADRILATERAL</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nv</span><span class="o">=</span><span class="n">nv</span><span class="p">,</span> <span class="n">nf</span><span class="o">=</span><span class="n">nf</span><span class="p">))</span>
+
+    <span class="n">node_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="c1"># block</span>
+        <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:16.6E}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">node</span><span class="p">)</span>
+        <span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">vertices</span>
+    <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">node_block</span><span class="p">)</span>
+
+    <span class="n">cells_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>  <span class="c1"># block</span>
+        <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:10d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">cell</span><span class="p">)</span>
+        <span class="p">)</span> <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">faces</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cells_block</span><span class="p">)</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="write_VTU"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_VTU">[docs]</a><span class="k">def</span> <span class="nf">write_VTU</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_VTU(filename, vertices, faces)</span>
+
+<span class="sd">    Writes .vtu file format for the paraview (Kitware (c)) visualisation</span>
+<span class="sd">    software. It relies on the VTK library for its writer. VTU files use</span>
+<span class="sd">    the last XML file format of the VTK library.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkXMLUnstructuredGridWriter</span><span class="p">,</span> <span class="n">VTK_MAJOR_VERSION</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">vtkXMLUnstructuredGridWriter</span><span class="p">()</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">SetDataModeToAscii</span><span class="p">()</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">unstructured_grid</span> <span class="o">=</span> <span class="n">_build_vtkUnstructuredGrid</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">unstructured_grid</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">unstructured_grid</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">Write</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="write_VTP"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_VTP">[docs]</a><span class="k">def</span> <span class="nf">write_VTP</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_VTP(filename, vertices, faces)</span>
+
+<span class="sd">    Writes .vtp file format for the paraview (Kitware (c)) visualisation</span>
+<span class="sd">    software. It relies on the VTK library for its writer. VTP files use</span>
+<span class="sd">    the last XML file format of the VTK library and correspond to polydata.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkXMLPolyDataWriter</span><span class="p">,</span> <span class="n">VTK_MAJOR_VERSION</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">vtkXMLPolyDataWriter</span><span class="p">()</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">SetDataModeToAscii</span><span class="p">()</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">polydata</span> <span class="o">=</span> <span class="n">_build_vtkPolyData</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">Write</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="write_VTK"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_VTK">[docs]</a><span class="k">def</span> <span class="nf">write_VTK</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_VTK(filename, vertices, faces)</span>
+
+<span class="sd">    Writes .vtk file format for the paraview (Kitware (c)) visualisation</span>
+<span class="sd">    software. It relies on the VTK library for its writer. VTK files use</span>
+<span class="sd">    the legagy ASCII file format of the VTK library.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkUnstructuredGridWriter</span><span class="p">,</span> <span class="n">VTK_MAJOR_VERSION</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">vtkUnstructuredGridWriter</span><span class="p">()</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">unstructured_grid</span> <span class="o">=</span> <span class="n">_build_vtkUnstructuredGrid</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">unstructured_grid</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">unstructured_grid</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">Write</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<span class="k">def</span> <span class="nf">_build_vtkUnstructuredGrid</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;_build_vtk_mesh_obj(vertices, faces)</span>
+
+<span class="sd">    Internal function that builds a VTK object for manipulation by the VTK library.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Returns: vtkObject</span>
+<span class="sd">        the vtk object instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">vtk</span>
+
+    <span class="n">nv</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">vertices</span><span class="p">))</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">faces</span><span class="p">))</span>
+
+    <span class="n">vtk_mesh</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkUnstructuredGrid</span><span class="p">()</span>
+    <span class="n">vtk_mesh</span><span class="o">.</span><span class="n">Allocate</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="n">nf</span><span class="p">)</span>
+
+    <span class="c1"># Building the vtkPoints data structure</span>
+    <span class="n">vtk_points</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">()</span>
+    <span class="n">vtk_points</span><span class="o">.</span><span class="n">SetNumberOfPoints</span><span class="p">(</span><span class="n">nv</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vertices</span><span class="p">):</span>
+        <span class="n">vtk_points</span><span class="o">.</span><span class="n">SetPoint</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">vertex</span><span class="p">)</span>
+
+    <span class="n">vtk_mesh</span><span class="o">.</span><span class="n">SetPoints</span><span class="p">(</span><span class="n">vtk_points</span><span class="p">)</span>  <span class="c1"># Storing the points into vtk_mesh</span>
+
+    <span class="c1"># Building the vtkCell data structure</span>
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">cell</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">vtk_cell</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkTriangle</span><span class="p">()</span>
+            <span class="n">nc</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># #print &#39;quadrangle&#39;</span>
+            <span class="n">vtk_cell</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkQuad</span><span class="p">()</span>
+            <span class="n">nc</span> <span class="o">=</span> <span class="mi">4</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+            <span class="n">vtk_cell</span><span class="o">.</span><span class="n">GetPointIds</span><span class="p">()</span><span class="o">.</span><span class="n">SetId</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">cell</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+        <span class="n">vtk_mesh</span><span class="o">.</span><span class="n">InsertNextCell</span><span class="p">(</span><span class="n">vtk_cell</span><span class="o">.</span><span class="n">GetCellType</span><span class="p">(),</span> <span class="n">vtk_cell</span><span class="o">.</span><span class="n">GetPointIds</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">vtk_mesh</span>
+
+
+<span class="k">def</span> <span class="nf">_build_vtkPolyData</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">vtk</span>
+
+    <span class="c1"># Create a vtkPoints object and store the points in it</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
+        <span class="n">points</span><span class="o">.</span><span class="n">InsertNextPoint</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+
+    <span class="c1"># Create a vtkCellArray to store faces</span>
+    <span class="n">cell_array</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCellArray</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">face_ids</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">face_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">face_ids</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="c1"># Triangle</span>
+            <span class="n">curface</span> <span class="o">=</span> <span class="n">face_ids</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">vtk_face</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkTriangle</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Quadrangle</span>
+            <span class="n">curface</span> <span class="o">=</span> <span class="n">face_ids</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">vtk_face</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkQuad</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="nb">id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">curface</span><span class="p">):</span>
+            <span class="n">vtk_face</span><span class="o">.</span><span class="n">GetPointIds</span><span class="p">()</span><span class="o">.</span><span class="n">SetId</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+
+        <span class="n">cell_array</span><span class="o">.</span><span class="n">InsertNextCell</span><span class="p">(</span><span class="n">vtk_face</span><span class="p">)</span>
+
+    <span class="n">polydata_mesh</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="p">()</span>
+    <span class="n">polydata_mesh</span><span class="o">.</span><span class="n">SetPoints</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+    <span class="n">polydata_mesh</span><span class="o">.</span><span class="n">SetPolys</span><span class="p">(</span><span class="n">cell_array</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">polydata_mesh</span>
+
+
+<div class="viewcode-block" id="write_NAT"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_NAT">[docs]</a><span class="k">def</span> <span class="nf">write_NAT</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_NAT(filename, vertices, faces)</span>
+
+<span class="sd">    Writes .nat file format as defined into the load_NAT function.</span>
+
+<span class="sd">    See:</span>
+<span class="sd">        load_NAT</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ofile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="n">nv</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">vertices</span><span class="p">))</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">faces</span><span class="p">))</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%6u%6u</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># lire les symmetries dans args...</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%6u%6u</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nv</span><span class="p">,</span> <span class="n">nf</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%15.6E%15.6E%15.6E</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vertex</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">faces</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%10u%10u%10u%10u</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cell</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cell</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cell</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">cell</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="write_NEM"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_NEM">[docs]</a><span class="k">def</span> <span class="nf">write_NEM</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    
+    <span class="n">ofile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%u</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%u</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%15.6f</span><span class="se">\t</span><span class="si">%15.6f</span><span class="se">\t</span><span class="si">%15.6f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vertex</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    
+    <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">faces</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%10u</span><span class="se">\t</span><span class="si">%10u</span><span class="se">\t</span><span class="si">%10u</span><span class="se">\t</span><span class="si">%10u</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+        
+    <span class="n">ofile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+    <span class="k">return</span></div>
+    
+    
+<div class="viewcode-block" id="write_GDF"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_GDF">[docs]</a><span class="k">def</span> <span class="nf">write_GDF</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_GDF(filename, vertices, faces)</span>
+
+<span class="sd">    Writes .gdf file format for the WAMIT (Wamit INC. (c)) BEM software.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">nf</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">faces</span><span class="p">))</span>
+
+    <span class="n">ofile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;GDF file generated by meshmagick on </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%c</span><span class="s1">&#39;</span><span class="p">))</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%16.6f%16.6f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">9.81</span><span class="p">))</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%12u%12u</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># TODO : mettre les symetries en argument</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%12u</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nf</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+            <span class="n">cur_vertices</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">cell</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="p">:]</span>
+            <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%16.6E%16.6E%16.6E</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cur_vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cur_vertices</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cur_vertices</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="write_MAR"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_MAR">[docs]</a><span class="k">def</span> <span class="nf">write_MAR</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_MAR(filename, vertices, faces)</span>
+
+<span class="sd">    Writes mesh files to be used with Nemoh BEM software (Ecole Centrale de Nantes)</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: detect symmetry in Oxz plane</span>
+
+    <span class="n">ofile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0:6d}{1:6d}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># TODO : mettre les symetries en argument</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">vertex</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vertices</span><span class="p">):</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0:6d}{1:16.6f}{2:16.6f}{3:16.6f}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0:6d}{1:6d}{2:6d}{3:6d}{4:6d}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="n">cell_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">u&#39;</span><span class="si">{0:10d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">cell</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">faces</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cell_block</span><span class="p">)</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%6u%6u%6u%6u</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;WARNING: if you described only one part of the mesh using symmetry for Nemoh, you may manually modify the &#39;</span> \
+          <span class="s1">&#39;file header accordingly&#39;</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="write_RAD"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_RAD">[docs]</a><span class="k">def</span> <span class="nf">write_RAD</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="write_STL"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_STL">[docs]</a><span class="k">def</span> <span class="nf">write_STL</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write_STL(filename, vertices, faces)</span>
+
+<span class="sd">    Writes .stl file format. It relies on the VTK library for its writer.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            name of the mesh file to be written on disk</span>
+<span class="sd">        vertices: ndarray</span>
+<span class="sd">            numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">        faces: ndarray</span>
+<span class="sd">            numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO : replace this implementation by using the vtk functionalities</span>
+
+    <span class="c1"># Triangulating quads</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">quads_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">faces</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">faces</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">new_faces</span> <span class="o">=</span> <span class="n">faces</span><span class="p">[</span><span class="n">quads_ids</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">new_faces</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_faces</span><span class="p">[:,</span> <span class="n">t1</span><span class="p">]</span>
+    <span class="n">new_faces</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_faces</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    
+    <span class="n">faces</span><span class="p">[</span><span class="n">quads_ids</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces</span><span class="p">[:,</span> <span class="n">t2</span><span class="p">][</span><span class="n">quads_ids</span><span class="p">]</span>
+    <span class="n">faces</span><span class="p">[</span><span class="n">quads_ids</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces</span><span class="p">[</span><span class="n">quads_ids</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">faces</span><span class="p">,</span> <span class="n">new_faces</span><span class="p">))</span>
+
+    <span class="c1"># Writing file</span>
+    <span class="n">ofile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;solid meshmagick</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Only full triangle meshes are accepted in STL files.</span>
+<span class="s2">              Please consider using the --triangulate-quadrangles option (-tq) to</span>
+<span class="s2">              perform a prior triangulation of the mesh&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Computing normal</span>
+        <span class="n">v0</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span>
+        <span class="n">v1</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:]</span>
+        <span class="n">v2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">:]</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v1</span> <span class="o">-</span> <span class="n">v0</span><span class="p">,</span> <span class="n">v2</span> <span class="o">-</span> <span class="n">v0</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">block_facet</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;  facet normal &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%15.6e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ni</span> <span class="k">for</span> <span class="n">ni</span> <span class="ow">in</span> <span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;    outer loop</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;      vertex&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%15.6e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">Vi</span> <span class="k">for</span> <span class="n">Vi</span> <span class="ow">in</span> <span class="n">v0</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;      vertex&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%15.6e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">Vi</span> <span class="k">for</span> <span class="n">Vi</span> <span class="ow">in</span> <span class="n">v1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;      vertex&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%15.6e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">Vi</span> <span class="k">for</span> <span class="n">Vi</span> <span class="ow">in</span> <span class="n">v2</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;    endloop</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;  endfacet</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">])</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">block_facet</span><span class="p">)</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;endsolid meshmagick</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">ofile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="write_INP"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_INP">[docs]</a><span class="k">def</span> <span class="nf">write_INP</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;INP writer is not implementer yet&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_MSH"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_MSH">[docs]</a><span class="k">def</span> <span class="nf">write_MSH</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;MSH writer is not implemented yet&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_MED"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_MED">[docs]</a><span class="k">def</span> <span class="nf">write_MED</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;MED writer is not implemented yet&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_WRL"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_WRL">[docs]</a><span class="k">def</span> <span class="nf">write_WRL</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;VRML writer is not implemented yet&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="know_extension"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.know_extension">[docs]</a><span class="k">def</span> <span class="nf">know_extension</span><span class="p">(</span><span class="n">ext</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">extension_dict</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span></div>
+
+<span class="n">extension_dict</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># keyword,  reader,   writer</span>
+    <span class="s1">&#39;mar&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_MAR</span><span class="p">,</span> <span class="n">write_MAR</span><span class="p">),</span>
+    <span class="s1">&#39;nemoh&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_MAR</span><span class="p">,</span> <span class="n">write_MAR</span><span class="p">),</span>
+    <span class="s1">&#39;wamit&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_GDF</span><span class="p">,</span> <span class="n">write_GDF</span><span class="p">),</span>
+    <span class="s1">&#39;gdf&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_GDF</span><span class="p">,</span> <span class="n">write_GDF</span><span class="p">),</span>
+    <span class="s1">&#39;diodore-inp&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_INP</span><span class="p">,</span> <span class="n">write_INP</span><span class="p">),</span>
+    <span class="s1">&#39;inp&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_INP</span><span class="p">,</span> <span class="n">write_INP</span><span class="p">),</span>
+    <span class="s1">&#39;diodore-dat&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_DAT</span><span class="p">,</span> <span class="n">write_DAT</span><span class="p">),</span>
+    <span class="s1">&#39;hydrostar&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_HST</span><span class="p">,</span> <span class="n">write_HST</span><span class="p">),</span>
+    <span class="s1">&#39;hst&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_HST</span><span class="p">,</span> <span class="n">write_HST</span><span class="p">),</span>
+    <span class="s1">&#39;natural&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_NAT</span><span class="p">,</span> <span class="n">write_NAT</span><span class="p">),</span>
+    <span class="s1">&#39;nat&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_NAT</span><span class="p">,</span> <span class="n">write_NAT</span><span class="p">),</span>
+    <span class="s1">&#39;gmsh&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_MSH</span><span class="p">,</span> <span class="n">write_MSH</span><span class="p">),</span>
+    <span class="s1">&#39;msh&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_MSH</span><span class="p">,</span> <span class="n">write_MSH</span><span class="p">),</span>
+    <span class="s1">&#39;rad&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_RAD</span><span class="p">,</span> <span class="n">write_RAD</span><span class="p">),</span>
+    <span class="s1">&#39;radioss&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_RAD</span><span class="p">,</span> <span class="n">write_RAD</span><span class="p">),</span>
+    <span class="s1">&#39;stl&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_STL</span><span class="p">,</span> <span class="n">write_STL</span><span class="p">),</span>
+    <span class="s1">&#39;vtu&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_VTU</span><span class="p">,</span> <span class="n">write_VTU</span><span class="p">),</span>
+    <span class="s1">&#39;vtp&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_VTP</span><span class="p">,</span> <span class="n">write_VTP</span><span class="p">),</span>
+    <span class="s1">&#39;paraview-legacy&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_VTK</span><span class="p">,</span> <span class="n">write_VTK</span><span class="p">),</span>
+    <span class="s1">&#39;vtk&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_VTK</span><span class="p">,</span> <span class="n">write_VTK</span><span class="p">),</span>
+    <span class="s1">&#39;tecplot&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_TEC</span><span class="p">,</span> <span class="n">write_TEC</span><span class="p">),</span>
+    <span class="s1">&#39;tec&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_TEC</span><span class="p">,</span> <span class="n">write_TEC</span><span class="p">),</span>
+    <span class="s1">&#39;med&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_MED</span><span class="p">,</span> <span class="n">write_MED</span><span class="p">),</span>
+    <span class="s1">&#39;salome&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_MED</span><span class="p">,</span> <span class="n">write_MED</span><span class="p">),</span>
+    <span class="s1">&#39;vrml&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_WRL</span><span class="p">,</span> <span class="n">write_WRL</span><span class="p">),</span>
+    <span class="s1">&#39;wrl&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_WRL</span><span class="p">,</span> <span class="n">write_WRL</span><span class="p">),</span>
+    <span class="s1">&#39;nem&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_NEM</span><span class="p">,</span> <span class="n">write_NEM</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Ecole Centrale de Nantes.
+      Last updated on Dec 21, 2016.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,630 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>meshmagick.MMviewer &mdash; Meshmagick User&#39;s Guide 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Meshmagick User&#39;s Guide 1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Meshmagick User's Guide
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/install.html">Installation Instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module/module.html">Using Meshmagick as a Python module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Meshmagick User's Guide</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>meshmagick.MMviewer</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for meshmagick.MMviewer</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module is part of meshmagick. It implements a viewer based on vtk</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">vtk</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">getcwd</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+
+<span class="n">__year__</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">year</span>
+
+<span class="c1"># TODO: See links below for interactive update of actors</span>
+<span class="c1"># https://stackoverflow.com/questions/31075569/vtk-rotate-actor-programmatically-while-vtkrenderwindowinteractor-is-active</span>
+<span class="c1"># https://stackoverflow.com/questions/32417197/vtk-update-vtkpolydata-in-renderwindow-without-blocking-interaction</span>
+
+<div class="viewcode-block" id="MMViewer"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer">[docs]</a><span class="k">class</span> <span class="nc">MMViewer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Building renderer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkRenderer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">SetBackground</span><span class="p">(</span><span class="mf">0.7706</span><span class="p">,</span> <span class="mf">0.8165</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="c1"># Building render window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_window</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkRenderWindow</span><span class="p">()</span>
+        <span class="c1"># self.render_window.FullScreenOn() # BUGFIX: It causes the window to fail to open...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_window</span><span class="o">.</span><span class="n">SetSize</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">768</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_window</span><span class="o">.</span><span class="n">SetWindowName</span><span class="p">(</span><span class="s2">&quot;Meshmagick viewer&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_window</span><span class="o">.</span><span class="n">AddRenderer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="p">)</span>
+
+        <span class="c1"># Building interactor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkRenderWindowInteractor</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span><span class="o">.</span><span class="n">SetRenderWindow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_window</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span><span class="o">.</span><span class="n">GetInteractorStyle</span><span class="p">()</span><span class="o">.</span><span class="n">SetCurrentStyleToTrackballCamera</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span><span class="o">.</span><span class="n">AddObserver</span><span class="p">(</span><span class="s1">&#39;KeyPressEvent&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_key_press</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="c1"># Building axes view</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkAxesActor</span><span class="p">()</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkOrientationMarkerWidget</span><span class="p">()</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">SetOrientationMarker</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">widget</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">SetInteractor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">SetEnabled</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">InteractiveOn</span><span class="p">()</span>
+
+        <span class="c1"># Building command annotations</span>
+        <span class="n">command_text</span> <span class="o">=</span> <span class="s2">&quot;left mouse : rotate</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;right mouse : zoom</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;middle mouse : pan</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;ctrl+left mouse : spin</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;n : (un)show normals</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;b : (un)show axes box</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;f : focus on the mouse cursor</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;r : reset view</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;s : surface representation</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;w : wire representation</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;h : (un)show Oxy plane</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;x : save</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;c : screenshot</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                        <span class="s2">&quot;q : quit&quot;</span>
+
+        <span class="n">corner_annotation</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCornerAnnotation</span><span class="p">()</span>
+        <span class="n">corner_annotation</span><span class="o">.</span><span class="n">SetLinearFontScaleFactor</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">corner_annotation</span><span class="o">.</span><span class="n">SetNonlinearFontScaleFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">corner_annotation</span><span class="o">.</span><span class="n">SetMaximumFontSize</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">corner_annotation</span><span class="o">.</span><span class="n">SetText</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">command_text</span><span class="p">)</span>
+        <span class="n">corner_annotation</span><span class="o">.</span><span class="n">GetTextProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddViewProp</span><span class="p">(</span><span class="n">corner_annotation</span><span class="p">)</span>
+
+        <span class="n">copyright_text</span> <span class="o">=</span> <span class="s2">&quot;Meshmagick Viewer</span><span class="se">\n</span><span class="s2">Copyright 2014-</span><span class="si">%u</span><span class="s2">, Ecole Centrale de Nantes&quot;</span> <span class="o">%</span> <span class="n">__year__</span>
+
+        <span class="n">copyright_annotation</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCornerAnnotation</span><span class="p">()</span>
+        <span class="n">copyright_annotation</span><span class="o">.</span><span class="n">SetLinearFontScaleFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">copyright_annotation</span><span class="o">.</span><span class="n">SetNonlinearFontScaleFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">copyright_annotation</span><span class="o">.</span><span class="n">SetMaximumFontSize</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">copyright_annotation</span><span class="o">.</span><span class="n">SetText</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">copyright_text</span><span class="p">)</span>
+        <span class="n">copyright_annotation</span><span class="o">.</span><span class="n">GetTextProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddViewProp</span><span class="p">(</span><span class="n">copyright_annotation</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">normals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oxy_plane</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hiden</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1"># TODO: A terminer -&gt; cf methode self.hide()</span>
+
+<div class="viewcode-block" id="MMViewer.normals_on"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.normals_on">[docs]</a>    <span class="k">def</span> <span class="nf">normals_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normals</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="MMViewer.normals_off"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.normals_off">[docs]</a>    <span class="k">def</span> <span class="nf">normals_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normals</span> <span class="o">=</span> <span class="kc">False</span></div>
+    
+<div class="viewcode-block" id="MMViewer.plane_on"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.plane_on">[docs]</a>    <span class="k">def</span> <span class="nf">plane_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="n">plane</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPlaneSource</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">GetBounds</span><span class="p">()</span>
+        
+        <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">)</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="p">(</span><span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span><span class="p">)</span>
+
+        <span class="n">plane</span><span class="o">.</span><span class="n">SetOrigin</span><span class="p">(</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">dx</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">dy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">plane</span><span class="o">.</span><span class="n">SetPoint1</span><span class="p">(</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">dx</span><span class="p">,</span> <span class="n">ymin</span> <span class="o">-</span> <span class="n">dy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">plane</span><span class="o">.</span><span class="n">SetPoint2</span><span class="p">(</span><span class="n">xmax</span> <span class="o">+</span> <span class="n">dx</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">dy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">plane</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+        <span class="n">polydata</span> <span class="o">=</span> <span class="n">plane</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span>
+        
+        <span class="n">mapper</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataMapper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">mapper</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mapper</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+            
+        <span class="n">actor</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkActor</span><span class="p">()</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">SetMapper</span><span class="p">(</span><span class="n">mapper</span><span class="p">)</span>
+        
+        <span class="n">color</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">102.</span> <span class="o">/</span> <span class="mi">255</span><span class="p">,</span> <span class="mf">204.</span> <span class="o">/</span> <span class="mi">255</span><span class="p">]</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetEdgeColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetLineWidth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="n">actor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oxy_plane</span> <span class="o">=</span> <span class="n">actor</span>
+        
+        
+        <span class="k">return</span></div>
+    
+<div class="viewcode-block" id="MMViewer.add_point"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_point">[docs]</a>    <span class="k">def</span> <span class="nf">add_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
+        
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+        
+        <span class="n">p</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">()</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCellArray</span><span class="p">()</span>
+    
+        <span class="n">i</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">InsertNextPoint</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="n">v</span><span class="o">.</span><span class="n">InsertNextCell</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">v</span><span class="o">.</span><span class="n">InsertCellPoint</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    
+        <span class="n">pd</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="p">()</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">SetPoints</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">SetVerts</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_polydata</span><span class="p">(</span><span class="n">pd</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">pd</span></div>
+    
+<div class="viewcode-block" id="MMViewer.add_line"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_line">[docs]</a>    <span class="k">def</span> <span class="nf">add_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
+        
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+
+        <span class="n">points</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">()</span>
+        <span class="n">points</span><span class="o">.</span><span class="n">InsertNextPoint</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
+        <span class="n">points</span><span class="o">.</span><span class="n">InsertNextPoint</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
+
+        <span class="n">line</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkLine</span><span class="p">()</span>
+        <span class="n">line</span><span class="o">.</span><span class="n">GetPointIds</span><span class="p">()</span><span class="o">.</span><span class="n">SetId</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">line</span><span class="o">.</span><span class="n">GetPointIds</span><span class="p">()</span><span class="o">.</span><span class="n">SetId</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCellArray</span><span class="p">()</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">InsertNextCell</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="n">lines_pd</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="p">()</span>
+        <span class="n">lines_pd</span><span class="o">.</span><span class="n">SetPoints</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">lines_pd</span><span class="o">.</span><span class="n">SetLines</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_polydata</span><span class="p">(</span><span class="n">lines_pd</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">lines_pd</span></div>
+    
+<div class="viewcode-block" id="MMViewer.add_vector"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_vector">[docs]</a>    <span class="k">def</span> <span class="nf">add_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
+
+        <span class="c1"># gforce = self.get_gravity_force()</span>
+        
+        <span class="n">points</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">()</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">InsertNextPoint</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+        
+        <span class="n">vert</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCellArray</span><span class="p">()</span>
+        <span class="n">vert</span><span class="o">.</span><span class="n">InsertNextCell</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">vert</span><span class="o">.</span><span class="n">InsertCellPoint</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">pd_point</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="p">()</span>
+        <span class="n">pd_point</span><span class="o">.</span><span class="n">SetPoints</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">pd_point</span><span class="o">.</span><span class="n">SetVerts</span><span class="p">(</span><span class="n">vert</span><span class="p">)</span>
+        
+        <span class="n">arrow</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkArrowSource</span><span class="p">()</span>
+        <span class="n">arrow</span><span class="o">.</span><span class="n">SetTipResolution</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">arrow</span><span class="o">.</span><span class="n">SetTipLength</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">arrow</span><span class="o">.</span><span class="n">SetTipRadius</span><span class="p">(</span><span class="mf">0.02</span><span class="p">)</span>
+        <span class="n">arrow</span><span class="o">.</span><span class="n">SetShaftRadius</span><span class="p">(</span><span class="mf">0.005</span><span class="p">)</span>
+
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkFloatArray</span><span class="p">()</span>
+        <span class="n">vec</span><span class="o">.</span><span class="n">SetNumberOfComponents</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">value</span> <span class="o">/</span> <span class="n">scale</span>
+        <span class="n">vec</span><span class="o">.</span><span class="n">InsertTuple3</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span>
+        <span class="n">pd_point</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">SetVectors</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+
+        <span class="n">g_glyph</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkGlyph3D</span><span class="p">()</span>
+        <span class="c1"># g_glyph.SetScaleModeToDataScalingOff()</span>
+        <span class="n">g_glyph</span><span class="o">.</span><span class="n">SetVectorModeToUseVector</span><span class="p">()</span>
+        <span class="n">g_glyph</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">pd_point</span><span class="p">)</span>
+        <span class="n">g_glyph</span><span class="o">.</span><span class="n">SetSourceConnection</span><span class="p">(</span><span class="n">arrow</span><span class="o">.</span><span class="n">GetOutputPort</span><span class="p">())</span>
+        <span class="n">g_glyph</span><span class="o">.</span><span class="n">SetScaleModeToScaleByVector</span><span class="p">()</span>
+        <span class="c1"># g_glyph.SetScaleFactor(10)</span>
+        <span class="n">g_glyph</span><span class="o">.</span><span class="n">ScalingOn</span><span class="p">()</span>
+        <span class="n">g_glyph</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+
+        <span class="n">g_glyph_mapper</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataMapper</span><span class="p">()</span>
+        <span class="n">g_glyph_mapper</span><span class="o">.</span><span class="n">SetInputConnection</span><span class="p">(</span><span class="n">g_glyph</span><span class="o">.</span><span class="n">GetOutputPort</span><span class="p">())</span>
+
+        <span class="n">g_glyph_actor</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkActor</span><span class="p">()</span>
+        <span class="n">g_glyph_actor</span><span class="o">.</span><span class="n">SetMapper</span><span class="p">(</span><span class="n">g_glyph_mapper</span><span class="p">)</span>
+        <span class="n">g_glyph_actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="n">g_glyph_actor</span><span class="p">)</span>
+        
+        <span class="k">return</span></div>
+    
+<div class="viewcode-block" id="MMViewer.add_plane"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_plane">[docs]</a>    <span class="k">def</span> <span class="nf">add_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">normal</span><span class="p">):</span>
+        <span class="n">plane</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPlaneSource</span><span class="p">()</span>
+        <span class="n">plane</span><span class="o">.</span><span class="n">SetCenter</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">plane</span><span class="o">.</span><span class="n">SetNormal</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
+
+        <span class="n">mapper</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataMapper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">mapper</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mapper</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>
+            
+        <span class="c1"># FIXME: terminer l&#39;implementation et l&#39;utiliser pour le plan de la surface libre</span>
+            
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MMViewer.add_polydata"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_polydata">[docs]</a>    <span class="k">def</span> <span class="nf">add_polydata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polydata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="nb">repr</span><span class="o">=</span><span class="s1">&#39;surface&#39;</span><span class="p">):</span>
+        
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">polydata</span><span class="p">,</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">repr</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;surface&#39;</span><span class="p">,</span> <span class="s1">&#39;wireframe&#39;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+
+        <span class="c1"># Building mapper</span>
+        <span class="n">mapper</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataMapper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">mapper</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mapper</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+
+        <span class="c1"># Building actor</span>
+        <span class="n">actor</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkActor</span><span class="p">()</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">SetMapper</span><span class="p">(</span><span class="n">mapper</span><span class="p">)</span>
+
+        <span class="c1"># Properties setting</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">EdgeVisibilityOn</span><span class="p">()</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetEdgeColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetLineWidth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetPointSize</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">repr</span> <span class="o">==</span> <span class="s1">&#39;wireframe&#39;</span><span class="p">:</span>
+            <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetRepresentationToWireframe</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="n">actor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MMViewer.show_normals"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.show_normals">[docs]</a>    <span class="k">def</span> <span class="nf">show_normals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">polydata</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="p">:</span>
+            <span class="n">normals</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataNormals</span><span class="p">()</span>
+            <span class="n">normals</span><span class="o">.</span><span class="n">ConsistencyOff</span><span class="p">()</span>
+            <span class="c1"># normals.ComputePointNormalsOn()</span>
+            <span class="n">normals</span><span class="o">.</span><span class="n">ComputeCellNormalsOn</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">normals</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">normals</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+            <span class="n">normals</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+
+            <span class="n">normals_at_centers</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCellCenters</span><span class="p">()</span>
+            <span class="n">normals_at_centers</span><span class="o">.</span><span class="n">SetInputConnection</span><span class="p">(</span><span class="n">normals</span><span class="o">.</span><span class="n">GetOutputPort</span><span class="p">())</span>
+
+            <span class="n">normals_mapper</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataMapper</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">normals_output</span> <span class="o">=</span> <span class="n">normals</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span>
+                <span class="n">normals_mapper</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">normals_output</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">normals_mapper</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">normals</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>
+            <span class="n">normals_actor</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkActor</span><span class="p">()</span>
+            <span class="n">normals_actor</span><span class="o">.</span><span class="n">SetMapper</span><span class="p">(</span><span class="n">normals_mapper</span><span class="p">)</span>
+
+            <span class="n">arrows</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkArrowSource</span><span class="p">()</span>
+            <span class="n">arrows</span><span class="o">.</span><span class="n">SetTipResolution</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+            <span class="n">arrows</span><span class="o">.</span><span class="n">SetTipLength</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">arrows</span><span class="o">.</span><span class="n">SetTipRadius</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+            <span class="n">glyph</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkGlyph3D</span><span class="p">()</span>
+            <span class="n">glyph</span><span class="o">.</span><span class="n">SetSourceConnection</span><span class="p">(</span><span class="n">arrows</span><span class="o">.</span><span class="n">GetOutputPort</span><span class="p">())</span>
+            <span class="n">glyph</span><span class="o">.</span><span class="n">SetInputConnection</span><span class="p">(</span><span class="n">normals_at_centers</span><span class="o">.</span><span class="n">GetOutputPort</span><span class="p">())</span>
+            <span class="n">glyph</span><span class="o">.</span><span class="n">SetVectorModeToUseNormal</span><span class="p">()</span>
+            <span class="n">glyph</span><span class="o">.</span><span class="n">SetScaleFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># FIXME: may be too big ...</span>
+            <span class="c1"># glyph.SetVectorModeToUseNormal()</span>
+            <span class="c1"># glyph.SetVectorModeToUseVector()</span>
+            <span class="c1"># glyph.SetScaleModeToDataScalingOff()</span>
+            <span class="n">glyph</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+
+            <span class="n">glyph_mapper</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataMapper</span><span class="p">()</span>
+            <span class="n">glyph_mapper</span><span class="o">.</span><span class="n">SetInputConnection</span><span class="p">(</span><span class="n">glyph</span><span class="o">.</span><span class="n">GetOutputPort</span><span class="p">())</span>
+
+            <span class="n">glyph_actor</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkActor</span><span class="p">()</span>
+            <span class="n">glyph_actor</span><span class="o">.</span><span class="n">SetMapper</span><span class="p">(</span><span class="n">glyph_mapper</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="n">glyph_actor</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">glyph_actor</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MMViewer.show_axes"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.show_axes">[docs]</a>    <span class="k">def</span> <span class="nf">show_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">tprop</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkTextProperty</span><span class="p">()</span>
+        <span class="n">tprop</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="n">tprop</span><span class="o">.</span><span class="n">ShadowOn</span><span class="p">()</span>
+
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCubeAxesActor2D</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">axes</span><span class="o">.</span><span class="n">SetCamera</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">GetActiveCamera</span><span class="p">())</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">SetLabelFormat</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%6.4g</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">SetFlyModeToOuterEdges</span><span class="p">()</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">SetFontFactor</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">SetAxisTitleTextProperty</span><span class="p">(</span><span class="n">tprop</span><span class="p">)</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">SetAxisLabelTextProperty</span><span class="p">(</span><span class="n">tprop</span><span class="p">)</span>
+        <span class="c1"># axes.DrawGridLinesOn()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddViewProp</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MMViewer.show"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">ResetCamera</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_window</span><span class="o">.</span><span class="n">Render</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span><span class="o">.</span><span class="n">Start</span><span class="p">()</span></div>
+        <span class="c1"># self.render_window_interactor.Initialize()</span>
+
+<div class="viewcode-block" id="MMViewer.hide"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.hide">[docs]</a>    <span class="k">def</span> <span class="nf">hide</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="s2">&quot;No mesh with id </span><span class="si">%u</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">id</span>
+            <span class="k">return</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">hiden</span></div>
+
+<div class="viewcode-block" id="MMViewer.save"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkXMLPolyDataWriter</span>
+
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">vtkXMLPolyDataWriter</span><span class="p">()</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">SetDataModeToAscii</span><span class="p">()</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="s1">&#39;mmviewer_save.vtp&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">polydata</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">Write</span><span class="p">()</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;File &#39;mmviewer_save.vtp&#39; written in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">getcwd</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MMViewer.screenshot"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.screenshot">[docs]</a>    <span class="k">def</span> <span class="nf">screenshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">w2if</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkWindowToImageFilter</span><span class="p">()</span>
+        <span class="n">w2if</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_window</span><span class="p">)</span>
+        <span class="n">w2if</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPNGWriter</span><span class="p">()</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="s2">&quot;screenshot.png&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">w2if</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">w2if</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">Write</span><span class="p">()</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;File &#39;screenshot.png&#39; written in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">getcwd</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MMViewer.finalize"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_window</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span></div>
+
+<div class="viewcode-block" id="MMViewer.on_key_press"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.on_key_press">[docs]</a>    <span class="k">def</span> <span class="nf">on_key_press</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetKeySym</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normals</span><span class="p">:</span>
+                <span class="c1"># self.normals = False</span>
+                <span class="k">for</span> <span class="n">actor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normals</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">RemoveActor</span><span class="p">(</span><span class="n">actor</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">Render</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">normals</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">show_normals</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">Render</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">RemoveActor</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">show_axes</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;e&#39;</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;q&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span><span class="o">.</span><span class="n">GetRenderWindow</span><span class="p">()</span><span class="o">.</span><span class="n">Finalize</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span><span class="o">.</span><span class="n">TerminateApp</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span>
+            <span class="c1"># pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">screenshot</span><span class="p">()</span>
+        
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxy_plane</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">RemoveActor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oxy_plane</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">oxy_plane</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plane_on</span><span class="p">()</span></div></div>
+        
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Ecole Centrale de Nantes.
+      Last updated on Dec 21, 2016.
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
