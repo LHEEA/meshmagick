@@ -49,8 +49,10 @@ def sphinx_build(working_dir, doc_dir, build_dir='.build'):
     except:
         raise RuntimeError('Unable to build Shpinx documentation')
     
-    copy_content_to_temp(os.path.join(working_dir, doc_dir, build_dir, 'html'))
+    temp_dir = mkdtemp()
+    copy_dir_content(os.path.join(working_dir, doc_dir, build_dir, 'html'), temp_dir)
     
+    call(['make', 'clean'])
     os.chdir(working_dir)
 
 
@@ -58,8 +60,10 @@ def empty_dir():
     pass
 
 
-def copy_content_to_temp(html_dir):
-    print html_dir
+def copy_dir_content(src, dst):
+    copy_tree(src, dst)
+    print "HTML files copied to %s" % dst
+    
 
 
 def retrieve_copy_temp():
@@ -106,7 +110,8 @@ if __name__ == '__main__':
         # Building sphinx documentation
         doc_dir = os.path.join(working_dir, 'doc')
         sphinx_build(working_dir, doc_dir)
-    
+        
+        # Checking out to gh-branch
     
     
     except:
