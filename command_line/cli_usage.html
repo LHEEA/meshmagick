@@ -796,13 +796,13 @@ If your mesh faces does not have a good aspect ratio, it could produce some real
 <p>Planes may be used in different situation as seen below. They can be defined so as to perform mesh clipping (useful
 to provide the submerged part of the mesh to hydrodynamics BEM software such as Nemoh), symmetrizing (when only a
 part of the mesh has been generated as in the <code class="docutils literal"><span class="pre">cylinder.geo</span></code> gmsh geometry file example) or mirroring.</p>
-<p>A plane is defined by its normal <span class="math">\(\vec{n}\)</span> and a scalar parameter <span class="math">\(c\)</span> following the equation
-<span class="math">\(\vec{n}.\vec{x} = c\)</span>, where <span class="math">\(\vec{x}\)</span> is the coordinate vector of a point belonging to the plane.</p>
-<p>The scalar parameter <span class="math">\(c\)</span> is practically the orthogonal distance between the origin of the reference frame and
+<p>A plane is defined by its normal <img class="math" src="../_images/math/db2fe1d8eccd0ed17f0275b70fd111b7dbdb0a30.png" alt="\vec{n}"/> and a scalar parameter <img class="math" src="../_images/math/ae12a24f88803b5895632e4848d87d46483c492c.png" alt="c"/> following the equation
+<img class="math" src="../_images/math/343d7f4ac23d54f9f7f68889f541208792cc0098.png" alt="\vec{n}.\vec{x} = c"/>, where <img class="math" src="../_images/math/8038a2982691bb9b9a5676262bd25e4739d8defa.png" alt="\vec{x}"/> is the coordinate vector of a point belonging to the plane.</p>
+<p>The scalar parameter <img class="math" src="../_images/math/ae12a24f88803b5895632e4848d87d46483c492c.png" alt="c"/> is practically the orthogonal distance between the origin of the reference frame and
 the plane.</p>
 <p>Working with planes is quite flexible as you have 3 mean to use them along with plane dependent options:</p>
 <ul>
-<li><p class="first">Defining the plane by 4 scalars:  <span class="math">\(n_x, n_y, n_z, c\)</span></p>
+<li><p class="first">Defining the plane by 4 scalars:  <img class="math" src="../_images/math/3549f4fe3a48960c81b9ca648a5e5e9975f4ea38.png" alt="n_x, n_y, n_z, c"/></p>
 </li>
 <li><dl class="first docutils">
 <dt>Using predefined plane keywords:</dt>
@@ -925,9 +925,9 @@ for floating structures).</li>
 <li><p class="first"><strong>Inertial properties</strong> are:</p>
 <blockquote>
 <div><ul class="simple">
-<li>The <strong>mass</strong> <span class="math">\(m\)</span> (tons)</li>
-<li>The position of the <strong>center of gravity</strong> in the mesh&#8217;s reference frame <span class="math">\(\vec{OG}\)</span></li>
-<li>The (3x3) symmetric 3D rotational <strong>inertia matrix</strong> <span class="math">\(\mathbf{I}_O\)</span></li>
+<li>The <strong>mass</strong> <img class="math" src="../_images/math/edba97b4c0d864d26e92ea7ea73767fa38eef3f7.png" alt="m"/> (tons)</li>
+<li>The position of the <strong>center of gravity</strong> in the mesh&#8217;s reference frame <img class="math" src="../_images/math/33e8a58a94e52a575d39ec8fdb4c1a3c0f2369dd.png" alt="\vec{OG}"/></li>
+<li>The (3x3) symmetric 3D rotational <strong>inertia matrix</strong> <img class="math" src="../_images/math/5e41fa00f90126e04b5b4068acee26de870845e3.png" alt="\mathbf{I}_O"/></li>
 </ul>
 </div></blockquote>
 </li>
@@ -1189,7 +1189,6 @@ meters.</li>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
