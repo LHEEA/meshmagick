@@ -111,8 +111,17 @@ if __name__ == '__main__':
         doc_dir = os.path.join(working_dir, 'doc')
         sphinx_build(working_dir, doc_dir)
         
-        # Checking out to gh-branch
-    
+        # Checking out to branch gh-pages
+        checkout_branch(repo, 'gh-pages')
+        
+        # Getting files changed at the last commit
+        # last hash
+        last_sha = repo.git.log(n='1', pretty="format:'%H'")
+        file_list = repo.git.diff_tree(no_commit_id=True, name_only=True, r=last_sha).split('\n')
+        print file_list
+        
+        
+        
     
     except:
         print "Failed, getting back to initial state"
