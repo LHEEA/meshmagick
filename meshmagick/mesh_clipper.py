@@ -159,10 +159,24 @@ class MeshClipper(object):
 
     @property
     def crown_mesh(self):
+        """A new mesh only having the faces that cut the plane
+        
+        Returns
+        -------
+        Mesh
+            The crown mesh
+        """
         return self.__internals__['crown_mesh']
 
     @property
     def upper_mesh(self):
+        """A new mesh only having the faces lying entirely up the plane
+        
+        Returns
+        -------
+        Mesh
+            The upper mesh
+        """
         return self.__internals__['upper_mesh']
 
     @property

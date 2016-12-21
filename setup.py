@@ -18,7 +18,7 @@ LONG_DESCRIPTION = read('README.rst')
 setup(
     name='meshmagick',
     version='1.0',
-    url='https://',  # TODO : A completer
+    url='https://github.com/LHEEA/meshmagick',
     author='Francois Rongere -- Ecole Centrale de Nantes',
     author_email='Francois.Rongere@ec-nantes.fr',
     description="""A command line tool to manipulate hydrodynamics meshes""",
