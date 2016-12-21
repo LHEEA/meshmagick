@@ -103,11 +103,13 @@ if __name__ == '__main__':
     
     stash_modifs(repo)
     
+    build_branch = 'master'
+    
     try:
         
         # Checking out the master branch
         # TODO: devrait pourvoir etre mis en parametre de la ligne de commande
-        checkout_branch(repo, 'master')
+        checkout_branch(repo, build_branch)
         
         # Building sphinx documentation
         doc_dir = os.path.join(working_dir, 'doc')
@@ -135,9 +137,10 @@ if __name__ == '__main__':
         # Copying new files
         copy_dir_content(temp_dir, '.')
         
+        repo.git.add('.', all=True)
         # Commiting changes
-        # repo.git.commit(m=)
-                
+        repo.git.commit(m="Updating documentation with respect to branch %s" % build_branch)
+        
         
     
     except:
