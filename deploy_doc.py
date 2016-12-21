@@ -54,6 +54,8 @@ def sphinx_build(working_dir, doc_dir, build_dir='.build'):
     
     call(['make', 'clean'])
     os.chdir(working_dir)
+    
+    return temp_dir
 
 
 def empty_dir():
@@ -109,20 +111,33 @@ if __name__ == '__main__':
         
         # Building sphinx documentation
         doc_dir = os.path.join(working_dir, 'doc')
-        sphinx_build(working_dir, doc_dir)
+        temp_dir = sphinx_build(working_dir, doc_dir)
         
         # Checking out to branch gh-pages
         checkout_branch(repo, 'gh-pages')
         
         # Getting files changed at the last commit
         # last hash
-        last_sha = repo.git.log(n='1', pretty="format:'%H'")
+        last_sha = repo.git.log(n='1', pretty="format:%H")
         print last_sha
         # file_list = repo.git.diff_tree(no_commit_id=True, name_only=True, r=last_sha)
         # print file_list
-        print repo.git.diff_tree(no_commit_id=True, name_only=True, r=last_sha).split(
-            '\n')
+        files = repo.git.diff_tree(no_commit_id=True, name_only=True, r=last_sha).split('\n')
         
+        # Removing files
+        for file in files:
+            try:
+                print 'Deleting file %s' % file
+                os.remove(file)
+            except OSError:
+                pass
+        
+        # Copying new files
+        copy_dir_content(temp_dir, '.')
+        
+        # Commiting changes
+        # repo.git.commit(m=)
+                
         
     
     except:
