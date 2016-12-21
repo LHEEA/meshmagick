@@ -37,8 +37,20 @@ def unstash_modifs(repo):
         raise RuntimeError('Unable to unstash modifications')
 
 
-def sphinx_build(working_dir):
-    print working_dir
+def sphinx_build(doc_dir):
+    try:
+        os.chdir(doc_dir)
+    except:
+        raise RuntimeError('Unable to cd to %s' % doc_dir)
+    
+    try:
+        call(['make', 'clean'])
+        call(['make', 'html'])
+    except:
+        raise RuntimeError('Unable to build Shpinx documentation')
+    
+    
+    os.chdir('..')
 
 
 def empty_dir():
@@ -91,7 +103,9 @@ if __name__ == '__main__':
         checkout_branch(repo, 'master')
         
         # Building sphinx documentation
-        sphinx_build(working_dir)
+        doc_dir = os.path.join(working_dir, 'doc')
+        print doc_dir
+        sphinx_build(doc_dir)
     
     
     
