@@ -38,12 +38,15 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.imgmath',
+    'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.graphviz',
     'sphinxarg.ext',
-    'sphinxcontrib.programoutput'
+    'sphinxcontrib.programoutput',
+    # 'sphinx.ext.autosummary',
+    'sphinx.ext.githubpages',
+    # 'sphinx.ext.coverage',
 ]
 
 # Napoleon settings
