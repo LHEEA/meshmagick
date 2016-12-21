@@ -117,9 +117,11 @@ if __name__ == '__main__':
         # Getting files changed at the last commit
         # last hash
         last_sha = repo.git.log(n='1', pretty="format:'%H'")
-        file_list = repo.git.diff_tree(no_commit_id=True, name_only=True, r=last_sha).split('\n')
-        print file_list
-        
+        print last_sha
+        # file_list = repo.git.diff_tree(no_commit_id=True, name_only=True, r=last_sha)
+        # print file_list
+        print repo.git.diff_tree(no_commit_id=True, name_only=True, r=last_sha).split(
+            '\n')
         
         
     
@@ -127,6 +129,7 @@ if __name__ == '__main__':
         print "Failed, getting back to initial state"
         checkout_branch(repo, cur_branch)
         unstash_modifs(repo)
+        raise RuntimeError('Failed')
     
     checkout_branch(repo, cur_branch)
     unstash_modifs(repo)
