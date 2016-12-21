@@ -141,7 +141,13 @@ if __name__ == '__main__':
         # Commiting changes
         repo.git.commit(m="Updating documentation with respect to branch %s" % build_branch)
         
+        # Pushing to remote branch
+        remote = 'origin'
+        print "\nPushing documentation files on branch gh-pages to the remote repo %s" % remote
+        repo.git.push(remote, 'gh-pages')
         
+        
+                
     
     except:
         print "Failed, getting back to initial state"
@@ -152,56 +158,3 @@ if __name__ == '__main__':
     checkout_branch(repo, cur_branch)
     unstash_modifs(repo)
 
-
-
-
-
-# repo = Repo()
-# git = repo.git
-#
-# branches = git.branch()
-# print branches
-#
-# branches.split()
-#
-# # Getting the current branch (better way to do that ?)
-# for branch in branches.split('\n'):
-#     if branch.startswith('*'):
-#         cur_branch = branch[2:]
-#
-#
-# # Checking out to master branch
-# git.checkout('master')
-#
-# # Going to doc dir and building documentation
-# chdir('doc')
-# system('make clean')
-# system('make html')
-#
-# # Copying html files into a tempdir
-# tempdir = mkdtemp()
-# print tempdir
-#
-# # TODO: aller cherche dans le conf.py le dossier build (.build ou _build)
-# html_files = os.path.join(getcwd(), '.build/html')
-#
-#
-# copy_tree(html_files, tempdir)
-# chdir('..')
-#
-#
-# git.checkout('gh-pages')
-#
-# # Removing everything here
-# system('rm -rf ./*')  # TODO: remplacer par des fonctions pures python
-#
-# copy_tree(tempdir, '.')
-#
-# git.commit(m='Updating documentation', a=True)
-#
-#
-# # Checking out back to the current branch
-# git.checkout(cur_branch)
-#
-#
-# print git.branch()
