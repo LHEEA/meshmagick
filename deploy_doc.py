@@ -103,7 +103,7 @@ if __name__ == '__main__':
     
     stash_modifs(repo)
     
-    build_branch = 'master'
+    build_branch = 'develop'
     
     try:
         
