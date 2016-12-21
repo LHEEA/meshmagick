@@ -2,36 +2,43 @@
 #  -*- coding: utf-8 -*-
 
 from git import Repo
+from subprocess import call
 import os
-from os import chdir, system, getcwd
+
 from distutils.dir_util import copy_tree, remove_tree
 from tempfile import mkdtemp
 import sys
 
 
 def checkout_branch(repo, branch):
+    # TODO: faire le check que la branche demandee existe bien dans le repo
+    print "\nChecking out to branch %s" % branch
     try:
-        repo.git.checkout(branch)
+        print repo.git.checkout(branch)
     except:
         raise RuntimeError('Unable to checkout to branch %s' % branch)
 
 
 def stash_modifs(repo):
+    print "\nStash local modifications"
+    print "-------------------------\n"
     try:
-        repo.git.stash()
+        print repo.git.stash(all=True)
     except:
         raise RuntimeError('Unable to stash modifications')
-    
-    
+
+
 def unstash_modifs(repo):
+    print "\nUnstash local modifications"
+    print "---------------------------\n"
     try:
-        repo.git.stash('pop')
+        print repo.git.stash('pop', 'stash@{0}')
     except:
         raise RuntimeError('Unable to unstash modifications')
 
 
-def sphinx_build(repo):
-    pass
+def sphinx_build(working_dir):
+    print working_dir
 
 
 def empty_dir():
@@ -54,22 +61,52 @@ def push_github(repo, remote):
     pass
 
 
+def get_current_branch(repo):
+    branches = repo.git.branch()
+    for branch in branches.split('\n'):
+        if branch.startswith('*'):
+            cur_branch = branch[2:]
+            break
+    return cur_branch
+
+
 if __name__ == '__main__':
     
-    print("Deploying documentation")
-    print("-----------------------\n")
+    print("\n========================================")
+    print("Deploying Sphinx documentation on GitHub")
+    print("========================================")
     
     repo = Repo()
+    working_dir = repo.working_tree_dir
     
-    # Stash modifications
+    # Getting the current branch
+    cur_branch = get_current_branch(repo)
+    
     stash_modifs(repo)
     
+    try:
+        
+        # Checking out the master branch
+        # TODO: devrait pourvoir etre mis en parametre de la ligne de commande
+        checkout_branch(repo, 'master')
+        
+        # Building sphinx documentation
+        sphinx_build(working_dir)
     
     
+    
+    except:
+        print "Failed, getting back to initial state"
+        checkout_branch(repo, cur_branch)
+        unstash_modifs(repo)
+    
+    checkout_branch(repo, cur_branch)
+    unstash_modifs(repo)
 
 
 
-    
+
+
 # repo = Repo()
 # git = repo.git
 #
