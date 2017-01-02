@@ -438,13 +438,13 @@ class _3DPointsArray(np.ndarray):
 
 
 class Mesh(object):
-    """A clas to handle unstructured meshes.
+    """A class to handle unstructured meshes.
 
     Parameters
     ----------
-    vertices : ndarray
+    vertices : array_like
         (nv x 3) Array of mesh vertices coordinates. Each line of the array represents one vertex coordinates
-    faces : ndarray
+    faces : array_like
         Arrays of mesh connectivities for faces. Each line of the array represents indices of vertices that form the
         face, expressed in counterclockwise order to ensure outward normals description.
     name : str, optional

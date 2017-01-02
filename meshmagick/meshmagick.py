@@ -1063,7 +1063,6 @@ def main():
             clipper = MeshClipper(mesh, plane=clipping_plane)
             mesh = clipper.clipped_mesh
 
-            # mesh = mesh.clip(clipping_plane)
         if verbose:
             print '\t-> Done.'
 

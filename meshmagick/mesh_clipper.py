@@ -10,19 +10,18 @@ class MeshClipper(object):
     Parameters
     ----------
     source_mesh : Mesh
-        The mesh to be clipped
+        The mesh to be clipped.
     plane : Plane, optional
         The clipping plane. By default, the plane is the Oxy plane.
-    vicinity_tol : float
-        The absolute tolerance to consider en vertex is on the plane. Default is 1z-3.
+    vicinity_tol : float, optional
+        The absolute tolerance to consider en vertex is on the plane. Default is 1e-3.
     assert_closed_boundaries : bool, optional
         False by default. When True, the mesh clipper will raise an exception if intersections with the clipping
-        plane are not closed
+        plane are not closed. It may be caused by a non-watertight mesh.
     verbose : bool, optional
         False by default. If True, some messages on operations that are handled are printed.
     """
-    def __init__(self, source_mesh=None, plane=Plane(), vicinity_tol=1e-3, assert_closed_boundaries=False, verbose=False):
-        # source_mesh._verbose = verbose
+    def __init__(self, source_mesh, plane=Plane(), vicinity_tol=1e-3, assert_closed_boundaries=False, verbose=False):
         self._source_mesh = source_mesh
         self._plane = plane
 
@@ -40,9 +39,11 @@ class MeshClipper(object):
         return self._verbose
 
     def verbose_on(self):
+        """Switches ON the verbosity of the clipper."""
         self._verbose = True
 
     def verbose_off(self):
+        """Switches OFF the verbosity of the clipper."""
         self._verbose = False
 
     @property
@@ -50,10 +51,11 @@ class MeshClipper(object):
         return self._assert_closed_boundaries
 
     def assert_closed_boundaries_on(self):
+        """Switches ON the flag for closed boundary assertion while clipping."""
         self._assert_closed_boundaries = True
-        return
 
     def assert_closed_boundaries_off(self):
+        """Switches OFF the flag for closed boundary assertion while clipping."""
         self._assert_closed_boundaries = False
         return
 
@@ -63,6 +65,7 @@ class MeshClipper(object):
 
     @vicinity_tol.setter
     def vicinity_tol(self, value):
+        """Set the vicinity tolerance that tells that a vertex is located on the plane."""
         self.__internals__.clear()
         self._vicinity_tol = float(value)
         self._update()
@@ -71,35 +74,27 @@ class MeshClipper(object):
     def source_mesh(self):
         return self._source_mesh
 
-    @source_mesh.setter
-    def source_mesh(self, value):
-        self._source_mesh = value
-        self.__internals__.clear()
-        self._update()
-        return
-
     @property
     def plane(self):
         return self._plane
 
     @plane.setter
     def plane(self, value):
+        """Changes the clipping plane."""
         self.__internals__.clear()
         self._plane = value
         self._update()
-        return
 
     def _update(self):
         self._vertices_positions_wrt_plane()
         self._partition_mesh()
-        self.clip()
-        return
+        self._clip()
 
     def _vertices_positions_wrt_plane(self):
         """
         Classifies vertices with respect to the clipping plane
         """
-        vertices_distances = self._plane.get_point_dist_wrt_plane(self._source_mesh._vertices)
+        vertices_distances = self._plane.get_point_dist_wrt_plane(self._source_mesh.vertices)
 
         vertices_positions = {'vertices_distances': vertices_distances,
                               'vertices_above_mask': vertices_distances > self._vicinity_tol,
@@ -115,7 +110,7 @@ class MeshClipper(object):
         vertices_on_mask = self.__internals__['vertices_on_mask']
         vertices_below_mask = self.__internals__['vertices_below_mask']
 
-        source_mesh_faces = self.source_mesh._faces
+        source_mesh_faces = self.source_mesh.faces
 
         nb_vertices_above = vertices_above_mask[source_mesh_faces].sum(axis=1)
         nb_vertices_below = vertices_below_mask[source_mesh_faces].sum(axis=1)
@@ -131,6 +126,7 @@ class MeshClipper(object):
         crown_faces_ids = np.where(crown_faces_mask)[0]
 
         partition = dict()
+        
         def generate_mesh(faces_ids, key):
             new_mesh, ids = self._source_mesh.extract_faces(faces_ids, return_index=True)
             new_mesh.name = key
@@ -151,10 +147,14 @@ class MeshClipper(object):
 
         self.__internals__.update(partition)
 
-        return
-
     @property
     def lower_mesh(self):
+        """A new mesh composed of the faces that entirely lie under the clipping plane.
+        
+        Returns
+        -------
+        Mesh
+        """
         return self.__internals__['lower_mesh']
 
     @property
@@ -164,7 +164,6 @@ class MeshClipper(object):
         Returns
         -------
         Mesh
-            The crown mesh
         """
         return self.__internals__['crown_mesh']
 
@@ -175,16 +174,54 @@ class MeshClipper(object):
         Returns
         -------
         Mesh
-            The upper mesh
         """
         return self.__internals__['upper_mesh']
 
     @property
+    def clipped_crown_mesh(self):
+        """A new mesh that is obtained by clipping the crown_mesh.
+        
+        Returns
+        -------
+        Mesh
+        """
+        return self.__internals__['clipped_crown_mesh']
+    
+    @property
+    def clipped_mesh(self):
+        return self.__internals__['clipped_mesh']
+    
+    @property
     def closed_polygons(self):
+        """Returns the list of closed boundary polygons obtained after clipping.
+        
+        This is a list of lists. The enclosed lists are ordered IDs list that form a closed polygon, described in the
+        counter-clockwise order with respect to the mesh (oriented following the clipping plane's normal).
+        
+        Returns
+        -------
+        list
+        
+        Warnings
+        --------
+        
+        * The first vertex is repeated at the end of the list. By definition, these polygons are lying on the clipping
+          plane.
+        * Vertices IDs are corresponding to the IDs of the clipped_crown_mesh, not those of the clipped_mesh.
+        """
         return self.__internals__['closed_polygons']
     
     @property
     def closed_polygons_vertices(self):
+        """Returns the list of closed boundary polygons obtained after clipping.
+        
+        This is a list of lists. The enclosed lists are ordered vertices coordinates of the closed polygons. By
+        definition, these polygons are lying on the clipping plane.
+        
+        Returns
+        -------
+        list
+        """
         polygons = self.__internals__['closed_polygons']
         closed_polygons_vertices = []
         # TODO: voir si on ne peut pas directement indicer par polygons sans boucle for
@@ -194,14 +231,42 @@ class MeshClipper(object):
     
     @property
     def nb_closed_polygons(self):
+        """The number of closed polygons obtained after clipping
+        
+        Returns
+        -------
+        int
+        """
         return len(self.__internals__['closed_polygons'])
 
     @property
     def open_lines(self):
+        """Returns a list of open boundary lines obtained after clipping.
+        
+        This is a list of lists. The enclosed lists are ordered vertices IDs.
+        
+        Returns
+        -------
+        list
+        
+        
+        Warning
+        -------
+        
+        * The vertices IDs correspond to the IDs of clipped_crown_mesh, not clipped_mesh.
+        """
         return self.__internals__['open_lines']
     
     @property
     def open_lines_vertices(self):
+        """Returns a list of open boundary lines obtained after clipping.
+
+        This is a list of lists. The enclosed lists are ordered vertices IDs.
+
+        Returns
+        -------
+        list
+        """
         lines = self.__internals__['open_lines']
         lines_vertices = []
         # TODO: voir si on ne peut pas directement indicer par polygons sans boucle for
@@ -211,17 +276,22 @@ class MeshClipper(object):
 
     @property
     def nb_open_lines(self):
+        """The number of open lines obtained after clipping.
+                
+        Returns
+        -------
+        int
+        """
         return len(self.__internals__['open_lines'])
 
-    @property
-    def clipped_crown_mesh(self):
-        return self.__internals__['clipped_crown_mesh']
-
-    # @cached_property
-    def clip_crown_by_plane(self):
-
+    def _clip_crown_by_plane(self):
+        """Performs the clipping operation of the crown_mesh and determines the obtained boundaries.
+        
+        This is the heart method of the class.
+        """
+        
         crown_mesh = self.crown_mesh
-        vertices = crown_mesh._vertices
+        vertices = crown_mesh.vertices
         vertices_on_mask = self.__internals__['crown_mesh_on_vertices_mask']
 
         # TODO: Vertices pre-projection to be done here !!!
@@ -240,7 +310,7 @@ class MeshClipper(object):
         inv_boundary_edges = dict()
         intersections = list()
 
-        nI = crown_mesh.nb_vertices
+        index = crown_mesh.nb_vertices
 
         for face_id in xrange(crown_mesh.nb_faces):
 
@@ -265,13 +335,13 @@ class MeshClipper(object):
                 #    1*-----*2
                 if v_above_face[1] == v_above_face[0] + 1:
                     face = np.roll(face, -v_above_face[1])
-                P0, P1, P2, P3 = vertices[face]
-                Ileft = self._plane.get_edge_intersection(P0, P1)
-                Iright = self._plane.get_edge_intersection(P2, P3)
-                intersections += [Ileft, Iright]
-                boundary_edge = [nI, nI + 1]
-                crown_faces.append([nI, face[1], face[2], nI + 1])
-                nI += 2
+                p0, p1, p2, p3 = vertices[face]
+                ileft = self._plane.get_edge_intersection(p0, p1)
+                iright = self._plane.get_edge_intersection(p2, p3)
+                intersections += [ileft, iright]
+                boundary_edge = [index, index + 1]
+                crown_faces.append([index, face[1], face[2], index + 1])
+                index += 2
 
             elif face_type == '301':  # Done
                 #      *2
@@ -284,13 +354,13 @@ class MeshClipper(object):
                 #     \ /
                 #      *0
                 face = np.roll(face, -v_below_face[0])
-                P0, P1, P3 = vertices[face[[0, 1, 3]]]
-                Ileft = self._plane.get_edge_intersection(P0, P3)
-                Iright = self._plane.get_edge_intersection(P0, P1)
-                intersections += [Ileft, Iright]
-                boundary_edge = [nI, nI + 1]
-                crown_faces.append([nI, face[0], nI + 1, nI])
-                nI += 2
+                p0, p1, p3 = vertices[face[[0, 1, 3]]]
+                ileft = self._plane.get_edge_intersection(p0, p3)
+                iright = self._plane.get_edge_intersection(p0, p1)
+                intersections += [ileft, iright]
+                boundary_edge = [index, index + 1]
+                crown_faces.append([index, face[0], index + 1, index])
+                index += 2
 
             elif face_type == '103':  # Done
                 #      *0
@@ -303,14 +373,14 @@ class MeshClipper(object):
                 #     \ /
                 #      *2
                 face = np.roll(face, -v_above_face[0])
-                P0, P1, P3 = vertices[face[[0, 1, 3]]]
-                Ileft = self._plane.get_edge_intersection(P0, P1)
-                Iright = self._plane.get_edge_intersection(P0, P3)
-                intersections += [Ileft, Iright]
-                boundary_edge = [nI, nI + 1]
-                crown_faces.append([nI, face[1], face[3], nI + 1])
+                p0, p1, p3 = vertices[face[[0, 1, 3]]]
+                ileft = self._plane.get_edge_intersection(p0, p1)
+                iright = self._plane.get_edge_intersection(p0, p3)
+                intersections += [ileft, iright]
+                boundary_edge = [index, index + 1]
+                crown_faces.append([index, face[1], face[3], index + 1])
                 crown_faces.append([face[1], face[2], face[3], face[1]])
-                nI += 2
+                index += 2
 
             elif face_type == '102':  # Done
                 #      *O
@@ -319,13 +389,13 @@ class MeshClipper(object):
                 #   /     \
                 # 1*-------*2
                 face = np.roll(face, -v_above_face[0])
-                P0, P1, P2 = vertices[face]
-                Ileft = self._plane.get_edge_intersection(P0, P1)
-                Iright = self._plane.get_edge_intersection(P0, P2)
-                intersections += [Ileft, Iright]
-                boundary_edge = [nI, nI + 1]
-                crown_faces.append([nI, face[1], face[2], nI + 1])
-                nI += 2
+                p0, p1, p2 = vertices[face]
+                ileft = self._plane.get_edge_intersection(p0, p1)
+                iright = self._plane.get_edge_intersection(p0, p2)
+                intersections += [ileft, iright]
+                boundary_edge = [index, index + 1]
+                crown_faces.append([index, face[1], face[2], index + 1])
+                index += 2
 
             elif face_type == '201':  # done
                 #  2*-------*1
@@ -334,13 +404,13 @@ class MeshClipper(object):
                 #      \ /
                 #       *0
                 face = np.roll(face, -v_below_face[0])
-                P0, P1, P2 = vertices[face]
-                Ileft = self._plane.get_edge_intersection(P0, P2)
-                Iright = self._plane.get_edge_intersection(P0, P1)
-                intersections += [Ileft, Iright]
-                boundary_edge = [nI, nI + 1]
-                crown_faces.append([nI, face[0], nI + 1, nI])
-                nI += 2
+                p0, p1, p2 = vertices[face]
+                ileft = self._plane.get_edge_intersection(p0, p2)
+                iright = self._plane.get_edge_intersection(p0, p1)
+                intersections += [ileft, iright]
+                boundary_edge = [index, index + 1]
+                crown_faces.append([index, face[0], index + 1, index])
+                index += 2
 
             elif face_type == '211':  # Done
                 #        *3                   *1
@@ -354,18 +424,18 @@ class MeshClipper(object):
 
                 face = np.roll(face, -v_on_face[0])
                 if vertices_distances[face[1]] < 0.:
-                    P1, P2 = vertices[face[[1, 2]]]
-                    Iright = self._plane.get_edge_intersection(P1, P2)
-                    intersections.append(Iright)
-                    boundary_edge = [face[0], nI]
-                    crown_faces.append([face[0], face[1], nI, face[0]])
+                    p1, p2 = vertices[face[[1, 2]]]
+                    iright = self._plane.get_edge_intersection(p1, p2)
+                    intersections.append(iright)
+                    boundary_edge = [face[0], index]
+                    crown_faces.append([face[0], face[1], index, face[0]])
                 else:
-                    P2, P3 = vertices[face[[2, 3]]]
-                    Ileft = self._plane.get_edge_intersection(P2, P3)
-                    intersections.append(Ileft)
-                    boundary_edge = [nI, face[0]]
-                    crown_faces.append([nI, face[3], face[0], nI])
-                nI += 1
+                    p2, p3 = vertices[face[[2, 3]]]
+                    ileft = self._plane.get_edge_intersection(p2, p3)
+                    intersections.append(ileft)
+                    boundary_edge = [index, face[0]]
+                    crown_faces.append([index, face[3], face[0], index])
+                index += 1
 
             elif face_type == '112':  # Done
                 #       *3                     *1
@@ -377,18 +447,18 @@ class MeshClipper(object):
                 #         *1                 *3
                 face = np.roll(face, -v_on_face[0])
                 if vertices_distances[face[1]] < 0.:
-                    P2, P3 = vertices[face[[2, 3]]]
-                    Iright = self._plane.get_edge_intersection(P2, P3)
-                    intersections.append(Iright)
-                    boundary_edge = [face[0], nI]
-                    crown_faces.append([face[0], face[1], face[2], nI])
+                    p2, p3 = vertices[face[[2, 3]]]
+                    iright = self._plane.get_edge_intersection(p2, p3)
+                    intersections.append(iright)
+                    boundary_edge = [face[0], index]
+                    crown_faces.append([face[0], face[1], face[2], index])
                 else:
-                    P1, P2 = vertices[face[[1, 2]]]
-                    Ileft = self._plane.get_edge_intersection(P1, P2)
-                    intersections.append(Ileft)
-                    boundary_edge = [nI, face[0]]
-                    crown_faces.append([nI, face[2], face[3], face[0]])
-                nI += 1
+                    p1, p2 = vertices[face[[1, 2]]]
+                    ileft = self._plane.get_edge_intersection(p1, p2)
+                    intersections.append(ileft)
+                    boundary_edge = [index, face[0]]
+                    crown_faces.append([index, face[2], face[3], face[0]])
+                index += 1
 
             elif face_type == '013':  # Done
                 # -----*-----
@@ -418,18 +488,18 @@ class MeshClipper(object):
                 #       \|               |/
                 #        *1              *2
                 face = np.roll(face, -v_on_face[0])
-                P1, P2 = vertices[face[[1, 2]]]
+                p1, p2 = vertices[face[[1, 2]]]
                 if vertices_distances[face[1]] < 0.:
-                    Iright = self._plane.get_edge_intersection(P1, P2)
-                    intersections.append(Iright)
-                    boundary_edge = [face[0], nI]
-                    crown_faces.append([face[0], face[1], nI, face[0]])
+                    iright = self._plane.get_edge_intersection(p1, p2)
+                    intersections.append(iright)
+                    boundary_edge = [face[0], index]
+                    crown_faces.append([face[0], face[1], index, face[0]])
                 else:
-                    Ileft = self._plane.get_edge_intersection(P1, P2)
-                    intersections.append(Ileft)
-                    boundary_edge = [nI, face[0]]
-                    crown_faces.append([nI, face[2], face[0], nI])
-                nI += 1
+                    ileft = self._plane.get_edge_intersection(p1, p2)
+                    intersections.append(ileft)
+                    boundary_edge = [index, face[0]]
+                    crown_faces.append([index, face[2], face[0], index])
+                index += 1
 
             elif face_type == '120':  # Done
                 #         *O
@@ -549,19 +619,16 @@ class MeshClipper(object):
         if len(intersections) > 0:
             vertices = np.concatenate((vertices, intersections))
         
-        
         clipped_crown_mesh = Mesh(vertices, crown_faces)
 
         # TODO: faire un merge uniquement sur la liste instersections et non sur tout le maillage clipped_crown
         # FIXME: potentiellement, un bug a ete introduit ici !!! --> l'update n'est plus bon sur les dictionnaires...
-        # Le nonuveau merge_duplicates (avec np.unique) ne fonctionne pas !!!!
-        newID = clipped_crown_mesh.merge_duplicates(return_index=True, atol=1e-5)  # Warning: choosing a lower value
-        #  for decimals results in vertices that are merged but should not...
+        new_id = clipped_crown_mesh.merge_duplicates(return_index=True, atol=1e-5)  # Warning: choosing a lower value
 
         # Updating dictionaries
         direct_boundary_edges = dict(
-            zip(newID[direct_boundary_edges.keys()], newID[direct_boundary_edges.values()]))
-        inv_boundary_edges = dict(zip(newID[inv_boundary_edges.keys()], newID[inv_boundary_edges.values()]))
+            zip(new_id[direct_boundary_edges.keys()], new_id[direct_boundary_edges.values()]))
+        inv_boundary_edges = dict(zip(new_id[inv_boundary_edges.keys()], new_id[inv_boundary_edges.values()]))
 
         # Ordering boundary edges in continuous lines
         closed_polygons = list()
@@ -569,27 +636,27 @@ class MeshClipper(object):
         while True:
             try:
                 line = list()
-                V0_init, V1 = direct_boundary_edges.popitem()
-                line.append(V0_init)
-                line.append(V1)
-                V0 = V1
+                v0_init, v1 = direct_boundary_edges.popitem()
+                line.append(v0_init)
+                line.append(v1)
+                v0 = v1
 
                 while True:
                     try:
-                        V1 = direct_boundary_edges.pop(V0)
-                        line.append(V1)
-                        V0 = V1
+                        v1 = direct_boundary_edges.pop(v0)
+                        line.append(v1)
+                        v0 = v1
                     except KeyError:
                         if line[0] != line[-1]:
                             # Trying to find an other queue
                             queue = list()
-                            V0 = V0_init
+                            v0 = v0_init
                             while True:
                                 try:
-                                    V1 = inv_boundary_edges[V0]
-                                    direct_boundary_edges.pop(V1)
-                                    queue.append(V1)
-                                    V0 = V1
+                                    v1 = inv_boundary_edges[v0]
+                                    direct_boundary_edges.pop(v1)
+                                    queue.append(v1)
+                                    v0 = v1
                                 except:
                                     queue.reverse()
                                     line = queue + line
@@ -611,7 +678,6 @@ class MeshClipper(object):
                 # TODO: retirer les deux lines suivantes
                 if self._verbose:
                     print "%u closed polygon\n%u open curve" % (len(closed_polygons), len(open_lines))
-                # print open_lines[0]
 
                 if self._assert_closed_boundaries:
                     if len(open_lines) > 0:
@@ -629,34 +695,17 @@ class MeshClipper(object):
                         raise RuntimeError, 'Open intersection curve found with assert_closed_boundaries option enabled. Files full_debug.vtp, crown_debug.vtp and clipped_crown_debug.vtp written.'
 
                 break
-        boundaries = {
-            'closed_polygons': closed_polygons,
-            'open_lines': open_lines
-        }
 
         output = {'clipped_crown_mesh': clipped_crown_mesh,
                   'closed_polygons': closed_polygons,
                   'open_lines': open_lines}
 
         self.__internals__.update(output)
-        return
 
-    @property
-    def clipped_mesh(self):
-        return self.__internals__['clipped_mesh']
-
-
-    def clip(self):
-        self.clip_crown_by_plane()
+    def _clip(self):
+        """Performs clipping and assemble the clipped mesh."""
+        self._clip_crown_by_plane()
         clipped_mesh = self.lower_mesh + self.clipped_crown_mesh
         clipped_mesh.name = '_'.join((self._source_mesh.name, 'clipped'))
         self.__internals__['clipped_mesh'] = clipped_mesh
         return
-
-if __name__ == '__main__':
-
-    import mmio
-
-    V, F = mmio.load_VTP('full_debug.vtp')
-    mymesh = Mesh(V, F)
-
