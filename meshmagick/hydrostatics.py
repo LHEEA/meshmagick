@@ -1,6 +1,9 @@
+#!/usr/bin/env python
+#  -*- coding: utf-8 -*-
+"""This module allows to perform hydrostatics computations on meshes"""
+
 import numpy as np
 import math
-from warnings import warn
 
 from mesh_clipper import MeshClipper
 

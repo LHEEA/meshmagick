@@ -19,6 +19,15 @@ from tools import merge_duplicate_rows
 import MMviewer
 from inertia import RigidBodyInertia
 
+__author__ = "Francois Rongere"
+__copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
+__credits__ = "Francois Rongere"
+__licence__ = "CeCILL"
+__version__ = "1.0"
+__maintainer__ = "Francois Rongere"
+__email__ = "Francois.Rongere@ec-nantes.fr"
+__status__ = "Development"
+
 # TODO: Use traitlets to manage updates into the Mesh class
 # TODO: les points doivent etre des objects nodes...
 # TODO: On doit pouvoir specifier des objets frame
