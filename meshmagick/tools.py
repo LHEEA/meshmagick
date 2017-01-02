@@ -4,27 +4,25 @@
 import numpy as np
 
 def merge_duplicate_rows(arr, atol=1e-8, return_index=False):
-    """merge_duplicates(arr, atol=1e-8, return_index=False)
+    """Returns a new node array where close nodes have been merged into one node (following atol).
 
-    Returns a new node array where close nodes have been merged into one node (following atol).
-
-    Parameters:
-    -----------
-    arr: array_like
-        numpy array of the coordinates of the mesh's nodes
-    atol[optional]: float
+    Parameters
+    ----------
+    arr : array_like
+        array of the coordinates of the mesh's nodes
+    atol[optional] : float
         the tolerance used to define nodes that are coincident and
         that have to be merged
-    return_index: bool
+    return_index : bool
         If true, it also returns the array for new indices of vertices
 
-    Returns:
-    --------
+    Returns
+    -------
     arr : ndarray
-        numpy array of the coordinates of the mesh's nodes where
+        array of the coordinates of the mesh's nodes where
         every node is different
     newID : ndarray, optional
-        numpy arrays of the new new vertices IDs
+        array of the new new vertices IDs
     """
     # TODO: Refaire la documentation --> les entrees sorties ont change !!
 

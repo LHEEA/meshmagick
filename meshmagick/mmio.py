@@ -558,25 +558,36 @@ def load_STL(filename):
 
 
 def load_NAT(filename):
-    """load_NAT(filename)
+    """This function loads natural file format for meshes.
+    
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    This function loads natural file format for meshes.
-
-    Format spec :
-    -------------------
-    xsym    ysym
-    n    m
-    x1    y1    z1
-    .
-    .
-    .
-    xn    yn    zn
-    i1    j1    k1    l1
-    .
-    .
-    .
-    im    jm    km    lm
-    -------------------
+    Returns
+    -------
+    vertices: ndarray
+        array of the coordinates of the mesh's nodes
+    faces: ndarray
+        array of the faces nodes connectivity
+    
+    Notes
+    -----
+    The file format is as follow::
+    
+        xsym    ysym
+        n    m
+        x1    y1    z1
+        .
+        .
+        .
+        xn    yn    zn
+        i1    j1    k1    l1
+        .
+        .
+        .
+        im    jm    km    lm
 
     where :
     n : number of nodes
@@ -586,17 +597,7 @@ def load_NAT(filename):
     if cell 1 is a triangle, i1==l1
 
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
-
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: NAT files have a 1-indexing
+    NAT files have a 1-indexing
     """
     check_file(filename)
 

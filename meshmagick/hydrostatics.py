@@ -122,42 +122,6 @@ class Hydrostatics(object):
     grav : float, optional
         The acceleration of gravity. Default is 9.81 m/s**2.
     
-    Attributes
-    ----------
-    verbose
-    gravity
-    rho_water
-    mass
-    gravity_center
-    zg
-    wet_surface_area
-    displacement_volume
-    displacement
-    buoyancy_center
-    flotation_surface_area
-    flotation_center
-    transversal_metacentric_radius
-    longitudinal_metacentric_radius
-    transversal_metacentric_height
-    longitudinal_metacentric_height
-    hydrostatic_stiffness_matrix
-    hydrostatic_mesh
-    delta_fz
-    delta_mx
-    delta_my
-    S33
-    S34
-    S35
-    S44
-    S45
-    S55
-    reltol
-    theta_relax
-    z_relax
-    max_iterations
-    max_restart
-    allow_unstable
-    residual
     
     Warnings
     --------
