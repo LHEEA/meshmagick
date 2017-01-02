@@ -14,7 +14,7 @@ __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
 
 # Data for DNV standards
-GM_min = 0.15
+GM_MIN = 0.15
 
 
 # TODO: pass this code to a version that only rotates the free surface plane and not the mesh...
@@ -23,6 +23,21 @@ GM_min = 0.15
 
 
 class Force(object):
+    """Class to handle a linear force (resultant).
+    
+    Parameters
+    ----------
+    point : array_like, optional
+        The force application point. Default is (0, 0, 0)
+    value : array_like, optional
+        The value of the force. Default is (0, 0, 0)
+    name : str, optional
+        The name of the force
+    mode : str, ['relative', 'absolute']
+        The mode of the force whether its direction follows the body motion ('relative') or remains fixed with
+        respect to the reference frame ('absolute'). Default is 'relative'.
+    
+    """
     def __init__(self, point=(0, 0, 0), value=(0, 0, 0), name='', mode='relative'):
         assert len(point) == 3
         assert len(value) == 3
@@ -38,19 +53,46 @@ class Force(object):
         return str_repr
 
     def update(self, dz=0., rot=np.eye(3, dtype=np.float)):
+        """Updates the vertical position and orientation of the force.
+        
+        Parameters
+        ----------
+        dz : float, optional
+            Update in the vertical position of the application point. Default is 0.
+        rot : ndarray
+            The 3x3 rotation matrix for the force direction. Default is identity.
+        """
+        
         self.point[2] += dz
         self.point = np.dot(rot, self.point)
         if self.mode == 'relative':
             self.value = np.dot(rot, self.value)
-        return
 
     def update_xy(self, dx, dy):
+        """Updates the horizontal position of the application point of the force.
+        
+        Parameters
+        ----------
+        dx : float, optional
+            Update in the x position of the application point. Defaults is 0.
+        dy : float, optional
+            Update in the y position of the application point. Defaults is 0.
+        """
+        
         self.point[0] += dx
         self.point[1] += dy
         return
 
     @property
     def hs_force(self):
+        """Returns the relevant force vector for hydrostatics computations.
+        
+        The return array's components are the vertical force, x moment and y moment around the application point.
+        
+        Returns
+        -------
+        ndarray
+        """
         fz = self.value[2]
         moment = np.cross(self.point, self.value)
         mx, my = moment[:2]
@@ -62,49 +104,78 @@ class Force(object):
 
 class Hydrostatics(object):
     # TODO: refactor this docstring
-    """
-    Class to perform hydrostatic computations on meshes.
+    """Class to perform hydrostatic computations on meshes.
+    
+    Parameters
+    ----------
+    working_mesh : Mesh
+        The mesh we want to work with for hydrostatics computations
+    cog : array_like, optional
+        The mesh's center of gravity coordinates. Default is the origin (0, 0, 0)
+    mass : float, optional
+        The mesh's mass. Default is 0. Unit is Ton.
+    rho_water : float, optional
+        The density of water (in kg/m**3). Default is that of salt water (1023 kg//m**3)
+    grav : float, optional
+        The acceleration of gravity. Default is 9.81 m/s**2.
+    
+    Attributes
+    ----------
+    verbose
+    gravity
+    rho_water
+    mass
+    gravity_center
+    zg
+    wet_surface_area
+    displacement_volume
+    displacement
+    buoyancy_center
+    flotation_surface_area
+    flotation_center
+    transversal_metacentric_radius
+    longitudinal_metacentric_radius
+    transversal_metacentric_height
+    longitudinal_metacentric_height
+    hydrostatic_stiffness_matrix
+    hydrostatic_mesh
+    delta_fz
+    delta_mx
+    delta_my
+    S33
+    S34
+    S35
+    S44
+    S45
+    S55
+    reltol
+    theta_relax
+    z_relax
+    max_iterations
+    max_restart
+    allow_unstable
+    residual
     
     Warnings
     --------
-    At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible
-    directly for this position. The mesh may not be at equilibrium thought and residual force balance between
-    hydrostatic force and gravity force may be not null. To trig the equilibrium computations, we have to call the
-    equilibrate() method.
+    * At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible
+      directly for this position. The mesh may not be at equilibrium thought and residual force balance between
+      hydrostatic force and gravity force may be not null. To trig the equilibrium computations, we have to call the
+      equilibrate() method.
     
-    Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally
-    and automatically at each modification.
-    
-    Intrinsic mesh properties are
-    
-        - _mass
-        - cog
-        - zg
-        - rho_water
-        - gravity
-        
-    Setting one of these property by its setter will trig a search for a new mesh position that fullfill the
-    hydrostatic equilibrium.
-    Note that zg is mandatory to get the hydrostatic stiffness matrix. By default, be carefull that it is set to
-    zero at instantiation.
-    
-    Modification of the displacement will produce the mesh to move along z so that
-    it reaches the correct displacement. The _mass is then set accordingly and equals the displacement. Note that this
-    is different from modifying the _mass and
-    
-    
-    Setting the buoyancy center will trig a search for a position of the gravity center that fullfill this
-    hydrostatic property, while keeping the correct displacement. NOT IMPLEMENTED, THIS IS AN ADVANCED FEATURE
+    * Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally
+      and automatically at each modification.
+      
+    * Mass unit is the ton !
     """
 
-    def __init__(self, mesh, cog=np.zeros(3, dtype=np.float), zg=0., mass=None, rho_water=1023, grav=9.81,
+    def __init__(self, working_mesh, cog=[0., 0., 0.], mass=None, rho_water=1023, grav=9.81,
                  verbose=False, animate=False):
 
-        # FIXME: l'argument zg n'est pas utilise !
         self.backup = dict()
 
-        self.backup['init_mesh'] = mesh.copy()
-        self.mesh = mesh.copy()
+        self.backup['init_mesh'] = working_mesh.copy()
+        self.mesh = working_mesh.copy()
 
         cog = np.array(cog, dtype=np.float)
         assert cog.shape[0] == 3
@@ -144,58 +215,66 @@ class Hydrostatics(object):
 
     @property
     def verbose(self):
+        """Get the verbosity"""
         return self._verbose
 
     def verbose_on(self):
+        """Switch ON the verbosity."""
         self._verbose = True
-        return
 
     def verbose_off(self):
+        """Switch OFF the verbosity."""
         self._verbose = False
-        return
 
     @property
     def gravity(self):
+        """Get the gravity acceleration"""
         return self._gravity
 
     @gravity.setter
     def gravity(self, value):
+        """Set the gravity acceleration"""
         self._gravity = float(value)
         self._rhog = self._rho_water * value
         self._mg = self._mass * value
         self._update_hydrostatic_properties()
-        return
 
     @property
     def rho_water(self):
+        """Get the water density"""
         return self._rho_water
 
     @rho_water.setter
     def rho_water(self, value):
+        """Set the water density"""
         self._rho_water = float(value)
         self._rhog = value * self._gravity
         self._update_hydrostatic_properties()
-        return
 
     @property
     def mass(self):
+        """Get the mass (in tons)"""
         return self._mass / 1000.
 
     @mass.setter
     def mass(self, value):
-
+        """Set the mass. It must be given in tons."""
         self._mass = float(value) * 1000.  # Conversion from tons to kg
         self._mg = self._mass * self._gravity  # SI units
 
         if self.is_sinking():
             raise ValueError('%s is sinking as it is too heavy.' % self.mesh.name)
 
-        return
-
     def _max_displacement(self):
         return self._rho_water * self.mesh._compute_volume()  # in kg
 
     def is_sinking(self):
+        """Returns whether the mesh is sinking with the current mass.
+        
+        Returns
+        -------
+        bool
+        """
         if self._mass > self._max_displacement():
             return True
         else:
@@ -203,77 +282,96 @@ class Hydrostatics(object):
 
     @property
     def gravity_center(self):
+        """Get the gravity center position
+        
+        Returns
+        -------
+        ndarray
+        """
         return self._gravity_center
 
     @gravity_center.setter
     def gravity_center(self, value):
+        """Set the gravity center position"""
         value = np.asarray(value, dtype=np.float)
         self.backup['gravity_center'] = value
         assert value.shape[0] == 3
         self._gravity_center = value
         self._update_hydrostatic_properties()
-        return
 
     @property
     def zg(self):
+        """Get the gravity center vertical position"""
         return self._gravity_center[-1]
 
     @zg.setter
     def zg(self, value):
+        """Set the gravity center vertical position"""
         self._gravity_center[-1] = float(value)
         self._update_hydrostatic_properties()
-        return
 
     @property
     def wet_surface_area(self):
+        """Get the area of the underwater surface (m**2)"""
         return self.hs_data['wet_surface_area']
 
     @property
     def displacement_volume(self):
+        """Get the volume displacement (m**2)"""
         return self.hs_data['disp_volume']
 
     @property
     def displacement(self):
+        """Get the mass displacement (tons)"""
         return self.hs_data['disp_mass'] / 1000.
 
     @property
     def buoyancy_center(self):
+        """Get the position of the buoyancy center"""
         return self.hs_data['buoy_center']
 
     @property
     def flotation_surface_area(self):
+        """Get the area of the flotation plane"""
         return self.hs_data['waterplane_area']
 
     @property
     def flotation_center(self):
+        """Get the position of the center of the flotation plane"""
         return self.hs_data['flotation_center']
 
     @property
     def transversal_metacentric_radius(self):
+        """Get the transversal metacentric radius"""
         return self.hs_data['transversal_metacentric_radius']
 
     @property
     def longitudinal_metacentric_radius(self):
+        """Get the longitudinal metacentric radius"""
         return self.hs_data['longitudinal_metacentric_radius']
 
     @property
     def transversal_metacentric_height(self):
+        """Get the transversal metacentric height (GMx)"""
         return self.hs_data['gm_x']
 
     @property
     def longitudinal_metacentric_height(self):
+        """Get the longitudinal metacentric height (GMy)"""
         return self.hs_data['gm_y']
 
     @property
     def hydrostatic_stiffness_matrix(self):
+        """Get the hydrostatic stiffness matrix"""
         return self.hs_data['stiffness_matrix']
 
     @property
     def hydrostatic_mesh(self):
+        """Get the underwater part of the mesh"""
         return self.hs_data['clipper'].clipped_mesh
 
     def reset(self):
-
+        """Reset hydrostatics with respect to the initial mesh"""
         # TODO: Utiliser plutot la rotation generale pour retrouver le maillage initial
 
         self.mesh = self.backup['init_mesh'].copy()
@@ -283,19 +381,41 @@ class Hydrostatics(object):
         self._update_hydrostatic_properties()
 
         self._rotation = np.eye(3, dtype=np.float)
-        return
 
     def is_stable_in_roll(self):
+        """Returns whether the mesh is stable in roll (GMx positive)
+        
+        Returns
+        -------
+        bool
+        """
         return self.transversal_metacentric_height > 0.
 
     def is_stable_in_pitch(self):
+        """Returns whether the mesh is stable in pitch (GMy positive)
+
+        Returns
+        -------
+        bool
+        """
         return self.longitudinal_metacentric_height > 0.
 
     def isstable(self):
+        """Returns whether the mesh is both stable in roll and in pitch
+
+        Returns
+        -------
+        bool
+        """
         return self.is_stable_in_pitch() and self.is_stable_in_roll()
 
     def is_at_equilibrium(self):
-
+        """Returns whether the mesh is actually in an equilibrium configuration
+        
+        Returns
+        -------
+        bool
+        """
         residual = self.residual
 
         mg = self._mg
@@ -310,115 +430,147 @@ class Hydrostatics(object):
 
     @property
     def delta_fz(self):
+        """The residual vertical force
+        
+        A non-zero value indicates that the mesh is not at hydrostatic equilibrium
+        
+        Returns
+        -------
+        float
+        """
         fz, _, _ = self.residual
         return fz
 
     @property
     def delta_mx(self):
+        """The residual moment around x
+        
+        A non-zero value indicates that the mesh is not at hydrostatic equilibrium
+        
+        Returns
+        -------
+        float
+        """
         _, mx, _ = self.residual
         return mx
 
     @property
     def delta_my(self):
+        """The residual moment around x
+
+        A non-zero value indicates that the mesh is not at hydrostatic equilibrium
+        
+        Returns
+        -------
+        float
+        """
         _, _, my = self.residual
         return my
 
     # TODO: create a Hydrostatic stiffness matrix class which should be a symmetric array class
     @property
     def S33(self):
+        """The S33 heave-heave stiffness coefficient"""
         return self.hs_data['stiffness_matrix'][0, 0]
 
     @property
     def S34(self):
+        """The S34 heave-roll stiffness coefficient"""
         return self.hs_data['stiffness_matrix'][0, 1]
 
     @property
     def S35(self):
+        """The S35 heave-pitch stiffness coefficient"""
         return self.hs_data['stiffness_matrix'][0, 2]
 
     @property
     def S44(self):
+        """The S44 roll-roll stiffness coefficient"""
         return self.hs_data['stiffness_matrix'][1, 1]
 
     @property
     def S45(self):
+        """The S45 roll-pitch stiffness coefficient"""
         return self.hs_data['stiffness_matrix'][1, 2]
 
     @property
     def S55(self):
+        """The S55 pitch-pitch stiffness coefficient"""
         return self.hs_data['stiffness_matrix'][2, 2]
 
     @property
     def reltol(self):
+        """The relative tolerance for hydrostatic equilibrium solver"""
         return self._solver_parameters['reltol']
 
     @reltol.setter
     def reltol(self, value):
+        """Set the relative tolerance for hydrostatic equilibrium solver"""
         value = float(value)
         assert 0. < value < 1.
         self._solver_parameters['reltol'] = value
-        return
 
     @property
     def theta_relax(self):
+        """The angle relaxation value of the hydrostatic solver"""
         return self._solver_parameters['theta_relax']
 
     @theta_relax.setter
     def theta_relax(self, value):
+        """Set the angle relaxation value of the hydrostatic solver"""
         value = float(value)
         assert 0. < value < 10.
         self._solver_parameters['theta_relax'] = value
-        return
 
     @property
     def z_relax(self):
+        """The distance relaxation value of the hydrostatic solver"""
         return self._solver_parameters['z_relax']
 
     @z_relax.setter
     def z_relax(self, value):
+        """Set the distance relaxation value of the hydrostatic solver"""
         value = float(value)
         assert 0. < value < 1.
         self._solver_parameters['z_relax'] = value
-        return
 
     @property
     def max_iterations(self):
+        """The maximum number of iterations to find a hydrostatic equilibrium starting from an initial configuration"""
         return self._solver_parameters['itermax']
 
     @max_iterations.setter
     def max_iterations(self, value):
+        """Set the maximum number of iterations to find a hydrostatic equilibrium starting from an initial
+        configuration"""
         value = int(value)
         assert value > 0.
         self._solver_parameters['itermax'] = value
-        return
 
     @property
     def max_restart(self):
+        """The maximum number of random restart for hydrostatic equilibrium computations"""
         return self._solver_parameters['max_nb_restart']
 
     @max_restart.setter
     def max_restart(self, value):
+        """Set the maximum number of random restart for hydrostatic equilibrium computations"""
         value = int(value)
         assert value >= 0.
         self._solver_parameters['max_nb_restart'] = value
-        return
 
     @property
     def allow_unstable(self):
+        """Whether unstable equilibrium configurations allowed"""
         return self._solver_parameters['stop_at_unstable']
 
-    @allow_unstable.setter
-    def allow_unstable(self, value):
-        value = bool(value)
-        self._solver_parameters['stop_at_unstable'] = value
-        return
-
     def allow_unstable_on(self):
-        self.allow_unstable = True
-        return
+        """Switches ON the allowance of unstable equilibrium configurations finding"""
+        self._solver_parameters['stop_at_unstable'] = True
 
     def allow_unstable_off(self):
-        self.allow_unstable = False
+        """Switches OFF the allowance of unstable equilibrium configurations finding"""
+        self._solver_parameters['stop_at_unstable'] = False
         return
 
     def _reinit_clipper(self):
@@ -584,20 +736,39 @@ class Hydrostatics(object):
         return
 
     def get_gravity_force(self):
+        """Returns the gravity force applied on the body
+        
+        Returns
+        -------
+        Force
+        """
         return Force(point=self._gravity_center, value=[0, 0, -self._mass * self._gravity], mode='absolute')
 
     def get_buoyancy_force(self):
+        """Returns the buoyancy force applied on the body
+        
+        Returns
+        -------
+        Force
+        """
         value = [0, 0, self.rho_water * self._gravity * self.displacement_volume]
         return Force(point=self.buoyancy_center, value=value, mode='absolute')
 
     def add_force(self, force):
+        """Add a custom force applying on the body
+        
+        Parameters
+        ----------
+        force : Force
+            External force
+        """
         # TODO: allow to remove those forces...
         assert isinstance(force, Force)
         self.additional_forces.append(force)
-        return
 
     @property
-    def scale(self):
+    def _scale(self):
+        """The scaling factor for relative convergence"""
         mg = self._mg
         breadth = self.hs_data['breadth']
         lwl = self.hs_data['lwl']
@@ -606,6 +777,14 @@ class Hydrostatics(object):
 
     @property
     def residual(self):
+        """The residual force resulting from the balance between gravity, buoyancy and external forces
+        
+        It is composed of the vertical force and horizontal moments only.
+        
+        Returns
+        -------
+        ndarray
+        """
         rhog_v = self._rhog * self.hs_data['disp_volume']
         mg = self._mg
 
@@ -624,7 +803,7 @@ class Hydrostatics(object):
 
     def set_displacement(self, disp):
         """
-        Displaces mesh at a prescribed displacement and returns
+        Displaces the mesh at a prescribed displacement
 
         Parameters
         ----------
@@ -673,10 +852,30 @@ class Hydrostatics(object):
                 dz = math.copysign(z_relax, dz)
             iter += 1
 
-        return
-
     def equilibrate(self, init_disp=True):
-
+        """Performs 3D equilibrium search.
+        
+        Parameters
+        ----------
+        init_disp : bool, optional
+            Flag to indicate if the mesh has to be first placed at its displacement. Default is True.
+        Returns
+        -------
+        int
+            A code indicating the state of the solver at the end of the computations
+            
+        Notes
+        -----
+        
+        The return code can have the following values:
+        
+        * 0 : Failed to find an equilibrium position
+        * 1 : A stable equilibrium configuration has been reached
+        * 2 : An unstable equilibrium configuration has been reached
+        """
+        
+        linear_solver = np.linalg.solve
+        
         # Initial displacement equilibrium
         if init_disp:
             if self.verbose:
@@ -757,11 +956,10 @@ class Hydrostatics(object):
             self._reinit_clipper()
             self._update_hydrostatic_properties()
 
-            # if self.animate:
-            #     mmio.write_VTP('mesh%u.vtp' % iter, mymesh_c.vertices, mymesh_c.faces)
+            # TODO: animation may be trigged here
 
             residual = self.residual
-            scale = self.scale
+            scale = self._scale
 
             if np.all(np.fabs(self.residual / scale) < reltol):
                 # Convergence at an equilibrium
@@ -782,9 +980,8 @@ class Hydrostatics(object):
                         continue
 
             # Computing correction
-            # TODO: voir pour une resolution ne faisant pas intervenir np.linalg ?
             stiffness_matrix = self.hs_data['stiffness_matrix']
-            dz, thetax, thetay = np.linalg.solve(stiffness_matrix, residual)
+            dz, thetax, thetay = linear_solver(stiffness_matrix, residual)
 
             # Relaxation
             if math.fabs(dz) > z_relax:
@@ -818,13 +1015,13 @@ class Hydrostatics(object):
         return code
 
     def get_hydrostatic_report(self):
-
-        def header(title):
-            head = '\t-----------------------------------------------------\n'
-            head += '\t* {0}\n'.format(title.upper())
-            head += '\t-----------------------------------------------------\n'
-            return head
-
+        """Returns a hydrostatic report for the current configuration
+        
+        Returns
+        -------
+        str
+        """
+        
         def hspace():
             return '\n'
 
@@ -904,7 +1101,7 @@ class Hydrostatics(object):
         msg += hspace()
         msg += '\tRESIDUALS:\n'
         msg += build_line('Absolute', self.residual, precision=3, dtype='E')
-        msg += build_line('Relative', self.residual / self.scale, precision=3, dtype='E')
+        msg += build_line('Relative', self.residual / self._scale, precision=3, dtype='E')
         msg += build_line('Relative tolerance', self.reltol, precision=1, dtype='E')
         # residual = self.residual
         # msg += ('\nResidual:\n')
@@ -912,7 +1109,7 @@ class Hydrostatics(object):
         # msg += ('Delta Mx = %.3f Nm\n' % residual[1])
         # msg += ('Delta My = %.3f Nm\n' % residual[2])
         #
-        # rel_res = residual / self.scale
+        # rel_res = residual / self._scale
         # msg += ('\nRelative residual:\n')
         # msg += ('Delta Fz = %E\n' % rel_res[0])
         # msg += ('Delta Mx = %E\n' % rel_res[1])
@@ -924,6 +1121,7 @@ class Hydrostatics(object):
     # FIXME: la methode show ne devrait pas faire appel explicitement a des fonctions vtk...
     # Tout devrait etre gere dans MMViewer
     def show(self):
+        """Displays the mesh in the meshmagick viewer with additional graphics proper to hydrostatics"""
         # TODO: Ce n'est pas ce module qui doit savoir utiliser vtk !!!
 
         import MMviewer
@@ -974,36 +1172,3 @@ class Hydrostatics(object):
         self.viewer.finalize()
 
         return
-
-
-if __name__ == '__main__':
-    # The following code are only for testing purpose
-    import mmio
-    import sys
-    import mesh
-
-    vertices, faces = mmio.load_VTP('meshmagick/tests/data/SEAREV.vtp')
-
-    searev = mesh.Mesh(vertices, faces, name='SEAREV')
-
-    hs = Hydrostatics(searev)
-    hs.verbose_on()
-
-    # hs.mass = 2300
-    hs.gravity_center = [0, 0, -2]
-    hs.allow_unstable_off()
-    hs.reltol = 1e-3
-
-    F = [0, 0, -50e3 * 9.81]
-    force1 = Force(point=[0, 0, 5], value=[0, 1e7, 0], mode='relative')
-    # force2 = AdditionalForce(point=[0, 15, -5], value=[0, 0, -50e3*9.81], mode='absolute')
-    # force = AdditionalForce(point=[0, 0, 3], value=[0, 1e7, 0], mode='absolute')
-    hs.add_force(force1)
-    # hs.add_force(force2)
-
-    hs.equilibrate()
-    hs.show()
-
-    print hs.get_hydrostatic_report()
-
-    print 'Done !'

@@ -144,7 +144,6 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
     
     Parameters
     ----------
-    
     normal : array_like
         3 component vector of the plane normal
     scalar : float
