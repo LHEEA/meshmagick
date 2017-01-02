@@ -59,7 +59,7 @@ Quick information on a mesh is given by the :abbr:`-i (--info)` option::
 
 That gives us the following output:
 
-.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -i
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -i
 
 
 Mesh quality metrics
@@ -71,7 +71,7 @@ You can get some quality metrics on the mesh by issuing::
 
 that gives:
 
-.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp --quality
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp --quality
 
 .. note::
 
@@ -134,7 +134,7 @@ The :abbr:`-md (--merge-duplicates)` option does this::
 
 that gives:
 
-.. program-output:: meshmagick ../meshmagick/tests/data/coque.gdf -md
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/coque.gdf -md
 
 This allows to generate connectivity tables in the mesh and may drastically reduce the mesh size in memory and on disk.
 
@@ -222,7 +222,7 @@ The command is then::
 
 that outputs:
 
-.. program-output:: meshmagick ../meshmagick/tests/data/cylinder.msh -hm
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/cylinder.msh -hm
 
 Mesh transformations
 --------------------
@@ -244,7 +244,7 @@ coordinate vector. The invocations are::
 
 for translations of 10 along specific axes and along the coordinate vector (10, 10, 10). The last command gives:
 
-.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -t 10 10 10 -i
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -t 10 10 10 -i
 
 Rotations
 ~~~~~~~~~
@@ -262,7 +262,7 @@ rotation along fixed axis rotation vector. The invocations are::
 for rotations of 90° around specific axes and around the rotation coordinate vector (90, 90, 90). The last command
 gives:
 
-.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -r 90 90 90 -i
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -r 90 90 90 -i
 
 .. warning::
 
@@ -285,7 +285,7 @@ scaling of the mesh. The invocations are::
 
 for scaling of 2 along specific axes and of the whole mesh in space. The last command gives:
 
-.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -s 2 -i
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -s 2 -i
 
 .. warning::
 
@@ -301,7 +301,7 @@ The :abbr:`-tq (--triangulate-quadrangles)` allows to split every quadrangle fac
 
 that displays the following:
 
-.. program-output:: meshmagick ../meshmagick/tests/data/cylinder.msh -tq
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/cylinder.msh -tq
 
 .. image:: ../img/triangulate.png
 
@@ -492,7 +492,7 @@ It is also possible to use some default medium density keywords. These keywords 
 
     >$ meshmagick SEAREV.vtp --list-medium
 
-.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp --list-medium
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp --list-medium
 
 An other solution is to look at the ``--help`` output.
 
@@ -513,7 +513,7 @@ This is achieved by using the :abbr:`-pi (--plain-inertia)` option::
 
 that gives:
 
-.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -pi --rho-medium 800
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -pi --rho-medium 800
 
 .. note::
     If the medium's density is not specified, the ``-pi`` option guesses that the medium is salt water and then takes a
@@ -528,7 +528,8 @@ This is achieved by using the :abbr:`-si (--shell-inertia)` option::
 
 that gives:
 
-.. program-output:: meshmagick ../meshmagick/tests/data/SEAREV.vtp -si --rho-medium 5850 --thickness 0.02
+.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -si --rho-medium 5850
+                    --thickness 0.02
 
 .. note::
 
