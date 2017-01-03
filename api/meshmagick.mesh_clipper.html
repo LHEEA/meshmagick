@@ -34,7 +34,7 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Meshmagick User&#39;s Guide 1.0 documentation" href="../index.html"/>
-        <link rel="up" title="Meshmagick Package" href="index.html"/>
+        <link rel="up" title="Meshmagick Package’s modules" href="index.html"/>
         <link rel="next" title="meshmagick.densities module" href="meshmagick.densities.html"/>
         <link rel="prev" title="meshmagick.inertia module" href="meshmagick.inertia.html"/> 
 
@@ -91,11 +91,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
 </ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../module/module.html">Using Meshmagick as a Python module</a></li>
-</ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package&#8217;s modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.mesh.html">meshmagick.mesh module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.mmio.html">meshmagick.mmio module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.inertia.html">meshmagick.inertia module</a></li>
@@ -136,7 +133,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-          <li><a href="index.html">Meshmagick Package</a> &raquo;</li>
+          <li><a href="index.html">Meshmagick Package&#8217;s modules</a> &raquo;</li>
       
     <li>meshmagick.mesh_clipper module</li>
       <li class="wy-breadcrumbs-aside">
@@ -154,9 +151,10 @@
             
   <div class="section" id="module-meshmagick.mesh_clipper">
 <span id="meshmagick-mesh-clipper-module"></span><h1>meshmagick.mesh_clipper module<a class="headerlink" href="#module-meshmagick.mesh_clipper" title="Permalink to this headline">¶</a></h1>
+<p>This module holds a tools to clip meshes against a plane</p>
 <dl class="class">
 <dt id="meshmagick.mesh_clipper.MeshClipper">
-<em class="property">class </em><code class="descclassname">meshmagick.mesh_clipper.</code><code class="descname">MeshClipper</code><span class="sig-paren">(</span><em>source_mesh=None</em>, <em>plane=&lt;meshmagick.mesh.Plane object&gt;</em>, <em>vicinity_tol=0.001</em>, <em>assert_closed_boundaries=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh_clipper.html#MeshClipper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">meshmagick.mesh_clipper.</code><code class="descname">MeshClipper</code><span class="sig-paren">(</span><em>source_mesh</em>, <em>plane=&lt;meshmagick.mesh.Plane object&gt;</em>, <em>vicinity_tol=0.001</em>, <em>assert_closed_boundaries=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh_clipper.html#MeshClipper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>A class to perform mesh clipping operations.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -164,11 +162,11 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>source_mesh</strong> (<a class="reference internal" href="meshmagick.mesh.html#meshmagick.mesh.Mesh" title="meshmagick.mesh.Mesh"><em>Mesh</em></a>) &#8211; The mesh to be clipped</li>
+<li><strong>source_mesh</strong> (<a class="reference internal" href="meshmagick.mesh.html#meshmagick.mesh.Mesh" title="meshmagick.mesh.Mesh"><em>Mesh</em></a>) &#8211; The mesh to be clipped.</li>
 <li><strong>plane</strong> (<a class="reference internal" href="meshmagick.mesh.html#meshmagick.mesh.Plane" title="meshmagick.mesh.Plane"><em>Plane</em></a><em>, </em><em>optional</em>) &#8211; The clipping plane. By default, the plane is the Oxy plane.</li>
-<li><strong>vicinity_tol</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The absolute tolerance to consider en vertex is on the plane. Default is 1z-3.</li>
+<li><strong>vicinity_tol</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; The absolute tolerance to consider en vertex is on the plane. Default is 1e-3.</li>
 <li><strong>assert_closed_boundaries</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; False by default. When True, the mesh clipper will raise an exception if intersections with the clipping
-plane are not closed</li>
+plane are not closed. It may be caused by a non-watertight mesh.</li>
 <li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; False by default. If True, some messages on operations that are handled are printed.</li>
 </ul>
 </td>
@@ -178,112 +176,243 @@ plane are not closed</li>
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.assert_closed_boundaries">
 <code class="descname">assert_closed_boundaries</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.assert_closed_boundaries" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Do we assert the boundaries have to be closed</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.mesh_clipper.MeshClipper.assert_closed_boundaries_off">
 <code class="descname">assert_closed_boundaries_off</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh_clipper.html#MeshClipper.assert_closed_boundaries_off"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.assert_closed_boundaries_off" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Switches OFF the flag for closed boundary assertion while clipping.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.mesh_clipper.MeshClipper.assert_closed_boundaries_on">
 <code class="descname">assert_closed_boundaries_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh_clipper.html#MeshClipper.assert_closed_boundaries_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.assert_closed_boundaries_on" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="meshmagick.mesh_clipper.MeshClipper.clip">
-<code class="descname">clip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh_clipper.html#MeshClipper.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.clip" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="meshmagick.mesh_clipper.MeshClipper.clip_crown_by_plane">
-<code class="descname">clip_crown_by_plane</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh_clipper.html#MeshClipper.clip_crown_by_plane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.clip_crown_by_plane" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Switches ON the flag for closed boundary assertion while clipping.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.clipped_crown_mesh">
 <code class="descname">clipped_crown_mesh</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.clipped_crown_mesh" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>A new mesh that is obtained by clipping the crown_mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="meshmagick.mesh.html#meshmagick.mesh.Mesh" title="meshmagick.mesh.Mesh">Mesh</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.clipped_mesh">
 <code class="descname">clipped_mesh</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.clipped_mesh" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The resulting clipped mesh</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.closed_polygons">
 <code class="descname">closed_polygons</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.closed_polygons" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the list of closed boundary polygons obtained after clipping.</p>
+<p>This is a list of lists. The enclosed lists are ordered IDs list that form a closed polygon, described in the
+counter-clockwise order with respect to the mesh (oriented following the clipping plane&#8217;s normal).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<ul class="last simple">
+<li>The first vertex is repeated at the end of the list. By definition, these polygons are lying on the clipping
+plane.</li>
+<li>Vertices IDs are corresponding to the IDs of the clipped_crown_mesh, not those of the clipped_mesh.</li>
+</ul>
+</div>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.closed_polygons_vertices">
 <code class="descname">closed_polygons_vertices</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.closed_polygons_vertices" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the list of closed boundary polygons obtained after clipping.</p>
+<p>This is a list of lists. The enclosed lists are ordered vertices coordinates of the closed polygons. By
+definition, these polygons are lying on the clipping plane.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.crown_mesh">
 <code class="descname">crown_mesh</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.crown_mesh" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>A new mesh only having the faces that cut the plane</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="meshmagick.mesh.html#meshmagick.mesh.Mesh" title="meshmagick.mesh.Mesh">Mesh</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.lower_mesh">
 <code class="descname">lower_mesh</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.lower_mesh" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>A new mesh composed of the faces that entirely lie under the clipping plane.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="meshmagick.mesh.html#meshmagick.mesh.Mesh" title="meshmagick.mesh.Mesh">Mesh</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.nb_closed_polygons">
 <code class="descname">nb_closed_polygons</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.nb_closed_polygons" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The number of closed polygons obtained after clipping</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.nb_open_lines">
 <code class="descname">nb_open_lines</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.nb_open_lines" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The number of open lines obtained after clipping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.open_lines">
 <code class="descname">open_lines</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.open_lines" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns a list of open boundary lines obtained after clipping.</p>
+<p>This is a list of lists. The enclosed lists are ordered vertices IDs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<ul class="last simple">
+<li>The vertices IDs correspond to the IDs of clipped_crown_mesh, not clipped_mesh.</li>
+</ul>
+</div>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.open_lines_vertices">
 <code class="descname">open_lines_vertices</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.open_lines_vertices" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns a list of open boundary lines obtained after clipping.</p>
+<p>This is a list of lists. The enclosed lists are ordered vertices IDs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.plane">
 <code class="descname">plane</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.plane" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The clipping plane</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.source_mesh">
 <code class="descname">source_mesh</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.source_mesh" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The mesh we work with</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.upper_mesh">
 <code class="descname">upper_mesh</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.upper_mesh" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>A new mesh only having the faces lying entirely up the plane</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="meshmagick.mesh.html#meshmagick.mesh.Mesh" title="meshmagick.mesh.Mesh">Mesh</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.verbose">
 <code class="descname">verbose</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.verbose" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get the current verbosity</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.mesh_clipper.MeshClipper.verbose_off">
 <code class="descname">verbose_off</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh_clipper.html#MeshClipper.verbose_off"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.verbose_off" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Switches OFF the verbosity of the clipper.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.mesh_clipper.MeshClipper.verbose_on">
 <code class="descname">verbose_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh_clipper.html#MeshClipper.verbose_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.verbose_on" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Switches ON the verbosity of the clipper.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="meshmagick.mesh_clipper.MeshClipper.vicinity_tol">
 <code class="descname">vicinity_tol</code><a class="headerlink" href="#meshmagick.mesh_clipper.MeshClipper.vicinity_tol" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Vicinity tolerance.</p>
+<p>It tells if a point is close enough to the plane to consider it lies on the plane</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -308,8 +437,8 @@ plane are not closed</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Ecole Centrale de Nantes.
-      Last updated on Dec 21, 2016.
+        &copy; Copyright 2017, Ecole Centrale de Nantes.
+      Last updated on Jan 03, 2017.
 
     </p>
   </div> 
@@ -339,6 +468,7 @@ plane are not closed</li>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

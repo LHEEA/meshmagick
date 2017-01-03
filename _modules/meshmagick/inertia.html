@@ -90,10 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../module/module.html">Using Meshmagick as a Python module</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package&#8217;s modules</a></li>
 </ul>
 
             
@@ -141,6 +138,7 @@
   <h1>Source code for meshmagick.inertia</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="c1">#  -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;This module defines a RigidBodyInertia class to handle 3D rotational inertia of rigid bodies&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">sqrt</span>
@@ -149,14 +147,33 @@
 <span class="kn">import</span> <span class="nn">densities</span>
 
 <span class="c1"># FIXME: attention, changer les signes pour les produits d&#39;inertie !</span>
-
 <span class="c1"># TODO: ajouter la production d&#39;inerties de solides connus --&gt; utile pour comparaison !!</span>
-
-
 <span class="c1"># TODO: indiquer une frame d&#39;expression ...</span>
 
 
 <div class="viewcode-block" id="RigidBodyInertia"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.RigidBodyInertia">[docs]</a><span class="k">class</span> <span class="nc">RigidBodyInertia</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mass : float</span>
+<span class="sd">        The mass of the body in kg</span>
+<span class="sd">    cog : array_like</span>
+<span class="sd">        The 3D coordinates of the center of gravity</span>
+<span class="sd">    xx : float</span>
+<span class="sd">        The principal inertia moment around x axis</span>
+<span class="sd">    yy : float</span>
+<span class="sd">        The principal inertia moment around y axis</span>
+<span class="sd">    zz : float</span>
+<span class="sd">        The principal inertia moment around z axis</span>
+<span class="sd">    yz : float</span>
+<span class="sd">        Inertia product</span>
+<span class="sd">    xz : float</span>
+<span class="sd">        Inertia product</span>
+<span class="sd">    xy : float</span>
+<span class="sd">        Inertia product</span>
+<span class="sd">    point : array_like, optional</span>
+<span class="sd">        The reduction point. If None, it is set to be cog</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">yz</span><span class="p">,</span> <span class="n">xz</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mass</span><span class="p">)</span>
@@ -176,41 +193,66 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The mass of the body&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gravity_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The position of the center of gravity&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">inertia_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The 3D rotational inertia matrix&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reduction_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The reduction point of the inertia matrix</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span>
     
     <span class="nd">@reduction_point</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">reduction_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Change the reduction point&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Set the reduction point&quot;&quot;&quot;</span>
         <span class="n">mat_at_cog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">at_cog</span><span class="o">.</span><span class="n">inertia_matrix</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span> <span class="o">=</span> <span class="n">mat_at_cog</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_huygens_transport</span><span class="p">()</span>
-        <span class="k">return</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">at_cog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a new inertia object that is expressed at cog.</span>
+<span class="sd">        </span>
+<span class="sd">        It makes a copy of itself.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">inertia</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">inertia</span><span class="o">.</span><span class="n">shift_at_cog</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">inertia</span>
     
 <div class="viewcode-block" id="RigidBodyInertia.shift_at_cog"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.RigidBodyInertia.shift_at_cog">[docs]</a>    <span class="k">def</span> <span class="nf">shift_at_cog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Shift the inertia matrix internally at cog.</span>
+<span class="sd">        </span>
+<span class="sd">        The reduction point is then cog.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_huygens_transport</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span>
-        <span class="k">return</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span></div>
     
 <div class="viewcode-block" id="RigidBodyInertia.is_at_cog"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.RigidBodyInertia.is_at_cog">[docs]</a>    <span class="k">def</span> <span class="nf">is_at_cog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns whether the object is expressed at cog</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span><span class="p">)</span></div>
     
     <span class="k">def</span> <span class="nf">_huygens_transport</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -219,26 +261,62 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the principal inertia moment around x</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">yy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the principal inertia moment around y</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">                &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">zz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the principal inertia moment around z</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">yz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the yz inertia product</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the xz inertia product</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the xy inertia product</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
     
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -272,6 +350,13 @@
 <span class="c1"># Principal geometrical shapes</span>
 <span class="c1"># From &quot;Handbook of equations for mass and area of various geometrical shapes, J.A. Myers, 1962&quot;</span>
 <div class="viewcode-block" id="right_circular_cylinder"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.right_circular_cylinder">[docs]</a><span class="k">def</span> <span class="nf">right_circular_cylinder</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a right circular cylinder</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">length</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -282,6 +367,13 @@
 
 
 <div class="viewcode-block" id="hollow_right_circular_cylinder"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.hollow_right_circular_cylinder">[docs]</a><span class="k">def</span> <span class="nf">hollow_right_circular_cylinder</span><span class="p">(</span><span class="n">int_radius</span><span class="p">,</span> <span class="n">ext_radius</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a hollow right circular cylinder</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">length</span> <span class="o">*</span> <span class="p">(</span><span class="n">ext_radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">int_radius</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -293,9 +385,17 @@
 
 
 <div class="viewcode-block" id="right_circular_cone"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.right_circular_cone">[docs]</a><span class="k">def</span> <span class="nf">right_circular_cone</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Note:</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a right circular cone</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    </span>
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
 <span class="sd">    The center of gravity is at an altitude of z = H/4 over the circular basis center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -306,6 +406,13 @@
 
 
 <div class="viewcode-block" id="sphere"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.sphere">[docs]</a><span class="k">def</span> <span class="nf">sphere</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a sphere</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -314,6 +421,13 @@
 
 
 <div class="viewcode-block" id="hollow_sphere"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.hollow_sphere">[docs]</a><span class="k">def</span> <span class="nf">hollow_sphere</span><span class="p">(</span><span class="n">int_radius</span><span class="p">,</span> <span class="n">ext_radius</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a hollow sphere</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">ext_radius</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">int_radius</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -322,9 +436,17 @@
 
 
 <div class="viewcode-block" id="hemisphere"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.hemisphere">[docs]</a><span class="k">def</span> <span class="nf">hemisphere</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Note</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a hemisphere</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    </span>
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
 <span class="sd">    The center of gravity is situated at the altitude of z = 3R/8 over the circular basis center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -334,11 +456,18 @@
 
 
 <div class="viewcode-block" id="elliptical_cylinder"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.elliptical_cylinder">[docs]</a><span class="k">def</span> <span class="nf">elliptical_cylinder</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Note :</span>
-<span class="sd">    The center of gravity is located at an altitude of z=H/2 over the elliptical basis center</span>
-<span class="sd">    a is along x axis (ellipse semi axis)</span>
-<span class="sd">    b is along y axis (ellipse semi axis)</span>
-<span class="sd">    length is along z axis</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of an elliptical cylinder</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    </span>
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    * The center of gravity is located at an altitude of z=H/2 over the elliptical basis center</span>
+<span class="sd">    * a is along x axis (ellipse semi axis)</span>
+<span class="sd">    * b is along y axis (ellipse semi axis)</span>
+<span class="sd">    * length is along z axis</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">vol</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">length</span>
@@ -352,11 +481,19 @@
 
 
 <div class="viewcode-block" id="ellipsoid"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.ellipsoid">[docs]</a><span class="k">def</span> <span class="nf">ellipsoid</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Note</span>
-<span class="sd">    a is along z axis (ellipse semi axis)</span>
-<span class="sd">    b is along x axis (ellipse semi axis)</span>
-<span class="sd">    c is along y axis (ellipse semi axis)</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of an ellipsoid</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    </span>
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    * a is along z axis (ellipse semi axis)</span>
+<span class="sd">    * b is along x axis (ellipse semi axis)</span>
+<span class="sd">    * c is along y axis (ellipse semi axis)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -367,6 +504,13 @@
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="torus"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.torus">[docs]</a><span class="k">def</span> <span class="nf">torus</span><span class="p">(</span><span class="n">chord_radius</span><span class="p">,</span> <span class="n">tube_radius</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a torus</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">tube_radius</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">chord_radius</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -377,6 +521,13 @@
 
 
 <div class="viewcode-block" id="right_angle_wedge"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.right_angle_wedge">[docs]</a><span class="k">def</span> <span class="nf">right_angle_wedge</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a right angle wedge</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="n">base</span><span class="o">*</span><span class="n">height</span><span class="o">*</span><span class="n">length</span> <span class="o">/</span> <span class="mf">2.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -388,6 +539,13 @@
 
 
 <div class="viewcode-block" id="isoceles_wedge"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.isoceles_wedge">[docs]</a><span class="k">def</span> <span class="nf">isoceles_wedge</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of an isocele wedge</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="n">base</span> <span class="o">*</span> <span class="n">height</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="mf">2.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
 
@@ -399,9 +557,17 @@
 
 
 <div class="viewcode-block" id="right_rectangular_pyramid"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.right_rectangular_pyramid">[docs]</a><span class="k">def</span> <span class="nf">right_rectangular_pyramid</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Note</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a right rectangular pyramid</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    </span>
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
 <span class="sd">    The center of gravity is located at the altitude z=H/4 over the rectangular basis center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">height</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -413,6 +579,13 @@
 
 
 <div class="viewcode-block" id="cube"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.cube">[docs]</a><span class="k">def</span> <span class="nf">cube</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a cube</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="n">a</span><span class="o">**</span><span class="mi">3</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -421,10 +594,19 @@
 
 
 <div class="viewcode-block" id="rectangular_prism"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.rectangular_prism">[docs]</a><span class="k">def</span> <span class="nf">rectangular_prism</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Note:</span>
-<span class="sd">    a is along x</span>
-<span class="sd">    b is along y</span>
-<span class="sd">    h is along z&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a rectangular prism</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    </span>
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    * a is along x</span>
+<span class="sd">    * b is along y</span>
+<span class="sd">    * h is along z</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">vol</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">h</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
     
@@ -436,9 +618,17 @@
 
 
 <div class="viewcode-block" id="circular_cone_shell"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.circular_cone_shell">[docs]</a><span class="k">def</span> <span class="nf">circular_cone_shell</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="s1">&#39;STEEL&#39;</span><span class="p">),</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Note</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a circular cone shell</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    </span>
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
 <span class="sd">    The center of gravity is located at an altitude of z=H/3 over the circular basis center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">surface</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">height</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
@@ -450,9 +640,17 @@
 
 
 <div class="viewcode-block" id="frustrum_of_circular_cone_shell"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.frustrum_of_circular_cone_shell">[docs]</a><span class="k">def</span> <span class="nf">frustrum_of_circular_cone_shell</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="s1">&#39;STEEL&#39;</span><span class="p">),</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Note:</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a frustrum of circular cone shell</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    </span>
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
 <span class="sd">    The center of gravity is located at an altitude of z=(H/3)*(2*r+R)/(r+R)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">surface</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">height</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">R</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
@@ -464,6 +662,13 @@
 
 
 <div class="viewcode-block" id="lateral_cylindrical_shell"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.lateral_cylindrical_shell">[docs]</a><span class="k">def</span> <span class="nf">lateral_cylindrical_shell</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="s1">&#39;STEEL&#39;</span><span class="p">),</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a lateral cylindrical shell</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">surface</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">R</span><span class="o">*</span><span class="n">H</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
@@ -475,6 +680,13 @@
 
 
 <div class="viewcode-block" id="total_cylindrical_shell"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.total_cylindrical_shell">[docs]</a><span class="k">def</span> <span class="nf">total_cylindrical_shell</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="s1">&#39;STEEL&#39;</span><span class="p">),</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a total cylindrical shell</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">surface</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">H</span><span class="p">)</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
@@ -486,6 +698,13 @@
 
 
 <div class="viewcode-block" id="spherical_shell"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.spherical_shell">[docs]</a><span class="k">def</span> <span class="nf">spherical_shell</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="s1">&#39;STEEL&#39;</span><span class="p">)</span> <span class="p">,</span><span class="n">thickness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a spherical shell</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">surface</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
@@ -495,9 +714,17 @@
 
 
 <div class="viewcode-block" id="hemispherical_shell"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.hemispherical_shell">[docs]</a><span class="k">def</span> <span class="nf">hemispherical_shell</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="s1">&#39;STEEL&#39;</span><span class="p">),</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Note</span>
+    <span class="sd">&quot;&quot;&quot;Get the inertia of a hemispherical shell</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RigidBodyInertia</span>
+<span class="sd">    </span>
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
 <span class="sd">    The center of gravity is located at an altitude of z=R/2 over the circular basis center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">surface</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">R</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
@@ -667,8 +894,8 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Ecole Centrale de Nantes.
-      Last updated on Dec 21, 2016.
+        &copy; Copyright 2017, Ecole Centrale de Nantes.
+      Last updated on Jan 03, 2017.
 
     </p>
   </div> 
@@ -698,6 +925,7 @@
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

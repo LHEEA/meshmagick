@@ -90,10 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../module/module.html">Using Meshmagick as a Python module</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package&#8217;s modules</a></li>
 </ul>
 
             
@@ -160,6 +157,15 @@
 <span class="kn">import</span> <span class="nn">MMviewer</span>
 <span class="kn">from</span> <span class="nn">inertia</span> <span class="k">import</span> <span class="n">RigidBodyInertia</span>
 
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Francois Rongere&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2014-2015, Ecole Centrale de Nantes&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Francois Rongere&quot;</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="s2">&quot;CeCILL&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Francois Rongere&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;Francois.Rongere@ec-nantes.fr&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
+
 <span class="c1"># TODO: Use traitlets to manage updates into the Mesh class</span>
 <span class="c1"># TODO: les points doivent etre des objects nodes...</span>
 <span class="c1"># TODO: On doit pouvoir specifier des objets frame</span>
@@ -178,7 +184,7 @@
 <span class="sd">        Angle around Oy axe (rad)</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    R : ndarray</span>
+<span class="sd">    rot : ndarray</span>
 <span class="sd">        Rotation matrix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -195,14 +201,14 @@
 
     <span class="c1"># Olinde Rodrigues formulae</span>
     <span class="c1"># FIXME: S&#39;assurer qu&#39;on a effectivement pas de Ctheta devant le I3 !! et repercuter sur l&#39;hydrostatique</span>
-    <span class="n">R</span> <span class="o">=</span> <span class="n">ctheta</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> \
-       <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">ctheta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">nx</span><span class="o">*</span><span class="n">nx</span><span class="p">,</span> <span class="n">nxny</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
-                                <span class="p">[</span><span class="n">nxny</span><span class="p">,</span> <span class="n">ny</span><span class="o">*</span><span class="n">ny</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
-                                <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span> \
-       <span class="o">+</span> <span class="n">stheta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>  <span class="n">ny</span><span class="p">],</span>
-                            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">nx</span><span class="p">],</span>
-                            <span class="p">[</span><span class="o">-</span><span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span>
-    <span class="k">return</span> <span class="n">R</span>
+    <span class="n">rot</span> <span class="o">=</span> <span class="n">ctheta</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> \
+        <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">ctheta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">nx</span><span class="o">*</span><span class="n">nx</span><span class="p">,</span> <span class="n">nxny</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                                 <span class="p">[</span><span class="n">nxny</span><span class="p">,</span> <span class="n">ny</span><span class="o">*</span><span class="n">ny</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                                 <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span> \
+        <span class="o">+</span> <span class="n">stheta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>  <span class="n">ny</span><span class="p">],</span>
+                             <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">nx</span><span class="p">],</span>
+                             <span class="p">[</span><span class="o">-</span><span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="n">rot</span>
 
 
 <span class="k">def</span> <span class="nf">_cardan</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
@@ -228,12 +234,12 @@
     <span class="n">ctheta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
     <span class="n">stheta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
 
-    <span class="n">Re0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="n">Re0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctheta</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">stheta</span><span class="p">]</span>
-    <span class="n">Re0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sphi</span><span class="o">*</span><span class="n">stheta</span><span class="p">,</span> <span class="n">cphi</span><span class="p">,</span> <span class="n">sphi</span><span class="o">*</span><span class="n">ctheta</span><span class="p">]</span>
-    <span class="n">Re0</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">cphi</span><span class="o">*</span><span class="n">stheta</span><span class="p">,</span> <span class="o">-</span><span class="n">sphi</span><span class="p">,</span> <span class="n">cphi</span><span class="o">*</span><span class="n">ctheta</span><span class="p">]</span>
+    <span class="n">rot_e0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">rot_e0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctheta</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">stheta</span><span class="p">]</span>
+    <span class="n">rot_e0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sphi</span><span class="o">*</span><span class="n">stheta</span><span class="p">,</span> <span class="n">cphi</span><span class="p">,</span> <span class="n">sphi</span><span class="o">*</span><span class="n">ctheta</span><span class="p">]</span>
+    <span class="n">rot_e0</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">cphi</span><span class="o">*</span><span class="n">stheta</span><span class="p">,</span> <span class="o">-</span><span class="n">sphi</span><span class="p">,</span> <span class="n">cphi</span><span class="o">*</span><span class="n">ctheta</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">Re0</span>
+    <span class="k">return</span> <span class="n">rot_e0</span>
 
 
 <span class="k">def</span> <span class="nf">_get_rotation_matrix</span><span class="p">(</span><span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span><span class="p">,</span> <span class="n">atype</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="p">):</span>
@@ -251,7 +257,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    R : ndarray</span>
+<span class="sd">    ndarray</span>
 <span class="sd">        Rotation matrix</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -266,7 +272,7 @@
 
 
 <span class="k">def</span> <span class="nf">_get_axis_angle_from_rotation_matrix</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">):</span>
-    
+    <span class="sd">&quot;&quot;&quot;Returns the angle and unit rotation axis from a rotation matrix&quot;&quot;&quot;</span>
     <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Fonction _get_axis_angle_from_rotation_matrix a verifier !!!&#39;</span><span class="p">)</span>
     <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
     <span class="n">direction</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rot_matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">rot_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
@@ -276,7 +282,8 @@
 
 
 <span class="c1"># Classes</span>
-<div class="viewcode-block" id="Plane"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Plane">[docs]</a><span class="k">class</span> <span class="nc">Plane</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>  <span class="c1"># TODO: placer cette classe dans un module a part (genre geometry) --&gt; utilise dans meshmagick aussi...</span>
+<span class="c1"># TODO: placer cette classe dans un module a part (genre geometry) --&gt; utilise dans meshmagick aussi...</span>
+<div class="viewcode-block" id="Plane"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Plane">[docs]</a><span class="k">class</span> <span class="nc">Plane</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class to handle plane geometry.</span>
 <span class="sd">    </span>
 <span class="sd">    A plane is represented by the equation :math:`\\vec{n}.\\vec{x} = c` where :math:`\\vec{n}` is the plane&#39;s normal,</span>
@@ -285,34 +292,12 @@
 <span class="sd">    </span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    </span>
 <span class="sd">    normal : array_like</span>
 <span class="sd">        3 component vector of the plane normal</span>
 <span class="sd">    scalar : float</span>
 <span class="sd">        The scalar parameter of the plane</span>
-<span class="sd">    </span>
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    normal : ndarray</span>
-<span class="sd">        The plane&#39;s normal</span>
-<span class="sd">    c : float</span>
-<span class="sd">        The plane&#39;s scalar parameter</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span> <span class="n">scalar</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Plane initialization</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        normal : array_like, optional</span>
-<span class="sd">            Normal of the plane. Default to [0., 0., 1.]</span>
-<span class="sd">        scalar : float, optional</span>
-<span class="sd">            Plane scalar parameter. Default to 0.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">            Plane object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
@@ -325,8 +310,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span> <span class="o">=</span> <span class="n">_get_rotation_matrix</span><span class="p">(</span><span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span><span class="p">)</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        
-        <span class="k">return</span>
     
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">str_repr</span> <span class="o">=</span> <span class="s2">&quot;Plane{normal=[</span><span class="si">%f</span><span class="s2">, </span><span class="si">%f</span><span class="s2">, </span><span class="si">%f</span><span class="s2">], scalar=</span><span class="si">%f</span><span class="s2">}&quot;</span> <span class="o">%</span> \
@@ -335,48 +318,24 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">normal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># &quot;&quot;&quot;Returns the normal of the plane</span>
-        <span class="c1">#</span>
-        <span class="c1"># Returns</span>
-        <span class="c1"># -------</span>
-        <span class="c1"># ndarray</span>
-        <span class="c1">#     The 3x1 plane&#39;s normal coordinates</span>
-        <span class="c1"># &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get the plane&#39;s normal&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span>
 
     <span class="nd">@normal</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">normal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the plane&#39;s normal&quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span> <span class="o">=</span> <span class="n">value</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># &quot;&quot;&quot;Returns the scalar parameter of the plane equation</span>
-        <span class="c1">#</span>
-        <span class="c1"># Returns</span>
-        <span class="c1"># -------</span>
-        <span class="c1"># float</span>
-        <span class="c1">#     The plane scalar</span>
-        <span class="c1"># &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get the plane&#39;s scalar parameter&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scalar</span>
 
     <span class="nd">@c</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set the scalar parameter of the plane equation</span>
-<span class="sd">        </span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        value : float</span>
-<span class="sd">            scalar parameter of the plane</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        None</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Set the scalar parameter of the plane equation&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_scalar</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">return</span>
 
 <div class="viewcode-block" id="Plane.rotate_normal"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Plane.rotate_normal">[docs]</a>    <span class="k">def</span> <span class="nf">rotate_normal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -388,14 +347,12 @@
 <span class="sd">            Angle of rotation around Ox (rad)</span>
 <span class="sd">        theta_y : float</span>
 <span class="sd">            Angle of rotation around Oy (rad)</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">rot_matrix</span> <span class="o">=</span> <span class="n">_get_rotation_matrix</span><span class="p">(</span><span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
 
         <span class="c1"># updating self._rot</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span><span class="p">)</span>
-        <span class="k">return</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Plane.set_normal_from_angles"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Plane.set_normal_from_angles">[docs]</a>    <span class="k">def</span> <span class="nf">set_normal_from_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the normal orientation given angles theta_x and theta_y.</span>
@@ -422,18 +379,15 @@
                                        <span class="o">-</span><span class="n">stheta_theta</span> <span class="o">*</span> <span class="n">theta_x</span><span class="p">,</span>
                                        <span class="n">ctheta</span><span class="p">])</span>
             <span class="c1"># Updating self._rot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span> <span class="o">=</span> <span class="n">_get_rotation_matrix</span><span class="p">(</span><span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span><span class="p">)</span>
-            
-        <span class="k">return</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span> <span class="o">=</span> <span class="n">_get_rotation_matrix</span><span class="p">(</span><span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Plane.get_normal_orientation_wrt_z"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Plane.get_normal_orientation_wrt_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_normal_orientation_wrt_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the angles theta_x and theta_y giving the orientation of the plane normal</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Returns the angles theta_x and theta_y giving the orientation of the plane normal&quot;&quot;&quot;</span>
 
         <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal</span>
         <span class="n">stheta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span><span class="o">*</span><span class="n">ny</span><span class="p">)</span>
         <span class="n">ctheta</span> <span class="o">=</span> <span class="n">nz</span>
+        <span class="n">theta_x</span> <span class="o">=</span> <span class="n">theta_y</span> <span class="o">=</span> <span class="mf">0.</span>
         <span class="k">if</span> <span class="n">stheta</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">nz</span> <span class="o">==</span> <span class="mf">1.</span><span class="p">:</span>
                 <span class="n">theta_x</span> <span class="o">=</span> <span class="n">theta_y</span> <span class="o">=</span> <span class="mf">0.</span>
@@ -461,20 +415,11 @@
 <span class="sd">            Normal angle around Ox (rad)</span>
 <span class="sd">        theta_y : float</span>
 <span class="sd">            Normal angle around Oy (rad)</span>
-
-<span class="sd">        Remark</span>
-<span class="sd">        ------</span>
-<span class="sd">        Formula is (reformulate...):</span>
-<span class="sd">        $$\theta = \sqrt{\theta_x^2 + \thetay^2}$$</span>
-<span class="sd">        $$n_f = R&#39;R z$$</span>
-<span class="sd">        $$c_f = c*\cos{\theta} + c&#39;$$</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">rotate_normal</span><span class="p">(</span><span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span><span class="p">)</span>
         <span class="n">ctheta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">theta_x</span> <span class="o">*</span> <span class="n">theta_x</span> <span class="o">+</span> <span class="n">theta_y</span> <span class="o">*</span> <span class="n">theta_y</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_scalar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scalar</span> <span class="o">*</span> <span class="n">ctheta</span> <span class="o">+</span> <span class="n">scalar</span>
-        
-        <span class="k">return</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scalar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scalar</span> <span class="o">*</span> <span class="n">ctheta</span> <span class="o">+</span> <span class="n">scalar</span></div>
 
 <div class="viewcode-block" id="Plane.get_point_dist_wrt_plane"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Plane.get_point_dist_wrt_plane">[docs]</a>    <span class="k">def</span> <span class="nf">get_point_dist_wrt_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -490,6 +435,7 @@
 <span class="sd">        dist : ndarray</span>
 <span class="sd">            Array of distances of points with respect to the plane</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scalar</span></div>
 
 <div class="viewcode-block" id="Plane.flip_normal"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Plane.flip_normal">[docs]</a>    <span class="k">def</span> <span class="nf">flip_normal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -498,8 +444,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normal</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_normal_orientation_wrt_z</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span> <span class="o">=</span> <span class="n">_get_rotation_matrix</span><span class="p">(</span><span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span><span class="p">)</span>
-        <span class="k">return</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rot</span> <span class="o">=</span> <span class="n">_get_rotation_matrix</span><span class="p">(</span><span class="n">theta_x</span><span class="p">,</span> <span class="n">theta_y</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Plane.coord_in_plane"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Plane.coord_in_plane">[docs]</a>    <span class="k">def</span> <span class="nf">coord_in_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -515,6 +460,7 @@
 <span class="sd">        output : ndarray</span>
 <span class="sd">            Array of points coordinates in the frame of the plane</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="c1"># TODO: verifier effectivement que si on prend des points se trouvant dans le plan, leurs coordonnees dans le</span>
         <span class="c1">#  plan n&#39;ont pas de composante z</span>
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_scalar</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rot</span><span class="p">,</span> <span class="n">points</span><span class="o">.</span><span class="n">T</span><span class="p">))</span></div>
@@ -566,6 +512,7 @@
         <span class="k">return</span> <span class="n">projected_points</span></div>
     
 <div class="viewcode-block" id="Plane.get_origin"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Plane.get_origin">[docs]</a>    <span class="k">def</span> <span class="nf">get_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the coordinates of the plane&#39;s origin&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal</span></div></div>
 
 
@@ -579,13 +526,13 @@
 
 
 <div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;A clas to handle unstructured meshes.</span>
+    <span class="sd">&quot;&quot;&quot;A class to handle unstructured meshes.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    vertices : ndarray</span>
+<span class="sd">    vertices : array_like</span>
 <span class="sd">        (nv x 3) Array of mesh vertices coordinates. Each line of the array represents one vertex coordinates</span>
-<span class="sd">    faces : ndarray</span>
+<span class="sd">    faces : array_like</span>
 <span class="sd">        Arrays of mesh connectivities for faces. Each line of the array represents indices of vertices that form the</span>
 <span class="sd">        face, expressed in counterclockwise order to ensure outward normals description.</span>
 <span class="sd">    name : str, optional</span>
@@ -650,7 +597,8 @@
 <div class="viewcode-block" id="Mesh.print_quality"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.print_quality">[docs]</a>    <span class="k">def</span> <span class="nf">print_quality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns data on the mesh quality</span>
 <span class="sd">        </span>
-<span class="sd">        It uses VTK and is reproduced from http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py</span>
+<span class="sd">        It uses VTK and is reproduced from</span>
+<span class="sd">        http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># This function is reproduced from</span>
         <span class="c1"># http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py</span>
@@ -699,25 +647,25 @@
               <span class="p">]</span>
              <span class="p">]</span>
         <span class="p">]</span>
-
+        <span class="n">res</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="k">if</span> <span class="n">polydata</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">res</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
             <span class="k">for</span> <span class="n">meshType</span> <span class="ow">in</span> <span class="n">meshTypes</span><span class="p">:</span>
                 <span class="n">res</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">meshType</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39; quality of the mesh &#39;</span><span class="p">)</span>
                 <span class="n">quality</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
                 <span class="n">an</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span><span class="o">.</span><span class="n">GetFieldData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="s1">&#39;Mesh &#39;</span> <span class="o">+</span> <span class="n">meshType</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; Quality&#39;</span><span class="p">)</span>
                 <span class="n">cardinality</span> <span class="o">=</span> <span class="n">an</span><span class="o">.</span><span class="n">GetComponent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 
-                <span class="n">res</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="s1">&#39;(</span><span class="si">%u</span><span class="s1"> elements):</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cardinality</span><span class="p">)))</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="s1">&#39;(</span><span class="si">%u</span><span class="s1"> elements):</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cardinality</span><span class="p">))</span>
 
                 <span class="c1"># res += &#39;(&#39;+str(cardinality) +meshType[1]+&#39;):\n&#39;</span>
 
                 <span class="k">for</span> <span class="n">measure</span> <span class="ow">in</span> <span class="n">meshType</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
                     <span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;quality.Set&#39;</span> <span class="o">+</span> <span class="n">meshType</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">measure</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;()&#39;</span><span class="p">)</span>
                     <span class="n">quality</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
-                    <span class="n">res</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">measure</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                         <span class="n">DumpQualityStats</span><span class="p">(</span><span class="n">quality</span><span class="p">,</span>
-                                        <span class="s1">&#39;Mesh &#39;</span> <span class="o">+</span> <span class="n">meshType</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; Quality&#39;</span><span class="p">))</span>
+                    <span class="n">res</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">measure</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">DumpQualityStats</span><span class="p">(</span><span class="n">quality</span><span class="p">,</span> <span class="s1">&#39;Mesh &#39;</span> <span class="o">+</span> <span class="n">meshType</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; Quality&#39;</span><span class="p">)</span>
+                    <span class="p">)</span>
                 <span class="n">res</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
         <span class="n">info</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\n\n</span><span class="s2">Definition of the different quality measures is given</span>
@@ -2193,7 +2141,8 @@
         <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">yz</span><span class="p">,</span> <span class="n">xz</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span></div>
     
 <div class="viewcode-block" id="Mesh.eval_shell_mesh_inertias"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.eval_shell_mesh_inertias">[docs]</a>    <span class="k">def</span> <span class="nf">eval_shell_mesh_inertias</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rho_medium</span><span class="o">=</span><span class="mf">7850.</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Evaluates the mesh inertia under the assumption of an enclosed volume made of an homogeneous    medium of the  given density.</span>
+        <span class="sd">&quot;&quot;&quot;Evaluates the mesh inertia under the assumption of an enclosed volume made of an homogeneous medium of the</span>
+<span class="sd">        given density.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2236,7 +2185,8 @@
     
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_compute_triangles_integrals</span><span class="p">(</span><span class="n">triangles_vertices</span><span class="p">,</span> <span class="n">sum_faces_contrib</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Performs the computation of the various interesting surface integrals.</span>
+<span class="sd">        </span>
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        triangles_vertices doit decrire par dimension croissante du general au particulier :</span>
@@ -2244,8 +2194,9 @@
 <span class="sd">        dimension 1 : informations sur chaque vertex de la facette -- triangles_vertices[0, 1] -&gt; vertex 1 de la facette 0</span>
 <span class="sd">        dimension 2 : information sur chacune des coordonnées des vertex -- triangles_vertices[0, 1, 2] -&gt; coordonnee z du vertex 1 de la facette 0</span>
 <span class="sd">        </span>
-<span class="sd">        s_int[0] =</span>
-<span class="sd">        </span>
+<span class="sd">        Todo</span>
+<span class="sd">        ----</span>
+<span class="sd">        Explicit the integrals</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">s_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">15</span><span class="p">,</span> <span class="n">triangles_vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
@@ -2304,20 +2255,6 @@
             <span class="nb">print</span> <span class="s1">&#39;File </span><span class="si">%s</span><span class="s1"> written&#39;</span> <span class="o">%</span> <span class="n">filename</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;mmio module not found&#39;</span><span class="p">)</span></div></div>
-
-
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-
-    <span class="kn">import</span> <span class="nn">mmio</span>
-    <span class="n">V</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">mmio</span><span class="o">.</span><span class="n">load_VTP</span><span class="p">(</span><span class="s1">&#39;SEAREV.vtp&#39;</span><span class="p">)</span>
-    <span class="n">mymesh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">F</span><span class="p">)</span>
-
-    <span class="n">mymesh</span><span class="o">.</span><span class="n">_compute_faces_integrals</span><span class="p">()</span>
-
-    <span class="nb">print</span> <span class="n">mymesh</span><span class="o">.</span><span class="n">volume</span>
-
-    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
 </pre></div>
 
            </div>
@@ -2329,8 +2266,8 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Ecole Centrale de Nantes.
-      Last updated on Dec 21, 2016.
+        &copy; Copyright 2017, Ecole Centrale de Nantes.
+      Last updated on Jan 03, 2017.
 
     </p>
   </div> 
@@ -2360,6 +2297,7 @@
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

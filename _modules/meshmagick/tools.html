@@ -90,10 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../module/module.html">Using Meshmagick as a Python module</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package&#8217;s modules</a></li>
 </ul>
 
             
@@ -145,27 +142,25 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <div class="viewcode-block" id="merge_duplicate_rows"><a class="viewcode-back" href="../../api/meshmagick.tools.html#meshmagick.tools.merge_duplicate_rows">[docs]</a><span class="k">def</span> <span class="nf">merge_duplicate_rows</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;merge_duplicates(arr, atol=1e-8, return_index=False)</span>
+    <span class="sd">&quot;&quot;&quot;Returns a new node array where close nodes have been merged into one node (following atol).</span>
 
-<span class="sd">    Returns a new node array where close nodes have been merged into one node (following atol).</span>
-
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
-<span class="sd">    arr: array_like</span>
-<span class="sd">        numpy array of the coordinates of the mesh&#39;s nodes</span>
-<span class="sd">    atol[optional]: float</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    arr : array_like</span>
+<span class="sd">        array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">    atol[optional] : float</span>
 <span class="sd">        the tolerance used to define nodes that are coincident and</span>
 <span class="sd">        that have to be merged</span>
-<span class="sd">    return_index: bool</span>
+<span class="sd">    return_index : bool</span>
 <span class="sd">        If true, it also returns the array for new indices of vertices</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    arr : ndarray</span>
-<span class="sd">        numpy array of the coordinates of the mesh&#39;s nodes where</span>
+<span class="sd">        array of the coordinates of the mesh&#39;s nodes where</span>
 <span class="sd">        every node is different</span>
 <span class="sd">    newID : ndarray, optional</span>
-<span class="sd">        numpy arrays of the new new vertices IDs</span>
+<span class="sd">        array of the new new vertices IDs</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># TODO: Refaire la documentation --&gt; les entrees sorties ont change !!</span>
 
@@ -276,8 +271,8 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Ecole Centrale de Nantes.
-      Last updated on Dec 21, 2016.
+        &copy; Copyright 2017, Ecole Centrale de Nantes.
+      Last updated on Jan 03, 2017.
 
     </p>
   </div> 
@@ -307,6 +302,7 @@
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -34,7 +34,7 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Meshmagick User&#39;s Guide 1.0 documentation" href="../index.html"/>
-        <link rel="up" title="Meshmagick Package" href="index.html"/>
+        <link rel="up" title="Meshmagick Package’s modules" href="index.html"/>
         <link rel="prev" title="meshmagick.MMviewer module" href="meshmagick.MMviewer.html"/> 
 
   
@@ -90,11 +90,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
 </ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../module/module.html">Using Meshmagick as a Python module</a></li>
-</ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package&#8217;s modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.mesh.html">meshmagick.mesh module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.mmio.html">meshmagick.mmio module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.inertia.html">meshmagick.inertia module</a></li>
@@ -135,7 +132,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-          <li><a href="index.html">Meshmagick Package</a> &raquo;</li>
+          <li><a href="index.html">Meshmagick Package&#8217;s modules</a> &raquo;</li>
       
     <li>meshmagick.tools module</li>
       <li class="wy-breadcrumbs-aside">
@@ -156,24 +153,29 @@
 <dl class="function">
 <dt id="meshmagick.tools.merge_duplicate_rows">
 <code class="descclassname">meshmagick.tools.</code><code class="descname">merge_duplicate_rows</code><span class="sig-paren">(</span><em>arr</em>, <em>atol=1e-08</em>, <em>return_index=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/tools.html#merge_duplicate_rows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.tools.merge_duplicate_rows" title="Permalink to this definition">¶</a></dt>
-<dd><p>merge_duplicates(arr, atol=1e-8, return_index=False)</p>
-<p>Returns a new node array where close nodes have been merged into one node (following atol).</p>
-<dl class="docutils">
-<dt>arr: array_like</dt>
-<dd>numpy array of the coordinates of the mesh&#8217;s nodes</dd>
-<dt>atol[optional]: float</dt>
-<dd>the tolerance used to define nodes that are coincident and
-that have to be merged</dd>
-<dt>return_index: bool</dt>
-<dd>If true, it also returns the array for new indices of vertices</dd>
-</dl>
-<dl class="docutils">
-<dt>arr</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span><dd>numpy array of the coordinates of the mesh&#8217;s nodes where
-every node is different</dd>
-<dt>newID</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">ndarray, optional</span><dd>numpy arrays of the new new vertices IDs</dd>
-</dl>
+<dd><p>Returns a new node array where close nodes have been merged into one node (following atol).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>arr</strong> (<em>array_like</em>) &#8211; array of the coordinates of the mesh&#8217;s nodes</li>
+<li><strong>atol</strong><strong>[</strong><strong>optional</strong><strong>]</strong><strong></strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the tolerance used to define nodes that are coincident and
+that have to be merged</li>
+<li><strong>return_index</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; If true, it also returns the array for new indices of vertices</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>arr</strong> (<em>ndarray</em>) &#8211; array of the coordinates of the mesh&#8217;s nodes where
+every node is different</li>
+<li><strong>newID</strong> (<em>ndarray, optional</em>) &#8211; array of the new new vertices IDs</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -195,8 +197,8 @@ every node is different</dd>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Ecole Centrale de Nantes.
-      Last updated on Dec 21, 2016.
+        &copy; Copyright 2017, Ecole Centrale de Nantes.
+      Last updated on Jan 03, 2017.
 
     </p>
   </div> 
@@ -226,6 +228,7 @@ every node is different</dd>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -90,10 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../module/module.html">Using Meshmagick as a Python module</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package&#8217;s modules</a></li>
 </ul>
 
             
@@ -142,6 +139,8 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="c1">#  -*- coding: utf-8 -*-</span>
 
+<span class="sd">&quot;&quot;&quot;This module holds a tools to clip meshes against a plane&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">mesh</span> <span class="k">import</span> <span class="o">*</span>
 
 
@@ -151,19 +150,18 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    source_mesh : Mesh</span>
-<span class="sd">        The mesh to be clipped</span>
+<span class="sd">        The mesh to be clipped.</span>
 <span class="sd">    plane : Plane, optional</span>
 <span class="sd">        The clipping plane. By default, the plane is the Oxy plane.</span>
-<span class="sd">    vicinity_tol : float</span>
-<span class="sd">        The absolute tolerance to consider en vertex is on the plane. Default is 1z-3.</span>
+<span class="sd">    vicinity_tol : float, optional</span>
+<span class="sd">        The absolute tolerance to consider en vertex is on the plane. Default is 1e-3.</span>
 <span class="sd">    assert_closed_boundaries : bool, optional</span>
 <span class="sd">        False by default. When True, the mesh clipper will raise an exception if intersections with the clipping</span>
-<span class="sd">        plane are not closed</span>
+<span class="sd">        plane are not closed. It may be caused by a non-watertight mesh.</span>
 <span class="sd">    verbose : bool, optional</span>
 <span class="sd">        False by default. If True, some messages on operations that are handled are printed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_mesh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">Plane</span><span class="p">(),</span> <span class="n">vicinity_tol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">assert_closed_boundaries</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="c1"># source_mesh._verbose = verbose</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_mesh</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">Plane</span><span class="p">(),</span> <span class="n">vicinity_tol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">assert_closed_boundaries</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_source_mesh</span> <span class="o">=</span> <span class="n">source_mesh</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span> <span class="o">=</span> <span class="n">plane</span>
 
@@ -178,69 +176,87 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the current verbosity&quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span>
 
 <div class="viewcode-block" id="MeshClipper.verbose_on"><a class="viewcode-back" href="../../api/meshmagick.mesh_clipper.html#meshmagick.mesh_clipper.MeshClipper.verbose_on">[docs]</a>    <span class="k">def</span> <span class="nf">verbose_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Switches ON the verbosity of the clipper.&quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="MeshClipper.verbose_off"><a class="viewcode-back" href="../../api/meshmagick.mesh_clipper.html#meshmagick.mesh_clipper.MeshClipper.verbose_off">[docs]</a>    <span class="k">def</span> <span class="nf">verbose_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Switches OFF the verbosity of the clipper.&quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="kc">False</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">assert_closed_boundaries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Do we assert the boundaries have to be closed&quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_closed_boundaries</span>
 
 <div class="viewcode-block" id="MeshClipper.assert_closed_boundaries_on"><a class="viewcode-back" href="../../api/meshmagick.mesh_clipper.html#meshmagick.mesh_clipper.MeshClipper.assert_closed_boundaries_on">[docs]</a>    <span class="k">def</span> <span class="nf">assert_closed_boundaries_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_closed_boundaries</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span></div>
+        <span class="sd">&quot;&quot;&quot;Switches ON the flag for closed boundary assertion while clipping.&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_closed_boundaries</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="MeshClipper.assert_closed_boundaries_off"><a class="viewcode-back" href="../../api/meshmagick.mesh_clipper.html#meshmagick.mesh_clipper.MeshClipper.assert_closed_boundaries_off">[docs]</a>    <span class="k">def</span> <span class="nf">assert_closed_boundaries_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Switches OFF the flag for closed boundary assertion while clipping.&quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">_assert_closed_boundaries</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vicinity_tol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Vicinity tolerance.</span>
+<span class="sd">        </span>
+<span class="sd">        It tells if a point is close enough to the plane to consider it lies on the plane</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vicinity_tol</span>
 
     <span class="nd">@vicinity_tol</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">vicinity_tol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the vicinity tolerance that tells that a vertex is located on the plane.&quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vicinity_tol</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The mesh we work with&quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_mesh</span>
-
-    <span class="nd">@source_mesh</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">source_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_source_mesh</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">()</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">plane</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The clipping plane&quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span>
 
     <span class="nd">@plane</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Changes the clipping plane.&quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">()</span>
-        <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Updates the clipper&quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">_vertices_positions_wrt_plane</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_partition_mesh</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clip</span><span class="p">()</span>
-        <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clip</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_vertices_positions_wrt_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Classifies vertices with respect to the clipping plane</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">vertices_distances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_point_dist_wrt_plane</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_mesh</span><span class="o">.</span><span class="n">_vertices</span><span class="p">)</span>
+        
+        <span class="n">vertices_distances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_point_dist_wrt_plane</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_mesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">)</span>
 
         <span class="n">vertices_positions</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;vertices_distances&#39;</span><span class="p">:</span> <span class="n">vertices_distances</span><span class="p">,</span>
                               <span class="s1">&#39;vertices_above_mask&#39;</span><span class="p">:</span> <span class="n">vertices_distances</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vicinity_tol</span><span class="p">,</span>
@@ -248,15 +264,21 @@
                               <span class="s1">&#39;vertices_below_mask&#39;</span><span class="p">:</span> <span class="n">vertices_distances</span> <span class="o">&lt;</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_vicinity_tol</span>
                               <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">vertices_positions</span><span class="p">)</span>
-        <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">_partition_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Partitions the mesh in 3 with respect to the plane</span>
+<span class="sd">        </span>
+<span class="sd">        * upper_mesh: part entirely above the clipping plane</span>
+<span class="sd">        * crown_mesh: part intersecting the clipping plane</span>
+<span class="sd">        * lower_mesh: part entirely under the clipping plane</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="n">vertices_distances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;vertices_distances&#39;</span><span class="p">]</span>
         <span class="n">vertices_above_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;vertices_above_mask&#39;</span><span class="p">]</span>
         <span class="n">vertices_on_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;vertices_on_mask&#39;</span><span class="p">]</span>
         <span class="n">vertices_below_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;vertices_below_mask&#39;</span><span class="p">]</span>
 
-        <span class="n">source_mesh_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_mesh</span><span class="o">.</span><span class="n">_faces</span>
+        <span class="n">source_mesh_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_mesh</span><span class="o">.</span><span class="n">faces</span>
 
         <span class="n">nb_vertices_above</span> <span class="o">=</span> <span class="n">vertices_above_mask</span><span class="p">[</span><span class="n">source_mesh_faces</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">nb_vertices_below</span> <span class="o">=</span> <span class="n">vertices_below_mask</span><span class="p">[</span><span class="n">source_mesh_faces</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -272,6 +294,7 @@
         <span class="n">crown_faces_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">crown_faces_mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">partition</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        
         <span class="k">def</span> <span class="nf">generate_mesh</span><span class="p">(</span><span class="n">faces_ids</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
             <span class="n">new_mesh</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_mesh</span><span class="o">.</span><span class="n">extract_faces</span><span class="p">(</span><span class="n">faces_ids</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">new_mesh</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">key</span>
@@ -292,26 +315,89 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
 
-        <span class="k">return</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">lower_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A new mesh composed of the faces that entirely lie under the clipping plane.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;lower_mesh&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">crown_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A new mesh only having the faces that cut the plane</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;crown_mesh&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">upper_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A new mesh only having the faces lying entirely up the plane</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;upper_mesh&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">clipped_crown_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A new mesh that is obtained by clipping the crown_mesh.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;clipped_crown_mesh&#39;</span><span class="p">]</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">clipped_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The resulting clipped mesh&quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;clipped_mesh&#39;</span><span class="p">]</span>
+    
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">closed_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the list of closed boundary polygons obtained after clipping.</span>
+<span class="sd">        </span>
+<span class="sd">        This is a list of lists. The enclosed lists are ordered IDs list that form a closed polygon, described in the</span>
+<span class="sd">        counter-clockwise order with respect to the mesh (oriented following the clipping plane&#39;s normal).</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">        </span>
+<span class="sd">        Warnings</span>
+<span class="sd">        --------</span>
+<span class="sd">        </span>
+<span class="sd">        * The first vertex is repeated at the end of the list. By definition, these polygons are lying on the clipping</span>
+<span class="sd">          plane.</span>
+<span class="sd">        * Vertices IDs are corresponding to the IDs of the clipped_crown_mesh, not those of the clipped_mesh.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;closed_polygons&#39;</span><span class="p">]</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">closed_polygons_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the list of closed boundary polygons obtained after clipping.</span>
+<span class="sd">        </span>
+<span class="sd">        This is a list of lists. The enclosed lists are ordered vertices coordinates of the closed polygons. By</span>
+<span class="sd">        definition, these polygons are lying on the clipping plane.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="n">polygons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;closed_polygons&#39;</span><span class="p">]</span>
         <span class="n">closed_polygons_vertices</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># TODO: voir si on ne peut pas directement indicer par polygons sans boucle for</span>
@@ -321,14 +407,45 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nb_closed_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The number of closed polygons obtained after clipping</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;closed_polygons&#39;</span><span class="p">])</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">open_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a list of open boundary lines obtained after clipping.</span>
+<span class="sd">        </span>
+<span class="sd">        This is a list of lists. The enclosed lists are ordered vertices IDs.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        Warning</span>
+<span class="sd">        -------</span>
+<span class="sd">        </span>
+<span class="sd">        * The vertices IDs correspond to the IDs of clipped_crown_mesh, not clipped_mesh.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;open_lines&#39;</span><span class="p">]</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">open_lines_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a list of open boundary lines obtained after clipping.</span>
+
+<span class="sd">        This is a list of lists. The enclosed lists are ordered vertices IDs.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;open_lines&#39;</span><span class="p">]</span>
         <span class="n">lines_vertices</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># TODO: voir si on ne peut pas directement indicer par polygons sans boucle for</span>
@@ -338,17 +455,23 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nb_open_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The number of open lines obtained after clipping.</span>
+<span class="sd">                </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;open_lines&#39;</span><span class="p">])</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">clipped_crown_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;clipped_crown_mesh&#39;</span><span class="p">]</span>
-
-    <span class="c1"># @cached_property</span>
-<div class="viewcode-block" id="MeshClipper.clip_crown_by_plane"><a class="viewcode-back" href="../../api/meshmagick.mesh_clipper.html#meshmagick.mesh_clipper.MeshClipper.clip_crown_by_plane">[docs]</a>    <span class="k">def</span> <span class="nf">clip_crown_by_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+    <span class="k">def</span> <span class="nf">_clip_crown_by_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Performs the clipping operation of the crown_mesh and determines the obtained boundaries.</span>
+<span class="sd">        </span>
+<span class="sd">        This is the heart method of the class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="n">crown_mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crown_mesh</span>
-        <span class="n">vertices</span> <span class="o">=</span> <span class="n">crown_mesh</span><span class="o">.</span><span class="n">_vertices</span>
+        <span class="n">vertices</span> <span class="o">=</span> <span class="n">crown_mesh</span><span class="o">.</span><span class="n">vertices</span>
         <span class="n">vertices_on_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;crown_mesh_on_vertices_mask&#39;</span><span class="p">]</span>
 
         <span class="c1"># TODO: Vertices pre-projection to be done here !!!</span>
@@ -367,7 +490,7 @@
         <span class="n">inv_boundary_edges</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">intersections</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
-        <span class="n">nI</span> <span class="o">=</span> <span class="n">crown_mesh</span><span class="o">.</span><span class="n">nb_vertices</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">crown_mesh</span><span class="o">.</span><span class="n">nb_vertices</span>
 
         <span class="k">for</span> <span class="n">face_id</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">crown_mesh</span><span class="o">.</span><span class="n">nb_faces</span><span class="p">):</span>
 
@@ -392,13 +515,13 @@
                 <span class="c1">#    1*-----*2</span>
                 <span class="k">if</span> <span class="n">v_above_face</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">v_above_face</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">face</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="o">-</span><span class="n">v_above_face</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">,</span> <span class="n">P2</span><span class="p">,</span> <span class="n">P3</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
-                <span class="n">Ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">)</span>
-                <span class="n">Iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P2</span><span class="p">,</span> <span class="n">P3</span><span class="p">)</span>
-                <span class="n">intersections</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Ileft</span><span class="p">,</span> <span class="n">Iright</span><span class="p">]</span>
-                <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">nI</span><span class="p">,</span> <span class="n">nI</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">nI</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
-                <span class="n">nI</span> <span class="o">+=</span> <span class="mi">2</span>
+                <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
+                <span class="n">ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+                <span class="n">iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">)</span>
+                <span class="n">intersections</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ileft</span><span class="p">,</span> <span class="n">iright</span><span class="p">]</span>
+                <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">2</span>
 
             <span class="k">elif</span> <span class="n">face_type</span> <span class="o">==</span> <span class="s1">&#39;301&#39;</span><span class="p">:</span>  <span class="c1"># Done</span>
                 <span class="c1">#      *2</span>
@@ -411,13 +534,13 @@
                 <span class="c1">#     \ /</span>
                 <span class="c1">#      *0</span>
                 <span class="n">face</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="o">-</span><span class="n">v_below_face</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">,</span> <span class="n">P3</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
-                <span class="n">Ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P0</span><span class="p">,</span> <span class="n">P3</span><span class="p">)</span>
-                <span class="n">Iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">)</span>
-                <span class="n">intersections</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Ileft</span><span class="p">,</span> <span class="n">Iright</span><span class="p">]</span>
-                <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">nI</span><span class="p">,</span> <span class="n">nI</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nI</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nI</span><span class="p">])</span>
-                <span class="n">nI</span> <span class="o">+=</span> <span class="mi">2</span>
+                <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
+                <span class="n">ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p3</span><span class="p">)</span>
+                <span class="n">iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+                <span class="n">intersections</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ileft</span><span class="p">,</span> <span class="n">iright</span><span class="p">]</span>
+                <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">index</span><span class="p">])</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">2</span>
 
             <span class="k">elif</span> <span class="n">face_type</span> <span class="o">==</span> <span class="s1">&#39;103&#39;</span><span class="p">:</span>  <span class="c1"># Done</span>
                 <span class="c1">#      *0</span>
@@ -430,14 +553,14 @@
                 <span class="c1">#     \ /</span>
                 <span class="c1">#      *2</span>
                 <span class="n">face</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="o">-</span><span class="n">v_above_face</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">,</span> <span class="n">P3</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
-                <span class="n">Ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">)</span>
-                <span class="n">Iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P0</span><span class="p">,</span> <span class="n">P3</span><span class="p">)</span>
-                <span class="n">intersections</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Ileft</span><span class="p">,</span> <span class="n">Iright</span><span class="p">]</span>
-                <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">nI</span><span class="p">,</span> <span class="n">nI</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">nI</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
+                <span class="n">ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+                <span class="n">iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p3</span><span class="p">)</span>
+                <span class="n">intersections</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ileft</span><span class="p">,</span> <span class="n">iright</span><span class="p">]</span>
+                <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
                 <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
-                <span class="n">nI</span> <span class="o">+=</span> <span class="mi">2</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">2</span>
 
             <span class="k">elif</span> <span class="n">face_type</span> <span class="o">==</span> <span class="s1">&#39;102&#39;</span><span class="p">:</span>  <span class="c1"># Done</span>
                 <span class="c1">#      *O</span>
@@ -446,13 +569,13 @@
                 <span class="c1">#   /     \</span>
                 <span class="c1"># 1*-------*2</span>
                 <span class="n">face</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="o">-</span><span class="n">v_above_face</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">,</span> <span class="n">P2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
-                <span class="n">Ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">)</span>
-                <span class="n">Iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P0</span><span class="p">,</span> <span class="n">P2</span><span class="p">)</span>
-                <span class="n">intersections</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Ileft</span><span class="p">,</span> <span class="n">Iright</span><span class="p">]</span>
-                <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">nI</span><span class="p">,</span> <span class="n">nI</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">nI</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
-                <span class="n">nI</span> <span class="o">+=</span> <span class="mi">2</span>
+                <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
+                <span class="n">ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+                <span class="n">iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+                <span class="n">intersections</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ileft</span><span class="p">,</span> <span class="n">iright</span><span class="p">]</span>
+                <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">2</span>
 
             <span class="k">elif</span> <span class="n">face_type</span> <span class="o">==</span> <span class="s1">&#39;201&#39;</span><span class="p">:</span>  <span class="c1"># done</span>
                 <span class="c1">#  2*-------*1</span>
@@ -461,13 +584,13 @@
                 <span class="c1">#      \ /</span>
                 <span class="c1">#       *0</span>
                 <span class="n">face</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="o">-</span><span class="n">v_below_face</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">,</span> <span class="n">P2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
-                <span class="n">Ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P0</span><span class="p">,</span> <span class="n">P2</span><span class="p">)</span>
-                <span class="n">Iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">)</span>
-                <span class="n">intersections</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Ileft</span><span class="p">,</span> <span class="n">Iright</span><span class="p">]</span>
-                <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">nI</span><span class="p">,</span> <span class="n">nI</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nI</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nI</span><span class="p">])</span>
-                <span class="n">nI</span> <span class="o">+=</span> <span class="mi">2</span>
+                <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
+                <span class="n">ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+                <span class="n">iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+                <span class="n">intersections</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ileft</span><span class="p">,</span> <span class="n">iright</span><span class="p">]</span>
+                <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">index</span><span class="p">])</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">2</span>
 
             <span class="k">elif</span> <span class="n">face_type</span> <span class="o">==</span> <span class="s1">&#39;211&#39;</span><span class="p">:</span>  <span class="c1"># Done</span>
                 <span class="c1">#        *3                   *1</span>
@@ -481,18 +604,18 @@
 
                 <span class="n">face</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="o">-</span><span class="n">v_on_face</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="k">if</span> <span class="n">vertices_distances</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">:</span>
-                    <span class="n">P1</span><span class="p">,</span> <span class="n">P2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]]</span>
-                    <span class="n">Iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P1</span><span class="p">,</span> <span class="n">P2</span><span class="p">)</span>
-                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Iright</span><span class="p">)</span>
-                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nI</span><span class="p">]</span>
-                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                    <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]]</span>
+                    <span class="n">iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iright</span><span class="p">)</span>
+                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="p">]</span>
+                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">P2</span><span class="p">,</span> <span class="n">P3</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
-                    <span class="n">Ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P2</span><span class="p">,</span> <span class="n">P3</span><span class="p">)</span>
-                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Ileft</span><span class="p">)</span>
-                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nI</span><span class="p">])</span>
-                <span class="n">nI</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
+                    <span class="n">ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">)</span>
+                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ileft</span><span class="p">)</span>
+                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="p">])</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">elif</span> <span class="n">face_type</span> <span class="o">==</span> <span class="s1">&#39;112&#39;</span><span class="p">:</span>  <span class="c1"># Done</span>
                 <span class="c1">#       *3                     *1</span>
@@ -504,18 +627,18 @@
                 <span class="c1">#         *1                 *3</span>
                 <span class="n">face</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="o">-</span><span class="n">v_on_face</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="k">if</span> <span class="n">vertices_distances</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">:</span>
-                    <span class="n">P2</span><span class="p">,</span> <span class="n">P3</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
-                    <span class="n">Iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P2</span><span class="p">,</span> <span class="n">P3</span><span class="p">)</span>
-                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Iright</span><span class="p">)</span>
-                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nI</span><span class="p">]</span>
-                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">nI</span><span class="p">])</span>
+                    <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
+                    <span class="n">iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">)</span>
+                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iright</span><span class="p">)</span>
+                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="p">]</span>
+                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">index</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">P1</span><span class="p">,</span> <span class="n">P2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]]</span>
-                    <span class="n">Ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P1</span><span class="p">,</span> <span class="n">P2</span><span class="p">)</span>
-                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Ileft</span><span class="p">)</span>
-                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
-                <span class="n">nI</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]]</span>
+                    <span class="n">ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ileft</span><span class="p">)</span>
+                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">elif</span> <span class="n">face_type</span> <span class="o">==</span> <span class="s1">&#39;013&#39;</span><span class="p">:</span>  <span class="c1"># Done</span>
                 <span class="c1"># -----*-----</span>
@@ -545,18 +668,18 @@
                 <span class="c1">#       \|               |/</span>
                 <span class="c1">#        *1              *2</span>
                 <span class="n">face</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="o">-</span><span class="n">v_on_face</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">P1</span><span class="p">,</span> <span class="n">P2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]]</span>
+                <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">face</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]]</span>
                 <span class="k">if</span> <span class="n">vertices_distances</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">:</span>
-                    <span class="n">Iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P1</span><span class="p">,</span> <span class="n">P2</span><span class="p">)</span>
-                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Iright</span><span class="p">)</span>
-                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nI</span><span class="p">]</span>
-                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                    <span class="n">iright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iright</span><span class="p">)</span>
+                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="p">]</span>
+                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">Ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">P1</span><span class="p">,</span> <span class="n">P2</span><span class="p">)</span>
-                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Ileft</span><span class="p">)</span>
-                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nI</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nI</span><span class="p">])</span>
-                <span class="n">nI</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">ileft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="o">.</span><span class="n">get_edge_intersection</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+                    <span class="n">intersections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ileft</span><span class="p">)</span>
+                    <span class="n">boundary_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="n">crown_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="p">])</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">elif</span> <span class="n">face_type</span> <span class="o">==</span> <span class="s1">&#39;120&#39;</span><span class="p">:</span>  <span class="c1"># Done</span>
                 <span class="c1">#         *O</span>
@@ -676,19 +799,16 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersections</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">vertices</span><span class="p">,</span> <span class="n">intersections</span><span class="p">))</span>
         
-        
         <span class="n">clipped_crown_mesh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">crown_faces</span><span class="p">)</span>
 
         <span class="c1"># TODO: faire un merge uniquement sur la liste instersections et non sur tout le maillage clipped_crown</span>
         <span class="c1"># FIXME: potentiellement, un bug a ete introduit ici !!! --&gt; l&#39;update n&#39;est plus bon sur les dictionnaires...</span>
-        <span class="c1"># Le nonuveau merge_duplicates (avec np.unique) ne fonctionne pas !!!!</span>
-        <span class="n">newID</span> <span class="o">=</span> <span class="n">clipped_crown_mesh</span><span class="o">.</span><span class="n">merge_duplicates</span><span class="p">(</span><span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># Warning: choosing a lower value</span>
-        <span class="c1">#  for decimals results in vertices that are merged but should not...</span>
+        <span class="n">new_id</span> <span class="o">=</span> <span class="n">clipped_crown_mesh</span><span class="o">.</span><span class="n">merge_duplicates</span><span class="p">(</span><span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># Warning: choosing a lower value</span>
 
         <span class="c1"># Updating dictionaries</span>
         <span class="n">direct_boundary_edges</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="nb">zip</span><span class="p">(</span><span class="n">newID</span><span class="p">[</span><span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">keys</span><span class="p">()],</span> <span class="n">newID</span><span class="p">[</span><span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
-        <span class="n">inv_boundary_edges</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">newID</span><span class="p">[</span><span class="n">inv_boundary_edges</span><span class="o">.</span><span class="n">keys</span><span class="p">()],</span> <span class="n">newID</span><span class="p">[</span><span class="n">inv_boundary_edges</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="n">new_id</span><span class="p">[</span><span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">keys</span><span class="p">()],</span> <span class="n">new_id</span><span class="p">[</span><span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
+        <span class="n">inv_boundary_edges</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">new_id</span><span class="p">[</span><span class="n">inv_boundary_edges</span><span class="o">.</span><span class="n">keys</span><span class="p">()],</span> <span class="n">new_id</span><span class="p">[</span><span class="n">inv_boundary_edges</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
 
         <span class="c1"># Ordering boundary edges in continuous lines</span>
         <span class="n">closed_polygons</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
@@ -696,27 +816,27 @@
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">line</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-                <span class="n">V0_init</span><span class="p">,</span> <span class="n">V1</span> <span class="o">=</span> <span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
-                <span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V0_init</span><span class="p">)</span>
-                <span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V1</span><span class="p">)</span>
-                <span class="n">V0</span> <span class="o">=</span> <span class="n">V1</span>
+                <span class="n">v0_init</span><span class="p">,</span> <span class="n">v1</span> <span class="o">=</span> <span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v0_init</span><span class="p">)</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
+                <span class="n">v0</span> <span class="o">=</span> <span class="n">v1</span>
 
                 <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">V1</span> <span class="o">=</span> <span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">V0</span><span class="p">)</span>
-                        <span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V1</span><span class="p">)</span>
-                        <span class="n">V0</span> <span class="o">=</span> <span class="n">V1</span>
+                        <span class="n">v1</span> <span class="o">=</span> <span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">v0</span><span class="p">)</span>
+                        <span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
+                        <span class="n">v0</span> <span class="o">=</span> <span class="n">v1</span>
                     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">line</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
                             <span class="c1"># Trying to find an other queue</span>
                             <span class="n">queue</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-                            <span class="n">V0</span> <span class="o">=</span> <span class="n">V0_init</span>
+                            <span class="n">v0</span> <span class="o">=</span> <span class="n">v0_init</span>
                             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                                 <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">V1</span> <span class="o">=</span> <span class="n">inv_boundary_edges</span><span class="p">[</span><span class="n">V0</span><span class="p">]</span>
-                                    <span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">V1</span><span class="p">)</span>
-                                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V1</span><span class="p">)</span>
-                                    <span class="n">V0</span> <span class="o">=</span> <span class="n">V1</span>
+                                    <span class="n">v1</span> <span class="o">=</span> <span class="n">inv_boundary_edges</span><span class="p">[</span><span class="n">v0</span><span class="p">]</span>
+                                    <span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
+                                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
+                                    <span class="n">v0</span> <span class="o">=</span> <span class="n">v1</span>
                                 <span class="k">except</span><span class="p">:</span>
                                     <span class="n">queue</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
                                     <span class="n">line</span> <span class="o">=</span> <span class="n">queue</span> <span class="o">+</span> <span class="n">line</span>
@@ -738,7 +858,6 @@
                 <span class="c1"># TODO: retirer les deux lines suivantes</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
                     <span class="nb">print</span> <span class="s2">&quot;</span><span class="si">%u</span><span class="s2"> closed polygon</span><span class="se">\n</span><span class="si">%u</span><span class="s2"> open curve&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">closed_polygons</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">open_lines</span><span class="p">))</span>
-                <span class="c1"># print open_lines[0]</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_closed_boundaries</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">open_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -756,37 +875,21 @@
                         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">,</span> <span class="s1">&#39;Open intersection curve found with assert_closed_boundaries option enabled. Files full_debug.vtp, crown_debug.vtp and clipped_crown_debug.vtp written.&#39;</span>
 
                 <span class="k">break</span>
-        <span class="n">boundaries</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;closed_polygons&#39;</span><span class="p">:</span> <span class="n">closed_polygons</span><span class="p">,</span>
-            <span class="s1">&#39;open_lines&#39;</span><span class="p">:</span> <span class="n">open_lines</span>
-        <span class="p">}</span>
 
         <span class="n">output</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;clipped_crown_mesh&#39;</span><span class="p">:</span> <span class="n">clipped_crown_mesh</span><span class="p">,</span>
                   <span class="s1">&#39;closed_polygons&#39;</span><span class="p">:</span> <span class="n">closed_polygons</span><span class="p">,</span>
                   <span class="s1">&#39;open_lines&#39;</span><span class="p">:</span> <span class="n">open_lines</span><span class="p">}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-        <span class="k">return</span></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">clipped_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;clipped_mesh&#39;</span><span class="p">]</span>
-
-
-<div class="viewcode-block" id="MeshClipper.clip"><a class="viewcode-back" href="../../api/meshmagick.mesh_clipper.html#meshmagick.mesh_clipper.MeshClipper.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clip_crown_by_plane</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Performs clipping and assemble the clipped mesh.&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clip_crown_by_plane</span><span class="p">()</span>
         <span class="n">clipped_mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_mesh</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">clipped_crown_mesh</span>
         <span class="n">clipped_mesh</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_mesh</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;clipped&#39;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;clipped_mesh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clipped_mesh</span>
-        <span class="k">return</span></div></div>
-
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-
-    <span class="kn">import</span> <span class="nn">mmio</span>
-
-    <span class="n">V</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">mmio</span><span class="o">.</span><span class="n">load_VTP</span><span class="p">(</span><span class="s1">&#39;full_debug.vtp&#39;</span><span class="p">)</span>
-    <span class="n">mymesh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">F</span><span class="p">)</span>
-
+        <span class="k">return</span></div>
 </pre></div>
 
            </div>
@@ -798,8 +901,8 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Ecole Centrale de Nantes.
-      Last updated on Dec 21, 2016.
+        &copy; Copyright 2017, Ecole Centrale de Nantes.
+      Last updated on Jan 03, 2017.
 
     </p>
   </div> 
@@ -829,6 +932,7 @@
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

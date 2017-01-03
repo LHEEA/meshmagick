@@ -90,10 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../module/module.html">Using Meshmagick as a Python module</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package&#8217;s modules</a></li>
 </ul>
 
             
@@ -139,9 +136,12 @@
            <div itemprop="articleBody">
             
   <h1>Source code for meshmagick.hydrostatics</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#  -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;This module allows to perform hydrostatics computations on meshes&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">warnings</span> <span class="k">import</span> <span class="n">warn</span>
 
 <span class="kn">from</span> <span class="nn">mesh_clipper</span> <span class="k">import</span> <span class="n">MeshClipper</span>
 
@@ -155,7 +155,7 @@
 <span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
 
 <span class="c1"># Data for DNV standards</span>
-<span class="n">GM_min</span> <span class="o">=</span> <span class="mf">0.15</span>
+<span class="n">GM_MIN</span> <span class="o">=</span> <span class="mf">0.15</span>
 
 
 <span class="c1"># TODO: pass this code to a version that only rotates the free surface plane and not the mesh...</span>
@@ -164,6 +164,21 @@
 
 
 <div class="viewcode-block" id="Force"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Force">[docs]</a><span class="k">class</span> <span class="nc">Force</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to handle a linear force (resultant).</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    point : array_like, optional</span>
+<span class="sd">        The force application point. Default is (0, 0, 0)</span>
+<span class="sd">    value : array_like, optional</span>
+<span class="sd">        The value of the force. Default is (0, 0, 0)</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        The name of the force</span>
+<span class="sd">    mode : str, [&#39;relative&#39;, &#39;absolute&#39;]</span>
+<span class="sd">        The mode of the force whether its direction follows the body motion (&#39;relative&#39;) or remains fixed with</span>
+<span class="sd">        respect to the reference frame (&#39;absolute&#39;). Default is &#39;relative&#39;.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">value</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;relative&#39;</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
@@ -179,19 +194,46 @@
         <span class="k">return</span> <span class="n">str_repr</span>
 
 <div class="viewcode-block" id="Force.update"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Force.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dz</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;Updates the vertical position and orientation of the force.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dz : float, optional</span>
+<span class="sd">            Update in the vertical position of the application point. Default is 0.</span>
+<span class="sd">        rot : ndarray</span>
+<span class="sd">            The 3x3 rotation matrix for the force direction. Default is identity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dz</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;relative&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">return</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Force.update_xy"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Force.update_xy">[docs]</a>    <span class="k">def</span> <span class="nf">update_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Updates the horizontal position of the application point of the force.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dx : float, optional</span>
+<span class="sd">            Update in the x position of the application point. Defaults is 0.</span>
+<span class="sd">        dy : float, optional</span>
+<span class="sd">            Update in the y position of the application point. Defaults is 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dy</span>
         <span class="k">return</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hs_force</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the relevant force vector for hydrostatics computations.</span>
+<span class="sd">        </span>
+<span class="sd">        The return array&#39;s components are the vertical force, x moment and y moment around the application point.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">moment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
         <span class="n">mx</span><span class="p">,</span> <span class="n">my</span> <span class="o">=</span> <span class="n">moment</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
@@ -203,49 +245,42 @@
 
 <div class="viewcode-block" id="Hydrostatics"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics">[docs]</a><span class="k">class</span> <span class="nc">Hydrostatics</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="c1"># TODO: refactor this docstring</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class to perform hydrostatic computations on meshes.</span>
+    <span class="sd">&quot;&quot;&quot;Class to perform hydrostatic computations on meshes.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    working_mesh : Mesh</span>
+<span class="sd">        The mesh we want to work with for hydrostatics computations</span>
+<span class="sd">    cog : array_like, optional</span>
+<span class="sd">        The mesh&#39;s center of gravity coordinates. Default is the origin (0, 0, 0)</span>
+<span class="sd">    mass : float, optional</span>
+<span class="sd">        The mesh&#39;s mass. Default is 0. Unit is Ton.</span>
+<span class="sd">    rho_water : float, optional</span>
+<span class="sd">        The density of water (in kg/m**3). Default is that of salt water (1023 kg//m**3)</span>
+<span class="sd">    grav : float, optional</span>
+<span class="sd">        The acceleration of gravity. Default is 9.81 m/s**2.</span>
+<span class="sd">    </span>
 <span class="sd">    </span>
 <span class="sd">    Warnings</span>
 <span class="sd">    --------</span>
-<span class="sd">    At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible</span>
-<span class="sd">    directly for this position. The mesh may not be at equilibrium thought and residual force balance between</span>
-<span class="sd">    hydrostatic force and gravity force may be not null. To trig the equilibrium computations, we have to call the</span>
-<span class="sd">    equilibrate() method.</span>
+<span class="sd">    * At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible</span>
+<span class="sd">      directly for this position. The mesh may not be at equilibrium thought and residual force balance between</span>
+<span class="sd">      hydrostatic force and gravity force may be not null. To trig the equilibrium computations, we have to call the</span>
+<span class="sd">      equilibrate() method.</span>
 <span class="sd">    </span>
-<span class="sd">    Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally</span>
-<span class="sd">    and automatically at each modification.</span>
-<span class="sd">    </span>
-<span class="sd">    Intrinsic mesh properties are</span>
-<span class="sd">    </span>
-<span class="sd">        - _mass</span>
-<span class="sd">        - cog</span>
-<span class="sd">        - zg</span>
-<span class="sd">        - rho_water</span>
-<span class="sd">        - gravity</span>
-<span class="sd">        </span>
-<span class="sd">    Setting one of these property by its setter will trig a search for a new mesh position that fullfill the</span>
-<span class="sd">    hydrostatic equilibrium.</span>
-<span class="sd">    Note that zg is mandatory to get the hydrostatic stiffness matrix. By default, be carefull that it is set to</span>
-<span class="sd">    zero at instantiation.</span>
-<span class="sd">    </span>
-<span class="sd">    Modification of the displacement will produce the mesh to move along z so that</span>
-<span class="sd">    it reaches the correct displacement. The _mass is then set accordingly and equals the displacement. Note that this</span>
-<span class="sd">    is different from modifying the _mass and</span>
-<span class="sd">    </span>
-<span class="sd">    </span>
-<span class="sd">    Setting the buoyancy center will trig a search for a position of the gravity center that fullfill this</span>
-<span class="sd">    hydrostatic property, while keeping the correct displacement. NOT IMPLEMENTED, THIS IS AN ADVANCED FEATURE</span>
+<span class="sd">    * Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally</span>
+<span class="sd">      and automatically at each modification.</span>
+<span class="sd">      </span>
+<span class="sd">    * Mass unit is the ton !</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">cog</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">),</span> <span class="n">zg</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rho_water</span><span class="o">=</span><span class="mi">1023</span><span class="p">,</span> <span class="n">grav</span><span class="o">=</span><span class="mf">9.81</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">working_mesh</span><span class="p">,</span> <span class="n">cog</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="n">mass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rho_water</span><span class="o">=</span><span class="mi">1023</span><span class="p">,</span> <span class="n">grav</span><span class="o">=</span><span class="mf">9.81</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-        <span class="c1"># FIXME: l&#39;argument zg n&#39;est pas utilise !</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">backup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">[</span><span class="s1">&#39;init_mesh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">[</span><span class="s1">&#39;init_mesh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">working_mesh</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">working_mesh</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
         <span class="n">cog</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cog</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">cog</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
@@ -285,58 +320,66 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the verbosity&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span>
 
 <div class="viewcode-block" id="Hydrostatics.verbose_on"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.verbose_on">[docs]</a>    <span class="k">def</span> <span class="nf">verbose_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span></div>
+        <span class="sd">&quot;&quot;&quot;Switch ON the verbosity.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="Hydrostatics.verbose_off"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.verbose_off">[docs]</a>    <span class="k">def</span> <span class="nf">verbose_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">return</span></div>
+        <span class="sd">&quot;&quot;&quot;Switch OFF the verbosity.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="kc">False</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gravity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the gravity acceleration&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span>
 
     <span class="nd">@gravity</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">gravity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the gravity acceleration&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho_water</span> <span class="o">*</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">*</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">rho_water</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the water density&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho_water</span>
 
     <span class="nd">@rho_water</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">rho_water</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the water density&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rho_water</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the mass (in tons)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">/</span> <span class="mf">1000.</span>
 
     <span class="nd">@mass</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;Set the mass. It must be given in tons.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1000.</span>  <span class="c1"># Conversion from tons to kg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span>  <span class="c1"># SI units</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_sinking</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is sinking as it is too heavy.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-        <span class="k">return</span>
-
     <span class="k">def</span> <span class="nf">_max_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho_water</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">_compute_volume</span><span class="p">()</span>  <span class="c1"># in kg</span>
 
 <div class="viewcode-block" id="Hydrostatics.is_sinking"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.is_sinking">[docs]</a>    <span class="k">def</span> <span class="nf">is_sinking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns whether the mesh is sinking with the current mass.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_displacement</span><span class="p">():</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
@@ -344,77 +387,96 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gravity_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the gravity center position</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span>
 
     <span class="nd">@gravity_center</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">gravity_center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the gravity center position&quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">[</span><span class="s1">&#39;gravity_center&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">assert</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">zg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the gravity center vertical position&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="nd">@zg</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">zg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the gravity center vertical position&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">wet_surface_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the area of the underwater surface (m**2)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;wet_surface_area&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">displacement_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the volume displacement (m**2)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;disp_volume&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the mass displacement (tons)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;disp_mass&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1000.</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">buoyancy_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the position of the buoyancy center&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;buoy_center&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">flotation_surface_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the area of the flotation plane&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;waterplane_area&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">flotation_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the position of the center of the flotation plane&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;flotation_center&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">transversal_metacentric_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the transversal metacentric radius&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;transversal_metacentric_radius&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">longitudinal_metacentric_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the longitudinal metacentric radius&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;longitudinal_metacentric_radius&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">transversal_metacentric_height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the transversal metacentric height (GMx)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;gm_x&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">longitudinal_metacentric_height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the longitudinal metacentric height (GMy)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;gm_y&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hydrostatic_stiffness_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the hydrostatic stiffness matrix&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hydrostatic_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the underwater part of the mesh&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;clipper&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">clipped_mesh</span>
 
 <div class="viewcode-block" id="Hydrostatics.reset"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;Reset hydrostatics with respect to the initial mesh&quot;&quot;&quot;</span>
         <span class="c1"># TODO: Utiliser plutot la rotation generale pour retrouver le maillage initial</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup</span><span class="p">[</span><span class="s1">&#39;init_mesh&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -423,20 +485,42 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-        <span class="k">return</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Hydrostatics.is_stable_in_roll"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.is_stable_in_roll">[docs]</a>    <span class="k">def</span> <span class="nf">is_stable_in_roll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns whether the mesh is stable in roll (GMx positive)</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transversal_metacentric_height</span> <span class="o">&gt;</span> <span class="mf">0.</span></div>
 
 <div class="viewcode-block" id="Hydrostatics.is_stable_in_pitch"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.is_stable_in_pitch">[docs]</a>    <span class="k">def</span> <span class="nf">is_stable_in_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns whether the mesh is stable in pitch (GMy positive)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">longitudinal_metacentric_height</span> <span class="o">&gt;</span> <span class="mf">0.</span></div>
 
 <div class="viewcode-block" id="Hydrostatics.isstable"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.isstable">[docs]</a>    <span class="k">def</span> <span class="nf">isstable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns whether the mesh is both stable in roll and in pitch</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stable_in_pitch</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stable_in_roll</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Hydrostatics.is_at_equilibrium"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.is_at_equilibrium">[docs]</a>    <span class="k">def</span> <span class="nf">is_at_equilibrium</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;Returns whether the mesh is actually in an equilibrium configuration</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">residual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span>
 
         <span class="n">mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span>
@@ -451,115 +535,147 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">delta_fz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The residual vertical force</span>
+<span class="sd">        </span>
+<span class="sd">        A non-zero value indicates that the mesh is not at hydrostatic equilibrium</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fz</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span>
         <span class="k">return</span> <span class="n">fz</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">delta_mx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The residual moment around x</span>
+<span class="sd">        </span>
+<span class="sd">        A non-zero value indicates that the mesh is not at hydrostatic equilibrium</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span>
         <span class="k">return</span> <span class="n">mx</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">delta_my</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The residual moment around x</span>
+
+<span class="sd">        A non-zero value indicates that the mesh is not at hydrostatic equilibrium</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">my</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span>
         <span class="k">return</span> <span class="n">my</span>
 
     <span class="c1"># TODO: create a Hydrostatic stiffness matrix class which should be a symmetric array class</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">S33</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The S33 heave-heave stiffness coefficient&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">S34</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The S34 heave-roll stiffness coefficient&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">S35</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The S35 heave-pitch stiffness coefficient&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">S44</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The S44 roll-roll stiffness coefficient&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">S45</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The S45 roll-pitch stiffness coefficient&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">S55</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The S55 pitch-pitch stiffness coefficient&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reltol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The relative tolerance for hydrostatic equilibrium solver&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;reltol&#39;</span><span class="p">]</span>
 
     <span class="nd">@reltol</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">reltol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the relative tolerance for hydrostatic equilibrium solver&quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">assert</span> <span class="mf">0.</span> <span class="o">&lt;</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mf">1.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;reltol&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">theta_relax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The angle relaxation value of the hydrostatic solver&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;theta_relax&#39;</span><span class="p">]</span>
 
     <span class="nd">@theta_relax</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">theta_relax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the angle relaxation value of the hydrostatic solver&quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">assert</span> <span class="mf">0.</span> <span class="o">&lt;</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mf">10.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;theta_relax&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">z_relax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The distance relaxation value of the hydrostatic solver&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;z_relax&#39;</span><span class="p">]</span>
 
     <span class="nd">@z_relax</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">z_relax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the distance relaxation value of the hydrostatic solver&quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">assert</span> <span class="mf">0.</span> <span class="o">&lt;</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mf">1.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;z_relax&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The maximum number of iterations to find a hydrostatic equilibrium starting from an initial configuration&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;itermax&#39;</span><span class="p">]</span>
 
     <span class="nd">@max_iterations</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the maximum number of iterations to find a hydrostatic equilibrium starting from an initial</span>
+<span class="sd">        configuration&quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mf">0.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;itermax&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">max_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The maximum number of random restart for hydrostatic equilibrium computations&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;max_nb_restart&#39;</span><span class="p">]</span>
 
     <span class="nd">@max_restart</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">max_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the maximum number of random restart for hydrostatic equilibrium computations&quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">value</span> <span class="o">&gt;=</span> <span class="mf">0.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;max_nb_restart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">allow_unstable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Whether unstable equilibrium configurations allowed&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;stop_at_unstable&#39;</span><span class="p">]</span>
 
-    <span class="nd">@allow_unstable</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">allow_unstable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;stop_at_unstable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">return</span>
-
 <div class="viewcode-block" id="Hydrostatics.allow_unstable_on"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.allow_unstable_on">[docs]</a>    <span class="k">def</span> <span class="nf">allow_unstable_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">allow_unstable</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span></div>
+        <span class="sd">&quot;&quot;&quot;Switches ON the allowance of unstable equilibrium configurations finding&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;stop_at_unstable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="Hydrostatics.allow_unstable_off"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.allow_unstable_off">[docs]</a>    <span class="k">def</span> <span class="nf">allow_unstable_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">allow_unstable</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;Switches OFF the allowance of unstable equilibrium configurations finding&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_parameters</span><span class="p">[</span><span class="s1">&#39;stop_at_unstable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span></div>
 
     <span class="k">def</span> <span class="nf">_reinit_clipper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -691,7 +807,8 @@
         <span class="c1"># Flotation center F:</span>
         <span class="n">x_f</span> <span class="o">=</span> <span class="o">-</span><span class="n">s35</span> <span class="o">/</span> <span class="n">s33</span>
         <span class="n">y_f</span> <span class="o">=</span> <span class="n">s34</span> <span class="o">/</span> <span class="n">s33</span>
-
+        <span class="c1"># TODO: ajouter xf et yf dans le rapport hydro !!</span>
+        
         <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">clipped_mesh</span><span class="o">.</span><span class="n">axis_aligned_bbox</span>
 
         <span class="c1"># Storing data</span>
@@ -725,20 +842,39 @@
         <span class="k">return</span>
 
 <div class="viewcode-block" id="Hydrostatics.get_gravity_force"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.get_gravity_force">[docs]</a>    <span class="k">def</span> <span class="nf">get_gravity_force</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the gravity force applied on the body</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Force</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Force</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gravity_center</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;absolute&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Hydrostatics.get_buoyancy_force"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.get_buoyancy_force">[docs]</a>    <span class="k">def</span> <span class="nf">get_buoyancy_force</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the buoyancy force applied on the body</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Force</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_water</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">displacement_volume</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">Force</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buoyancy_center</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;absolute&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Hydrostatics.add_force"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.add_force">[docs]</a>    <span class="k">def</span> <span class="nf">add_force</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a custom force applying on the body</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        force : Force</span>
+<span class="sd">            External force</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO: allow to remove those forces...</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">force</span><span class="p">,</span> <span class="n">Force</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">additional_forces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
-        <span class="k">return</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_forces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">force</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The scaling factor for relative convergence&quot;&quot;&quot;</span>
         <span class="n">mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span>
         <span class="n">breadth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;breadth&#39;</span><span class="p">]</span>
         <span class="n">lwl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;lwl&#39;</span><span class="p">]</span>
@@ -747,6 +883,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">residual</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The residual force resulting from the balance between gravity, buoyancy and external forces</span>
+<span class="sd">        </span>
+<span class="sd">        It is composed of the vertical force and horizontal moments only.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">rhog_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;disp_volume&#39;</span><span class="p">]</span>
         <span class="n">mg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mg</span>
 
@@ -765,7 +909,7 @@
 
 <div class="viewcode-block" id="Hydrostatics.set_displacement"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.set_displacement">[docs]</a>    <span class="k">def</span> <span class="nf">set_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Displaces mesh at a prescribed displacement and returns</span>
+<span class="sd">        Displaces the mesh at a prescribed displacement</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -812,12 +956,32 @@
             <span class="n">dz</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rhog</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">flotation_surface_area</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">dz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">z_relax</span><span class="p">:</span>
                 <span class="n">dz</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">copysign</span><span class="p">(</span><span class="n">z_relax</span><span class="p">,</span> <span class="n">dz</span><span class="p">)</span>
-            <span class="nb">iter</span> <span class="o">+=</span> <span class="mi">1</span>
-
-        <span class="k">return</span></div>
+            <span class="nb">iter</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="Hydrostatics.equilibrate"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.equilibrate">[docs]</a>    <span class="k">def</span> <span class="nf">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_disp</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;Performs 3D equilibrium search.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        init_disp : bool, optional</span>
+<span class="sd">            Flag to indicate if the mesh has to be first placed at its displacement. Default is True.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            A code indicating the state of the solver at the end of the computations</span>
+<span class="sd">            </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        </span>
+<span class="sd">        The return code can have the following values:</span>
+<span class="sd">        </span>
+<span class="sd">        * 0 : Failed to find an equilibrium position</span>
+<span class="sd">        * 1 : A stable equilibrium configuration has been reached</span>
+<span class="sd">        * 2 : An unstable equilibrium configuration has been reached</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">linear_solver</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span>
+        
         <span class="c1"># Initial displacement equilibrium</span>
         <span class="k">if</span> <span class="n">init_disp</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -898,11 +1062,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_reinit_clipper</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_hydrostatic_properties</span><span class="p">()</span>
 
-            <span class="c1"># if self.animate:</span>
-            <span class="c1">#     mmio.write_VTP(&#39;mesh%u.vtp&#39; % iter, mymesh_c.vertices, mymesh_c.faces)</span>
+            <span class="c1"># TODO: animation may be trigged here</span>
 
             <span class="n">residual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span>
-            <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span>
 
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residual</span> <span class="o">/</span> <span class="n">scale</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">reltol</span><span class="p">):</span>
                 <span class="c1"># Convergence at an equilibrium</span>
@@ -923,9 +1086,8 @@
                         <span class="k">continue</span>
 
             <span class="c1"># Computing correction</span>
-            <span class="c1"># TODO: voir pour une resolution ne faisant pas intervenir np.linalg ?</span>
             <span class="n">stiffness_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hs_data</span><span class="p">[</span><span class="s1">&#39;stiffness_matrix&#39;</span><span class="p">]</span>
-            <span class="n">dz</span><span class="p">,</span> <span class="n">thetax</span><span class="p">,</span> <span class="n">thetay</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">stiffness_matrix</span><span class="p">,</span> <span class="n">residual</span><span class="p">)</span>
+            <span class="n">dz</span><span class="p">,</span> <span class="n">thetax</span><span class="p">,</span> <span class="n">thetay</span> <span class="o">=</span> <span class="n">linear_solver</span><span class="p">(</span><span class="n">stiffness_matrix</span><span class="p">,</span> <span class="n">residual</span><span class="p">)</span>
 
             <span class="c1"># Relaxation</span>
             <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">dz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">z_relax</span><span class="p">:</span>
@@ -959,13 +1121,13 @@
         <span class="k">return</span> <span class="n">code</span></div>
 
 <div class="viewcode-block" id="Hydrostatics.get_hydrostatic_report"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.get_hydrostatic_report">[docs]</a>    <span class="k">def</span> <span class="nf">get_hydrostatic_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="k">def</span> <span class="nf">header</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
-            <span class="n">head</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">-----------------------------------------------------</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="n">head</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">title</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
-            <span class="n">head</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">-----------------------------------------------------</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="k">return</span> <span class="n">head</span>
-
+        <span class="sd">&quot;&quot;&quot;Returns a hydrostatic report for the current configuration</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">def</span> <span class="nf">hspace</span><span class="p">():</span>
             <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
@@ -1045,7 +1207,7 @@
         <span class="n">msg</span> <span class="o">+=</span> <span class="n">hspace</span><span class="p">()</span>
         <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">RESIDUALS:</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Absolute&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
-        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Relative&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Relative&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
         <span class="n">msg</span> <span class="o">+=</span> <span class="n">build_line</span><span class="p">(</span><span class="s1">&#39;Relative tolerance&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reltol</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
         <span class="c1"># residual = self.residual</span>
         <span class="c1"># msg += (&#39;\nResidual:\n&#39;)</span>
@@ -1053,7 +1215,7 @@
         <span class="c1"># msg += (&#39;Delta Mx = %.3f Nm\n&#39; % residual[1])</span>
         <span class="c1"># msg += (&#39;Delta My = %.3f Nm\n&#39; % residual[2])</span>
         <span class="c1">#</span>
-        <span class="c1"># rel_res = residual / self.scale</span>
+        <span class="c1"># rel_res = residual / self._scale</span>
         <span class="c1"># msg += (&#39;\nRelative residual:\n&#39;)</span>
         <span class="c1"># msg += (&#39;Delta Fz = %E\n&#39; % rel_res[0])</span>
         <span class="c1"># msg += (&#39;Delta Mx = %E\n&#39; % rel_res[1])</span>
@@ -1065,6 +1227,7 @@
     <span class="c1"># FIXME: la methode show ne devrait pas faire appel explicitement a des fonctions vtk...</span>
     <span class="c1"># Tout devrait etre gere dans MMViewer</span>
 <div class="viewcode-block" id="Hydrostatics.show"><a class="viewcode-back" href="../../api/meshmagick.hydrostatics.html#meshmagick.hydrostatics.Hydrostatics.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Displays the mesh in the meshmagick viewer with additional graphics proper to hydrostatics&quot;&quot;&quot;</span>
         <span class="c1"># TODO: Ce n&#39;est pas ce module qui doit savoir utiliser vtk !!!</span>
 
         <span class="kn">import</span> <span class="nn">MMviewer</span>
@@ -1115,39 +1278,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
 
         <span class="k">return</span></div></div>
-
-
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="c1"># The following code are only for testing purpose</span>
-    <span class="kn">import</span> <span class="nn">mmio</span>
-    <span class="kn">import</span> <span class="nn">sys</span>
-    <span class="kn">import</span> <span class="nn">mesh</span>
-
-    <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">mmio</span><span class="o">.</span><span class="n">load_VTP</span><span class="p">(</span><span class="s1">&#39;meshmagick/tests/data/SEAREV.vtp&#39;</span><span class="p">)</span>
-
-    <span class="n">searev</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;SEAREV&#39;</span><span class="p">)</span>
-
-    <span class="n">hs</span> <span class="o">=</span> <span class="n">Hydrostatics</span><span class="p">(</span><span class="n">searev</span><span class="p">)</span>
-    <span class="n">hs</span><span class="o">.</span><span class="n">verbose_on</span><span class="p">()</span>
-
-    <span class="c1"># hs.mass = 2300</span>
-    <span class="n">hs</span><span class="o">.</span><span class="n">gravity_center</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
-    <span class="n">hs</span><span class="o">.</span><span class="n">allow_unstable_off</span><span class="p">()</span>
-    <span class="n">hs</span><span class="o">.</span><span class="n">reltol</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
-
-    <span class="n">F</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="n">e3</span> <span class="o">*</span> <span class="mf">9.81</span><span class="p">]</span>
-    <span class="n">force1</span> <span class="o">=</span> <span class="n">Force</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="n">e7</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;relative&#39;</span><span class="p">)</span>
-    <span class="c1"># force2 = AdditionalForce(point=[0, 15, -5], value=[0, 0, -50e3*9.81], mode=&#39;absolute&#39;)</span>
-    <span class="c1"># force = AdditionalForce(point=[0, 0, 3], value=[0, 1e7, 0], mode=&#39;absolute&#39;)</span>
-    <span class="n">hs</span><span class="o">.</span><span class="n">add_force</span><span class="p">(</span><span class="n">force1</span><span class="p">)</span>
-    <span class="c1"># hs.add_force(force2)</span>
-
-    <span class="n">hs</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">()</span>
-    <span class="n">hs</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-    <span class="nb">print</span> <span class="n">hs</span><span class="o">.</span><span class="n">get_hydrostatic_report</span><span class="p">()</span>
-
-    <span class="nb">print</span> <span class="s1">&#39;Done !&#39;</span>
 </pre></div>
 
            </div>
@@ -1159,8 +1289,8 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Ecole Centrale de Nantes.
-      Last updated on Dec 21, 2016.
+        &copy; Copyright 2017, Ecole Centrale de Nantes.
+      Last updated on Jan 03, 2017.
 
     </p>
   </div> 
@@ -1190,6 +1320,7 @@
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

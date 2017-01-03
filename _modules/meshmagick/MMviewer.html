@@ -90,10 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../module/module.html">Using Meshmagick as a Python module</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package&#8217;s modules</a></li>
 </ul>
 
             
@@ -143,11 +140,10 @@
 <span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This module is part of meshmagick. It implements a viewer based on vtk</span>
+<span class="sd">This module implements a viewer based on VTK.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">vtk</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">getcwd</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 
@@ -157,7 +153,9 @@
 <span class="c1"># https://stackoverflow.com/questions/31075569/vtk-rotate-actor-programmatically-while-vtkrenderwindowinteractor-is-active</span>
 <span class="c1"># https://stackoverflow.com/questions/32417197/vtk-update-vtkpolydata-in-renderwindow-without-blocking-interaction</span>
 
+
 <div class="viewcode-block" id="MMViewer"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer">[docs]</a><span class="k">class</span> <span class="nc">MMViewer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class implements a viewer based on VTK&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># Building renderer</span>
@@ -189,19 +187,19 @@
 
         <span class="c1"># Building command annotations</span>
         <span class="n">command_text</span> <span class="o">=</span> <span class="s2">&quot;left mouse : rotate</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;right mouse : zoom</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;middle mouse : pan</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;ctrl+left mouse : spin</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;n : (un)show normals</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;b : (un)show axes box</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;f : focus on the mouse cursor</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;r : reset view</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;s : surface representation</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;w : wire representation</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;h : (un)show Oxy plane</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;x : save</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;c : screenshot</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
-                        <span class="s2">&quot;q : quit&quot;</span>
+                       <span class="s2">&quot;right mouse : zoom</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;middle mouse : pan</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;ctrl+left mouse : spin</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;n : (un)show normals</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;b : (un)show axes box</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;f : focus on the mouse cursor</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;r : reset view</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;s : surface representation</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;w : wire representation</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;h : (un)show Oxy plane</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;x : save</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;c : screenshot</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                       <span class="s2">&quot;q : quit&quot;</span>
 
         <span class="n">corner_annotation</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCornerAnnotation</span><span class="p">()</span>
         <span class="n">corner_annotation</span><span class="o">.</span><span class="n">SetLinearFontScaleFactor</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -226,15 +224,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">oxy_plane</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hiden</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1"># TODO: A terminer -&gt; cf methode self.hide()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hiden</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># TODO: A terminer -&gt; cf methode self.hide()</span>
 
 <div class="viewcode-block" id="MMViewer.normals_on"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.normals_on">[docs]</a>    <span class="k">def</span> <span class="nf">normals_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Displays the normals&quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">normals</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="MMViewer.normals_off"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.normals_off">[docs]</a>    <span class="k">def</span> <span class="nf">normals_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Hide the normals&quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">normals</span> <span class="o">=</span> <span class="kc">False</span></div>
     
 <div class="viewcode-block" id="MMViewer.plane_on"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.plane_on">[docs]</a>    <span class="k">def</span> <span class="nf">plane_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Displays the Oxy plane&quot;&quot;&quot;</span>
+        
         <span class="n">pd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         
         <span class="n">plane</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPlaneSource</span><span class="p">()</span>
@@ -265,12 +269,22 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="n">actor</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">oxy_plane</span> <span class="o">=</span> <span class="n">actor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oxy_plane</span> <span class="o">=</span> <span class="n">actor</span></div>
         
-        
-        <span class="k">return</span></div>
-    
-<div class="viewcode-block" id="MMViewer.add_point"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_point">[docs]</a>    <span class="k">def</span> <span class="nf">add_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
+<div class="viewcode-block" id="MMViewer.add_point"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_point">[docs]</a>    <span class="k">def</span> <span class="nf">add_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;Add a point to the viewer</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pos : array_like</span>
+<span class="sd">            The point&#39;s position</span>
+<span class="sd">        color : array_like, optional</span>
+<span class="sd">            The RGB color required for the point. Default is (0, 0, 0) corresponding to black.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        vtkPolyData</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
         
@@ -289,7 +303,22 @@
         
         <span class="k">return</span> <span class="n">pd</span></div>
     
-<div class="viewcode-block" id="MMViewer.add_line"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_line">[docs]</a>    <span class="k">def</span> <span class="nf">add_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
+<div class="viewcode-block" id="MMViewer.add_line"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_line">[docs]</a>    <span class="k">def</span> <span class="nf">add_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;Add a line to the viewer</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        p0 : array_like</span>
+<span class="sd">            position of one end point of the line</span>
+<span class="sd">        p1 : array_like</span>
+<span class="sd">            position of a second end point of the line</span>
+<span class="sd">        color : array_like, optional</span>
+<span class="sd">            RGB color of the line. Default is black (0, 0, 0)</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        vtkPolyData</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
 
@@ -312,9 +341,20 @@
         
         <span class="k">return</span> <span class="n">lines_pd</span></div>
     
-<div class="viewcode-block" id="MMViewer.add_vector"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_vector">[docs]</a>    <span class="k">def</span> <span class="nf">add_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
-
-        <span class="c1"># gforce = self.get_gravity_force()</span>
+<div class="viewcode-block" id="MMViewer.add_vector"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_vector">[docs]</a>    <span class="k">def</span> <span class="nf">add_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;Add a vector to the viewer</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        point : array_like</span>
+<span class="sd">            starting point position of the vector</span>
+<span class="sd">        value : float</span>
+<span class="sd">            the magnitude of the vector</span>
+<span class="sd">        scale : float, optional</span>
+<span class="sd">            the scaling to apply to the vector for better visualization. Default is 1.</span>
+<span class="sd">        color : array_like</span>
+<span class="sd">            The color of the vector. Default is black (0, 0, 0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">points</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">()</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">InsertNextPoint</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
@@ -355,11 +395,19 @@
         <span class="n">g_glyph_actor</span><span class="o">.</span><span class="n">SetMapper</span><span class="p">(</span><span class="n">g_glyph_mapper</span><span class="p">)</span>
         <span class="n">g_glyph_actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="n">g_glyph_actor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="n">g_glyph_actor</span><span class="p">)</span></div>
         
-        <span class="k">return</span></div>
-    
 <div class="viewcode-block" id="MMViewer.add_plane"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_plane">[docs]</a>    <span class="k">def</span> <span class="nf">add_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">normal</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a plane to the viewer</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        center : array_like</span>
+<span class="sd">            The origin of the plane</span>
+<span class="sd">        normal : array_like</span>
+<span class="sd">            The normal of the plane</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">plane</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPlaneSource</span><span class="p">()</span>
         <span class="n">plane</span><span class="o">.</span><span class="n">SetCenter</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
         <span class="n">plane</span><span class="o">.</span><span class="n">SetNormal</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
@@ -368,16 +416,25 @@
         <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
             <span class="n">mapper</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">mapper</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>
+            <span class="n">mapper</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span></div>
             
         <span class="c1"># FIXME: terminer l&#39;implementation et l&#39;utiliser pour le plan de la surface libre</span>
             
-        <span class="k">return</span></div>
-
-<div class="viewcode-block" id="MMViewer.add_polydata"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_polydata">[docs]</a>    <span class="k">def</span> <span class="nf">add_polydata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polydata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="nb">repr</span><span class="o">=</span><span class="s1">&#39;surface&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="MMViewer.add_polydata"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.add_polydata">[docs]</a>    <span class="k">def</span> <span class="nf">add_polydata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polydata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">representation</span><span class="o">=</span><span class="s1">&#39;surface&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a polydata object to the viewer</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        polydata : vtkPolyData</span>
+<span class="sd">            the object to be added</span>
+<span class="sd">        color : array_like, optional</span>
+<span class="sd">            the color of the object. Default is yellow (1, 1, 0)</span>
+<span class="sd">        representation : str</span>
+<span class="sd">            the representation mode of the object (&#39;surface&#39; or &#39;wireframe&#39;). Default is &#39;surface&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">polydata</span><span class="p">,</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="nb">repr</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;surface&#39;</span><span class="p">,</span> <span class="s1">&#39;wireframe&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">representation</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;surface&#39;</span><span class="p">,</span> <span class="s1">&#39;wireframe&#39;</span><span class="p">)</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polydata</span><span class="p">)</span>
 
@@ -398,14 +455,15 @@
         <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetEdgeColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetLineWidth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetPointSize</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">repr</span> <span class="o">==</span> <span class="s1">&#39;wireframe&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">representation</span> <span class="o">==</span> <span class="s1">&#39;wireframe&#39;</span><span class="p">:</span>
             <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetRepresentationToWireframe</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="n">actor</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span>
-        <span class="k">return</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="MMViewer.show_normals"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.show_normals">[docs]</a>    <span class="k">def</span> <span class="nf">show_normals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Shows the normals of the current objects&quot;&quot;&quot;</span>
+        
         <span class="k">for</span> <span class="n">polydata</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="p">:</span>
             <span class="n">normals</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataNormals</span><span class="p">()</span>
             <span class="n">normals</span><span class="o">.</span><span class="n">ConsistencyOff</span><span class="p">()</span>
@@ -438,7 +496,7 @@
             <span class="n">glyph</span><span class="o">.</span><span class="n">SetSourceConnection</span><span class="p">(</span><span class="n">arrows</span><span class="o">.</span><span class="n">GetOutputPort</span><span class="p">())</span>
             <span class="n">glyph</span><span class="o">.</span><span class="n">SetInputConnection</span><span class="p">(</span><span class="n">normals_at_centers</span><span class="o">.</span><span class="n">GetOutputPort</span><span class="p">())</span>
             <span class="n">glyph</span><span class="o">.</span><span class="n">SetVectorModeToUseNormal</span><span class="p">()</span>
-            <span class="n">glyph</span><span class="o">.</span><span class="n">SetScaleFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># FIXME: may be too big ...</span>
+            <span class="n">glyph</span><span class="o">.</span><span class="n">SetScaleFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># FIXME: may be too big ...</span>
             <span class="c1"># glyph.SetVectorModeToUseNormal()</span>
             <span class="c1"># glyph.SetVectorModeToUseVector()</span>
             <span class="c1"># glyph.SetScaleModeToDataScalingOff()</span>
@@ -454,6 +512,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">normals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">glyph_actor</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MMViewer.show_axes"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.show_axes">[docs]</a>    <span class="k">def</span> <span class="nf">show_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Shows the axes around the main object&quot;&quot;&quot;</span>
 
         <span class="n">tprop</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkTextProperty</span><span class="p">()</span>
         <span class="n">tprop</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
@@ -477,19 +536,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MMViewer.show"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Show the viewer&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">renderer</span><span class="o">.</span><span class="n">ResetCamera</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">render_window</span><span class="o">.</span><span class="n">Render</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span><span class="o">.</span><span class="n">Start</span><span class="p">()</span></div>
         <span class="c1"># self.render_window_interactor.Initialize()</span>
 
-<div class="viewcode-block" id="MMViewer.hide"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.hide">[docs]</a>    <span class="k">def</span> <span class="nf">hide</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">id</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="p">):</span>
-            <span class="nb">print</span> <span class="s2">&quot;No mesh with id </span><span class="si">%u</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">id</span>
+<div class="viewcode-block" id="MMViewer.hide"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.hide">[docs]</a>    <span class="k">def</span> <span class="nf">hide</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polydatas</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="s2">&quot;No mesh with index </span><span class="si">%u</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">index</span>
             <span class="k">return</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">hiden</span></div>
 
 <div class="viewcode-block" id="MMViewer.save"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Saves the main object in a &#39;mmviewer_save.vtp&#39; vtp file is the current folder&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkXMLPolyDataWriter</span>
 
         <span class="n">writer</span> <span class="o">=</span> <span class="n">vtkXMLPolyDataWriter</span><span class="p">()</span>
@@ -507,6 +568,7 @@
         <span class="k">return</span></div>
 
 <div class="viewcode-block" id="MMViewer.screenshot"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.screenshot">[docs]</a>    <span class="k">def</span> <span class="nf">screenshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Saves a screeshot of the current window in a file screenshot.png&quot;&quot;&quot;</span>
         <span class="n">w2if</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkWindowToImageFilter</span><span class="p">()</span>
         <span class="n">w2if</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_window</span><span class="p">)</span>
         <span class="n">w2if</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
@@ -523,10 +585,12 @@
         <span class="k">return</span></div>
 
 <div class="viewcode-block" id="MMViewer.finalize"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Cleanly close the viewer&quot;&quot;&quot;</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_window</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_window_interactor</span></div>
 
 <div class="viewcode-block" id="MMViewer.on_key_press"><a class="viewcode-back" href="../../api/meshmagick.MMviewer.html#meshmagick.MMviewer.MMViewer.on_key_press">[docs]</a>    <span class="k">def</span> <span class="nf">on_key_press</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Event trig at keystroke&quot;&quot;&quot;</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetKeySym</span><span class="p">()</span>
         
         <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
@@ -564,8 +628,6 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">oxy_plane</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">plane_on</span><span class="p">()</span></div></div>
-        
-        
 </pre></div>
 
            </div>
@@ -577,8 +639,8 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Ecole Centrale de Nantes.
-      Last updated on Dec 21, 2016.
+        &copy; Copyright 2017, Ecole Centrale de Nantes.
+      Last updated on Jan 03, 2017.
 
     </p>
   </div> 
@@ -608,6 +670,7 @@
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -34,9 +34,9 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Meshmagick User&#39;s Guide 1.0 documentation" href="../index.html"/>
-        <link rel="up" title="Meshmagick Package" href="index.html"/>
+        <link rel="up" title="Meshmagick Package’s modules" href="index.html"/>
         <link rel="next" title="meshmagick.mmio module" href="meshmagick.mmio.html"/>
-        <link rel="prev" title="Meshmagick Package" href="index.html"/> 
+        <link rel="prev" title="Meshmagick Package’s modules" href="index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -91,11 +91,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
 </ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../module/module.html">Using Meshmagick as a Python module</a></li>
-</ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package&#8217;s modules</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">meshmagick.mesh module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.mmio.html">meshmagick.mmio module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.inertia.html">meshmagick.inertia module</a></li>
@@ -136,7 +133,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-          <li><a href="index.html">Meshmagick Package</a> &raquo;</li>
+          <li><a href="index.html">Meshmagick Package&#8217;s modules</a> &raquo;</li>
       
     <li>meshmagick.mesh module</li>
       <li class="wy-breadcrumbs-aside">
@@ -160,14 +157,14 @@
 <dt id="meshmagick.mesh.Mesh">
 <em class="property">class </em><code class="descclassname">meshmagick.mesh.</code><code class="descname">Mesh</code><span class="sig-paren">(</span><em>vertices</em>, <em>faces</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>A clas to handle unstructured meshes.</p>
+<p>A class to handle unstructured meshes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>vertices</strong> (<em>ndarray</em>) &#8211; (nv x 3) Array of mesh vertices coordinates. Each line of the array represents one vertex coordinates</li>
-<li><strong>faces</strong> (<em>ndarray</em>) &#8211; Arrays of mesh connectivities for faces. Each line of the array represents indices of vertices that form the
+<li><strong>vertices</strong> (<em>array_like</em>) &#8211; (nv x 3) Array of mesh vertices coordinates. Each line of the array represents one vertex coordinates</li>
+<li><strong>faces</strong> (<em>array_like</em>) &#8211; Arrays of mesh connectivities for faces. Each line of the array represents indices of vertices that form the
 face, expressed in counterclockwise order to ensure outward normals description.</li>
 <li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a><em>, </em><em>optional</em>) &#8211; The mesh&#8217;s name. If None, mesh is given an automatic name based on its internal ID.</li>
 </ul>
@@ -286,7 +283,8 @@ face, expressed in counterclockwise order to ensure outward normals description.
 <dl class="method">
 <dt id="meshmagick.mesh.Mesh.eval_shell_mesh_inertias">
 <code class="descname">eval_shell_mesh_inertias</code><span class="sig-paren">(</span><em>rho_medium=7850.0</em>, <em>thickness=0.02</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.eval_shell_mesh_inertias"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.eval_shell_mesh_inertias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates the mesh inertia under the assumption of an enclosed volume made of an homogeneous    medium of the  given density.</p>
+<dd><p>Evaluates the mesh inertia under the assumption of an enclosed volume made of an homogeneous medium of the
+given density.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -690,7 +688,8 @@ face, expressed in counterclockwise order to ensure outward normals description.
 <dt id="meshmagick.mesh.Mesh.print_quality">
 <code class="descname">print_quality</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.print_quality"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.print_quality" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns data on the mesh quality</p>
-<p>It uses VTK and is reproduced from <a class="reference external" href="http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py">http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py</a></p>
+<p>It uses VTK and is reproduced from
+<a class="reference external" href="http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py">http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py</a></p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1098,8 +1097,8 @@ tolerance given.</p>
 <em class="property">class </em><code class="descclassname">meshmagick.mesh.</code><code class="descname">Plane</code><span class="sig-paren">(</span><em>normal=(0.0</em>, <em>0.0</em>, <em>1.0)</em>, <em>scalar=0.0</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Class to handle plane geometry.</p>
-<p>A plane is represented by the equation <img class="math" src="../_images/math/343d7f4ac23d54f9f7f68889f541208792cc0098.png" alt="\vec{n}.\vec{x} = c"/> where <img class="math" src="../_images/math/db2fe1d8eccd0ed17f0275b70fd111b7dbdb0a30.png" alt="\vec{n}"/> is the plane&#8217;s normal,
-<img class="math" src="../_images/math/8038a2982691bb9b9a5676262bd25e4739d8defa.png" alt="\vec{x}"/> a point in the space and <img class="math" src="../_images/math/ae12a24f88803b5895632e4848d87d46483c492c.png" alt="c"/> a scalar parameter being the signed distance between the
+<p>A plane is represented by the equation <span class="math">\(\vec{n}.\vec{x} = c\)</span> where <span class="math">\(\vec{n}\)</span> is the plane&#8217;s normal,
+<span class="math">\(\vec{x}\)</span> a point in the space and <span class="math">\(c\)</span> a scalar parameter being the signed distance between the
 reference frame origin and the its otrhogonal projection on the plane.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1114,21 +1113,10 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 </tbody>
 </table>
 <dl class="attribute">
-<dt id="meshmagick.mesh.Plane.normal">
-<code class="descname">normal</code><a class="headerlink" href="#meshmagick.mesh.Plane.normal" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>ndarray</em> &#8211; The plane&#8217;s normal</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="meshmagick.mesh.Plane.c">
 <code class="descname">c</code><a class="headerlink" href="#meshmagick.mesh.Plane.c" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>float</em> &#8211; The plane&#8217;s scalar parameter</p>
+<dd><p>Get the plane&#8217;s scalar parameter</p>
 </dd></dl>
-
-<dl class="attribute">
-<dt>
-<code class="descname">c</code></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.mesh.Plane.coord_in_plane">
@@ -1187,7 +1175,8 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 <dl class="method">
 <dt id="meshmagick.mesh.Plane.get_origin">
 <code class="descname">get_origin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.get_origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.get_origin" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get the coordinates of the plane&#8217;s origin</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.mesh.Plane.get_point_dist_wrt_plane">
@@ -1208,9 +1197,10 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt>
-<code class="descname">normal</code></dt>
-<dd></dd></dl>
+<dt id="meshmagick.mesh.Plane.normal">
+<code class="descname">normal</code><a class="headerlink" href="#meshmagick.mesh.Plane.normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the plane&#8217;s normal</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.mesh.Plane.orthogonal_projection_on_plane">
@@ -1278,12 +1268,6 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 <li><strong>scalar</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Plane scalar parameter (m)</li>
 <li><strong>theta_x</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Normal angle around Ox (rad)</li>
 <li><strong>theta_y</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Normal angle around Oy (rad)</li>
-<li><strong>Remark</strong> &#8211; </li>
-<li><strong>------</strong> &#8211; </li>
-<li><strong>is</strong><strong> (</strong><strong>reformulate...</strong><strong>)</strong><strong></strong> (<em>Formula</em>) &#8211; </li>
-<li><strong>heta = sqrt{   heta_x^2 +      hetay^2}$$</strong> (<em>$$</em>) &#8211; </li>
-<li><strong>= R'R z$$</strong> (<em>$$n_f</em>) &#8211; </li>
-<li><strong>= c*cos{ heta} + c'$$</strong> (<em>$$c_f</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1305,7 +1289,7 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
         <a href="meshmagick.mmio.html" class="btn btn-neutral float-right" title="meshmagick.mmio module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Meshmagick Package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="Meshmagick Package’s modules" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1314,8 +1298,8 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Ecole Centrale de Nantes.
-      Last updated on Dec 21, 2016.
+        &copy; Copyright 2017, Ecole Centrale de Nantes.
+      Last updated on Jan 03, 2017.
 
     </p>
   </div> 
@@ -1345,6 +1329,7 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

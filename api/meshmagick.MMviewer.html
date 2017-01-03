@@ -34,7 +34,7 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Meshmagick User&#39;s Guide 1.0 documentation" href="../index.html"/>
-        <link rel="up" title="Meshmagick Package" href="index.html"/>
+        <link rel="up" title="Meshmagick Package’s modules" href="index.html"/>
         <link rel="next" title="meshmagick.tools module" href="meshmagick.tools.html"/>
         <link rel="prev" title="meshmagick.hydrostatics module" href="meshmagick.hydrostatics.html"/> 
 
@@ -91,11 +91,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
 </ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../module/module.html">Using Meshmagick as a Python module</a></li>
-</ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package&#8217;s modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.mesh.html">meshmagick.mesh module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.mmio.html">meshmagick.mmio module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.inertia.html">meshmagick.inertia module</a></li>
@@ -136,7 +133,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-          <li><a href="index.html">Meshmagick Package</a> &raquo;</li>
+          <li><a href="index.html">Meshmagick Package&#8217;s modules</a> &raquo;</li>
       
     <li>meshmagick.MMviewer module</li>
       <li class="wy-breadcrumbs-aside">
@@ -154,89 +151,181 @@
             
   <div class="section" id="module-meshmagick.MMviewer">
 <span id="meshmagick-mmviewer-module"></span><h1>meshmagick.MMviewer module<a class="headerlink" href="#module-meshmagick.MMviewer" title="Permalink to this headline">¶</a></h1>
-<p>This module is part of meshmagick. It implements a viewer based on vtk</p>
+<p>This module implements a viewer based on VTK.</p>
 <dl class="class">
 <dt id="meshmagick.MMviewer.MMViewer">
 <em class="property">class </em><code class="descclassname">meshmagick.MMviewer.</code><code class="descname">MMViewer</code><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>This class implements a viewer based on VTK</p>
+<dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.add_line">
-<code class="descname">add_line</code><span class="sig-paren">(</span><em>p0, p1, color=[0, 0, 0]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.add_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.add_line" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">add_line</code><span class="sig-paren">(</span><em>p0</em>, <em>p1</em>, <em>color=(0</em>, <em>0</em>, <em>0)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.add_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.add_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a line to the viewer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p0</strong> (<em>array_like</em>) &#8211; position of one end point of the line</li>
+<li><strong>p1</strong> (<em>array_like</em>) &#8211; position of a second end point of the line</li>
+<li><strong>color</strong> (<em>array_like</em><em>, </em><em>optional</em>) &#8211; RGB color of the line. Default is black (0, 0, 0)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">vtkPolyData</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.add_plane">
 <code class="descname">add_plane</code><span class="sig-paren">(</span><em>center</em>, <em>normal</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.add_plane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.add_plane" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Add a plane to the viewer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>center</strong> (<em>array_like</em>) &#8211; The origin of the plane</li>
+<li><strong>normal</strong> (<em>array_like</em>) &#8211; The normal of the plane</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.add_point">
-<code class="descname">add_point</code><span class="sig-paren">(</span><em>pos, color=[0, 0, 0]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.add_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.add_point" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">add_point</code><span class="sig-paren">(</span><em>pos</em>, <em>color=(0</em>, <em>0</em>, <em>0)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.add_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.add_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a point to the viewer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pos</strong> (<em>array_like</em>) &#8211; The point&#8217;s position</li>
+<li><strong>color</strong> (<em>array_like</em><em>, </em><em>optional</em>) &#8211; The RGB color required for the point. Default is (0, 0, 0) corresponding to black.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">vtkPolyData</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.add_polydata">
-<code class="descname">add_polydata</code><span class="sig-paren">(</span><em>polydata, color=[1, 1, 0], repr='surface'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.add_polydata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.add_polydata" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">add_polydata</code><span class="sig-paren">(</span><em>polydata</em>, <em>color=(1</em>, <em>1</em>, <em>0)</em>, <em>representation='surface'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.add_polydata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.add_polydata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a polydata object to the viewer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>polydata</strong> (<em>vtkPolyData</em>) &#8211; the object to be added</li>
+<li><strong>color</strong> (<em>array_like</em><em>, </em><em>optional</em>) &#8211; the color of the object. Default is yellow (1, 1, 0)</li>
+<li><strong>representation</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the representation mode of the object (&#8216;surface&#8217; or &#8216;wireframe&#8217;). Default is &#8216;surface&#8217;.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.add_vector">
-<code class="descname">add_vector</code><span class="sig-paren">(</span><em>point, value, scale=1, color=[0, 0, 0]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.add_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.add_vector" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">add_vector</code><span class="sig-paren">(</span><em>point</em>, <em>value</em>, <em>scale=1</em>, <em>color=(0</em>, <em>0</em>, <em>0)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.add_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.add_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a vector to the viewer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>point</strong> (<em>array_like</em>) &#8211; starting point position of the vector</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the magnitude of the vector</li>
+<li><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; the scaling to apply to the vector for better visualization. Default is 1.</li>
+<li><strong>color</strong> (<em>array_like</em>) &#8211; The color of the vector. Default is black (0, 0, 0)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.finalize">
 <code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.finalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.finalize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Cleanly close the viewer</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.hide">
-<code class="descname">hide</code><span class="sig-paren">(</span><em>id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.hide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.hide" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hide</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.hide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.hide" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.normals_off">
 <code class="descname">normals_off</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.normals_off"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.normals_off" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Hide the normals</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.normals_on">
 <code class="descname">normals_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.normals_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.normals_on" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Displays the normals</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.on_key_press">
 <code class="descname">on_key_press</code><span class="sig-paren">(</span><em>obj</em>, <em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.on_key_press"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.on_key_press" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Event trig at keystroke</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.plane_on">
 <code class="descname">plane_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.plane_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.plane_on" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Displays the Oxy plane</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.save">
 <code class="descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.save" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Saves the main object in a &#8216;mmviewer_save.vtp&#8217; vtp file is the current folder</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.screenshot">
 <code class="descname">screenshot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.screenshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.screenshot" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Saves a screeshot of the current window in a file screenshot.png</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.show">
 <code class="descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.show" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Show the viewer</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.show_axes">
 <code class="descname">show_axes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.show_axes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.show_axes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Shows the axes around the main object</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="meshmagick.MMviewer.MMViewer.show_normals">
 <code class="descname">show_normals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/MMviewer.html#MMViewer.show_normals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.MMviewer.MMViewer.show_normals" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Shows the normals of the current objects</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -261,8 +350,8 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Ecole Centrale de Nantes.
-      Last updated on Dec 21, 2016.
+        &copy; Copyright 2017, Ecole Centrale de Nantes.
+      Last updated on Jan 03, 2017.
 
     </p>
   </div> 
@@ -292,6 +381,7 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
