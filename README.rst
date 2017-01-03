@@ -24,8 +24,8 @@ draft...). Inertial properties of meshes may also be computed, based on assumpti
 package that can be imported in a python script and give the full access to the command line options, programatically.
 
 .. note::
-    **Meshmagick is the property of **Ecole Centrale de Nantes** and is maintained by François Rongère <francois
-    .rongere@ec-nantes.fr>**. It is released under the **GNU GPLv3** open source licence (see LICENCE file).
+    **Meshmagick** is the property of **Ecole Centrale de Nantes** and is maintained by François Rongère <francois
+    .rongere@ec-nantes.fr>. It is released under the **GNU GPLv3** open source licence (see LICENCE file).
 
 GitHub Repository
 -----------------
