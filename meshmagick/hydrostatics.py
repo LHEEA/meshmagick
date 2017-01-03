@@ -669,7 +669,8 @@ class Hydrostatics(object):
         # Flotation center F:
         x_f = -s35 / s33
         y_f = s34 / s33
-
+        # TODO: ajouter xf et yf dans le rapport hydro !!
+        
         xmin, xmax, ymin, ymax, zmin, zmax = clipped_mesh.axis_aligned_bbox
 
         # Storing data
