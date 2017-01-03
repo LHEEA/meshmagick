@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #  -*- coding: utf-8 -*-
+"""This module defines a RigidBodyInertia class to handle 3D rotational inertia of rigid bodies"""
 
 import numpy as np
 from math import pi, sqrt
@@ -8,14 +9,33 @@ from copy import deepcopy
 import densities
 
 # FIXME: attention, changer les signes pour les produits d'inertie !
-
 # TODO: ajouter la production d'inerties de solides connus --> utile pour comparaison !!
-
-
 # TODO: indiquer une frame d'expression ...
 
 
 class RigidBodyInertia(object):
+    """
+    Parameters
+    ----------
+    mass : float
+        The mass of the body in kg
+    cog : array_like
+        The 3D coordinates of the center of gravity
+    xx : float
+        The principal inertia moment around x axis
+    yy : float
+        The principal inertia moment around y axis
+    zz : float
+        The principal inertia moment around z axis
+    yz : float
+        Inertia product
+    xz : float
+        Inertia product
+    xy : float
+        Inertia product
+    point : array_like, optional
+        The reduction point. If None, it is set to be cog
+    """
     def __init__(self, mass, cog, xx, yy, zz, yz, xz, xy, point=None):
         
         self._mass = float(mass)
@@ -35,41 +55,66 @@ class RigidBodyInertia(object):
     
     @property
     def mass(self):
+        """The mass of the body"""
         return self._mass
     
     @property
     def gravity_center(self):
+        """The position of the center of gravity"""
         return self._cog
     
     @property
     def inertia_matrix(self):
+        """The 3D rotational inertia matrix"""
         return self._3d_rotational_inertia
     
     @property
     def reduction_point(self):
+        """The reduction point of the inertia matrix
+        
+        Returns
+        -------
+        ndarray
+        """
         return self._point
     
     @reduction_point.setter
     def reduction_point(self, point):
-        """Change the reduction point"""
+        """Set the reduction point"""
         mat_at_cog = self.at_cog.inertia_matrix
         assert len(point) == 3
         self._point = np.asarray(point, dtype=np.float)
         self._3d_rotational_inertia = mat_at_cog + self._huygens_transport()
-        return
     
     @property
     def at_cog(self):
+        """Returns a new inertia object that is expressed at cog.
+        
+        It makes a copy of itself.
+        
+        Returns
+        -------
+        ndarray
+        """
         inertia = deepcopy(self)
         inertia.shift_at_cog()
         return inertia
     
     def shift_at_cog(self):
+        """Shift the inertia matrix internally at cog.
+        
+        The reduction point is then cog.
+        """
         self._3d_rotational_inertia -= self._huygens_transport()
         self._point = self._cog
-        return
     
     def is_at_cog(self):
+        """Returns whether the object is expressed at cog
+        
+        Returns
+        -------
+        bool
+        """
         return np.all(self._point == self._cog)
     
     def _huygens_transport(self):
@@ -78,26 +123,62 @@ class RigidBodyInertia(object):
     
     @property
     def xx(self):
+        """Get the principal inertia moment around x
+        
+        Returns
+        -------
+        float
+        """
         return self._3d_rotational_inertia[0, 0]
     
     @property
     def yy(self):
+        """Get the principal inertia moment around y
+
+        Returns
+        -------
+        float
+                """
         return self._3d_rotational_inertia[1, 1]
     
     @property
     def zz(self):
+        """Get the principal inertia moment around z
+
+        Returns
+        -------
+        float
+        """
         return self._3d_rotational_inertia[2, 2]
     
     @property
     def yz(self):
+        """Get the yz inertia product
+
+        Returns
+        -------
+        float
+        """
         return -self._3d_rotational_inertia[1, 2]
     
     @property
     def xz(self):
+        """Get the xz inertia product
+
+        Returns
+        -------
+        float
+        """
         return -self._3d_rotational_inertia[0, 2]
     
     @property
     def xy(self):
+        """Get the xy inertia product
+
+        Returns
+        -------
+        float
+        """
         return -self._3d_rotational_inertia[0, 1]
     
     def __str__(self):
@@ -131,6 +212,13 @@ class RigidBodyInertia(object):
 # Principal geometrical shapes
 # From "Handbook of equations for mass and area of various geometrical shapes, J.A. Myers, 1962"
 def right_circular_cylinder(radius, length, density=1.):
+    """Get the inertia of a right circular cylinder
+    
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     vol = pi * radius ** 2 * length
     mass = density * vol
     
@@ -141,6 +229,13 @@ def right_circular_cylinder(radius, length, density=1.):
 
 
 def hollow_right_circular_cylinder(int_radius, ext_radius, length, density=1.):
+    """Get the inertia of a hollow right circular cylinder
+
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     vol = pi * length * (ext_radius ** 2 - int_radius ** 2)
     mass = density * vol
     
@@ -152,9 +247,17 @@ def hollow_right_circular_cylinder(int_radius, ext_radius, length, density=1.):
 
 
 def right_circular_cone(radius, length, density=1.):
-    """Note:
+    """Get the inertia of a right circular cone
+
+    Returns
+    -------
+    RigidBodyInertia
+    
+    Note
+    ----
     The center of gravity is at an altitude of z = H/4 over the circular basis center
     """
+    
     vol = pi * radius ** 2 * length / 3.
     mass = density * vol
     
@@ -165,6 +268,13 @@ def right_circular_cone(radius, length, density=1.):
 
 
 def sphere(radius, density=1.):
+    """Get the inertia of a sphere
+
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     vol = 4. * pi * radius ** 3 / 3.
     mass = density * vol
     
@@ -173,6 +283,13 @@ def sphere(radius, density=1.):
 
 
 def hollow_sphere(int_radius, ext_radius, density=1.):
+    """Get the inertia of a hollow sphere
+
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     vol = 4. * pi * (ext_radius ** 3 - int_radius ** 3) / 3.
     mass = density * vol
     
@@ -181,9 +298,17 @@ def hollow_sphere(int_radius, ext_radius, density=1.):
 
 
 def hemisphere(radius, density=1.):
-    """Note
+    """Get the inertia of a hemisphere
+
+    Returns
+    -------
+    RigidBodyInertia
+    
+    Note
+    ----
     The center of gravity is situated at the altitude of z = 3R/8 over the circular basis center
     """
+    
     vol = 2 * pi * radius ** 3 / 3.
     mass = density * vol
     
@@ -193,11 +318,18 @@ def hemisphere(radius, density=1.):
 
 
 def elliptical_cylinder(a, b, length, density=1.):
-    """Note :
-    The center of gravity is located at an altitude of z=H/2 over the elliptical basis center
-    a is along x axis (ellipse semi axis)
-    b is along y axis (ellipse semi axis)
-    length is along z axis
+    """Get the inertia of an elliptical cylinder
+
+    Returns
+    -------
+    RigidBodyInertia
+    
+    Note
+    ----
+    * The center of gravity is located at an altitude of z=H/2 over the elliptical basis center
+    * a is along x axis (ellipse semi axis)
+    * b is along y axis (ellipse semi axis)
+    * length is along z axis
     """
     
     vol = pi * a * b * length
@@ -211,11 +343,19 @@ def elliptical_cylinder(a, b, length, density=1.):
 
 
 def ellipsoid(a, b, c, density=1.):
-    """Note
-    a is along z axis (ellipse semi axis)
-    b is along x axis (ellipse semi axis)
-    c is along y axis (ellipse semi axis)
+    """Get the inertia of an ellipsoid
+
+    Returns
+    -------
+    RigidBodyInertia
+    
+    Note
+    ----
+    * a is along z axis (ellipse semi axis)
+    * b is along x axis (ellipse semi axis)
+    * c is along y axis (ellipse semi axis)
     """
+    
     vol = 4 * pi * a * b * c / 3.
     mass = density * vol
     
@@ -226,6 +366,13 @@ def ellipsoid(a, b, c, density=1.):
     return RigidBodyInertia(mass, [0, 0, 0], Ixx, Iyy, Izz, 0, 0, 0)
 
 def torus(chord_radius, tube_radius, density=1.):
+    """Get the inertia of a torus
+
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     vol = 2*pi**2 * tube_radius**2 * chord_radius
     mass = density * vol
     
@@ -236,6 +383,13 @@ def torus(chord_radius, tube_radius, density=1.):
 
 
 def right_angle_wedge(base, height, length, density=1.):
+    """Get the inertia of a right angle wedge
+
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     vol = base*height*length / 2.
     mass = density * vol
     
@@ -247,6 +401,13 @@ def right_angle_wedge(base, height, length, density=1.):
 
 
 def isoceles_wedge(base, height, length, density=1.):
+    """Get the inertia of an isocele wedge
+
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     vol = base * height * length / 2.
     mass = density * vol
 
@@ -258,9 +419,17 @@ def isoceles_wedge(base, height, length, density=1.):
 
 
 def right_rectangular_pyramid(a, b, height, density=1.):
-    """Note
+    """Get the inertia of a right rectangular pyramid
+
+    Returns
+    -------
+    RigidBodyInertia
+    
+    Note
+    ----
     The center of gravity is located at the altitude z=H/4 over the rectangular basis center
     """
+    
     vol = a*b*height / 3.
     mass = density * vol
     
@@ -272,6 +441,13 @@ def right_rectangular_pyramid(a, b, height, density=1.):
 
 
 def cube(a, density=1.):
+    """Get the inertia of a cube
+
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     vol = a**3
     mass = density * vol
     
@@ -280,10 +456,19 @@ def cube(a, density=1.):
 
 
 def rectangular_prism(a, b, h, density=1.):
-    """Note:
-    a is along x
-    b is along y
-    h is along z"""
+    """Get the inertia of a rectangular prism
+
+    Returns
+    -------
+    RigidBodyInertia
+    
+    Note
+    ----
+    * a is along x
+    * b is along y
+    * h is along z
+    """
+    
     vol = a*b*h
     mass = density * vol
     
@@ -295,9 +480,17 @@ def rectangular_prism(a, b, h, density=1.):
 
 
 def circular_cone_shell(R, height, density=densities.get_density('STEEL'), thickness=0.02):
-    """Note
+    """Get the inertia of a circular cone shell
+
+    Returns
+    -------
+    RigidBodyInertia
+    
+    Note
+    ----
     The center of gravity is located at an altitude of z=H/3 over the circular basis center
     """
+    
     surface = pi * R * sqrt(R**2 + height**2)
     sigma = density * thickness
     mass = sigma * surface
@@ -309,9 +502,17 @@ def circular_cone_shell(R, height, density=densities.get_density('STEEL'), thick
 
 
 def frustrum_of_circular_cone_shell(r, R, height, density=densities.get_density('STEEL'), thickness=0.02):
-    """Note:
+    """Get the inertia of a frustrum of circular cone shell
+
+    Returns
+    -------
+    RigidBodyInertia
+    
+    Note
+    ----
     The center of gravity is located at an altitude of z=(H/3)*(2*r+R)/(r+R)
     """
+    
     surface = pi * (R + r) * sqrt(height**2 + (R - r)**2)
     sigma = density * thickness
     mass = sigma * surface
@@ -323,6 +524,13 @@ def frustrum_of_circular_cone_shell(r, R, height, density=densities.get_density(
 
 
 def lateral_cylindrical_shell(R, H, density=densities.get_density('STEEL'), thickness=0.02):
+    """Get the inertia of a lateral cylindrical shell
+
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     surface = 2*pi*R*H
     sigma = density * thickness
     mass = sigma * surface
@@ -334,6 +542,13 @@ def lateral_cylindrical_shell(R, H, density=densities.get_density('STEEL'), thic
 
 
 def total_cylindrical_shell(R, H, density=densities.get_density('STEEL'), thickness=0.02):
+    """Get the inertia of a total cylindrical shell
+
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     surface = 2 * pi * R * (R + H)
     sigma = density * thickness
     mass = sigma * surface
@@ -345,6 +560,13 @@ def total_cylindrical_shell(R, H, density=densities.get_density('STEEL'), thickn
 
 
 def spherical_shell(R, density=densities.get_density('STEEL') ,thickness=0.02):
+    """Get the inertia of a spherical shell
+
+    Returns
+    -------
+    RigidBodyInertia
+    """
+    
     surface = 4*pi*R**2
     sigma = density * thickness
     mass = sigma * surface
@@ -354,9 +576,17 @@ def spherical_shell(R, density=densities.get_density('STEEL') ,thickness=0.02):
 
 
 def hemispherical_shell(R, density=densities.get_density('STEEL'), thickness=0.02):
-    """Note
+    """Get the inertia of a hemispherical shell
+
+    Returns
+    -------
+    RigidBodyInertia
+    
+    Note
+    ----
     The center of gravity is located at an altitude of z=R/2 over the circular basis center
     """
+    
     surface = 2 * pi * R ** 2
     sigma = density * thickness
     mass = sigma * surface

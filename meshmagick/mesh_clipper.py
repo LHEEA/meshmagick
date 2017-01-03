@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #  -*- coding: utf-8 -*-
 
+"""This module holds a tools to clip meshes against a plane"""
+
 from mesh import *
 
 
@@ -36,56 +38,77 @@ class MeshClipper(object):
 
     @property
     def verbose(self):
+        """Get the current verbosity"""
+        
         return self._verbose
 
     def verbose_on(self):
         """Switches ON the verbosity of the clipper."""
+        
         self._verbose = True
 
     def verbose_off(self):
         """Switches OFF the verbosity of the clipper."""
+        
         self._verbose = False
 
     @property
     def assert_closed_boundaries(self):
+        """Do we assert the boundaries have to be closed"""
+        
         return self._assert_closed_boundaries
 
     def assert_closed_boundaries_on(self):
         """Switches ON the flag for closed boundary assertion while clipping."""
+        
         self._assert_closed_boundaries = True
 
     def assert_closed_boundaries_off(self):
         """Switches OFF the flag for closed boundary assertion while clipping."""
+        
         self._assert_closed_boundaries = False
         return
 
     @property
     def vicinity_tol(self):
+        """Vicinity tolerance.
+        
+        It tells if a point is close enough to the plane to consider it lies on the plane
+        """
+        
         return self._vicinity_tol
 
     @vicinity_tol.setter
     def vicinity_tol(self, value):
         """Set the vicinity tolerance that tells that a vertex is located on the plane."""
+        
         self.__internals__.clear()
         self._vicinity_tol = float(value)
         self._update()
 
     @property
     def source_mesh(self):
+        """The mesh we work with"""
+        
         return self._source_mesh
 
     @property
     def plane(self):
+        """The clipping plane"""
+        
         return self._plane
 
     @plane.setter
     def plane(self, value):
         """Changes the clipping plane."""
+        
         self.__internals__.clear()
         self._plane = value
         self._update()
 
     def _update(self):
+        """Updates the clipper"""
+        
         self._vertices_positions_wrt_plane()
         self._partition_mesh()
         self._clip()
@@ -94,6 +117,7 @@ class MeshClipper(object):
         """
         Classifies vertices with respect to the clipping plane
         """
+        
         vertices_distances = self._plane.get_point_dist_wrt_plane(self._source_mesh.vertices)
 
         vertices_positions = {'vertices_distances': vertices_distances,
@@ -102,9 +126,15 @@ class MeshClipper(object):
                               'vertices_below_mask': vertices_distances < -self._vicinity_tol
                               }
         self.__internals__.update(vertices_positions)
-        return
 
     def _partition_mesh(self):
+        """Partitions the mesh in 3 with respect to the plane
+        
+        * upper_mesh: part entirely above the clipping plane
+        * crown_mesh: part intersecting the clipping plane
+        * lower_mesh: part entirely under the clipping plane
+        """
+        
         vertices_distances = self.__internals__['vertices_distances']
         vertices_above_mask = self.__internals__['vertices_above_mask']
         vertices_on_mask = self.__internals__['vertices_on_mask']
@@ -155,6 +185,7 @@ class MeshClipper(object):
         -------
         Mesh
         """
+        
         return self.__internals__['lower_mesh']
 
     @property
@@ -165,6 +196,7 @@ class MeshClipper(object):
         -------
         Mesh
         """
+        
         return self.__internals__['crown_mesh']
 
     @property
@@ -175,6 +207,7 @@ class MeshClipper(object):
         -------
         Mesh
         """
+        
         return self.__internals__['upper_mesh']
 
     @property
@@ -185,10 +218,13 @@ class MeshClipper(object):
         -------
         Mesh
         """
+        
         return self.__internals__['clipped_crown_mesh']
     
     @property
     def clipped_mesh(self):
+        """The resulting clipped mesh"""
+        
         return self.__internals__['clipped_mesh']
     
     @property
@@ -209,6 +245,7 @@ class MeshClipper(object):
           plane.
         * Vertices IDs are corresponding to the IDs of the clipped_crown_mesh, not those of the clipped_mesh.
         """
+        
         return self.__internals__['closed_polygons']
     
     @property
@@ -222,6 +259,7 @@ class MeshClipper(object):
         -------
         list
         """
+        
         polygons = self.__internals__['closed_polygons']
         closed_polygons_vertices = []
         # TODO: voir si on ne peut pas directement indicer par polygons sans boucle for
@@ -237,6 +275,7 @@ class MeshClipper(object):
         -------
         int
         """
+        
         return len(self.__internals__['closed_polygons'])
 
     @property
@@ -255,6 +294,7 @@ class MeshClipper(object):
         
         * The vertices IDs correspond to the IDs of clipped_crown_mesh, not clipped_mesh.
         """
+        
         return self.__internals__['open_lines']
     
     @property
@@ -267,6 +307,7 @@ class MeshClipper(object):
         -------
         list
         """
+        
         lines = self.__internals__['open_lines']
         lines_vertices = []
         # TODO: voir si on ne peut pas directement indicer par polygons sans boucle for
@@ -282,6 +323,7 @@ class MeshClipper(object):
         -------
         int
         """
+        
         return len(self.__internals__['open_lines'])
 
     def _clip_crown_by_plane(self):
@@ -704,6 +746,7 @@ class MeshClipper(object):
 
     def _clip(self):
         """Performs clipping and assemble the clipped mesh."""
+        
         self._clip_crown_by_plane()
         clipped_mesh = self.lower_mesh + self.clipped_crown_mesh
         clipped_mesh.name = '_'.join((self._source_mesh.name, 'clipped'))
