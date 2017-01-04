@@ -25,8 +25,3 @@ about:
   license: {{data.get('license')}}
   license_file: LICENCE
   summary: {{data.get('description')}}
-
-#// about:
-  #// home: 
-  #// license: BSD
-  #// license_file: LICENSE

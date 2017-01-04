@@ -22,7 +22,11 @@ install:
 
   # Build meshmagick package to be installed by conda
   - conda build conda.recipe
+
+  # Install meshmagick
   - conda install --use-local meshmagick
+  - meshmagick -h
+  - python -c "import meshmagick"
 
 script:
   pytest
