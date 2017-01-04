@@ -26,7 +26,7 @@ install:
   # Install meshmagick
   - conda install --use-local meshmagick
   - meshmagick -h
-  - python -c "import meshmagick"
+  - python -c "from meshmagick import mmio"
 
 script:
   pytest
