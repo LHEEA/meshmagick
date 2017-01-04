@@ -27,5 +27,8 @@ install:
   - conda install --use-local meshmagick
   - meshmagick -h
 
+  # Build doc
+  # TODO
+
 script:
-  - python setup.py test
+  - pytest --pyargs meshmagick

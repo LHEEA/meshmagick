@@ -23,11 +23,11 @@ setup(
     author_email='Francois.Rongere@ec-nantes.fr',
     description="""A command line tool to manipulate hydrodynamics meshes""",
     long_description=LONG_DESCRIPTION,
-    license='CeCILL-2.1',
+    license='GPLv3',
     keywords='hydrodynamics, unstructured mesh, conversion, manipulation',
     packages=find_packages(exclude=['contrib', 'doc', 'tests*']),
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'pytest-cov'],
+    # setup_requires=['pytest-runner'],
+    # tests_require=['pytest', 'pytest-cov'],
     install_requires=['vtk>=5', 'numpy', 'argcomplete'],
     entry_points={
         'console_scripts': [
