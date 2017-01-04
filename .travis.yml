@@ -35,4 +35,5 @@ install:
   # TODO
 
 script:
+  - source activate test-environment
   - pytest --pyargs meshmagick
