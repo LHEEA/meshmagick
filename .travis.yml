@@ -13,6 +13,7 @@ install:
   - conda update -q conda
   - conda config --set anaconda_upload no
   - conda install conda-build
+  - conda install vtk
   # Useful for debugging any issues with conda
   - conda info -a
 
