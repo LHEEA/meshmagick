@@ -17,7 +17,7 @@ install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION # numpy vtk argcomplete
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION vtk # numpy vtk argcomplete
   - source activate test-environment
 
   # Build meshmagick package to be installed by conda
@@ -29,11 +29,10 @@ install:
 
   # Debug
   - conda list
-  - python -c "import vtk; print(vtk.__file__)"
+  - python -c "import vtk; print(vtk.VTK_VERSION)"
 
   # Build doc
   # TODO
 
 script:
-  - source activate test-environment
   - pytest --pyargs meshmagick
