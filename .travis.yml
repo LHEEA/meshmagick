@@ -32,7 +32,9 @@ install:
   - python -c "import vtk; print(vtk.VTK_VERSION)"
 
   # Build doc
-  # TODO
+  - cd doc
+  - make html
+  - cd ..
 
 script:
   - pytest --pyargs meshmagick
