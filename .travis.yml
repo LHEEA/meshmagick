@@ -27,6 +27,10 @@ install:
   - conda install --use-local meshmagick
   - meshmagick -h
 
+  # Debug
+  - conda list
+  - python -c "import vtk"
+
   # Build doc
   # TODO
 
