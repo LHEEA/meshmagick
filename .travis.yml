@@ -29,7 +29,7 @@ install:
 
   # Debug
   - conda list
-  - python -c "import vtk"
+  - python -c "import vtk; print(vtk.__file__)"
 
   # Build doc
   # TODO
