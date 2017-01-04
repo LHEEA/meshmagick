@@ -23,4 +23,4 @@ install:
   - conda build meshmagick
 
 script:
-  # Your test script goes here
+  pytest
