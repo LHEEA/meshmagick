@@ -17,7 +17,7 @@ install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION vtk pytest
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest sphinx sphinx_rtd_theme
   - source activate test-environment
 
   # Build meshmagick package to be installed by conda
