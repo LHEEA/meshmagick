@@ -20,6 +20,8 @@ install:
   - source activate test-environment
 
   # Build meshmagick package to be installed by conda
+  - ls
+  - pwd
   - conda build meshmagick
 
 script:
