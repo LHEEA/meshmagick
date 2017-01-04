@@ -23,7 +23,7 @@ build:
 about:
   home: {{data.get('url')}}
   license: {{data.get('license')}}
-  license_file: Licence_CeCILL_V2.1-en.txt
+  license_file: LICENCE
   summary: {{data.get('description')}}
 
 #// about:

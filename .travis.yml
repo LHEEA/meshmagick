@@ -11,6 +11,7 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
+  - conda config --set anaconda_upload no
   - conda install conda-build
   # Useful for debugging any issues with conda
   - conda info -a
@@ -20,9 +21,8 @@ install:
   - source activate test-environment
 
   # Build meshmagick package to be installed by conda
-  - ls
-  - pwd
-  - conda build meshmagick
+  - conda build conda.recipe
+  - conda install --use-local meshmagick
 
 script:
   pytest
