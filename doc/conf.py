@@ -83,7 +83,7 @@ author = u'François Rongère'
 # built documents.
 #
 # The short X.Y version.
-version = meshmagick.meshmagick.__version__
+version = meshmagick.__version__
 # The full version, including alpha/beta/rc tags.
 release = version
 
