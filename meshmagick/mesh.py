@@ -19,6 +19,15 @@ from tools import merge_duplicate_rows
 import MMviewer
 from inertia import RigidBodyInertia
 
+__author__ = "Francois Rongere"
+__copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
+__credits__ = "Francois Rongere"
+__licence__ = "CeCILL"
+__version__ = "1.0"
+__maintainer__ = "Francois Rongere"
+__email__ = "Francois.Rongere@ec-nantes.fr"
+__status__ = "Development"
+
 # TODO: Use traitlets to manage updates into the Mesh class
 # TODO: les points doivent etre des objects nodes...
 # TODO: On doit pouvoir specifier des objets frame
@@ -37,7 +46,7 @@ def _rodrigues(thetax, thetay):
         Angle around Oy axe (rad)
     Returns
     -------
-    R : ndarray
+    rot : ndarray
         Rotation matrix
     """
 
@@ -54,14 +63,14 @@ def _rodrigues(thetax, thetay):
 
     # Olinde Rodrigues formulae
     # FIXME: S'assurer qu'on a effectivement pas de Ctheta devant le I3 !! et repercuter sur l'hydrostatique
-    R = ctheta*np.eye(3) \
-       + (1-ctheta) * np.array([[nx*nx, nxny, 0.],
-                                [nxny, ny*ny, 0.],
-                                [0., 0., 0.]]) \
-       + stheta * np.array([[0., 0.,  ny],
-                            [0., 0., -nx],
-                            [-ny, nx, 0.]])
-    return R
+    rot = ctheta*np.eye(3) \
+        + (1-ctheta) * np.array([[nx*nx, nxny, 0.],
+                                 [nxny, ny*ny, 0.],
+                                 [0., 0., 0.]]) \
+        + stheta * np.array([[0., 0.,  ny],
+                             [0., 0., -nx],
+                             [-ny, nx, 0.]])
+    return rot
 
 
 def _cardan(phi, theta):
@@ -87,12 +96,12 @@ def _cardan(phi, theta):
     ctheta = math.cos(theta)
     stheta = math.sin(theta)
 
-    Re0 = np.zeros((3, 3), dtype=float)
-    Re0[0] = [ctheta, 0., -stheta]
-    Re0[1] = [sphi*stheta, cphi, sphi*ctheta]
-    Re0[2] = [cphi*stheta, -sphi, cphi*ctheta]
+    rot_e0 = np.zeros((3, 3), dtype=float)
+    rot_e0[0] = [ctheta, 0., -stheta]
+    rot_e0[1] = [sphi*stheta, cphi, sphi*ctheta]
+    rot_e0[2] = [cphi*stheta, -sphi, cphi*ctheta]
 
-    return Re0
+    return rot_e0
 
 
 def _get_rotation_matrix(theta_x, theta_y, atype='fixed'):
@@ -110,7 +119,7 @@ def _get_rotation_matrix(theta_x, theta_y, atype='fixed'):
 
     Returns
     -------
-    R : ndarray
+    ndarray
         Rotation matrix
 
     """
@@ -125,7 +134,7 @@ def _get_rotation_matrix(theta_x, theta_y, atype='fixed'):
 
 
 def _get_axis_angle_from_rotation_matrix(rot_matrix):
-    
+    """Returns the angle and unit rotation axis from a rotation matrix"""
     warn('Fonction _get_axis_angle_from_rotation_matrix a verifier !!!')
     theta = math.acos((np.trace(rot_matrix) - 1.) * 0.5)
     direction = (1./(2.*math.sin(theta))) * np.array([rot_matrix[2, 1] - rot_matrix[1, 2],
@@ -135,7 +144,8 @@ def _get_axis_angle_from_rotation_matrix(rot_matrix):
 
 
 # Classes
-class Plane(object):  # TODO: placer cette classe dans un module a part (genre geometry) --> utilise dans meshmagick aussi...
+# TODO: placer cette classe dans un module a part (genre geometry) --> utilise dans meshmagick aussi...
+class Plane(object):
     """Class to handle plane geometry.
     
     A plane is represented by the equation :math:`\\vec{n}.\\vec{x} = c` where :math:`\\vec{n}` is the plane's normal,
@@ -144,34 +154,12 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
     
     Parameters
     ----------
-    
     normal : array_like
         3 component vector of the plane normal
     scalar : float
         The scalar parameter of the plane
-    
-    Attributes
-    ----------
-    normal : ndarray
-        The plane's normal
-    c : float
-        The plane's scalar parameter
     """
     def __init__(self, normal=(0., 0., 1.), scalar=0., name=None):
-        """
-        Plane initialization
-
-        Parameters
-        ----------
-        normal : array_like, optional
-            Normal of the plane. Default to [0., 0., 1.]
-        scalar : float, optional
-            Plane scalar parameter. Default to 0.
-
-        Returns
-        -------
-            Plane object
-        """
 
         normal = np.asarray(normal, dtype=np.float)
 
@@ -184,8 +172,6 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
         self._rot = _get_rotation_matrix(theta_x, theta_y)
         
         self.name = str(name)
-        
-        return
     
     def __str__(self):
         str_repr = "Plane{normal=[%f, %f, %f], scalar=%f}" % \
@@ -194,48 +180,24 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
     
     @property
     def normal(self):
-        # """Returns the normal of the plane
-        #
-        # Returns
-        # -------
-        # ndarray
-        #     The 3x1 plane's normal coordinates
-        # """
+        """Get the plane's normal"""
         return self._normal
 
     @normal.setter
     def normal(self, value):
+        """Set the plane's normal"""
         value = np.asarray(value, dtype=np.float)
         self._normal = value / np.linalg.norm(value)
-        return
 
     @property
     def c(self):
-        # """Returns the scalar parameter of the plane equation
-        #
-        # Returns
-        # -------
-        # float
-        #     The plane scalar
-        # """
+        """Get the plane's scalar parameter"""
         return self._scalar
 
     @c.setter
     def c(self, value):
-        """Set the scalar parameter of the plane equation
-        
-        Parameters
-        ----------
-        value : float
-            scalar parameter of the plane
-
-        Returns
-        -------
-        None
-
-        """
+        """Set the scalar parameter of the plane equation"""
         self._scalar = float(value)
-        return
 
     def rotate_normal(self, theta_x, theta_y):
         """
@@ -247,14 +209,12 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
             Angle of rotation around Ox (rad)
         theta_y : float
             Angle of rotation around Oy (rad)
-
         """
         rot_matrix = _get_rotation_matrix(theta_x, theta_y)
         self.normal = np.dot(rot_matrix, self.normal)
 
         # updating self._rot
         self._rot = np.dot(rot_matrix, self._rot)
-        return
 
     def set_normal_from_angles(self, theta_x, theta_y):
         """Set the normal orientation given angles theta_x and theta_y.
@@ -282,17 +242,14 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
                                        ctheta])
             # Updating self._rot
             self._rot = _get_rotation_matrix(theta_x, theta_y)
-            
-        return
 
     def get_normal_orientation_wrt_z(self):
-        """
-        Returns the angles theta_x and theta_y giving the orientation of the plane normal
-        """
+        """Returns the angles theta_x and theta_y giving the orientation of the plane normal"""
 
         nx, ny, nz = self.normal
         stheta = math.sqrt(nx*nx + ny*ny)
         ctheta = nz
+        theta_x = theta_y = 0.
         if stheta == 0.:
             if nz == 1.:
                 theta_x = theta_y = 0.
@@ -320,20 +277,11 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
             Normal angle around Ox (rad)
         theta_y : float
             Normal angle around Oy (rad)
-
-        Remark
-        ------
-        Formula is (reformulate...):
-        $$\theta = \sqrt{\theta_x^2 + \thetay^2}$$
-        $$n_f = R'R z$$
-        $$c_f = c*\cos{\theta} + c'$$
-
         """
+        
         self.rotate_normal(theta_x, theta_y)
         ctheta = math.cos(math.sqrt(theta_x * theta_x + theta_y * theta_y))
         self._scalar = self._scalar * ctheta + scalar
-        
-        return
 
     def get_point_dist_wrt_plane(self, points):
         """
@@ -349,6 +297,7 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
         dist : ndarray
             Array of distances of points with respect to the plane
         """
+        
         return np.dot(points, self._normal) - self._scalar
 
     def flip_normal(self):
@@ -358,7 +307,6 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
         self.normal *= -1
         theta_x, theta_y = self.get_normal_orientation_wrt_z()
         self._rot = _get_rotation_matrix(theta_x, theta_y)
-        return
 
     def coord_in_plane(self, points):
         """
@@ -374,6 +322,7 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
         output : ndarray
             Array of points coordinates in the frame of the plane
         """
+        
         # TODO: verifier effectivement que si on prend des points se trouvant dans le plan, leurs coordonnees dans le
         #  plan n'ont pas de composante z
         return -self._scalar * self.normal + np.transpose(np.dot(self._rot, points.T))
@@ -425,6 +374,7 @@ class Plane(object):  # TODO: placer cette classe dans un module a part (genre g
         return projected_points
     
     def get_origin(self):
+        """Get the coordinates of the plane's origin"""
         return self.c * self.normal
 
 
@@ -438,13 +388,13 @@ class _3DPointsArray(np.ndarray):
 
 
 class Mesh(object):
-    """A clas to handle unstructured meshes.
+    """A class to handle unstructured meshes.
 
     Parameters
     ----------
-    vertices : ndarray
+    vertices : array_like
         (nv x 3) Array of mesh vertices coordinates. Each line of the array represents one vertex coordinates
-    faces : ndarray
+    faces : array_like
         Arrays of mesh connectivities for faces. Each line of the array represents indices of vertices that form the
         face, expressed in counterclockwise order to ensure outward normals description.
     name : str, optional
@@ -509,7 +459,8 @@ class Mesh(object):
     def print_quality(self):
         """Returns data on the mesh quality
         
-        It uses VTK and is reproduced from http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py
+        It uses VTK and is reproduced from
+        http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py
         """
         # This function is reproduced from
         # http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py
@@ -558,25 +509,25 @@ class Mesh(object):
               ]
              ]
         ]
-
+        res = ''
         if polydata.GetNumberOfCells() > 0:
-            res = ''
             for meshType in meshTypes:
                 res += '\n%s%s' % (meshType[1], ' quality of the mesh ')
                 quality.Update()
                 an = quality.GetOutput().GetFieldData().GetArray('Mesh ' + meshType[1] + ' Quality')
                 cardinality = an.GetComponent(0, 4)
 
-                res = ''.join((res, '(%u elements):\n' % (cardinality)))
+                res = ''.join((res, '(%u elements):\n' % cardinality))
 
                 # res += '('+str(cardinality) +meshType[1]+'):\n'
 
                 for measure in meshType[2]:
                     eval('quality.Set' + meshType[0] + measure[0] + '()')
                     quality.Update()
-                    res += '\n%s\n%s' % (measure[1],
-                                         DumpQualityStats(quality,
-                                        'Mesh ' + meshType[1] + ' Quality'))
+                    res += '\n%s\n%s' % (
+                        measure[1],
+                        DumpQualityStats(quality, 'Mesh ' + meshType[1] + ' Quality')
+                    )
                 res += '\n'
 
         info = """\n\nDefinition of the different quality measures is given
@@ -2052,7 +2003,8 @@ class Mesh(object):
         return RigidBodyInertia(mass, cog, xx, yy, zz, yz, xz, xy, point=[0, 0, 0])
     
     def eval_shell_mesh_inertias(self, rho_medium=7850., thickness=0.02):
-        """Evaluates the mesh inertia under the assumption of an enclosed volume made of an homogeneous    medium of the  given density.
+        """Evaluates the mesh inertia under the assumption of an enclosed volume made of an homogeneous medium of the
+        given density.
 
         Parameters
         ----------
@@ -2095,7 +2047,8 @@ class Mesh(object):
     
     @staticmethod
     def _compute_triangles_integrals(triangles_vertices, sum_faces_contrib=False):
-        """
+        """Performs the computation of the various interesting surface integrals.
+        
         Notes
         -----
         triangles_vertices doit decrire par dimension croissante du general au particulier :
@@ -2103,8 +2056,9 @@ class Mesh(object):
         dimension 1 : informations sur chaque vertex de la facette -- triangles_vertices[0, 1] -> vertex 1 de la facette 0
         dimension 2 : information sur chacune des coordonnées des vertex -- triangles_vertices[0, 1, 2] -> coordonnee z du vertex 1 de la facette 0
         
-        s_int[0] =
-        
+        Todo
+        ----
+        Explicit the integrals
         """
 
         s_int = np.zeros((15, triangles_vertices.shape[0]), dtype=np.float)
@@ -2163,17 +2117,3 @@ class Mesh(object):
             print 'File %s written' % filename
         except ImportError:
             raise ImportError('mmio module not found')
-
-
-if __name__ == '__main__':
-
-    import mmio
-    V, F = mmio.load_VTP('SEAREV.vtp')
-    mymesh = Mesh(V, F)
-
-    mymesh._compute_faces_integrals()
-
-    print mymesh.volume
-
-    sys.exit(0)
-

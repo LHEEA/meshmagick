@@ -1,0 +1,43 @@
+language: python
+python:
+  # We don't actually use the Travis Python, but this keeps it organized.
+  - "2.7"
+  
+install:
+  - sudo apt-get update
+  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda config --set anaconda_upload no
+  - conda install conda-build
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # Replace dep1 dep2 ... with your dependencies
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest sphinx sphinx_rtd_theme
+  - source activate test-environment
+  - conda install -c conda-forge sphinx-argparse
+  - conda install -c bioconda sphinxcontrib-programoutput
+
+  # Build meshmagick package to be installed by conda
+  - conda build conda.recipe
+
+  # Install meshmagick
+  - conda install --use-local meshmagick
+  - meshmagick -h
+  - python -c "import meshmagick"
+
+  # Debug
+  - conda list
+  - python -c "import vtk; print(vtk.VTK_VERSION)"
+
+  # Build doc
+  - cd doc
+  - make html
+  - cd ..
+
+script:
+  - pytest --pyargs meshmagick

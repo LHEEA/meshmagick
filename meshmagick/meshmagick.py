@@ -399,7 +399,7 @@ parser = argparse.ArgumentParser(
 
 
                 """,
-    epilog='--  Copyright 2014-2015  -  Francois Rongere  /  Ecole Centrale de Nantes  --',
+    epilog='--  Copyright 2014-%u  -  Francois Rongere  /  Ecole Centrale de Nantes  --' % __year__,
     formatter_class=argparse.RawDescriptionHelpFormatter)
 
 # TODO: ajouter option pour voir l'ensemble des formats de fichier geres par meshmagick avec une explication du logiciel utilise
@@ -1063,7 +1063,6 @@ def main():
             clipper = MeshClipper(mesh, plane=clipping_plane)
             mesh = clipper.clipped_mesh
 
-            # mesh = mesh.clip(clipping_plane)
         if verbose:
             print '\t-> Done.'
 

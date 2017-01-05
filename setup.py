@@ -18,17 +18,17 @@ LONG_DESCRIPTION = read('README.rst')
 setup(
     name='meshmagick',
     version='1.0',
-    url='https://',  # TODO : A completer
+    url='https://github.com/LHEEA/meshmagick',
     author='Francois Rongere -- Ecole Centrale de Nantes',
     author_email='Francois.Rongere@ec-nantes.fr',
     description="""A command line tool to manipulate hydrodynamics meshes""",
     long_description=LONG_DESCRIPTION,
-    license='CeCILL-2.1',
+    license='GPLv3',
     keywords='hydrodynamics, unstructured mesh, conversion, manipulation',
     packages=find_packages(exclude=['contrib', 'doc', 'tests*']),
     # setup_requires=['pytest-runner'],
     # tests_require=['pytest', 'pytest-cov'],
-    install_requires=['vtk>=5', 'numpy', 'argcomplete'],
+    install_requires=['numpy', 'argcomplete'],
     entry_points={
         'console_scripts': [
             'meshmagick=meshmagick:main',

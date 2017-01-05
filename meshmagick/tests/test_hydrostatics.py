@@ -60,8 +60,6 @@ def test_accessors():
     hs_cylinder.max_iterations = max_iter
     max_restart = hs_cylinder.max_restart
     hs_cylinder.max_restart = max_restart
-    allow_unstable = hs_cylinder.allow_unstable
-    hs_cylinder.allow_unstable = allow_unstable
     hs_cylinder.allow_unstable_on()
     hs_cylinder.allow_unstable_off()
     hs_cylinder.reset()

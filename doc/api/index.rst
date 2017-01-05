@@ -1,5 +1,5 @@
-Meshmagick Package
-==================
+Meshmagick Package's modules
+============================
 
 .. toctree::
     :maxdepth: 2

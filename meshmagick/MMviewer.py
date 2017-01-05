@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-This module is part of meshmagick. It implements a viewer based on vtk
+This module implements a viewer based on VTK.
 """
 
 import vtk
-import os
 from os import getcwd
 from datetime import datetime
 
@@ -16,7 +15,9 @@ __year__ = datetime.now().year
 # https://stackoverflow.com/questions/31075569/vtk-rotate-actor-programmatically-while-vtkrenderwindowinteractor-is-active
 # https://stackoverflow.com/questions/32417197/vtk-update-vtkpolydata-in-renderwindow-without-blocking-interaction
 
+
 class MMViewer:
+    """This class implements a viewer based on VTK"""
     def __init__(self):
 
         # Building renderer
@@ -48,19 +49,19 @@ class MMViewer:
 
         # Building command annotations
         command_text = "left mouse : rotate\n" + \
-                        "right mouse : zoom\n" + \
-                        "middle mouse : pan\n" + \
-                        "ctrl+left mouse : spin\n" + \
-                        "n : (un)show normals\n" + \
-                        "b : (un)show axes box\n" + \
-                        "f : focus on the mouse cursor\n" + \
-                        "r : reset view\n" + \
-                        "s : surface representation\n" + \
-                        "w : wire representation\n" + \
-                        "h : (un)show Oxy plane\n" + \
-                        "x : save\n" + \
-                        "c : screenshot\n" + \
-                        "q : quit"
+                       "right mouse : zoom\n" + \
+                       "middle mouse : pan\n" + \
+                       "ctrl+left mouse : spin\n" + \
+                       "n : (un)show normals\n" + \
+                       "b : (un)show axes box\n" + \
+                       "f : focus on the mouse cursor\n" + \
+                       "r : reset view\n" + \
+                       "s : surface representation\n" + \
+                       "w : wire representation\n" + \
+                       "h : (un)show Oxy plane\n" + \
+                       "x : save\n" + \
+                       "c : screenshot\n" + \
+                       "q : quit"
 
         corner_annotation = vtk.vtkCornerAnnotation()
         corner_annotation.SetLinearFontScaleFactor(2)
@@ -85,15 +86,21 @@ class MMViewer:
         self.oxy_plane = None
 
         self.polydatas = list()
-        self.hiden = dict() # TODO: A terminer -> cf methode self.hide()
+        self.hiden = dict()  # TODO: A terminer -> cf methode self.hide()
 
     def normals_on(self):
+        """Displays the normals"""
+        
         self.normals = True
 
     def normals_off(self):
+        """Hide the normals"""
+        
         self.normals = False
     
     def plane_on(self):
+        """Displays the Oxy plane"""
+        
         pd = self.polydatas[0]
         
         plane = vtk.vtkPlaneSource()
@@ -126,10 +133,20 @@ class MMViewer:
         self.renderer.Modified()
         self.oxy_plane = actor
         
+    def add_point(self, pos, color=(0, 0, 0)):
+        """Add a point to the viewer
         
-        return
-    
-    def add_point(self, pos, color=[0, 0, 0]):
+        Parameters
+        ----------
+        pos : array_like
+            The point's position
+        color : array_like, optional
+            The RGB color required for the point. Default is (0, 0, 0) corresponding to black.
+
+        Returns
+        -------
+        vtkPolyData
+        """
         
         assert len(pos) == 3
         
@@ -148,7 +165,22 @@ class MMViewer:
         
         return pd
     
-    def add_line(self, p0, p1, color=[0, 0, 0]):
+    def add_line(self, p0, p1, color=(0, 0, 0)):
+        """Add a line to the viewer
+        
+        Parameters
+        ----------
+        p0 : array_like
+            position of one end point of the line
+        p1 : array_like
+            position of a second end point of the line
+        color : array_like, optional
+            RGB color of the line. Default is black (0, 0, 0)
+            
+        Returns
+        -------
+        vtkPolyData
+        """
         
         assert len(p0) == 3 and len(p1) == 3
 
@@ -171,9 +203,20 @@ class MMViewer:
         
         return lines_pd
     
-    def add_vector(self, point, value, scale=1, color=[0, 0, 0]):
-
-        # gforce = self.get_gravity_force()
+    def add_vector(self, point, value, scale=1, color=(0, 0, 0)):
+        """Add a vector to the viewer
+        
+        Parameters
+        ----------
+        point : array_like
+            starting point position of the vector
+        value : float
+            the magnitude of the vector
+        scale : float, optional
+            the scaling to apply to the vector for better visualization. Default is 1.
+        color : array_like
+            The color of the vector. Default is black (0, 0, 0)
+        """
         
         points = vtk.vtkPoints()
         idx = points.InsertNextPoint(point)
@@ -216,9 +259,17 @@ class MMViewer:
 
         self.renderer.AddActor(g_glyph_actor)
         
-        return
-    
     def add_plane(self, center, normal):
+        """Add a plane to the viewer
+        
+        Parameters
+        ----------
+        center : array_like
+            The origin of the plane
+        normal : array_like
+            The normal of the plane
+        """
+
         plane = vtk.vtkPlaneSource()
         plane.SetCenter(center)
         plane.SetNormal(normal)
@@ -231,12 +282,21 @@ class MMViewer:
             
         # FIXME: terminer l'implementation et l'utiliser pour le plan de la surface libre
             
-        return
-
-    def add_polydata(self, polydata, color=[1, 1, 0], repr='surface'):
+    def add_polydata(self, polydata, color=(1, 1, 0), representation='surface'):
+        """Add a polydata object to the viewer
+        
+        Parameters
+        ----------
+        polydata : vtkPolyData
+            the object to be added
+        color : array_like, optional
+            the color of the object. Default is yellow (1, 1, 0)
+        representation : str
+            the representation mode of the object ('surface' or 'wireframe'). Default is 'surface'.
+        """
         
         assert isinstance(polydata, vtk.vtkPolyData)
-        assert repr in ('surface', 'wireframe')
+        assert representation in ('surface', 'wireframe')
         
         self.polydatas.append(polydata)
 
@@ -257,14 +317,15 @@ class MMViewer:
         actor.GetProperty().SetEdgeColor(0, 0, 0)
         actor.GetProperty().SetLineWidth(1)
         actor.GetProperty().SetPointSize(10)
-        if repr == 'wireframe':
+        if representation == 'wireframe':
             actor.GetProperty().SetRepresentationToWireframe()
 
         self.renderer.AddActor(actor)
         self.renderer.Modified()
-        return
 
     def show_normals(self):
+        """Shows the normals of the current objects"""
+        
         for polydata in self.polydatas:
             normals = vtk.vtkPolyDataNormals()
             normals.ConsistencyOff()
@@ -297,7 +358,7 @@ class MMViewer:
             glyph.SetSourceConnection(arrows.GetOutputPort())
             glyph.SetInputConnection(normals_at_centers.GetOutputPort())
             glyph.SetVectorModeToUseNormal()
-            glyph.SetScaleFactor(1) # FIXME: may be too big ...
+            glyph.SetScaleFactor(1)  # FIXME: may be too big ...
             # glyph.SetVectorModeToUseNormal()
             # glyph.SetVectorModeToUseVector()
             # glyph.SetScaleModeToDataScalingOff()
@@ -313,6 +374,7 @@ class MMViewer:
             self.normals.append(glyph_actor)
 
     def show_axes(self):
+        """Shows the axes around the main object"""
 
         tprop = vtk.vtkTextProperty()
         tprop.SetColor(0., 0., 0.)
@@ -336,19 +398,21 @@ class MMViewer:
         self.axes.append(axes)
 
     def show(self):
+        """Show the viewer"""
         self.renderer.ResetCamera()
         self.render_window.Render()
         self.render_window_interactor.Start()
         # self.render_window_interactor.Initialize()
 
-    def hide(self, id):
-        if id > len(self.polydatas):
-            print "No mesh with id %u" % id
+    def hide(self, index):
+        if index > len(self.polydatas):
+            print "No mesh with index %u" % index
             return
         
         self.hiden
 
     def save(self):
+        """Saves the main object in a 'mmviewer_save.vtp' vtp file is the current folder"""
         from vtk import vtkXMLPolyDataWriter
 
         writer = vtkXMLPolyDataWriter()
@@ -366,6 +430,7 @@ class MMViewer:
         return
 
     def screenshot(self):
+        """Saves a screeshot of the current window in a file screenshot.png"""
         w2if = vtk.vtkWindowToImageFilter()
         w2if.SetInput(self.render_window)
         w2if.Update()
@@ -382,10 +447,12 @@ class MMViewer:
         return
 
     def finalize(self):
+        """Cleanly close the viewer"""
         del self.render_window
         del self.render_window_interactor
 
     def on_key_press(self, obj, event):
+        """Event trig at keystroke"""
         key = obj.GetKeySym()
         
         if key == 'n':
@@ -423,5 +490,3 @@ class MMViewer:
                 self.oxy_plane = None
             else:
                 self.plane_on()
-        
-        

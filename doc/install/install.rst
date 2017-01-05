@@ -1,11 +1,12 @@
 Installation Instructions
 =========================
 
+Meshmagick is packaged for every major OS (\*nix, Windows, OS/X) for both 32/64 bit systems.
 
 .. warning::
+
     Meshmagick is written in Python 2.7 only. So please ensure that you have a Python 2.7 distribution.
 
-Meshmagick is packaged for every major OS (*nix, Windows, OS/X) for both 32/64 bit systems.
 
 Installing with conda
 ---------------------
@@ -48,6 +49,12 @@ Update to the newest version is achieved by::
 .. note::
     This is not the preferred method as Meshmagick depends on vtk for its visualization features which is sadly not
     available on Pypi. You will then have to deal with this dependency by yourself.
+
+    * **On Linux** : You may use the current package manager of your system to install vtk
+    * **On Mac** : You may follow the instructions given in *bemio* documentation:
+      https://wec-sim.github.io/bemio/installing.html#installing-vtk-with-python-bindings
+    * **On Windows** : We had success in installing unofficial pakage from here:
+      http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
 Installing from source
 ----------------------

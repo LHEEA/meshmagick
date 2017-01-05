@@ -12,31 +12,31 @@ real_str = r'[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?'  # Regex for floats
 # Contains here all functions to load meshes from different file formats
 
 
-def check_file(filename):
+def _check_file(filename):
     if not os.path.isfile(filename):
         raise IOError("file %s not found" % filename)
     return
 
 
 def load_mesh(filename, file_format):
-    """load_mesh(filename, format)
+    """Driver function that loads every mesh file format known by meshmagick and returns the node list and the
+    connectivity array
 
-    Driver function that loads every mesh file format known by meshmagick
-    and returns the node list and the connectivity array
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
+    file_format: str
+        format of the mesh defined in the extension_dict dictionary
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
-        file_format: str
-            format of the mesh defined in the extension_dict dictionary
-
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
-    check_file(filename)
+    _check_file(filename)
 
     if file_format not in extension_dict:
         raise IOError('Extension ".%s" is not known' % file_format)
@@ -49,26 +49,27 @@ def load_mesh(filename, file_format):
 
 
 def load_RAD(filename):
-    """load_RAD(filename)
+    """Loads RADIOSS mesh files. This export file format may be chosen in ICEM meshing program.
 
-    Loads RADIOSS mesh files. This export file format may be chosen in ICEM
-    meshing program.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: RAD files have a 1-indexing
+    Note
+    ----
+    RAD files have a 1-indexing
     """
 
     import re
-    check_file(filename)
+    _check_file(filename)
     ifile = open(filename, 'r')
     data = ifile.read()
     ifile.close()
@@ -102,23 +103,25 @@ def load_RAD(filename):
 
 
 def load_HST(filename):
-    """load_HST(filename)
+    """Loads HYDROSTAR (Bureau Veritas (c)) mesh files.
 
-    Loads HYDROSTAR (Bureau Veritas (c)) mesh files.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: HST files have a 1-indexing
+    Note
+    ----
+    HST files have a 1-indexing
     """
-    check_file(filename)
+    _check_file(filename)
 
     ifile = open(filename, 'r')
     data = ifile.read()
@@ -174,30 +177,33 @@ def load_DAT(filename):
     """Not implemented.
     Intended to load .DAT files used in DIODORE (PRINCIPIA (c))
     """
-    check_file(filename)
+    _check_file(filename)
     raise NotImplementedError
 
 
 def load_INP(filename):
-    """load_INP(filename)
+    """Loads DIODORE (PRINCIPIA (c)) configuration file format.
+    
+    It parses the .INP file and extract meshes defined in subsequent .DAT files using the different informations
+    contained in the .INP file.
 
-    Loads DIODORE (PRINCIPIA (c)) configuration file format. It parses
-    the .INP file and extract meshes defined in subsequent .DAT files
-    using the different informations contained in the .INP file.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: INP/DAT files use a 1-indexing
+    Note
+    ----
+    INP/DAT files use a 1-indexing
     """
-    check_file(filename)
+    _check_file(filename)
     import re
     
     with open(filename, 'r') as f:
@@ -346,26 +352,30 @@ def load_INP(filename):
 
 
 def load_TEC(filename):
-    """load_TEC(filename)
+    """Loads TECPLOT (Tecplot (c)) mesh files.
+    
+    It relies on the tecplot file reader from the VTK library.
 
-        Loads TECPLOT (Tecplot (c)) mesh files. It relies on the tecplot file
-        reader from the VTK library.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-        Parameters:
-            filename: str
-                name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-        Returns:
-            vertices: ndarray
-                numpy array of the coordinates of the mesh's nodes
-            faces: ndarray
-                numpy array of the faces' nodes connectivities
-
-        Note: TEC files have a 1-indexing
-        """
+    Note
+    ----
+    TEC files have a 1-indexing
+    """
+    
     import re
 
-    check_file(filename)
+    _check_file(filename)
 
     data_pattern = re.compile(
                     r'ZONE.*\s*N\s*=\s*(\d+)\s*,\s*E=\s*(\d+)\s*,\s*F\s*=\s*FEPOINT\s*,\s*ET\s*=\s*QUADRILATERAL\s+'
@@ -386,24 +396,28 @@ def load_TEC(filename):
 
 
 def load_VTU(filename):
-    """load_VTU(filename)
+    """Loads VTK file format in the new XML format (vtu file extension for unstructured meshes).
+    
+    It relies on the reader from the VTK library.
 
-    Loads VTK file format in the new XML format (vtu file extension for
-    unstructured meshes). It relies on the reader from the VTK library.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: VTU files have a 0-indexing
+    Note
+    ----
+    VTU files have a 0-indexing
     """
-    check_file(filename)
+    
+    _check_file(filename)
 
     from vtk import vtkXMLUnstructuredGridReader
     reader = vtkXMLUnstructuredGridReader()
@@ -416,24 +430,27 @@ def load_VTU(filename):
 
 
 def load_VTP(filename):
-    """load_VTP(filename)
+    """Loads VTK file format in the new XML format (vtp file extension for polydata meshes).
+    
+    It relies on the reader from the VTK library.
 
-    Loads VTK file format in the new XML format (vtp file extension for
-    polydata meshes). It relies on the reader from the VTK library.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: VTP files have a 0-indexing
+    Note
+    ----
+    VTP files have a 0-indexing
     """
-    check_file(filename)
+    _check_file(filename)
 
     from vtk import vtkXMLPolyDataReader
     reader = vtkXMLPolyDataReader()
@@ -446,24 +463,27 @@ def load_VTP(filename):
 
 
 def load_VTK(filename):
-    """load_VTK(filename)
-
-    Loads VTK file format in the legacy format (vtk file extension).
+    """Loads VTK file format in the legacy format (vtk file extension).
+    
     It relies on the reader from the VTK library.
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Note: VTU files have a 0-indexing
+    Note
+    ----
+    VTU files have a 0-indexing
     """
-    check_file(filename)
+    _check_file(filename)
 
     from vtk import vtkUnstructuredGridReader
     reader = vtkUnstructuredGridReader()
@@ -476,16 +496,14 @@ def load_VTK(filename):
 
 
 def _dump_vtk(vtk_mesh):
-    """_dump_vtk(vtk_mesh)
+    """Internal driver function that uses the VTK library to read VTK polydata or vtk unstructured grid data structures
 
-    Internal driver function that uses the VTK library to read VTK polydata
-    or vtk unstructured grid data structures
-
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
 
     nv = vtk_mesh.GetNumberOfPoints()
@@ -507,29 +525,31 @@ def _dump_vtk(vtk_mesh):
 
 
 def load_STL(filename):
-    """load_STL(filename)
+    """Loads STL file format.
+    
+    It relies on the reader from the VTK library. As STL file format maintains a redundant set of vertices for each
+    faces of the mesh, it returns a merged list of nodes and connectivity array by using the merge_duplicates function.
 
-    Loads STL file format. It relies on the reader from the VTK library.
-    As STL file format maintains a redundant set of vertices for each faces
-    of the mesh, it returns a merged list of nodes and connectivity array
-    by using the merge_duplicates function.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: STL files have a 0-indexing
+    Note
+    ----
+    STL files have a 0-indexing
     """
     from vtk import vtkSTLReader
     from tools import merge_duplicate_rows
 
-    check_file(filename)
+    _check_file(filename)
 
     reader = vtkSTLReader()
     reader.SetFileName(filename)
@@ -558,25 +578,36 @@ def load_STL(filename):
 
 
 def load_NAT(filename):
-    """load_NAT(filename)
+    """This function loads natural file format for meshes.
+    
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    This function loads natural file format for meshes.
-
-    Format spec :
-    -------------------
-    xsym    ysym
-    n    m
-    x1    y1    z1
-    .
-    .
-    .
-    xn    yn    zn
-    i1    j1    k1    l1
-    .
-    .
-    .
-    im    jm    km    lm
-    -------------------
+    Returns
+    -------
+    vertices: ndarray
+        array of the coordinates of the mesh's nodes
+    faces: ndarray
+        array of the faces nodes connectivity
+    
+    Notes
+    -----
+    The file format is as follow::
+    
+        xsym    ysym
+        n    m
+        x1    y1    z1
+        .
+        .
+        .
+        xn    yn    zn
+        i1    j1    k1    l1
+        .
+        .
+        .
+        im    jm    km    lm
 
     where :
     n : number of nodes
@@ -585,20 +616,12 @@ def load_NAT(filename):
     i1 j1 k1 l1 : counterclock wise Ids of nodes for cell 1
     if cell 1 is a triangle, i1==l1
 
-
-    Parameters:
-        filename: str
-            name of the meh file on disk
-
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: NAT files have a 1-indexing
+    Note
+    ----
+    NAT files have a 1-indexing
     """
-    check_file(filename)
+    
+    _check_file(filename)
 
     ifile = open(filename, 'r')
     ifile.readline()
@@ -619,27 +642,29 @@ def load_NAT(filename):
 
 
 def load_GDF(filename):
-    """load_GDF(filename)
+    """Loads WAMIT (Wamit INC. (c)) GDF mesh files.
+    
+    As GDF file format maintains a redundant set of vertices for each faces of the mesh, it returns a merged list of
+    nodes and connectivity array by using the merge_duplicates function.
 
-    Loads WAMIT (Wamit INC. (c)) GDF mesh files. As GDF file format maintains
-    a redundant set of vertices for each faces of the mesh, it returns a merged
-    list of nodes and connectivity array by using the merge_duplicates function.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: GDF files have a 1-indexing
+    Note
+    ----
+    GDF files have a 1-indexing
     """
-    from tools import merge_duplicate_rows
 
-    check_file(filename)
+    _check_file(filename)
 
     ifile = open(filename, 'r')
 
@@ -668,31 +693,30 @@ def load_GDF(filename):
 
     ifile.close()
 
-    # Merging duplicates nodes
-    # vertices, new_id = merge_duplicate_rows(vertices, return_index=True)
-    # faces = new_id[faces]
-
     return vertices, faces
 
 
 def load_MAR(filename):
-    """load_MAR(filename)
+    """Loads Nemoh (Ecole Centrale de Nantes) mesh files.
 
-    Loads Nemoh (Ecole Centrale de Nantes) mesh files.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: MAR files have a 1-indexing
+    Note
+    ----
+    MAR files have a 1-indexing
     """
-    check_file(filename)
+    
+    _check_file(filename)
 
     ifile = open(filename, 'r')
 
@@ -722,26 +746,28 @@ def load_MAR(filename):
 
 
 def load_MSH(filename):
-    """load_MSH(filename)
+    """Loads .MSH mesh files generated by GMSH by C. Geuzaine and J.F. Remacle.
 
-    Loads .MSH mesh files generated by GMSH by C. Geuzaine and J.F. Remacle.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: MSH files have a 1-indexing
+    Note
+    ----
+    MSH files have a 1-indexing
     """
 
     import re
 
-    check_file(filename)
+    _check_file(filename)
 
     with open(filename, 'r') as file:
         data = file.read()
@@ -771,28 +797,31 @@ def load_MSH(filename):
 
 
 def load_MED(filename):
-    """load_MED(filename)
+    """Loads MED mesh files generated by SALOME MECA.
 
-    Loads MED mesh files generated by SALOME MECA.
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
 
-    Parameters:
-        filename: str
-            name of the meh file on disk
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Returns:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Note: MED files have a 1-indexing
+    Note
+    ----
+    MED files have a 1-indexing
     """
+    
     try:
         import h5py
     except ImportError:
         raise ImportError('MED file format reader needs h5py module to be installed')
 
-    check_file(filename)
+    _check_file(filename)
 
     file = h5py.File(filename)
 
@@ -832,11 +861,25 @@ def load_MED(filename):
 
 
 def load_WRL(filename):
+    """Loads VRML 2.0 mesh files.
+
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
+
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
+    """
 
     from vtk import vtkVRMLImporter
     import re
 
-    check_file(filename)
+    _check_file(filename)
     
     # Checking version
     with open(filename, 'r') as f:
@@ -857,7 +900,28 @@ def load_WRL(filename):
 
 
 def load_NEM(filename):
-    check_file(filename)
+    """Loads mesh files that are used by the ``Mesh`` tool included in Nemoh.
+    
+    
+
+    Parameters
+    ----------
+    filename: str
+        name of the meh file on disk
+
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
+
+    Note
+    ----
+    This format is different from that is used directly by Nemoh software. It is only dedicated to the Mesh tool.
+    """
+    
+    _check_file(filename)
     
     ifile = open(filename, 'r')
     
@@ -884,19 +948,18 @@ def load_NEM(filename):
 # Contains here all functions to write meshes in different file formats
 
 def write_mesh(filename, vertices, faces, file_format):
-    """write_mesh(filename, file_format)
+    """Driver function that writes every mesh file file_format known by meshmagick
 
-    Driver function that writes every mesh file file_format known by meshmagick
-
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-        file_format: str
-            file_format of the mesh defined in the extension_dict dictionary
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
+    file_format: str
+        file_format of the mesh defined in the extension_dict dictionary
 
     """
 
@@ -907,24 +970,21 @@ def write_mesh(filename, vertices, faces, file_format):
 
     writer(filename, vertices, faces)
 
-    return
-
 
 def write_DAT(filename, vertices, faces):
-    """write_DAT(filename, vertices, faces)
-
-    Writes .DAT file format for the DIODORE (PRINCIPA (c)) software.
+    """Writes .DAT file format for the DIODORE (PRINCIPA (c)) software.
+    
     It also displays suggestions for inclusion into the .INP configuration
     file.
 
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
 
     import os
@@ -1001,22 +1061,18 @@ def write_DAT(filename, vertices, faces):
     print '-------------------------------------------------'
     ofile.close()
 
-    return
-
 
 def write_HST(filename, vertices, faces):
-    """write_HST(filename, vertices, faces)
+    """Writes .HST file format for the HYDROSTAR (Bureau Veritas (c)) software.
 
-    Writes .HST file format for the HYDROSTAR (Bureau Veritas (c)) software.
-
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
     # TODO: allow many bodies
 
@@ -1061,24 +1117,22 @@ def write_HST(filename, vertices, faces):
 
     ofile.close()
 
-    return
-
 
 def write_TEC(filename, vertices, faces):
-    """write_TEC(filename, vertices, faces)
+    """Writes .TEC file format for the TECPLOT (Tecplot (c)) visualisation software.
+    
+    It relies on the VTK library for its writer.
 
-    Writes .TEC file format for the TECPLOT (Tecplot (c)) visualisation
-    software. It relies on the VTK library for its writer.
-
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
+    
     ofile = open(filename, 'w')
 
     nv = vertices.shape[0]
@@ -1110,21 +1164,20 @@ def write_TEC(filename, vertices, faces):
 
 
 def write_VTU(filename, vertices, faces):
-    """write_VTU(filename, vertices, faces)
+    """Writes .vtu file format for the paraview (Kitware (c)) visualisation software.
+    
+    It relies on the VTK library for its writer. VTU files use the last XML file format of the VTK library.
 
-    Writes .vtu file format for the paraview (Kitware (c)) visualisation
-    software. It relies on the VTK library for its writer. VTU files use
-    the last XML file format of the VTK library.
-
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
+
     from vtk import vtkXMLUnstructuredGridWriter, VTK_MAJOR_VERSION
     writer = vtkXMLUnstructuredGridWriter()
     writer.SetDataModeToAscii()
@@ -1137,25 +1190,23 @@ def write_VTU(filename, vertices, faces):
         writer.SetInputData(unstructured_grid)
     writer.Write()
 
-    return
-
 
 def write_VTP(filename, vertices, faces):
-    """write_VTP(filename, vertices, faces)
+    """Writes .vtp file format for the Paraview (Kitware (c)) visualisation software.
+    
+    It relies on the VTK library for its writer. VTP files use the last XML file format of the VTK library and
+    correspond to polydata.
 
-    Writes .vtp file format for the paraview (Kitware (c)) visualisation
-    software. It relies on the VTK library for its writer. VTP files use
-    the last XML file format of the VTK library and correspond to polydata.
-
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
+
     from vtk import vtkXMLPolyDataWriter, VTK_MAJOR_VERSION
     writer = vtkXMLPolyDataWriter()
     writer.SetDataModeToAscii()
@@ -1168,24 +1219,20 @@ def write_VTP(filename, vertices, faces):
         writer.SetInputData(polydata)
     writer.Write()
 
-    return
-
 
 def write_VTK(filename, vertices, faces):
-    """write_VTK(filename, vertices, faces)
+    """Writes .vtk file format for the Paraview (Kitware (c)) visualisation software.
+    
+    It relies on the VTK library for its writer. VTK files use the legagy ASCII file format of the VTK library.
 
-    Writes .vtk file format for the paraview (Kitware (c)) visualisation
-    software. It relies on the VTK library for its writer. VTK files use
-    the legagy ASCII file format of the VTK library.
-
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
 
     from vtk import vtkUnstructuredGridWriter, VTK_MAJOR_VERSION
@@ -1199,23 +1246,22 @@ def write_VTK(filename, vertices, faces):
         writer.SetInputData(unstructured_grid)
     writer.Write()
 
-    return
-
 
 def _build_vtkUnstructuredGrid(vertices, faces):
-    """_build_vtk_mesh_obj(vertices, faces)
+    """Internal function that builds a VTK object for manipulation by the VTK library.
 
-    Internal function that builds a VTK object for manipulation by the VTK library.
+    Parameters
+    ----------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    Parameters:
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
-    Returns: vtkObject
-        the vtk object instance
+    Returns
+    -------
+    vtkObject
     """
+    
     import vtk
 
     nv = max(np.shape(vertices))
@@ -1250,6 +1296,8 @@ def _build_vtkUnstructuredGrid(vertices, faces):
 
 
 def _build_vtkPolyData(vertices, faces):
+    """Builds a vtkPolyData object from vertices and faces"""
+    
     import vtk
 
     # Create a vtkPoints object and store the points in it
@@ -1282,22 +1330,22 @@ def _build_vtkPolyData(vertices, faces):
 
 
 def write_NAT(filename, vertices, faces):
-    """write_NAT(filename, vertices, faces)
+    """Writes .nat file format as defined into the load_NAT function.
 
-    Writes .nat file format as defined into the load_NAT function.
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
 
-    See:
-        load_NAT
-
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
+    See Also
+    --------
+    load_NAT
     """
+    
     ofile = open(filename, 'w')
 
     nv = max(np.shape(vertices))
@@ -1312,11 +1360,23 @@ def write_NAT(filename, vertices, faces):
 
     ofile.close()
 
-    return
-
 
 def write_NEM(filename, vertices, faces):
+    """Writes mesh files used by the Mesh tool included in Nemoh
     
+    Parameters
+    ----------
+    filename : str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
+
+    Note
+    ----
+    This file format is different from that used by Nemoh itself. It is only used by the Mesh tool.
+    """
     ofile = open(filename, 'w')
     
     ofile.write('%u\n' % vertices.shape[0])
@@ -1330,22 +1390,18 @@ def write_NEM(filename, vertices, faces):
         
     ofile.close()
     
-    return
-    
     
 def write_GDF(filename, vertices, faces):
-    """write_GDF(filename, vertices, faces)
+    """Writes .gdf file format for the WAMIT (Wamit INC. (c)) BEM software.
 
-    Writes .gdf file format for the WAMIT (Wamit INC. (c)) BEM software.
-
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
 
     nf = max(np.shape(faces))
@@ -1365,22 +1421,18 @@ def write_GDF(filename, vertices, faces):
 
     ofile.close()
 
-    return
-
 
 def write_MAR(filename, vertices, faces):
-    """write_MAR(filename, vertices, faces)
+    """Writes mesh files to be used with Nemoh BEM software (Ecole Centrale de Nantes)
 
-    Writes mesh files to be used with Nemoh BEM software (Ecole Centrale de Nantes)
-
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
 
     # TODO: detect symmetry in Oxz plane
@@ -1406,26 +1458,22 @@ def write_MAR(filename, vertices, faces):
     print 'WARNING: if you described only one part of the mesh using symmetry for Nemoh, you may manually modify the ' \
           'file header accordingly'
 
-    return
-
 
 def write_RAD(filename, vertices, faces):
     raise NotImplementedError
 
 
 def write_STL(filename, vertices, faces):
-    """write_STL(filename, vertices, faces)
+    """Writes .stl file format. It relies on the VTK library for its writer.
 
-    Writes .stl file format. It relies on the VTK library for its writer.
-
-    Parameters:
-        filename: str
-            name of the mesh file to be written on disk
-        vertices: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        faces: ndarray
-            numpy array of the faces' nodes connectivities
-
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file to be written on disk
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
     """
 
     # TODO : replace this implementation by using the vtk functionalities
@@ -1474,8 +1522,6 @@ def write_STL(filename, vertices, faces):
         ofile.write(block_facet)
     ofile.write('endsolid meshmagick\n')
     ofile.close()
-
-    return
 
 
 def write_INP(filename, vertices, faces):
