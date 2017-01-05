@@ -1,6 +1,9 @@
 Meshmagick
 ==========
 
+.. image:: https://travis-ci.org/LHEEA/meshmagick.svg?branch=master
+    :target: https://travis-ci.org/LHEEA/meshmagick
+
 **Meshmagick** is a command line utility as well as a python module for the manipulation of meshes encountered in the
 hydrodynamics community.
 
