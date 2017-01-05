@@ -16,6 +16,7 @@ import sys
 import os
 import shlex
 from datetime import datetime
+import meshmagick
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -38,13 +39,15 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    # 'sphinx.ext.imgmath',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.graphviz',
     'sphinxarg.ext',
-    'sphinxcontrib.programoutput'
+    'sphinxcontrib.programoutput',
+    # 'sphinx.ext.autosummary',
+    'sphinx.ext.githubpages',
+    # 'sphinx.ext.coverage',
 ]
 
 # Napoleon settings
