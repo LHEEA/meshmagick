@@ -41,7 +41,7 @@ install:
   - cd ..
 
 script:
-  - pytest --pyargs meshmagick
+  - pytest --pyargs meshmagick --cov=meshmagick --cov-report term
 
 after_success:
   - coveralls

@@ -5,7 +5,7 @@ Meshmagick
     :target: https://travis-ci.org/LHEEA/meshmagick
 
 .. image:: https://coveralls.io/repos/github/LHEEA/meshmagick/badge.svg?branch=master
-:target: https://coveralls.io/github/LHEEA/meshmagick?branch=master
+    :target: https://coveralls.io/github/LHEEA/meshmagick?branch=master
 
 
 **Meshmagick** is a command line utility as well as a python module for the manipulation of meshes encountered in the
