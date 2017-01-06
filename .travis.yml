@@ -17,7 +17,7 @@ install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest sphinx sphinx_rtd_theme
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest pytest-cov sphinx sphinx_rtd_theme
   - source activate test-environment
   - conda install -c conda-forge sphinx-argparse
   - conda install -c bioconda sphinxcontrib-programoutput
@@ -40,4 +40,4 @@ install:
   - cd ..
 
 script:
-  - pytest --pyargs meshmagick
+  - pytest --pyargs meshmagick --cov=meshmagick
