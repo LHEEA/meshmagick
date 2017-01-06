@@ -21,6 +21,7 @@ install:
   - source activate test-environment
   - conda install -c conda-forge sphinx-argparse
   - conda install -c bioconda sphinxcontrib-programoutput
+  - pip install coveralls
 
   # Build meshmagick package to be installed by conda
   - conda build conda.recipe
@@ -40,4 +41,7 @@ install:
   - cd ..
 
 script:
-  - pytest --pyargs meshmagick --cov=meshmagick
+  - pytest --pyargs meshmagick
+
+after_success:
+  - coveralls
