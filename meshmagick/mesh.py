@@ -2039,11 +2039,29 @@ class Mesh(object):
         return RigidBodyInertia(mass, cog, xx, yy, zz, yz, xz, xy, point=[0, 0, 0])
         
     def _edges_stats(self):
-        raise NotImplementedError
+        """Computes the min, max, and mean of the mesh's edge length"""
+        vertices = self.vertices[self.faces]
+        edge_length = np.zeros((self.nb_faces, 4), dtype=np.float)
+        for i in xrange(4):
+            edge = vertices[:, i, :] - vertices[:, i-1, :]
+            edge_length[:, i] = np.sqrt(np.einsum('ij, ij -> i', edge, edge))
+            
+        return edge_length.min(), edge_length.max(), edge_length.mean()
     
     @property
     def min_edge_length(self):
-        raise NotImplementedError
+        """The mesh's minimum edge length"""
+        return self._edges_stats()[0]
+    
+    @property
+    def max_edge_length(self):
+        """The mesh's maximum edge length"""
+        return self._edges_stats()[1]
+    
+    @property
+    def mean_edge_length(self):
+        """The mesh's mean edge length"""
+        return self._edges_stats()[2]
     
     @staticmethod
     def _compute_triangles_integrals(triangles_vertices, sum_faces_contrib=False):
