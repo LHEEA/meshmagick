@@ -323,18 +323,18 @@ developped by EDF-R&amp;D</td></tr>
 </pre></div>
 </div>
 <dl class="docutils">
-<dt>Positional arguments:</dt>
+<dt>Required Arguments</dt>
 <dd><table class="first last docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
 <tr><td class="option-group">
-<kbd>infilename</kbd></td>
+<kbd><span class="option">infilename</span></kbd></td>
 <td>path of the input mesh file in any supported format</td></tr>
 </tbody>
 </table>
 </dd>
-<dt>Options:</dt>
+<dt>Optional Arguments</dt>
 <dd><table class="first last docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
@@ -342,50 +342,50 @@ developped by EDF-R&amp;D</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-o</span>, <span class="option">--outfilename</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>path of the output mesh file. The format of
+<tr><td>&#160;</td><td>path of the output mesh file. The format of
                      this file is determined from the given extension.
                      </td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-ifmt</span>, <span class="option">--input-format</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Input format. Meshmagick will read the input file considering the
+<tr><td>&#160;</td><td>Input format. Meshmagick will read the input file considering the
                      INPUT_FORMAT rather than using the extension
                      </td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-ofmt</span>, <span class="option">--output-format</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Output format. Meshmagick will write the output file considering
+<tr><td>&#160;</td><td>Output format. Meshmagick will write the output file considering
                     the OUTPUT_FORMAT rather than using the extension
                     </td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-q=False</span>, <span class="option">--quiet=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>switch of verbosity of meshmagick</td></tr>
+<tr><td>&#160;</td><td>switch of verbosity of meshmagick</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-i=False</span>, <span class="option">--info=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>extract informations on the mesh on the standard output</td></tr>
+<tr><td>&#160;</td><td>extract informations on the mesh on the standard output</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--quality=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>prints mesh quality</td></tr>
+<tr><td>&#160;</td><td>prints mesh quality</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-t</span>, <span class="option">--translate</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>translates the mesh in 3D
+<tr><td>&#160;</td><td>translates the mesh in 3D
                     Usage -translate tx ty tz</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-tx</span>, <span class="option">--translatex</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>translates the mesh following the x direction</td></tr>
+<tr><td>&#160;</td><td>translates the mesh following the x direction</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-ty</span>, <span class="option">--translatey</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>translates the mesh following the y direction</td></tr>
+<tr><td>&#160;</td><td>translates the mesh following the y direction</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-tz</span>, <span class="option">--translatez</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>translates the mesh following the z direction</td></tr>
+<tr><td>&#160;</td><td>translates the mesh following the z direction</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-r</span>, <span class="option">--rotate</span></kbd></td>
 <td>rotates the mesh in 3D following a rotation
@@ -434,17 +434,17 @@ developped by EDF-R&amp;D</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-hn=False</span>, <span class="option">--heal-normals=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Checks and heals the normals consistency and
+<tr><td>&#160;</td><td>Checks and heals the normals consistency and
                     verify if they are outward.
                     </td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-fn=False</span>, <span class="option">--flip-normals=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>flips the normals of the mesh</td></tr>
+<tr><td>&#160;</td><td>flips the normals of the mesh</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-hm=False</span>, <span class="option">--heal-mesh=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Applies the following sanity transformation on the
+<tr><td>&#160;</td><td>Applies the following sanity transformation on the
                     mesh: Removes unused vertices, Removes degenerated faces,
                     Merge duplicate vertices, Heal triangles description,
                     Heal normal orientations.
@@ -466,7 +466,7 @@ developped by EDF-R&amp;D</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-c</span>, <span class="option">--clip-by-plane</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>cuts the mesh with a plane. Is no arguments are given, the Oxy plane
+<tr><td>&#160;</td><td>cuts the mesh with a plane. Is no arguments are given, the Oxy plane
                     is used. If an integer is given, it should correspond to a plane defined with
                     the &#8211;plane option. If a key string is given, it should be a valid key (see
                     help of &#8211;plane option for valid plane keys). A normal and a scalar could
@@ -475,19 +475,19 @@ developped by EDF-R&amp;D</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-md</span>, <span class="option">--merge-duplicates</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>merges the duplicate nodes in the mesh with the absolute tolerance
+<tr><td>&#160;</td><td>merges the duplicate nodes in the mesh with the absolute tolerance
                     given as argument (default 1e-8). Tolerance must be lower than 1</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-tq=False</span>, <span class="option">--triangulate-quadrangles=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Triangulate all quadrangle _faces by a simple splitting procedure.
+<tr><td>&#160;</td><td>Triangulate all quadrangle _faces by a simple splitting procedure.
                     Twho triangles are generated and from both solution, the one with the best
                     aspect ratios is kept. This option may be used in conjunction with a
                     mesh export in a format that only deal with triangular cells like STL format.</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-sym</span>, <span class="option">--symmetrize</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Symmetrize the mesh by a plane defined wether by 4 scalars, i.e.
+<tr><td>&#160;</td><td>Symmetrize the mesh by a plane defined wether by 4 scalars, i.e.
                     the plane normal vector coordinates and a scalar c such as N.X=c is the
                     plane equation (with X a point of the plane) or a string among [&#8216;Oxy&#8217;,
                     &#8216;Oxz&#8217;, &#8216;Oyz&#8217;, &#8216;/Oxy&#8217;, &#8216;/Oxz&#8217;, &#8216;/Oyz&#8217;] which are shortcuts for planes
@@ -504,13 +504,13 @@ developped by EDF-R&amp;D</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-pi=False</span>, <span class="option">--plain-inertia=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Evaluates the inertia properties of the mesh condidering it as
+<tr><td>&#160;</td><td>Evaluates the inertia properties of the mesh condidering it as
                     uniformly plain of a medium of density rho_medium in kg/m**3. Default
                     is 1023 kg/m**3.</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-si=False</span>, <span class="option">--shell-inertia=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Evaluates the inertia properties of the mesh condidering it as
+<tr><td>&#160;</td><td>Evaluates the inertia properties of the mesh condidering it as
                     uniformly plain of a medium of density rho_medium in kg/m**3. Default
                     is 1023 kg/m**3.</td></tr>
 <tr><td class="option-group">
@@ -526,7 +526,7 @@ developped by EDF-R&amp;D</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--list-medium=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Lists the available medium keywords along with their density.
+<tr><td>&#160;</td><td>Lists the available medium keywords along with their density.
                     </td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--thickness</span></kbd></td>
@@ -535,7 +535,7 @@ developped by EDF-R&amp;D</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-hs=False</span>, <span class="option">--hydrostatics=False</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Compute hydrostatics data and throws a report on the
+<tr><td>&#160;</td><td>Compute hydrostatics data and throws a report on the
                     command line. When used along with options &#8211;disp, &#8211;cog or
                     &#8211;zcog, the behaviour is different.</td></tr>
 <tr><td class="option-group">
@@ -559,18 +559,18 @@ developped by EDF-R&amp;D</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--rho-water=1023.0</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Specifies the density of salt water. Default is 1023 kg/m**3.
+<tr><td>&#160;</td><td>Specifies the density of salt water. Default is 1023 kg/m**3.
                     </td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-g=9.81</span>, <span class="option">--grav=9.81</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Specifies the acceleration of gravity on the earth surface.
+<tr><td>&#160;</td><td>Specifies the acceleration of gravity on the earth surface.
                     Default is 9.81 m/s**2.
                     </td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-af</span>, <span class="option">--absolute-force</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Add an additional absolute force applied to the mesh in
+<tr><td>&#160;</td><td>Add an additional absolute force applied to the mesh in
                     hydrostatics equilibrium computations. It is absolute as force
                     orientation does not change during hydrostatic equilibrium
                     computations, but application point follows the mesh motion.
@@ -585,7 +585,7 @@ developped by EDF-R&amp;D</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-rf</span>, <span class="option">--relative-force</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Add an additional relative force applied to the mesh in
+<tr><td>&#160;</td><td>Add an additional relative force applied to the mesh in
                     hydrostatics equilibrium computations. It is relative as force
                     orientation follows the orientation of the mesh during equilibrium
                     computations. The option is called with 6 arguments such that:
@@ -602,9 +602,10 @@ developped by EDF-R&amp;D</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--show=False</span></kbd></td>
 <td>Shows the input mesh in an interactive window</td></tr>
-<tr><td class="option-group">
-<kbd><span class="option">--version</span></kbd></td>
-<td>Shows the version number and exit</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--version=&quot;==SUPPRESS==&quot;</span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Shows the version number and exit</td></tr>
 </tbody>
 </table>
 </dd>
@@ -632,7 +633,7 @@ developped by EDF-R&amp;D</td></tr>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2017, Ecole Centrale de Nantes.
-      Last updated on Jan 05, 2017.
+      Last updated on Mar 16, 2017.
 
     </p>
   </div> 
@@ -656,7 +657,8 @@ developped by EDF-R&amp;D</td></tr>
             VERSION:'1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>

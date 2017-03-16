@@ -141,7 +141,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<div class="viewcode-block" id="merge_duplicate_rows"><a class="viewcode-back" href="../../api/meshmagick.tools.html#meshmagick.tools.merge_duplicate_rows">[docs]</a><span class="k">def</span> <span class="nf">merge_duplicate_rows</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="merge_duplicate_rows"><a class="viewcode-back" href="../../api/meshmagick.tools.html#meshmagick.tools.merge_duplicate_rows">[docs]</a><span class="k">def</span> <span class="nf">merge_duplicate_rows</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns a new node array where close nodes have been merged into one node (following atol).</span>
 
 <span class="sd">    Parameters</span>
@@ -272,7 +272,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2017, Ecole Centrale de Nantes.
-      Last updated on Jan 05, 2017.
+      Last updated on Mar 16, 2017.
 
     </p>
   </div> 
@@ -296,7 +296,8 @@
             VERSION:'1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../../_static/jquery.js"></script>
