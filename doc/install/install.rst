@@ -18,6 +18,13 @@ is known to deal with every dependencies of Meshmagick. For this, you will need 
 manager. If you are not an everyday Python developer, maybe you will prefer installing Miniconda which is far mush
 lighter than Anaconda.
 
+.. warning::
+
+    **For Windows users**, current version of conda (4.3.*) appears to be buggy with respect to conda install of
+    meshmagick. One workaround is to downgrade conda to version 4.2.* by typing::
+
+        conda install conda=4.2
+
 Once conda installed, just try this::
 
     conda install -c frongere meshmagick

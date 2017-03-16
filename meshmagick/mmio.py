@@ -1235,16 +1235,44 @@ def write_VTK(filename, vertices, faces):
         numpy array of the faces' nodes connectivities
     """
 
-    from vtk import vtkUnstructuredGridWriter, VTK_MAJOR_VERSION
-    writer = vtkUnstructuredGridWriter()
+    from vtk import vtkPolyDataWriter, VTK_MAJOR_VERSION
+    writer = vtkPolyDataWriter()
+    writer.SetFileTypeToASCII()
     writer.SetFileName(filename)
 
-    unstructured_grid = _build_vtkUnstructuredGrid(vertices, faces)
+    polydata = _build_vtkPolyData(vertices, faces)
     if VTK_MAJOR_VERSION <= 5:
-        writer.SetInput(unstructured_grid)
+        writer.SetInput(polydata)
     else:
-        writer.SetInputData(unstructured_grid)
+        writer.SetInputData(polydata)
     writer.Write()
+
+
+# def write_VTK(filename, vertices, faces):
+#     """Writes .vtk file format for the Paraview (Kitware (c)) visualisation software.
+#
+#     It relies on the VTK library for its writer. VTK files use the legagy ASCII file format of the VTK library.
+#
+#     Parameters
+#     ----------
+#     filename: str
+#         name of the mesh file to be written on disk
+#     vertices: ndarray
+#         numpy array of the coordinates of the mesh's nodes
+#     faces: ndarray
+#         numpy array of the faces' nodes connectivities
+#     """
+#
+#     from vtk import vtkUnstructuredGridWriter, VTK_MAJOR_VERSION
+#     writer = vtkUnstructuredGridWriter()
+#     writer.SetFileName(filename)
+#
+#     unstructured_grid = _build_vtkUnstructuredGrid(vertices, faces)
+#     if VTK_MAJOR_VERSION <= 5:
+#         writer.SetInput(unstructured_grid)
+#     else:
+#         writer.SetInputData(unstructured_grid)
+#     writer.Write()
 
 
 def _build_vtkUnstructuredGrid(vertices, faces):
