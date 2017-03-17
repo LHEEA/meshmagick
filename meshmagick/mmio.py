@@ -901,8 +901,6 @@ def load_WRL(filename):
 
 def load_NEM(filename):
     """Loads mesh files that are used by the ``Mesh`` tool included in Nemoh.
-    
-    
 
     Parameters
     ----------
@@ -1242,9 +1240,6 @@ def write_VTK(filename, vertices, faces):
     quadrangles_mask = np.invert(triangle_mask)
     nb_triangles = len(np.where(triangle_mask)[0])
     nb_quandrangles = len(np.where(quadrangles_mask)[0])
-    
-    print vertices
-    print faces
     
     with open(filename, 'w') as f:
         
@@ -1589,5 +1584,6 @@ extension_dict = {  # keyword,  reader,   writer
     'salome': (load_MED, write_MED),
     'vrml': (load_WRL, write_WRL),
     'wrl': (load_WRL, write_WRL),
-    'nem': (load_NEM, write_NEM)
+    'nem': (load_NEM, write_NEM),
+    'nemoh_mesh': (load_NEM, write_NEM)
 }

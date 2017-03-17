@@ -43,7 +43,7 @@ __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-%u, Ecole Centrale de Nantes" % __year__
 __credits__ = "Francois Rongere"
 __licence__ = "GPLv3"
-__version__ = "1.0.5"
+__version__ = "1.0.6"
 __maintainer__ = "Francois Rongere"
 __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
@@ -348,6 +348,8 @@ parser = argparse.ArgumentParser(
                 | extension | W: writing |                 |                      |
                 +===========+============+=================+======================+
                 |   .mar    |    R/W     | NEMOH [#f1]_    | nemoh, mar           |
+                +-----------+------------+-----------------+----------------------+
+                |   .nem    |    R       | NEMOH [#f1]_    | nemoh_mesh, nem      |
                 +-----------+------------+-----------------+----------------------+
                 |   .gdf    |    R/W     | WAMIT [#f2]_    | wamit, gdf           |
                 +-----------+------------+-----------------+----------------------+
