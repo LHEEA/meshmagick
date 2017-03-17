@@ -17,7 +17,7 @@ LONG_DESCRIPTION = read('README.rst')
 
 setup(
     name='meshmagick',
-    version='1.0.5',
+    version='1.0.6',
     url='https://github.com/LHEEA/meshmagick',
     author='Francois Rongere -- Ecole Centrale de Nantes',
     author_email='Francois.Rongere@ec-nantes.fr',
