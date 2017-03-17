@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>meshmagick.mesh &mdash; Meshmagick User&#39;s Guide 1.0 documentation</title>
+  <title>meshmagick.mesh &mdash; Meshmagick User&#39;s Guide 1.0.5 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Meshmagick User&#39;s Guide 1.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Meshmagick User&#39;s Guide 1.0.5 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                1.0
+                1.0.5
               </div>
             
           
@@ -161,7 +161,6 @@
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2014-2015, Ecole Centrale de Nantes&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Francois Rongere&quot;</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="s2">&quot;CeCILL&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
 <span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Francois Rongere&quot;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;Francois.Rongere@ec-nantes.fr&quot;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
@@ -517,11 +516,11 @@
 
 
 <span class="k">class</span> <span class="nc">_3DPointsArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">:</span> <span class="n">cls</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">:</span> <span class="n">cls</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">:</span> <span class="n">cls</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">obj</span>
 
 
@@ -1291,7 +1290,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;This method is not stable yet !! Use with caution&#39;</span><span class="p">)</span>
         <span class="c1"># FIXME: experimental method</span>
-        <span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-7</span>
+        <span class="n">tol</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">7</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_connectivity</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_connectivity</span><span class="p">()</span>
@@ -1660,7 +1659,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mesh.merge_duplicates"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.merge_duplicates">[docs]</a>    <span class="k">def</span> <span class="nf">merge_duplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh.merge_duplicates"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.merge_duplicates">[docs]</a>    <span class="k">def</span> <span class="nf">merge_duplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Merges the duplicate vertices of the mesh.</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -1805,7 +1804,7 @@
 
             <span class="n">hs</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">centers</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">zmax</span><span class="p">)</span> <span class="o">*</span> <span class="n">areas</span><span class="p">,</span> <span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">normals</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-            <span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-9</span>
+            <span class="n">tol</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">9</span>
             <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">hs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">tol</span> <span class="ow">or</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">hs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">tol</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
                     <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; WARNING: the mesh does not seem watertight althought marked as closed...&quot;</span>
@@ -1899,7 +1898,7 @@
 
         <span class="k">return</span></div>
 
-<div class="viewcode-block" id="Mesh.remove_degenerated_faces"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.remove_degenerated_faces">[docs]</a>    <span class="k">def</span> <span class="nf">remove_degenerated_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh.remove_degenerated_faces"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.remove_degenerated_faces">[docs]</a>    <span class="k">def</span> <span class="nf">remove_degenerated_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Removes tiny triangles from the mesh.</span>
 <span class="sd">        </span>
 <span class="sd">        Tiny triangles are those whose area is lower than the mean triangle area in the mesh times the relative</span>
@@ -2177,11 +2176,29 @@
         <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">yz</span><span class="p">,</span> <span class="n">xz</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span></div>
         
     <span class="k">def</span> <span class="nf">_edges_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="sd">&quot;&quot;&quot;Computes the min, max, and mean of the mesh&#39;s edge length&quot;&quot;&quot;</span>
+        <span class="n">vertices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="p">]</span>
+        <span class="n">edge_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_faces</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+            <span class="n">edge</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">vertices</span><span class="p">[:,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">edge_length</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij, ij -&gt; i&#39;</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">edge</span><span class="p">))</span>
+            
+        <span class="k">return</span> <span class="n">edge_length</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">edge_length</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">edge_length</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">min_edge_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="sd">&quot;&quot;&quot;The mesh&#39;s minimum edge length&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edges_stats</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_edge_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The mesh&#39;s maximum edge length&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edges_stats</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mean_edge_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The mesh&#39;s mean edge length&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edges_stats</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
     
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_compute_triangles_integrals</span><span class="p">(</span><span class="n">triangles_vertices</span><span class="p">,</span> <span class="n">sum_faces_contrib</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -2267,7 +2284,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2017, Ecole Centrale de Nantes.
-      Last updated on Mar 16, 2017.
+      Last updated on Mar 17, 2017.
 
     </p>
   </div> 
@@ -2288,11 +2305,10 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0',
+            VERSION:'1.0.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="../../_static/jquery.js"></script>
