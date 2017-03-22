@@ -470,7 +470,7 @@ def load_VTK(filename):
     Parameters
     ----------
     filename: str
-        name of the meh file on disk
+        name of the mesh file on disk
 
     Returns
     -------
@@ -487,6 +487,39 @@ def load_VTK(filename):
 
     from vtk import vtkPolyDataReader
     reader = vtkPolyDataReader()
+    reader.SetFileName(filename)
+    reader.Update()
+    vtk_mesh = reader.GetOutput()
+
+    vertices, faces = _dump_vtk(vtk_mesh)
+    return vertices, faces
+
+
+def load_OBJ(filename):
+    """Loads Wavefront OBJ file format.
+    
+    It relies on the reader from the VTK library.
+
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file on disk
+
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
+
+    Note
+    ----
+    VTU files have a 0-indexing
+    """
+    _check_file(filename)
+
+    from vtk import vtkOBJReader
+    reader = vtkOBJReader()
     reader.SetFileName(filename)
     reader.Update()
     vtk_mesh = reader.GetOutput()
@@ -1261,6 +1294,10 @@ def write_VTK(filename, vertices, faces):
                 f.write('4 %u %u %u %u\n' % (face[0], face[1], face[2], face[3]))
 
 
+def write_OBJ(filename, vectices, faces):
+    raise NotImplementedError
+
+
 def _build_vtkUnstructuredGrid(vertices, faces):
     """Internal function that builds a VTK object for manipulation by the VTK library.
 
@@ -1585,5 +1622,6 @@ extension_dict = {  # keyword,  reader,   writer
     'vrml': (load_WRL, write_WRL),
     'wrl': (load_WRL, write_WRL),
     'nem': (load_NEM, write_NEM),
-    'nemoh_mesh': (load_NEM, write_NEM)
+    'nemoh_mesh': (load_NEM, write_NEM),
+    'obj': (load_OBJ, write_OBJ)
 }

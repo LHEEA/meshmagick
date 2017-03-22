@@ -377,6 +377,8 @@ parser = argparse.ArgumentParser(
                 +-----------+------------+-----------------+----------------------+
                 |   .med    |    R       | SALOME [#f8]_   | med, salome          |
                 +-----------+------------+-----------------+----------------------+
+                |   .obj    |    R       | WAVEFRONT       | obj                  |
+                +-----------+------------+-----------------+----------------------+
 
                 By default, Meshmagick uses the filename extensions to choose the
                 appropriate reader/writer. This behaviour might be bypassed using the
@@ -1273,7 +1275,7 @@ def main():
 
         if verbose:
             print 'Writing %s' % args.outfilename
-        mmio.write_mesh(args.outfilename, mesh._vertices, mesh._faces, format)
+        mmio.write_mesh(args.outfilename, mesh.vertices, mesh.faces, format)
         if verbose:
             print '\t-> Done.'
 
