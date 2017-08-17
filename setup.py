@@ -1,5 +1,5 @@
 """Setup script for meshmagick."""
-from __future__ import print_function
+
 from setuptools import setup, find_packages
 import codecs
 import os

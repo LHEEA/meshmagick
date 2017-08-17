@@ -61,7 +61,7 @@ def merge_duplicate_rows(arr, atol=1e-8, return_index=False):
                 levels_tmp.append(istart)
                 vref = values[istart]
 
-                for idx in xrange(istart, istop):
+                for idx in range(istart, istop):
                     cur_val = values[idx]
                     if np.abs(cur_val - vref) > atol:
                         levels_tmp.append(idx)
@@ -88,7 +88,7 @@ def merge_duplicate_rows(arr, atol=1e-8, return_index=False):
             istop = levels[ilevel+1]
 
             arr_tmp.append(arr[iperm[istart]])
-            newID[iperm[range(istart, istop)]] = ilevel
+            newID[iperm[list(range(istart, istop))]] = ilevel
         arr = np.array(arr_tmp, dtype=float)
         # Applying renumbering to cells
         # if F is not None:

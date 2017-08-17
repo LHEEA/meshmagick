@@ -15,9 +15,9 @@ from itertools import count
 from warnings import warn
 import sys  # TODO: Retirer
 
-from tools import merge_duplicate_rows
-import MMviewer
-from inertia import RigidBodyInertia
+from .tools import merge_duplicate_rows
+from . import MMviewer
+from .inertia import RigidBodyInertia
 
 __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
@@ -410,7 +410,7 @@ class Mesh(object):
         
         self._vertices = np.array(vertices, dtype=np.float)
         self._faces = np.array(faces, dtype=np.int)
-        self._id = self._ids.next()
+        self._id = next(self._ids)
 
         if not name:
             self._name = 'mesh_%u' % self._id
@@ -534,7 +534,7 @@ class Mesh(object):
         http://www.vtk.org/Wiki/images/6/6b/VerdictManual-revA.pdf\n"""
 
         res += info
-        print res
+        print(res)
         return
 
     @property
@@ -938,8 +938,8 @@ class Mesh(object):
         # Building connectivities
 
         # Establishing v_v and v_f connectivities
-        v_v = dict([(i, set()) for i in xrange(nv)])
-        v_f = dict([(i, set()) for i in xrange(nv)])
+        v_v = dict([(i, set()) for i in range(nv)])
+        v_f = dict([(i, set()) for i in range(nv)])
         for (iface, face) in enumerate(self._faces):
             if face[0] == face[-1]:
                 face_w = face[:3]
@@ -953,8 +953,8 @@ class Mesh(object):
         # Connectivity f_f
         boundary_edges = dict()
 
-        f_f = dict([(i, set()) for i in xrange(nf)])
-        for ivertex in xrange(nv):
+        f_f = dict([(i, set()) for i in range(nf)])
+        for ivertex in range(nv):
             set1 = v_f[ivertex]
             for iadj_v in v_v[ivertex]:
                 set2 = v_f[iadj_v]
@@ -997,7 +997,7 @@ class Mesh(object):
                         i_v0 = i_v1
                     except KeyError:
                         if boundary[0] != boundary[-1]:
-                            print 'Boundary is not closed !!!'
+                            print('Boundary is not closed !!!')
                         else:
                             boundaries.append(boundary)
                         break
@@ -1552,14 +1552,14 @@ class Mesh(object):
         nv_final = self.nb_vertices
 
         if self._verbose:
-            print "* Merging duplicate vertices that lie in an absolute proximity of %.1E..." % atol
+            print("* Merging duplicate vertices that lie in an absolute proximity of %.1E..." % atol)
             delta_n = nv_init - nv_final
             if delta_n == 0:
-                print "\t--> No duplicate vertices have been found"
+                print("\t--> No duplicate vertices have been found")
             else:
-                print "\t--> Initial number of vertices : %u" % nv_init
-                print "\t--> Final number of vertices   : %u" % nv_final
-                print "\t--> %u vertices have been merged\n" % delta_n
+                print("\t--> Initial number of vertices : %u" % nv_init)
+                print("\t--> Final number of vertices   : %u" % nv_final)
+                print("\t--> %u vertices have been merged\n" % delta_n)
 
         if self._has_connectivity():
             self._remove_connectivity()
@@ -1626,7 +1626,7 @@ class Mesh(object):
                 if len(common_vertices) == 2:
                     i_v1, i_v2 = common_vertices
                 else:
-                    print 'WARNING: faces %u and %u have more than 2 vertices in common !' % (iface, iadj_f)
+                    print('WARNING: faces %u and %u have more than 2 vertices in common !' % (iface, iadj_f))
                     continue
 
                 # Checking normal consistency
@@ -1647,11 +1647,11 @@ class Mesh(object):
                 stack.append(iadj_f)
 
         if self._verbose:
-            print "* Healing normals to make them consistent and if possible outward"
+            print("* Healing normals to make them consistent and if possible outward")
             if nb_reversed > 0:
-                print '\t--> %u faces have been reversed to make normals consistent across the mesh' % (nb_reversed)
+                print('\t--> %u faces have been reversed to make normals consistent across the mesh' % (nb_reversed))
             else:
-                print "\t--> Normals orientations are consistent"
+                print("\t--> Normals orientations are consistent")
 
         self._faces = faces
 
@@ -1669,7 +1669,7 @@ class Mesh(object):
             tol = 1e-9
             if math.fabs(hs[0]) > tol or math.fabs(hs[1]) > tol:
                 if self._verbose:
-                    print "\t--> WARNING: the mesh does not seem watertight althought marked as closed..."
+                    print("\t--> WARNING: the mesh does not seem watertight althought marked as closed...")
 
             if hs[2] < 0:
                 flipped = True
@@ -1678,12 +1678,12 @@ class Mesh(object):
                 flipped = False
 
             if self._verbose and flipped:
-                print '\t--> Every normals have been reversed to be outward'
+                print('\t--> Every normals have been reversed to be outward')
 
 
         else:
             if self._verbose:
-                print "\t--> Mesh is not closed, meshmagick cannot test if the normals are outward"
+                print("\t--> Mesh is not closed, meshmagick cannot test if the normals are outward")
 
         if self._has_faces_properties():
             self._remove_faces_properties()
@@ -1700,7 +1700,7 @@ class Mesh(object):
         vertices, faces = self._vertices, self._faces
 
         used_v = np.zeros(nv, dtype=np.bool)
-        used_v[sum(map(list, faces), [])] = True
+        used_v[sum(list(map(list, faces)), [])] = True
         nb_used_v = sum(used_v)
 
         if nb_used_v < nv:
@@ -1712,13 +1712,13 @@ class Mesh(object):
         self._vertices, self._faces = vertices, faces
 
         if self._verbose:
-            print "* Removing unused vertices in the mesh:"
+            print("* Removing unused vertices in the mesh:")
             if nb_used_v < nv:
                 unused_v = np.where(np.logical_not(used_v))[0]
                 vlist_str = '[' + ', '.join(str(iV) for iV in unused_v) + ']'
-                print "\t--> %u unused vertices have been removed" % (nv - nb_used_v)
+                print("\t--> %u unused vertices have been removed" % (nv - nb_used_v))
             else:
-                print "\t--> No unused vertices"
+                print("\t--> No unused vertices")
 
         if self._has_connectivity():
             self._remove_connectivity()
@@ -1751,12 +1751,12 @@ class Mesh(object):
         self._faces = faces
 
         if self._verbose:
-            print "* Ensuring consistent definition of triangles:"
+            print("* Ensuring consistent definition of triangles:")
             if nquads_final < nquads_init:
-                print "\t--> %u triangles were described the wrong way and have been corrected" % (
-                nquads_init - nquads_final)
+                print("\t--> %u triangles were described the wrong way and have been corrected" % (
+                nquads_init - nquads_final))
             else:
-                print "\t--> Triangle description is consistent"
+                print("\t--> Triangle description is consistent")
 
         return
 
@@ -1782,11 +1782,11 @@ class Mesh(object):
         faces = self._faces[np.logical_not(areas < area_threshold)]
         if self._verbose:
             nb_removed = self.nb_faces - faces.shape[0]
-            print '* Removing degenerated faces'
+            print('* Removing degenerated faces')
             if nb_removed > 0:
-                print '\t-->%u degenerated faces have been removed' % nb_removed
+                print('\t-->%u degenerated faces have been removed' % nb_removed)
             else:
-                print '\t--> No degenerated faces'
+                print('\t--> No degenerated faces')
 
         self._faces = faces
         
@@ -1843,9 +1843,9 @@ class Mesh(object):
         faces = np.concatenate((faces, new_faces))
 
         if self._verbose:
-            print '\nTriangulating quadrangles'
+            print('\nTriangulating quadrangles')
             if self.nb_quadrangles != 0:
-                print '\t-->{:d} quadrangles have been split in triangles'.format(self.nb_quadrangles)
+                print('\t-->{:d} quadrangles have been split in triangles'.format(self.nb_quadrangles))
 
         self.__internals__.clear()
 
@@ -1925,7 +1925,7 @@ class Mesh(object):
         return
     
     def has_surface_integrals(self):
-        return self.__internals__.has_key('surface_integrals')
+        return 'surface_integrals' in self.__internals__
 
     def get_surface_integrals(self):
         """Get the mesh surface integrals
@@ -2041,7 +2041,7 @@ class Mesh(object):
         """Computes the min, max, and mean of the mesh's edge length"""
         vertices = self.vertices[self.faces]
         edge_length = np.zeros((self.nb_faces, 4), dtype=np.float)
-        for i in xrange(4):
+        for i in range(4):
             edge = vertices[:, i, :] - vertices[:, i-1, :]
             edge_length[:, i] = np.sqrt(np.einsum('ij, ij -> i', edge, edge))
             
@@ -2080,7 +2080,7 @@ class Mesh(object):
 
         s_int = np.zeros((15, triangles_vertices.shape[0]), dtype=np.float)
 
-        point_0, point_1, point_2 = map(_3DPointsArray, np.rollaxis(triangles_vertices, 1, 0))
+        point_0, point_1, point_2 = list(map(_3DPointsArray, np.rollaxis(triangles_vertices, 1, 0)))
 
         t0 = point_0 + point_1
         f1 = t0 + point_2
@@ -2129,8 +2129,8 @@ class Mesh(object):
         if not filename.endswith('.vtp'):
             filename += '.vtp'
         try:
-            from mmio import write_VTP
+            from .mmio import write_VTP
             write_VTP(filename, self.vertices, self.faces)
-            print 'File %s written' % filename
+            print('File %s written' % filename)
         except ImportError:
             raise ImportError('mmio module not found')

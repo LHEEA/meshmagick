@@ -3,7 +3,7 @@
 
 """This module holds a tools to clip meshes against a plane"""
 
-from mesh import *
+from .mesh import *
 
 
 class MeshClipper(object):
@@ -354,7 +354,7 @@ class MeshClipper(object):
 
         index = crown_mesh.nb_vertices
 
-        for face_id in xrange(crown_mesh.nb_faces):
+        for face_id in range(crown_mesh.nb_faces):
 
             face = crown_mesh.get_face(face_id)
 
@@ -645,7 +645,7 @@ class MeshClipper(object):
                 
             else:
                 try:
-                    import mmio
+                    from . import mmio
                     mmio.write_VTP('full_debug.vtp', self.source_mesh.vertices, self.source_mesh.faces)
                     # mmio.write_VTP('clipped_crown_debug.vtp', clipped_crown_mesh.vertices, clipped_crown_mesh.faces)
                     mmio.write_VTP('crown_debug.vtp', crown_mesh.vertices, crown_mesh.faces)
@@ -669,8 +669,8 @@ class MeshClipper(object):
 
         # Updating dictionaries
         direct_boundary_edges = dict(
-            zip(new_id[direct_boundary_edges.keys()], new_id[direct_boundary_edges.values()]))
-        inv_boundary_edges = dict(zip(new_id[inv_boundary_edges.keys()], new_id[inv_boundary_edges.values()]))
+            list(zip(new_id[list(direct_boundary_edges.keys())], new_id[list(direct_boundary_edges.values())])))
+        inv_boundary_edges = dict(list(zip(new_id[list(inv_boundary_edges.keys())], new_id[list(inv_boundary_edges.values())])))
 
         # Ordering boundary edges in continuous lines
         closed_polygons = list()
@@ -708,7 +708,7 @@ class MeshClipper(object):
                                     pend = clipped_crown_mesh.vertices[line[-1]]
                                     
                                     d = np.linalg.norm(pstart-pend)
-                                    print d
+                                    print(d)
                                     
                                     open_lines.append(line)
                                     break
@@ -719,12 +719,12 @@ class MeshClipper(object):
             except: # FIXME: specifier quelle exception est attendue ici !
                 # TODO: retirer les deux lines suivantes
                 if self._verbose:
-                    print "%u closed polygon\n%u open curve" % (len(closed_polygons), len(open_lines))
+                    print("%u closed polygon\n%u open curve" % (len(closed_polygons), len(open_lines)))
 
                 if self._assert_closed_boundaries:
                     if len(open_lines) > 0:
                         try:
-                            import mmio
+                            from . import mmio
                             mmio.write_VTP('full_debug.vtp', self.source_mesh.vertices, self.source_mesh.faces)
                             mmio.write_VTP('clipped_crown_debug.vtp', clipped_crown_mesh.vertices, clipped_crown_mesh.faces)
                             mmio.write_VTP('crown_debug.vtp', crown_mesh.vertices, crown_mesh.faces)
@@ -732,9 +732,9 @@ class MeshClipper(object):
                             pass
                         
                         for line in open_lines:
-                            print line
+                            print(line)
                             
-                        raise RuntimeError, 'Open intersection curve found with assert_closed_boundaries option enabled. Files full_debug.vtp, crown_debug.vtp and clipped_crown_debug.vtp written.'
+                        raise RuntimeError('Open intersection curve found with assert_closed_boundaries option enabled. Files full_debug.vtp, crown_debug.vtp and clipped_crown_debug.vtp written.')
 
                 break
 

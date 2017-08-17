@@ -90,13 +90,13 @@ def load_RAD(filename):
     vertices = []
     node_section = pattern_node_section.search(data).group(1)
     for node in pattern_node_line.finditer(node_section):
-        vertices.append(map(float, list(node.groups())))
+        vertices.append(list(map(float, list(node.groups()))))
     vertices = np.asarray(vertices, dtype=float)
 
     faces = []
     elem_section = pattern_elem_section.search(data).group(1)
     for elem in pattern_elem_line.findall(elem_section):
-        faces.append(map(int, elem.strip().split()[3:]))
+        faces.append(list(map(int, elem.strip().split()[3:])))
     faces = np.asarray(faces, dtype=np.int) - 1
 
     return vertices, faces
@@ -145,7 +145,7 @@ def load_HST(filename):
     nv = 0
     for node_section in pattern_node_section.findall(data):
         for node in pattern_node_line.findall(node_section):
-            vertices_tmp.append(map(float, node.split()[1:]))
+            vertices_tmp.append(list(map(float, node.split()[1:])))
         nv_tmp = len(vertices_tmp)
         vertices_tmp = np.asarray(vertices_tmp, dtype=np.float)
         if nv == 0:
@@ -160,7 +160,7 @@ def load_HST(filename):
     nf = 0
     for elem_section in pattern_elem_section.findall(data):
         for elem in pattern_elem_line.findall(elem_section):
-            faces_tmp.append(map(int, elem.split()))
+            faces_tmp.append(list(map(int, elem.split())))
         nf_tmp = len(faces_tmp)
         faces_tmp = np.asarray(faces_tmp, dtype=np.int)
         if nf == 0:
@@ -217,7 +217,7 @@ def load_INP(filename):
     for match in pattern_frame.finditer(text):
         frame_name = match.group(1).strip()
         frame_vector = re.split(r'[, ]', match.group(2).strip())
-        frames[frame_name] = np.asarray(map(float, frame_vector))
+        frames[frame_name] = np.asarray(list(map(float, frame_vector)))
 
     # Storing the inp layout into a list of dictionary
     pattern_node_elements = re.compile(r'^\s*\*(NODE|ELEMENT),(.*)', re.MULTILINE)
@@ -266,8 +266,8 @@ def load_INP(filename):
 
         node_section = pattern_node_section.findall(data)
         if len(node_section) > 1:
-            raise IOError, """Several NODE sections into a .DAT file is not supported by meshmagick
-                              as it is considered as bad practice"""
+            raise IOError("""Several NODE sections into a .DAT file is not supported by meshmagick
+                              as it is considered as bad practice""")
         node_array = []
         idx_array = []
         for node in pattern_node_line.findall(node_section[0]):
@@ -275,7 +275,7 @@ def load_INP(filename):
 
             node[0] = int(node[0])
             idx_array.append(node[0])
-            node[1:] = map(float, node[1:])
+            node[1:] = list(map(float, node[1:]))
             node_array.append(node[1:])
 
         mesh_files[file]['NODE_SECTION'] = node_array
@@ -293,13 +293,13 @@ def load_INP(filename):
 
             elem_array = []
             for elem in pattern_elem_line.findall(elem_section):
-                elem = map(int, elem.split())
+                elem = list(map(int, elem.split()))
                 # for node in elem[1:]:
                 elem = id_new[elem[1:]].tolist()
                 if len(elem) == 3:  # Case of a triangle, we repeat the first node at the last position
                     elem.append(elem[0])
 
-                elem_array.append(map(int, elem))
+                elem_array.append(list(map(int, elem)))
             mesh_files[file]['ELEM_SECTIONS'].append(elem_array)
         mesh_files[file]['nb_elem_sections'] = len(mesh_files[file]['ELEM_SECTIONS'])
 
@@ -389,8 +389,8 @@ def load_TEC(filename):
     nv = int(nv)
     nf = int(nf)
 
-    vertices = np.asarray(map(float, vertices.split()), dtype=np.float).reshape((nv, -1))[:, :3]
-    faces = np.asarray(map(int, faces.split()), dtype=np.int).reshape((nf, 4))-1
+    vertices = np.asarray(list(map(float, vertices.split())), dtype=np.float).reshape((nv, -1))[:, :3]
+    faces = np.asarray(list(map(int, faces.split())), dtype=np.int).reshape((nf, 4))-1
 
     return vertices, faces
 
@@ -547,7 +547,7 @@ def load_STL(filename):
     STL files have a 0-indexing
     """
     from vtk import vtkSTLReader
-    from tools import merge_duplicate_rows
+    from .tools import merge_duplicate_rows
 
     _check_file(filename)
 
@@ -625,16 +625,16 @@ def load_NAT(filename):
 
     ifile = open(filename, 'r')
     ifile.readline()
-    nv, nf = map(int, ifile.readline().split())
+    nv, nf = list(map(int, ifile.readline().split()))
 
     vertices = []
     for i in range(nv):
-        vertices.append(map(float, ifile.readline().split()))
+        vertices.append(list(map(float, ifile.readline().split())))
     vertices = np.array(vertices, dtype=np.float)
 
     faces = []
     for i in range(nf):
-        faces.append(map(int, ifile.readline().split()))
+        faces.append(list(map(int, ifile.readline().split())))
     faces = np.array(faces, dtype=np.int)
 
     ifile.close()
@@ -727,7 +727,7 @@ def load_MAR(filename):
         line = line.split()
         if line[0] == '0':
             break
-        vertices.append(map(float, line[1:]))
+        vertices.append(list(map(float, line[1:])))
 
     vertices = np.array(vertices, dtype=np.float)
     faces = []
@@ -736,7 +736,7 @@ def load_MAR(filename):
         line = line.split()
         if line[0] == '0':
             break
-        faces.append(map(int, line))
+        faces.append(list(map(int, line)))
 
     faces = np.array(faces, dtype=np.int)
 
@@ -775,19 +775,19 @@ def load_MSH(filename):
     nb_nodes, nodes_data = re.search(r'\$Nodes\n(\d+)\n(.+)\$EndNodes', data, re.DOTALL).groups()
     nb_elts, elts_data = re.search(r'\$Elements\n(\d+)\n(.+)\$EndElements', data, re.DOTALL).groups()
 
-    vertices = np.asarray(map(float, nodes_data.split()), dtype=np.float).reshape((-1, 4))[:, 1:]
+    vertices = np.asarray(list(map(float, nodes_data.split())), dtype=np.float).reshape((-1, 4))[:, 1:]
     vertices = np.ascontiguousarray(vertices)
     faces = []
 
     # Triangles
     for tri_elt in re.findall(r'(^\d+\s2(?:\s\d+)+?$)', elts_data, re.MULTILINE):
-        tri_elt = map(int, tri_elt.split())
+        tri_elt = list(map(int, tri_elt.split()))
         triangle = tri_elt[-3:]
         triangle.append(triangle[0])
         faces.append(triangle)
 
     for quad_elt in re.findall(r'(^\d+\s3(?:\s\d+)+?$)', elts_data, re.MULTILINE):
-        quad_elt = map(int, quad_elt.split())
+        quad_elt = list(map(int, quad_elt.split()))
         quadrangle = quad_elt[-4:]
         faces.append(quadrangle)
 
@@ -927,13 +927,13 @@ def load_NEM(filename):
     nf = int(ifile.readline())
     
     vertices = []
-    for ivertex in xrange(nv):
-        vertices.append(map(float, ifile.readline().split()))
+    for ivertex in range(nv):
+        vertices.append(list(map(float, ifile.readline().split())))
     vertices = np.asarray(vertices, dtype=np.float)
     
     faces = []
-    for iface in xrange(nf):
-        faces.append(map(int, ifile.readline().split()))
+    for iface in range(nf):
+        faces.append(list(map(int, ifile.readline().split())))
     faces = np.asarray(faces, dtype=np.int)
     faces -= 1
     
@@ -1041,22 +1041,22 @@ def write_DAT(filename, vertices, faces):
                 )
             )
 
-    print '-------------------------------------------------'
-    print 'Suggestion for .inp DIODORE input file :'
-    print ''
-    print '*NODE,INPUT={0},FRAME=???'.format(root_filename)
+    print('-------------------------------------------------')
+    print('Suggestion for .inp DIODORE input file :')
+    print('')
+    print('*NODE,INPUT={0},FRAME=???'.format(root_filename))
 
     if nq > 0:
         quad_block = ''.join((quad_block, '\n*RETURN\n'))
         ofile.write(quad_block)
-        print '*ELEMENT,TYPE=Q4C000,ELSTRUCTURE={0},INPUT={0}'.format(root_filename)
+        print('*ELEMENT,TYPE=Q4C000,ELSTRUCTURE={0},INPUT={0}'.format(root_filename))
     if nt > 0:
         tri_block = ''.join((tri_block, '\n*RETURN\n'))
         ofile.write(tri_block)
-        print '*ELEMENT,TYPE=T3C000,ELSTRUCTURE={0},INPUT={0}'.format(root_filename)
+        print('*ELEMENT,TYPE=T3C000,ELSTRUCTURE={0},INPUT={0}'.format(root_filename))
 
-    print ''
-    print '-------------------------------------------------'
+    print('')
+    print('-------------------------------------------------')
     ofile.close()
 
 
@@ -1461,7 +1461,7 @@ def write_MAR(filename, vertices, faces):
     ofile.write('{0:6d}{1:6d}{2:6d}{3:6d}{4:6d}\n'.format(0, 0, 0, 0, 0))
 
     cell_block = '\n'.join(
-        ''.join(u'{0:10d}'.format(elt) for elt in cell)
+        ''.join('{0:10d}'.format(elt) for elt in cell)
         for cell in faces + 1
     ) + '\n'
     ofile.write(cell_block)
@@ -1469,8 +1469,8 @@ def write_MAR(filename, vertices, faces):
 
     ofile.close()
 
-    print 'WARNING: if you described only one part of the mesh using symmetry for Nemoh, you may manually modify the ' \
-          'file header accordingly'
+    print('WARNING: if you described only one part of the mesh using symmetry for Nemoh, you may manually modify the ' \
+          'file header accordingly')
 
 
 def write_RAD(filename, vertices, faces):
@@ -1555,7 +1555,7 @@ def write_WRL(filename, vertices, faces):
 
 
 def know_extension(ext):
-    return extension_dict.has_key(ext)
+    return ext in extension_dict
 
 extension_dict = {  # keyword,  reader,   writer
     'mar': (load_MAR, write_MAR),

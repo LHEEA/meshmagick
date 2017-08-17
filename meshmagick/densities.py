@@ -52,7 +52,7 @@ def list_medium():
     list
         List of available medium
     """
-    return _DENSITIES.keys()
+    return list(_DENSITIES.keys())
 
 
 # def get_table():
