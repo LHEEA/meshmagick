@@ -1001,7 +1001,7 @@ class Hydrostatics(object):
                                                                                 textwidth=textwidth,
                                                                                 dtype=dtype
                                                                                 )
-            except TypeError:
+            except (ValueError, TypeError):
                 if isinstance(data, np.ndarray):
                     if data.ndim == 1:
                         data_str = ''.join(['{:< 10.{precision}{dtype}}'.format(val, precision=precision, dtype=dtype)
