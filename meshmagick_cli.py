@@ -417,7 +417,10 @@ parser.add_argument('--hs-report', type=str, metavar='filename',
 #                     """)
 
 parser.add_argument('--show', action='store_true',
-                    help="""Shows the input mesh in an interactive window""")
+                    help="""Shows the input mesh in an interactive window (VTK)""")
+
+parser.add_argument('--show_mpl', action='store_true',
+                    help="""Shows the input mesh with matplotlib""")
 
 parser.add_argument('--version', action='version',
                     version='meshmagick - version %s\n%s' % (__version__, __copyright__),
@@ -948,6 +951,9 @@ def main():
 
     if args.show:
         mesh.show()
+
+    if args.show_mpl:
+        mesh.show_matplotlib()
 
     if args.outfilename is None:
         base, ext = os.path.splitext(args.infilename)

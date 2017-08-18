@@ -784,7 +784,7 @@ class Mesh(object):
 
     @property
     def quadrangles_ids(self):
-        """Get the array of ids of qudrangle shaped faces
+        """Get the array of ids of quadrangle shaped faces
 
         Returns
         -------
@@ -919,6 +919,35 @@ class Mesh(object):
         self.viewer.add_polydata(vtk_polydata)
         self.viewer.show()
         self.viewer.finalize()
+
+    def show_matplotlib(self):
+        """Poor man's viewer with matplotlib
+        To be deleted when the VTK viewer is fully working with Python 3?"""
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.mplot3d import Axes3D
+        from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+
+        faces = []
+        for face in self.faces:
+            vertices = []
+            for index_vertex in face:
+                vertices.append(self.vertices[int(index_vertex), :])
+            faces.append(vertices)
+        ax.add_collection3d(Poly3DCollection(faces, facecolor=(0.3, 0.3, 0.3, 0.3), edgecolor='k'))
+
+        # Plot normal vectors.
+        # TODO: this is Python 3 only syntax...
+        # ax.quiver(*zip(*self.faces_centers), *zip(*self.faces_normals), length=0.2)
+
+        plt.xlabel("x")
+        plt.ylabel("y")
+        plt.xlim(min(self.vertices[:, 0]), max(self.vertices[:, 0]))
+        plt.ylim(min(self.vertices[:, 1]), max(self.vertices[:, 1]))
+        plt.gca().set_zlim(min(self.vertices[:, 2]), max(self.vertices[:, 2]))
+        plt.show()
 
     def _connectivity(self):
         """Updates the connectivities of the mesh.
