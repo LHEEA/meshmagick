@@ -5,8 +5,7 @@ Meshmagick is packaged for every major OS (\*nix, Windows, OS/X) for both 32/64 
 
 .. warning::
 
-    Meshmagick is written in Python 2.7 only. So please ensure that you have a Python 2.7 distribution.
-
+    Meshmagick is compatible with both Python 2.7 as well as Python 3. However, the visualization tool using VTK might not be working properly with Python 3.
 
 Installing with conda
 ---------------------
@@ -24,6 +23,14 @@ lighter than Anaconda.
     meshmagick. One workaround is to downgrade conda to version 4.2.* by typing::
 
         conda install conda=4.2
+
+.. warning::
+
+    **For Python 3 users**, a version of VTK compatible with Python 3 can be installed through::
+
+        conda install -c clinicalgraphics vtk
+	
+	It allows meshmagick to use most of the features requiring vtk (such as some mesh format import) except for the mesh vizualization.
 
 Once conda installed, just try this::
 
