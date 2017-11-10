@@ -1315,7 +1315,7 @@ def write_OBJ(filename, vertices, faces):
                 ofile.write("\n")
             else:
                 # Quadrangle
-                ofile.write("  %10u\n" % face[-1]+1)
+                ofile.write("  %10u\n" % (face[-1]+1))
                 
 
 def _build_vtkUnstructuredGrid(vertices, faces):
