@@ -609,7 +609,7 @@ class Mesh(object):
         
         Returns
         -------
-        ndarray
+        np.ndarray
         """
         return self._vertices
 
@@ -728,7 +728,7 @@ class Mesh(object):
         if 'faces_centers' not in self.__internals__:
             self._faces_properties()
         return self.__internals__['faces_centers']
-
+    
     @property
     def faces_normals(self):
         """Get the array of faces normals of the mesh
