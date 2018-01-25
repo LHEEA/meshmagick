@@ -174,11 +174,69 @@ def load_HST(filename):
 
 
 def load_DAT(filename):
-    """Not implemented.
-    Intended to load .DAT files used in DIODORE (PRINCIPIA (c))
+    """Loads .DAT files used in DIODORE (PRINCIPIA (c))
+    
     """
     _check_file(filename)
-    raise NotImplementedError
+    
+    with open(filename, 'r') as f:
+        data = f.read()
+    
+    
+    import re
+    
+    # NODE SECTION
+    node_section_pattern = re.compile(r'NODE\s*((?:\d+(?:\s+\S+){3}\s+)+)\*RETURN')
+    node_sections = node_section_pattern.findall(data)
+    
+    if len(node_sections) > 1:
+        raise RuntimeError('Not possible to have several NODE sections in Diodore DAT files')
+    
+    nodes = []
+    node_dict = {}
+    for inode, node_str in enumerate(node_sections[0].splitlines()):
+        node_split = node_str.split()
+        nodes.append(node_split[1:])
+        node_dict[node_split[0]] = inode
+        
+    vertices = np.array(nodes, dtype=np.float)
+    
+    # TRIANGLE FACES SECTION
+    triangle_section_pattern = re.compile(r'ELEMENT\S+T3C000.+\s*((?:(?:\d+\s+){4})+)\*RETURN')
+    triangle_sections = triangle_section_pattern.findall(data)
+    
+    faces = []
+    for triangle in triangle_sections[0].splitlines():
+        triangle_split = triangle.split()
+        
+        triangle = [
+            node_dict[triangle_split[1]],
+            node_dict[triangle_split[2]],
+            node_dict[triangle_split[3]],
+            node_dict[triangle_split[1]],
+        ]
+        
+        faces.append(triangle)
+    
+    # QUADRANGLE FACES SECTION
+    quadrangle_section_pattern = re.compile(r'ELEMENT\S+Q4C000.+\s*((?:(?:\d+\s+){5})+)\*RETURN')
+    quadrangle_sections = quadrangle_section_pattern.findall(data)
+    
+    for quadrangle in quadrangle_sections[0].splitlines():
+        quadrangle_split = quadrangle.split()
+        
+        quadrangle = [
+            node_dict[quadrangle_split[1]],
+            node_dict[quadrangle_split[2]],
+            node_dict[quadrangle_split[3]],
+            node_dict[quadrangle_split[4]],
+        ]
+        
+        faces.append(quadrangle)
+
+    faces = np.array(faces, dtype=np.int)
+    
+    return vertices, faces
 
 
 def load_INP(filename):
