@@ -470,30 +470,30 @@ parser.add_argument('-rz', '--rotatez', type=float, metavar='Rz',
 
 parser.add_argument('-s', '--scale', type=float, metavar='S',
                     help="""scales the mesh. CAUTION : if used along
-                     with a translation option, the scaling is done before
+                     with a translation option, the scaling is done after
                     the translations. The translation magnitude should be set
-                    accordingly to the newly scaled mesh.
+                    accordingly to the original mesh.
                     """)
 
 parser.add_argument('-sx', '--scalex', type=float, metavar='Sx',
                     help="""scales the mesh along x axis. CAUTION : if used along
-                     with a translation option, the scaling is done before
+                     with a translation option, the scaling is done after
                     the translations. The translation magnitude should be set
-                    accordingly to the newly scaled mesh.
+                    accordingly to the original mesh.
                     """)
 
 parser.add_argument('-sy', '--scaley', type=float, metavar='Sy',
                     help="""scales the mesh along y axis. CAUTION : if used along
-                     with a translation option, the scaling is done before
+                     with a translation option, the scaling is done after
                     the translations. The translation magnitude should be set
-                    accordingly to the newly scaled mesh.
+                    accordingly to the original mesh.
                     """)
 
 parser.add_argument('-sz', '--scalez', type=float, metavar='Sz',
                     help="""scales the mesh along z axis. CAUTION : if used along
-                     with a translation option, the scaling is done before
+                     with a translation option, the scaling is done after
                     the translations. The translation magnitude should be set
-                    accordingly to the newly scaled mesh.
+                    accordingly to the original mesh.
                     """)
 
 parser.add_argument('-hn', '--heal-normals', action='store_true',
