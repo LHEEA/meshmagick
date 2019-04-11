@@ -779,7 +779,7 @@ def load_GDF(filename):
 
         for k in range(4):
             iv += 1
-            vertices[iv, :] = np.array(ifile.readline().split())
+            vertices[iv, :] = np.array(ifile.readline().split())[:3]
             faces[icell, k] = iv
 
     ifile.close()
