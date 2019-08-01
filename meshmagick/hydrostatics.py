@@ -608,13 +608,14 @@ class Hydrostatics(object):
                 dy = yii - yi
                 px = xi + xii
                 py = yi + yii
-                a = xi * xi + xii * xii
+                # a = xi * xi + xii * xii
 
                 sigma0 += dy * px
                 sigma1 += dy * (px * px - xi * xii)
                 sigma2 += dx * (py * py - yi * yii)
-                sigma3 += dy * (py * a + 2 * px * (xi * yi + xii * yii))
-                sigma4 += dy * a * px
+                # sigma3 += dy * (py * a + 2 * px * (xi * yi + xii * yii))
+                sigma3 += dy * (py * px * px + yi * xi * xi + yii * xii * xii)
+                sigma4 += dy * (xi * xi + xii * xii) * px
                 sigma5 += dx * (yi * yi + yii * yii) * py
 
                 xi, yi = xii, yii

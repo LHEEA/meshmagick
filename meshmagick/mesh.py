@@ -1933,7 +1933,7 @@ class Mesh(object):
         Returns
         -------
         ndarray
-            The mesh surface inegrals array
+            The mesh surface integrals array
         """
         # TODO: add an option to do the summation
         # TODO: decrire les integrales de surface en question
@@ -2026,7 +2026,7 @@ class Mesh(object):
 
         s0, s1, s2, s3, s4, s5, s6, s7, s8 = self.get_surface_integrals()[:9].sum(axis=1)
         
-        cog = np.array([s0, s1, s2], dtype=np.float) / mass
+        cog = np.array([s0, s1, s2], dtype=np.float) / surface
         
         xx = surf_density * (s7 + s8)
         yy = surf_density * (s6 + s8)
