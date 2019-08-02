@@ -174,11 +174,69 @@ def load_HST(filename):
 
 
 def load_DAT(filename):
-    """Not implemented.
-    Intended to load .DAT files used in DIODORE (PRINCIPIA (c))
+    """Loads .DAT files used in DIODORE (PRINCIPIA (c))
+    
     """
     _check_file(filename)
-    raise NotImplementedError
+    
+    with open(filename, 'r') as f:
+        data = f.read()
+    
+    
+    import re
+    
+    # NODE SECTION
+    node_section_pattern = re.compile(r'NODE\s*((?:\d+(?:\s+\S+){3}\s+)+)\*RETURN')
+    node_sections = node_section_pattern.findall(data)
+    
+    if len(node_sections) > 1:
+        raise RuntimeError('Not possible to have several NODE sections in Diodore DAT files')
+    
+    nodes = []
+    node_dict = {}
+    for inode, node_str in enumerate(node_sections[0].splitlines()):
+        node_split = node_str.split()
+        nodes.append(node_split[1:])
+        node_dict[node_split[0]] = inode
+        
+    vertices = np.array(nodes, dtype=np.float)
+    
+    # TRIANGLE FACES SECTION
+    triangle_section_pattern = re.compile(r'ELEMENT\S+T3C000.+\s*((?:(?:\d+\s+){4})+)\*RETURN')
+    triangle_sections = triangle_section_pattern.findall(data)
+    
+    faces = []
+    for triangle in triangle_sections[0].splitlines():
+        triangle_split = triangle.split()
+        
+        triangle = [
+            node_dict[triangle_split[1]],
+            node_dict[triangle_split[2]],
+            node_dict[triangle_split[3]],
+            node_dict[triangle_split[1]],
+        ]
+        
+        faces.append(triangle)
+    
+    # QUADRANGLE FACES SECTION
+    quadrangle_section_pattern = re.compile(r'ELEMENT\S+Q4C000.+\s*((?:(?:\d+\s+){5})+)\*RETURN')
+    quadrangle_sections = quadrangle_section_pattern.findall(data)
+    
+    for quadrangle in quadrangle_sections[0].splitlines():
+        quadrangle_split = quadrangle.split()
+        
+        quadrangle = [
+            node_dict[quadrangle_split[1]],
+            node_dict[quadrangle_split[2]],
+            node_dict[quadrangle_split[3]],
+            node_dict[quadrangle_split[4]],
+        ]
+        
+        faces.append(quadrangle)
+
+    faces = np.array(faces, dtype=np.int)
+    
+    return vertices, faces
 
 
 def load_INP(filename):
@@ -470,7 +528,7 @@ def load_VTK(filename):
     Parameters
     ----------
     filename: str
-        name of the meh file on disk
+        name of the mesh file on disk
 
     Returns
     -------
@@ -487,6 +545,39 @@ def load_VTK(filename):
 
     from vtk import vtkPolyDataReader
     reader = vtkPolyDataReader()
+    reader.SetFileName(filename)
+    reader.Update()
+    vtk_mesh = reader.GetOutput()
+
+    vertices, faces = _dump_vtk(vtk_mesh)
+    return vertices, faces
+
+
+def load_OBJ(filename):
+    """Loads Wavefront OBJ file format.
+    
+    It relies on the reader from the VTK library.
+
+    Parameters
+    ----------
+    filename: str
+        name of the mesh file on disk
+
+    Returns
+    -------
+    vertices: ndarray
+        numpy array of the coordinates of the mesh's nodes
+    faces: ndarray
+        numpy array of the faces' nodes connectivities
+
+    Note
+    ----
+    VTU files have a 0-indexing
+    """
+    _check_file(filename)
+
+    from vtk import vtkOBJReader
+    reader = vtkOBJReader()
     reader.SetFileName(filename)
     reader.Update()
     vtk_mesh = reader.GetOutput()
@@ -688,7 +779,7 @@ def load_GDF(filename):
 
         for k in range(4):
             iv += 1
-            vertices[iv, :] = np.array(ifile.readline().split())
+            vertices[iv, :] = np.array(ifile.readline().split())[:3]
             faces[icell, k] = iv
 
     ifile.close()
@@ -1261,6 +1352,30 @@ def write_VTK(filename, vertices, faces):
                 f.write('4 %u %u %u %u\n' % (face[0], face[1], face[2], face[3]))
 
 
+def write_OBJ(filename, vertices, faces):
+    
+    with open(filename, 'w') as ofile:
+        
+        # HEADER
+        ofile.write("# Wavefront OBJ file exported by Meshmagick (Copyright Ecole Centrale de Nantes)\n")
+        ofile.write("# File Created: %s\n\n\n" % time.strftime('%c'))
+        ofile.write("# Vertices: %u\n\n" % vertices.shape[0])
+    
+        for vertex in vertices:
+            ofile.write("v  %15.6f\t%15.6f\t%15.6f\n" % (vertex[0], vertex[1], vertex[2]))
+        
+        ofile.write("\n\n\n# Faces: %u\n\n" % faces.shape[0])
+        for face in faces:
+            ofile.write("f  %10u  %10u  %10u" % (face[0]+1, face[1]+1, face[2]+1))
+            
+            if face[0] == face[-1]:
+                # Triangle
+                ofile.write("\n")
+            else:
+                # Quadrangle
+                ofile.write("  %10u\n" % (face[-1]+1))
+                
+
 def _build_vtkUnstructuredGrid(vertices, faces):
     """Internal function that builds a VTK object for manipulation by the VTK library.
 
@@ -1585,5 +1700,6 @@ extension_dict = {  # keyword,  reader,   writer
     'vrml': (load_WRL, write_WRL),
     'wrl': (load_WRL, write_WRL),
     'nem': (load_NEM, write_NEM),
-    'nemoh_mesh': (load_NEM, write_NEM)
+    'nemoh_mesh': (load_NEM, write_NEM),
+    'obj': (load_OBJ, write_OBJ)
 }
