@@ -8,7 +8,7 @@ import os
 def test_all_io():
     vertices, faces = load_VTP('meshmagick/tests/data/SEAREV.vtp')
     
-    for (loader, writer) in extension_dict.values():
+    for (loader, writer) in list(extension_dict.values()):
         try:
             writer('meshfile', vertices, faces)
             can_try_to_load = True

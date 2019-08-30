@@ -406,7 +406,7 @@ class MMViewer:
 
     def hide(self, index):
         if index > len(self.polydatas):
-            print "No mesh with index %u" % index
+            print(("No mesh with index %u" % index))
             return
         
         self.hiden
@@ -426,7 +426,7 @@ class MMViewer:
                 writer.SetInputData(polydata)
         writer.Write()
 
-        print "File 'mmviewer_save.vtp' written in %s" % getcwd()
+        print(("File 'mmviewer_save.vtp' written in %s" % getcwd()))
         return
 
     def screenshot(self):
@@ -443,7 +443,7 @@ class MMViewer:
             writer.SetInputData(w2if.GetOutput())
         writer.Write()
 
-        print "File 'screenshot.png' written in %s" % getcwd()
+        print(("File 'screenshot.png' written in %s" % getcwd()))
         return
 
     def finalize(self):

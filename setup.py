@@ -1,5 +1,5 @@
 """Setup script for meshmagick."""
-from __future__ import print_function
+
 from setuptools import setup, find_packages
 import codecs
 import os
@@ -36,7 +36,6 @@ setup(
     },
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Development Status :: 5 - Production/Stable',
         'Natural Language :: English',
         'Intended Audience :: Science/Research',

@@ -12,33 +12,33 @@ import sys
 
 def checkout_branch(repo, branch):
     # TODO: faire le check que la branche demandee existe bien dans le repo
-    print "\nChecking out to branch %s" % branch
+    print(("\nChecking out to branch %s" % branch))
     try:
-        print repo.git.checkout(branch)
+        print((repo.git.checkout(branch)))
     except:
         raise RuntimeError('Unable to checkout to branch %s' % branch)
 
 
 def stash_modifs(repo):
-    print "\nStash local modifications"
-    print "-------------------------\n"
+    print("\nStash local modifications")
+    print("-------------------------\n")
     try:
-        print repo.git.stash(all=True)
+        print((repo.git.stash(all=True)))
     except:
         raise RuntimeError('Unable to stash modifications')
     
     
 def unstash_modifs(repo):
-    print "\nUnstash local modifications"
-    print "---------------------------\n"
+    print("\nUnstash local modifications")
+    print("---------------------------\n")
     try:
-        print repo.git.stash('pop', 'stash@{0}')
+        print((repo.git.stash('pop', 'stash@{0}')))
     except:
         raise RuntimeError('Unable to unstash modifications')
 
 
 def sphinx_build(working_dir):
-    print working_dir
+    print(working_dir)
 
 
 def empty_dir():
@@ -97,7 +97,7 @@ if __name__ == '__main__':
         
     
     except:
-        print "Failed, getting back to initial state"
+        print("Failed, getting back to initial state")
         checkout_branch(repo, cur_branch)
         unstash_modifs(repo)
     

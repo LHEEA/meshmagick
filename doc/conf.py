@@ -77,9 +77,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u"Meshmagick User's Guide"
-copyright = u'%s, Ecole Centrale de Nantes' % datetime.now().year
-author = u'François Rongère'
+project = "Meshmagick User's Guide"
+copyright = '%s, Ecole Centrale de Nantes' % datetime.now().year
+author = 'François Rongère'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -253,8 +253,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'meshmagick.tex', u'Meshmagick Documentation',
-   u'François Rongère', 'manual'),
+  (master_doc, 'meshmagick.tex', 'Meshmagick Documentation',
+   'François Rongère', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -283,7 +283,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'meshmagick', u'meshmagick %s Documentation' % version,
+    (master_doc, 'meshmagick', 'meshmagick %s Documentation' % version,
      [author], 1)
 ]
 
@@ -297,7 +297,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'meshmagick', u'Meshmagick %s Documentation' % version,
+  (master_doc, 'meshmagick', 'Meshmagick %s Documentation' % version,
    author, 'meshmagick', 'One line description of project.',
    'Miscellaneous'),
 ]

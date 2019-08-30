@@ -6,7 +6,7 @@ import numpy as np
 from math import pi, sqrt
 from copy import deepcopy
 
-import densities
+from . import densities
 
 # FIXME: attention, changer les signes pour les produits d'inertie !
 # TODO: ajouter la production d'inerties de solides connus --> utile pour comparaison !!
@@ -614,7 +614,7 @@ class RotationalInertia3D(np.ndarray):
     
     @property
     def array(self):
-        print "generating full array"
+        print("generating full array")
         array = np.asarray(self, dtype=np.float)[[0, 1, 3, 1, 2, 4, 3, 4, 5]]
         array[[1, 2, 3, 5, 6, 7]] *= -1
         return array.reshape((3, 3))
@@ -646,7 +646,7 @@ class RotationalInertia3D(np.ndarray):
     # #         return NotImplemented
 
     def __numpy_ufunc__(self, ufunc, method, i, inputs, **kwargs):
-        print "In __numpy_ufunc__"
+        print("In __numpy_ufunc__")
         return NotImplemented
     
 
@@ -703,7 +703,7 @@ if __name__ == '__main__':
     # print inertia * 2
     # print inertia.__array_priority__
     # print w.__array_priority__
-    print inertia * 2
+    print((inertia * 2))
     # print w*inertia
     # print inertia*2
 
