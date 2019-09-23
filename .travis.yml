@@ -24,7 +24,7 @@ install:
   - conda build conda.recipe
 
   # Install meshmagick
-  - pip install meshmagick
+  - pip install .
   - meshmagick -h
   - python -c "import meshmagick"
 
