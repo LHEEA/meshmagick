@@ -1,10 +1,10 @@
 Meshmagick
 ==========
 
-.. image:: https://travis-ci.org/LHEEA/meshmagick.svg?branch=master
+.. .. image:: https://travis-ci.org/LHEEA/meshmagick.svg?branch=master
     :target: https://travis-ci.org/LHEEA/meshmagick
 
-.. image:: https://coveralls.io/repos/github/LHEEA/meshmagick/badge.svg?branch=master
+.. .. image:: https://coveralls.io/repos/github/LHEEA/meshmagick/badge.svg?branch=master
     :target: https://coveralls.io/github/LHEEA/meshmagick?branch=master
 
 <<< **INFORMATION : From version 2.0, Meshmagick runs under Python 3.7 !!** >>>
