@@ -22,7 +22,7 @@ install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest pytest-cov sphinx sphinx_rtd_theme
   - source activate test-environment
   - conda install -c conda-forge sphinx-argparse
-  - conda install -c bioconda sphinxcontrib-programoutput
+  - conda install -c conda-forge sphinxcontrib-programoutput
   - pip install coveralls
 
   # Build meshmagick package to be installed by conda
