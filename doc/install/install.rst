@@ -5,7 +5,8 @@ Meshmagick is packaged for every major OS (\*nix, Windows, OS/X) for both 32/64 
 
 .. warning::
 
-    Meshmagick is written in Python 2.7 only. So please ensure that you have a Python 2.7 distribution.
+    From version 2.0, Meshmagick is now written in Python 3. Compatibility with Python 2.7 is no more ensured. If special
+    needs for this compatibility, please contact the developpers. Thanks.
 
 
 Installing with conda
