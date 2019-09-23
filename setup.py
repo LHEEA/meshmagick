@@ -1,5 +1,5 @@
 """Setup script for meshmagick."""
-from __future__ import print_function
+
 from setuptools import setup, find_packages
 import codecs
 import os
@@ -17,7 +17,7 @@ LONG_DESCRIPTION = read('README.rst')
 
 setup(
     name='meshmagick',
-    version='1.0.6',
+    version='2.0',
     url='https://github.com/LHEEA/meshmagick',
     author='Francois Rongere -- Ecole Centrale de Nantes',
     author_email='Francois.Rongere@ec-nantes.fr',
@@ -28,7 +28,7 @@ setup(
     packages=find_packages(exclude=['contrib', 'doc', 'tests*']),
     # setup_requires=['pytest-runner'],
     # tests_require=['pytest', 'pytest-cov'],
-    install_requires=['numpy', 'argcomplete'],
+    install_requires=['numpy', 'argcomplete', 'vtk'],
     entry_points={
         'console_scripts': [
             'meshmagick=meshmagick:main',
@@ -36,7 +36,6 @@ setup(
     },
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Development Status :: 5 - Production/Stable',
         'Natural Language :: English',
         'Intended Audience :: Science/Research',

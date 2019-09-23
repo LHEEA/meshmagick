@@ -5,7 +5,7 @@
 import numpy as np
 import math
 
-from mesh_clipper import MeshClipper
+from .mesh_clipper import MeshClipper
 
 __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
@@ -571,7 +571,7 @@ class Hydrostatics(object):
         # centers = clipped_mesh.faces_centers
 
         if np.any(np.fabs(areas) < 1e-10):  # TODO: bloc a retirer
-            print 'probleme de facette'
+            print('probleme de facette')
             self.mesh.quick_save()
             raise Exception
 
@@ -600,7 +600,7 @@ class Hydrostatics(object):
 
             # TODO: voir si on conserve ce test...
             if np.any(np.fabs(polyverts[:, 2]) > 1e-3):
-                print 'The intersection polygon is not on the plane z=0'
+                print('The intersection polygon is not on the plane z=0')
 
             xi, yi = polyverts[0, :2]
             for (xii, yii) in polyverts[1:, :2]:
@@ -780,8 +780,8 @@ class Hydrostatics(object):
         """
 
         if self.verbose:
-            print "\nComplying with a displacement of %.3f tons" % disp
-            print "----------------------------------------------"
+            print(("\nComplying with a displacement of %.3f tons" % disp))
+            print("----------------------------------------------")
 
         self.mass = disp
 
@@ -796,7 +796,7 @@ class Hydrostatics(object):
             # print iter
             if iter == itermax:
                 if self.verbose:
-                    print '\t-> No convergence of the displacement after %u iterations' % itermax
+                    print(('\t-> No convergence of the displacement after %u iterations' % itermax))
                 break
 
             # Translating the mesh
@@ -812,7 +812,7 @@ class Hydrostatics(object):
             residual = self.delta_fz
             if math.fabs(residual / self._mg) < reltol:
                 if self.verbose:
-                    print '\t-> Convergence obtained after %u iterations' % iter
+                    print(('\t-> Convergence obtained after %u iterations' % iter))
                 break
 
             dz = residual / (self._rhog * self.flotation_surface_area)
@@ -847,13 +847,13 @@ class Hydrostatics(object):
         # Initial displacement equilibrium
         if init_disp:
             if self.verbose:
-                print "First placing the mesh at the target displacement"
-                print "-------------------------------------------------"
+                print("First placing the mesh at the target displacement")
+                print("-------------------------------------------------")
             self.set_displacement(self.mass)
 
         if self.verbose:
-            print '\nComputing equilibrium from initial condition.'
-            print '----------------------------------------------'
+            print('\nComputing equilibrium from initial condition.')
+            print('----------------------------------------------')
 
         # Retrieving solver parameters
         z_relax = self._solver_parameters['z_relax']
@@ -878,13 +878,13 @@ class Hydrostatics(object):
             if unstable_config or (iter == (nb_restart + 1) * (itermax - 1)):
                 if self.verbose:
                     if unstable_config:
-                        print 'Unstable equilibrium reached.'
-                        print '\t-> Keep searching a stable configuration by random restart number %u.' % (
-                        nb_restart + 1)
+                        print('Unstable equilibrium reached.')
+                        print(('\t-> Keep searching a stable configuration by random restart number %u.' % (
+                        nb_restart + 1)))
                     else:
-                        print 'Failed to find an equilibrium configuration with these initial conditions in %u ' \
-                              'iterations.' % itermax
-                        print '\t-> Keep searching by random restart number %u.' % (nb_restart + 1)
+                        print(('Failed to find an equilibrium configuration with these initial conditions in %u ' \
+                              'iterations.' % itermax))
+                        print(('\t-> Keep searching by random restart number %u.' % (nb_restart + 1)))
 
                 unstable_config = False
 
@@ -974,11 +974,11 @@ class Hydrostatics(object):
 
         if self.verbose:
             if code == 0:
-                print "\t-> Maximum number of restart reached. Failed to find an equilibrum position."
+                print("\t-> Maximum number of restart reached. Failed to find an equilibrum position.")
             elif code == 1:
-                print "Stable equilibrium reached after %u iterations and %u random restart" % (iter, nb_restart)
+                print(("Stable equilibrium reached after %u iterations and %u random restart" % (iter, nb_restart)))
             elif code == 2:
-                print 'Unstable equilibrium reached after %u iterations and %u random restart' % (iter, nb_restart)
+                print(('Unstable equilibrium reached after %u iterations and %u random restart' % (iter, nb_restart)))
 
         return code
 
@@ -1002,7 +1002,9 @@ class Hydrostatics(object):
                                                                                 textwidth=textwidth,
                                                                                 dtype=dtype
                                                                                 )
-            except ValueError:
+            # ValueError for Python 2
+            # TypeError for Python 3
+            except (ValueError, TypeError):
                 if isinstance(data, np.ndarray):
                     if data.ndim == 1:
                         data_str = ''.join(['{:< 10.{precision}{dtype}}'.format(val, precision=precision, dtype=dtype)
@@ -1092,7 +1094,7 @@ class Hydrostatics(object):
         """Displays the mesh in the meshmagick viewer with additional graphics proper to hydrostatics"""
         # TODO: Ce n'est pas ce module qui doit savoir utiliser vtk !!!
 
-        import MMviewer
+        from . import MMviewer
         import vtk
 
         vtk_polydata = self.mesh._vtk_polydata()

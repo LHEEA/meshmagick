@@ -11,7 +11,7 @@ from os.path import curdir
 
 vertices, faces = load_VTP('meshmagick/tests/data/Cylinder.vtp')
 cylinder = Mesh(vertices, faces)
-print cylinder
+print(cylinder)
 
 def test_plane():
     plane = Plane()

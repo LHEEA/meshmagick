@@ -26,10 +26,10 @@ cyl_anal_inertia = right_circular_cylinder(R, H, density=get_density('SALT_WATER
 cyl_mesh.translate([1, 3, -10])
 # cyl_mesh.show()
 
-print "Numerique:"
-print cyl_mesh.eval_plain_mesh_inertias(get_density('SALT_WATER'))
+print("Numerique:")
+print((cyl_mesh.eval_plain_mesh_inertias(get_density('SALT_WATER'))))
 
 cyl_anal_inertia.reduction_point = [-1, -3, 10]
-print "analytique:"
-print cyl_anal_inertia
+print("analytique:")
+print(cyl_anal_inertia)
 
