@@ -14,7 +14,7 @@ Meshmagick
 hydrodynamics community.
 
 Its primary goal was to be a conversion tool between major file formats for hydrodynamic computations tools (`Nemoh
-<https://lheea.ec-nantes.fr/doku.php/emo/nemoh/start>`_, `Wamit <http://www.wamit.com/>`_, `Hydrostar
+<https://lheea.ec-nantes.fr/logiciels-et-brevets/nemoh-presentation-192863.kjsp>`_, `Wamit <http://www.wamit.com/>`_, `Hydrostar
 <http://www.veristar.com/portal/veristarinfo/detail/software/Seakeeping%20and%20Mooring%20Analysis/HYDROSTAR/Hydros>`_
 or `Diodore <http://www.principia.fr/expertise-fields-software-products-diodore-132.html>`_) and visualization tools
 (stl, `Tecplot <http://www.tecplot.com/>`_, `Paraview <http://www.paraview.org/>`_). It will be particularly useful for
