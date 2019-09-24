@@ -200,39 +200,42 @@ def load_DAT(filename):
         node_dict[node_split[0]] = inode
         
     vertices = np.array(nodes, dtype=np.float)
-    
+
+    faces = []
+
     # TRIANGLE FACES SECTION
     triangle_section_pattern = re.compile(r'ELEMENT\S+T3C000.+\s*((?:(?:\d+\s+){4})+)\*RETURN')
     triangle_sections = triangle_section_pattern.findall(data)
-    
-    faces = []
-    for triangle in triangle_sections[0].splitlines():
-        triangle_split = triangle.split()
-        
-        triangle = [
-            node_dict[triangle_split[1]],
-            node_dict[triangle_split[2]],
-            node_dict[triangle_split[3]],
-            node_dict[triangle_split[1]],
-        ]
-        
-        faces.append(triangle)
+
+    if len(triangle_sections) != 0:
+        for triangle in triangle_sections[0].splitlines():
+            triangle_split = triangle.split()
+
+            triangle = [
+                node_dict[triangle_split[1]],
+                node_dict[triangle_split[2]],
+                node_dict[triangle_split[3]],
+                node_dict[triangle_split[1]],
+            ]
+
+            faces.append(triangle)
     
     # QUADRANGLE FACES SECTION
     quadrangle_section_pattern = re.compile(r'ELEMENT\S+Q4C000.+\s*((?:(?:\d+\s+){5})+)\*RETURN')
     quadrangle_sections = quadrangle_section_pattern.findall(data)
-    
-    for quadrangle in quadrangle_sections[0].splitlines():
-        quadrangle_split = quadrangle.split()
-        
-        quadrangle = [
-            node_dict[quadrangle_split[1]],
-            node_dict[quadrangle_split[2]],
-            node_dict[quadrangle_split[3]],
-            node_dict[quadrangle_split[4]],
-        ]
-        
-        faces.append(quadrangle)
+
+    if len(quadrangle_sections) != 0:
+        for quadrangle in quadrangle_sections[0].splitlines():
+            quadrangle_split = quadrangle.split()
+
+            quadrangle = [
+                node_dict[quadrangle_split[1]],
+                node_dict[quadrangle_split[2]],
+                node_dict[quadrangle_split[3]],
+                node_dict[quadrangle_split[4]],
+            ]
+
+            faces.append(quadrangle)
 
     faces = np.array(faces, dtype=np.int)
     
