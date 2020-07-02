@@ -153,8 +153,8 @@ class Hydrostatics(object):
         self._rhog = rho_water * grav
 
         # Solver parameters
-        self._solver_parameters = {'reltol': 1e-2,
-                                   'itermax': 100,
+        self._solver_parameters = {'reltol': 1e-4,
+                                   'itermax': 1000,
                                    'max_nb_restart': 10,
                                    'theta_relax': 2,
                                    'z_relax': 0.1,
@@ -702,6 +702,26 @@ class Hydrostatics(object):
         self.hs_data['Iyz'] = inertia.yz
 
         return
+        
+    @property
+    def faces(self):
+        """Get the number of faces in the mesh
+        
+        Returns
+        -------
+        int
+        """
+        return self.mesh.faces
+
+    @property
+    def vertices(self):
+        """Get the vertices array coordinate of the mesh
+        
+        Returns
+        -------
+        np.ndarray
+        """
+        return self.mesh.vertices
 
     def get_gravity_force(self):
         """Returns the gravity force applied on the body
@@ -789,6 +809,8 @@ class Hydrostatics(object):
         reltol = self._solver_parameters['reltol']
         z_relax = self._solver_parameters['z_relax']
 
+        total_dz = 0.
+
         dz = 0.
         iter = 0
 
@@ -802,6 +824,7 @@ class Hydrostatics(object):
             # Translating the mesh
             self.mesh.translate_z(dz)
             self._gravity_center[2] += dz
+            total_dz += dz
 
             for force in self.additional_forces:
                 force.update(dz=dz)
@@ -813,6 +836,7 @@ class Hydrostatics(object):
             if math.fabs(residual / self._mg) < reltol:
                 if self.verbose:
                     print(('\t-> Convergence obtained after %u iterations' % iter))
+                    print(('\t-> Mesh has been translated in z by: %f' % total_dz))
                 break
 
             dz = residual / (self._rhog * self.flotation_surface_area)
