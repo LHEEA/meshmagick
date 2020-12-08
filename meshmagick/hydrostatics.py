@@ -165,7 +165,7 @@ class Hydrostatics(object):
         self._update_hydrostatic_properties()
 
         if mass:
-            self.mass = mass * 1000.  # conversion in kg
+            self._mass = mass * 1000.  # conversion in kg
         else:
             self._mass = self.hs_data['disp_mass']
 
