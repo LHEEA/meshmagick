@@ -535,6 +535,10 @@ parser.add_argument('-c', '--clip-by-plane', nargs='*', action='append', metavar
                     also be given for the plane definition just as for the --plane option. Several
                     clipping planes may be defined on the same command line.""")
 
+parser.add_argument('-cc', '--concatenate-file', type=str,
+                    help="""Concatenate a mesh from the specified path. The file format has to be
+                    the same as the input file.""")
+
 parser.add_argument('-md', '--merge-duplicates', nargs='?', const='1e-8',
                     default=None, metavar='Tol',
                     help="""merges the duplicate nodes in the mesh with the absolute tolerance
@@ -763,6 +767,26 @@ def main():
             print(('%s successfully loaded' % args.infilename))
     else:
         raise IOError('file %s not found' % args.infilename)
+
+    if args.concatenate_file is not None:
+        print('Concatenate %s with %s' % (args.infilename, args.concatenate_file))
+        # Loading the file
+        if os.path.isfile(args.concatenate_file):
+            Vc, Fc = mmio.load_mesh(args.concatenate_file, format)
+
+            # Give the name of the mesh the filename
+            basename = os.path.basename(args.concatenate_file)
+            mesh_name, _ = os.path.splitext(basename)
+
+            mesh_c = Mesh(Vc, Fc, name=mesh_name)
+            # Ensuring triangles are following the right convention (last id = first id)
+            mesh_c.heal_triangles()
+            if verbose:
+                mesh_c.verbose_on()
+                print(('%s successfully loaded' % args.concatenate_file))
+        else:
+            raise IOError('file %s not found' % args.concatenate_file)
+        mesh += mesh_c
 
     # Merge duplicate _vertices
     if args.merge_duplicates is not None:
