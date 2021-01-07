@@ -18,7 +18,7 @@ requirements:
 
 build:
   entry_points:
-    - meshmagick = meshmagick:main
+    - meshmagick = meshmagick_cli:main
 
 about:
   home: {{data.get('url')}}

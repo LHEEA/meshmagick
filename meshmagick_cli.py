@@ -24,19 +24,20 @@ to user and 1-indexing may not be present outside the I/O functions
 # TODO: move meshmagick.py at the root level of the project ?
 
 import os, sys
-import numpy as np
-import math
+# import numpy as np
+# import math
 from datetime import datetime
-from warnings import warn
+# from warnings import warn
 from time import strftime
-
-from .mesh import *
-from . import mmio
-from .mesh_clipper import MeshClipper
-from . import hydrostatics as hs
 import argparse
-from . import densities
-from . import __version__
+
+from meshmagick.mesh import *
+from meshmagick import mmio
+from meshmagick.mesh_clipper import MeshClipper
+from meshmagick import hydrostatics as hs
+
+from meshmagick import densities
+from meshmagick import __version__
 
 __year__ = datetime.now().year
 
