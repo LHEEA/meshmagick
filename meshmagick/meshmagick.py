@@ -36,6 +36,7 @@ from .mesh_clipper import MeshClipper
 from . import hydrostatics as hs
 import argparse
 from . import densities
+from . import __version__
 
 __year__ = datetime.now().year
 
@@ -43,7 +44,6 @@ __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-%u, Ecole Centrale de Nantes" % __year__
 __credits__ = "Francois Rongere"
 __licence__ = "GPLv3"
-__version__ = "1.0.6"
 __maintainer__ = "Francois Rongere"
 __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"

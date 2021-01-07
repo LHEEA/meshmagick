@@ -7,8 +7,6 @@ Meshmagick
 .. image:: https://coveralls.io/repos/github/LHEEA/meshmagick/badge.svg?branch=master
     :target: https://coveralls.io/github/LHEEA/meshmagick?branch=master
 
-<<< **INFORMATION : From version 2.0, Meshmagick runs under Python 3.7 !!** >>>
-
 
 **Meshmagick** is a command line utility as well as a python module for the manipulation of meshes encountered in the
 hydrodynamics community.
@@ -24,7 +22,7 @@ code to code comparisons or benchmarking.
 plane, symmetry, normals flipping, normals healing (making them consistent across the mesh and outgoing), cleaning
 (duplicate nodes merging...).
 
-As of the release 1.0, **meshmagick** provides useful options for hydrostatics computations. It can solve for
+**Meshmagick** provides useful options for hydrostatics computations. It can solve for
 hydrostatics equilibrium for a given mass, center of gravity or both and provide the clipped mesh to be used by BEM
 software as well as the hydrostatics parameters (stiffness matrix, position of the center of buoyancy, displacement,
 draft...). Inertial properties of meshes may also be computed, based on assumptions.
