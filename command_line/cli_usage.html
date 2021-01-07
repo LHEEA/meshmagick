@@ -8,49 +8,46 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Using Meshmagick &mdash; Meshmagick User&#39;s Guide 1.0.5 documentation</title>
+  <title>Using Meshmagick &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
   
 
   
   
+  
+  
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Meshmagick User&#39;s Guide 1.0.5 documentation" href="../index.html"/>
-        <link rel="up" title="Meshmagick’s Command Line Interface" href="index.html"/>
-        <link rel="next" title="Command Line Interface Reference Guide" href="cli_reference.html"/>
-        <link rel="prev" title="Meshmagick’s Command Line Interface" href="index.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Command Line Interface Reference Guide" href="cli_reference.html" />
+    <link rel="prev" title="Meshmagick’s Command Line Interface" href="index.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -64,7 +61,7 @@
             
             
               <div class="version">
-                1.0.5
+                2.1.1
               </div>
             
           
@@ -85,11 +82,14 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install/install.html">Installation Instructions</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick&#8217;s Command Line Interface</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick’s Command Line Interface</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Using Meshmagick</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#getting-help">Getting help</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#converting-a-mesh-file">Converting a mesh file</a></li>
@@ -100,6 +100,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#mesh-file-visualization">Mesh file visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mesh-file-concatenation">Mesh file concatenation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mesh-healing">Mesh healing</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#removing-duplicate-vertices">Removing duplicate vertices</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#healing-normals">Healing normals</a></li>
@@ -143,7 +144,7 @@
 </li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api/index.html">Meshmagick Package&#8217;s modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">Meshmagick Package’s modules</a></li>
 </ul>
 
             
@@ -155,36 +156,56 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Meshmagick User's Guide</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Meshmagick User's Guide</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
-          <li><a href="index.html">Meshmagick&#8217;s Command Line Interface</a> &raquo;</li>
-      
-    <li>Using Meshmagick</li>
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Meshmagick’s Command Line Interface</a> &raquo;</li>
+        
+      <li>Using Meshmagick</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../_sources/command_line/cli_usage.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -193,65 +214,73 @@
   <div class="section" id="using-meshmagick">
 <h1>Using Meshmagick<a class="headerlink" href="#using-meshmagick" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ul class="last simple">
-<li>Mesh files examples used through this page are available under the <cite>meshmagick/tests/data</cite> directory so that you
-can play with them.</li>
-<li>Images that illustrate the examples have been obtained with the Meshmagick&#8217;s viewer and by pressing the <code class="docutils literal"><span class="pre">c</span></code>
-keystroke.</li>
-<li>Most of the command line options may be combined.</li>
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Mesh files examples used through this page are available under the <cite>meshmagick/tests/data</cite> directory so that you
+can play with them.</p></li>
+<li><p>Images that illustrate the examples have been obtained with the Meshmagick’s viewer and by pressing the <code class="docutils literal notranslate"><span class="pre">c</span></code>
+keystroke.</p></li>
+<li><p>Most of the command line options may be combined.</p></li>
 </ul>
 </div>
 <div class="contents local topic" id="content">
-<p class="topic-title first">Content</p>
+<p class="topic-title">Content</p>
 <ul class="simple">
-<li><a class="reference internal" href="#getting-help" id="id1">Getting help</a></li>
-<li><a class="reference internal" href="#converting-a-mesh-file" id="id2">Converting a mesh file</a></li>
-<li><a class="reference internal" href="#quiet-mode" id="id3">Quiet mode</a></li>
-<li><a class="reference internal" href="#getting-information-on-a-mesh" id="id4">Getting information on a mesh</a><ul>
-<li><a class="reference internal" href="#quick-information" id="id5">Quick information</a></li>
-<li><a class="reference internal" href="#mesh-quality-metrics" id="id6">Mesh quality metrics</a></li>
+<li><p><a class="reference internal" href="#getting-help" id="id3">Getting help</a></p></li>
+<li><p><a class="reference internal" href="#converting-a-mesh-file" id="id4">Converting a mesh file</a></p></li>
+<li><p><a class="reference internal" href="#quiet-mode" id="id5">Quiet mode</a></p></li>
+<li><p><a class="reference internal" href="#getting-information-on-a-mesh" id="id6">Getting information on a mesh</a></p>
+<ul>
+<li><p><a class="reference internal" href="#quick-information" id="id7">Quick information</a></p></li>
+<li><p><a class="reference internal" href="#mesh-quality-metrics" id="id8">Mesh quality metrics</a></p></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#mesh-file-visualization" id="id7">Mesh file visualization</a></li>
-<li><a class="reference internal" href="#mesh-healing" id="id8">Mesh healing</a><ul>
-<li><a class="reference internal" href="#removing-duplicate-vertices" id="id9">Removing duplicate vertices</a></li>
-<li><a class="reference internal" href="#healing-normals" id="id10">Healing normals</a></li>
-<li><a class="reference internal" href="#flipping-normals" id="id11">Flipping normals</a></li>
-<li><a class="reference internal" href="#global-healing" id="id12">Global healing</a></li>
+<li><p><a class="reference internal" href="#mesh-file-visualization" id="id9">Mesh file visualization</a></p></li>
+<li><p><a class="reference internal" href="#mesh-file-concatenation" id="id10">Mesh file concatenation</a></p></li>
+<li><p><a class="reference internal" href="#mesh-healing" id="id11">Mesh healing</a></p>
+<ul>
+<li><p><a class="reference internal" href="#removing-duplicate-vertices" id="id12">Removing duplicate vertices</a></p></li>
+<li><p><a class="reference internal" href="#healing-normals" id="id13">Healing normals</a></p></li>
+<li><p><a class="reference internal" href="#flipping-normals" id="id14">Flipping normals</a></p></li>
+<li><p><a class="reference internal" href="#global-healing" id="id15">Global healing</a></p></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#mesh-transformations" id="id13">Mesh transformations</a><ul>
-<li><a class="reference internal" href="#translations" id="id14">Translations</a></li>
-<li><a class="reference internal" href="#rotations" id="id15">Rotations</a></li>
-<li><a class="reference internal" href="#scaling" id="id16">Scaling</a></li>
+<li><p><a class="reference internal" href="#mesh-transformations" id="id16">Mesh transformations</a></p>
+<ul>
+<li><p><a class="reference internal" href="#translations" id="id17">Translations</a></p></li>
+<li><p><a class="reference internal" href="#rotations" id="id18">Rotations</a></p></li>
+<li><p><a class="reference internal" href="#scaling" id="id19">Scaling</a></p></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#triangulating-quadrangles" id="id17">Triangulating quadrangles</a></li>
-<li><a class="reference internal" href="#working-with-planes" id="id18">Working with planes</a><ul>
-<li><a class="reference internal" href="#defining-planes" id="id19">Defining planes</a></li>
-<li><a class="reference internal" href="#clipping-a-mesh-by-a-plane" id="id20">Clipping a mesh by a plane</a></li>
-<li><a class="reference internal" href="#symmetrizing-a-mesh-about-a-plane" id="id21">Symmetrizing a mesh about a plane</a></li>
+<li><p><a class="reference internal" href="#triangulating-quadrangles" id="id20">Triangulating quadrangles</a></p></li>
+<li><p><a class="reference internal" href="#working-with-planes" id="id21">Working with planes</a></p>
+<ul>
+<li><p><a class="reference internal" href="#defining-planes" id="id22">Defining planes</a></p></li>
+<li><p><a class="reference internal" href="#clipping-a-mesh-by-a-plane" id="id23">Clipping a mesh by a plane</a></p></li>
+<li><p><a class="reference internal" href="#symmetrizing-a-mesh-about-a-plane" id="id24">Symmetrizing a mesh about a plane</a></p></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#getting-inertial-properties-of-the-mesh" id="id22">Getting inertial properties of the mesh</a><ul>
-<li><a class="reference internal" href="#defining-the-medium-density" id="id23">Defining the medium density</a></li>
-<li><a class="reference internal" href="#guessing-the-mesh-is-filled-with-homogeneous-medium" id="id24">Guessing the mesh is filled with homogeneous medium</a></li>
-<li><a class="reference internal" href="#guessing-the-mesh-is-a-shell" id="id25">Guessing the mesh is a shell</a></li>
+<li><p><a class="reference internal" href="#getting-inertial-properties-of-the-mesh" id="id25">Getting inertial properties of the mesh</a></p>
+<ul>
+<li><p><a class="reference internal" href="#defining-the-medium-density" id="id26">Defining the medium density</a></p></li>
+<li><p><a class="reference internal" href="#guessing-the-mesh-is-filled-with-homogeneous-medium" id="id27">Guessing the mesh is filled with homogeneous medium</a></p></li>
+<li><p><a class="reference internal" href="#guessing-the-mesh-is-a-shell" id="id28">Guessing the mesh is a shell</a></p></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#performing-hydrostatics-calculations-on-the-mesh" id="id26">Performing hydrostatics calculations on the mesh</a><ul>
-<li><a class="reference internal" href="#expression-of-the-hydrostatic-data" id="id27">Expression of the hydrostatic data</a></li>
-<li><a class="reference internal" href="#getting-hydrostatics-properties-of-the-mesh" id="id28">Getting hydrostatics properties of the mesh</a></li>
-<li><a class="reference internal" href="#displaying-the-mesh-with-hydrostatic-results" id="id29">Displaying the mesh with hydrostatic results</a></li>
-<li><a class="reference internal" href="#getting-the-mesh-vertical-position-that-complies-with-a-given-mass-displacement" id="id30">Getting the mesh vertical position that complies with a given mass displacement</a></li>
-<li><a class="reference internal" href="#d-hydrostatic-equilibrium" id="id31">3D hydrostatic equilibrium</a></li>
-<li><a class="reference internal" href="#adding-external-static-forces" id="id32">Adding external static forces</a><ul>
-<li><a class="reference internal" href="#absolute-forces" id="id33">Absolute forces</a></li>
-<li><a class="reference internal" href="#relative-forces" id="id34">Relative forces</a></li>
+<li><p><a class="reference internal" href="#performing-hydrostatics-calculations-on-the-mesh" id="id29">Performing hydrostatics calculations on the mesh</a></p>
+<ul>
+<li><p><a class="reference internal" href="#expression-of-the-hydrostatic-data" id="id30">Expression of the hydrostatic data</a></p></li>
+<li><p><a class="reference internal" href="#getting-hydrostatics-properties-of-the-mesh" id="id31">Getting hydrostatics properties of the mesh</a></p></li>
+<li><p><a class="reference internal" href="#displaying-the-mesh-with-hydrostatic-results" id="id32">Displaying the mesh with hydrostatic results</a></p></li>
+<li><p><a class="reference internal" href="#getting-the-mesh-vertical-position-that-complies-with-a-given-mass-displacement" id="id33">Getting the mesh vertical position that complies with a given mass displacement</a></p></li>
+<li><p><a class="reference internal" href="#d-hydrostatic-equilibrium" id="id34">3D hydrostatic equilibrium</a></p></li>
+<li><p><a class="reference internal" href="#adding-external-static-forces" id="id35">Adding external static forces</a></p>
+<ul>
+<li><p><a class="reference internal" href="#absolute-forces" id="id36">Absolute forces</a></p></li>
+<li><p><a class="reference internal" href="#relative-forces" id="id37">Relative forces</a></p></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#saving-the-hydrostatic-report-in-a-text-file" id="id35">Saving the hydrostatic report in a text file</a></li>
+<li><p><a class="reference internal" href="#saving-the-hydrostatic-report-in-a-text-file" id="id38">Saving the hydrostatic report in a text file</a></p></li>
 </ul>
 </li>
 </ul>
@@ -259,7 +288,7 @@ keystroke.</li>
 <div class="section" id="getting-help">
 <h2><a class="toc-backref" href="#content">Getting help</a><a class="headerlink" href="#getting-help" title="Permalink to this headline">¶</a></h2>
 <p>You can get command line help by issuing the following command:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick -h
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick -h
 </pre></div>
 </div>
 <p>The output of this command is reproduced in the <a class="reference internal" href="cli_reference.html"><span class="doc">Command Line Interface Reference Guide</span></a>.</p>
@@ -267,13 +296,13 @@ keystroke.</li>
 <div class="section" id="converting-a-mesh-file">
 <h2><a class="toc-backref" href="#content">Converting a mesh file</a><a class="headerlink" href="#converting-a-mesh-file" title="Permalink to this headline">¶</a></h2>
 <p>Converting a mesh file is one of the most basic usage of Meshmagick:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -o SEAREV.mar
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -o SEAREV.mar
 </pre></div>
 </div>
 <p>The format of the file is generally guessed from the extensions. Sometimes the extension may not be explicit
-enough to guess the file format. You should then use the <code class="docutils literal"><span class="pre">-ifmt</span> <span class="pre">(--input-format)</span></code> and
-<code class="docutils literal"><span class="pre">-ofmt</span> <span class="pre">(--output-format)</span></code> options to explicitly declare the file format:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -ifmt paraview SEAREV.vtp -ofmt nemoh SEAREV.dat
+enough to guess the file format. You should then use the <code class="docutils literal notranslate"><span class="pre">-ifmt</span> <span class="pre">(--input-format)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">-ofmt</span> <span class="pre">(--output-format)</span></code> options to explicitly declare the file format:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -ifmt paraview SEAREV.vtp -ofmt nemoh SEAREV.dat
 </pre></div>
 </div>
 <p>This way, we told Meshmagick that SEAREV.dat must be in the
@@ -281,8 +310,8 @@ enough to guess the file format. You should then use the <code class="docutils l
 </div>
 <div class="section" id="quiet-mode">
 <h2><a class="toc-backref" href="#content">Quiet mode</a><a class="headerlink" href="#quiet-mode" title="Permalink to this headline">¶</a></h2>
-<p>To switch off outputs of Meshmagick, use the <code class="docutils literal"><span class="pre">-q</span> <span class="pre">(--quiet)</span></code> option:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -q
+<p>To switch off outputs of Meshmagick, use the <code class="docutils literal notranslate"><span class="pre">-q</span> <span class="pre">(--quiet)</span></code> option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -q
 </pre></div>
 </div>
 </div>
@@ -290,14 +319,14 @@ enough to guess the file format. You should then use the <code class="docutils l
 <h2><a class="toc-backref" href="#content">Getting information on a mesh</a><a class="headerlink" href="#getting-information-on-a-mesh" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="quick-information">
 <h3><a class="toc-backref" href="#content">Quick information</a><a class="headerlink" href="#quick-information" title="Permalink to this headline">¶</a></h3>
-<p>Quick information on a mesh is given by the <code class="docutils literal"><span class="pre">-i</span> <span class="pre">(--info)</span></code> option:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -i
+<p>Quick information on a mesh is given by the <code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">(--info)</span></code> option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -i
 </pre></div>
 </div>
 <p>That gives us the following output:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -319,8 +348,8 @@ Copyright 2014-2017, Ecole Centrale de Nantes
         
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
@@ -330,13 +359,13 @@ Good Bye!
 <div class="section" id="mesh-quality-metrics">
 <h3><a class="toc-backref" href="#content">Mesh quality metrics</a><a class="headerlink" href="#mesh-quality-metrics" title="Permalink to this headline">¶</a></h3>
 <p>You can get some quality metrics on the mesh by issuing:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp --quality
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp --quality
 </pre></div>
 </div>
 <p>that gives:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -392,16 +421,16 @@ Definition of the different quality measures is given
 
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This option requires that you have installed a version of the python VTK library as it is used to compute these
+<p class="admonition-title">Note</p>
+<p>This option requires that you have installed a version of the python VTK library as it is used to compute these
 metrics. It relies on the <strong>verdict</strong> library, initially developed at Sandia lab and later included into VTK. More
 information on the metrics can be seen in the
 <a class="reference external" href="http://www.vtk.org/Wiki/images/6/6b/VerdictManual-revA.pdf">Verdict manual</a>.</p>
@@ -411,28 +440,42 @@ information on the metrics can be seen in the
 <div class="section" id="mesh-file-visualization">
 <h2><a class="toc-backref" href="#content">Mesh file visualization</a><a class="headerlink" href="#mesh-file-visualization" title="Permalink to this headline">¶</a></h2>
 <p>Quickly viewing a mesh can be achieved by using the following command:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp --show
 </pre></div>
 </div>
-<p>that opens the internal Meshmagick&#8217;s viewer.</p>
+<p>that opens the internal Meshmagick’s viewer.</p>
 <img alt="../_images/viewer.png" src="../_images/viewer.png" />
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The viewer relies on VTK, so the python VTK library must be installed in order to use it.</p>
+<p class="admonition-title">Note</p>
+<p>The viewer relies on VTK, so the python VTK library must be installed in order to use it.</p>
 </div>
 <p>The viewer is blazing fast and support mesh manipulation with the mouse. Some keyboard keys are available and their
 usage is indicated in the upper right panel.</p>
-<p>Certainly the most useful feature is the visualization of normals by pressing the <code class="docutils literal"><span class="pre">n</span></code> keystroke so that you can verify
+<p>Certainly the most useful feature is the visualization of normals by pressing the <code class="docutils literal notranslate"><span class="pre">n</span></code> keystroke so that you can verify
 consistency of normals across the mesh as well as orientation (must generally be outward for computations).</p>
 <img alt="../_images/viewer_options.png" src="../_images/viewer_options.png" />
-<p>The above screenshot has been obtained by pressing successively the keys <code class="docutils literal"><span class="pre">n</span></code> (showing normals), <code class="docutils literal"><span class="pre">w</span></code> (wire
-representation), <code class="docutils literal"><span class="pre">h</span></code> (show Oxy plane i.e. the water free surface) and <code class="docutils literal"><span class="pre">c</span></code> (to save a screenshot that is saved
-under the name <code class="docutils literal"><span class="pre">screenshot.png</span></code> in the current working directory.)</p>
+<p>The above screenshot has been obtained by pressing successively the keys <code class="docutils literal notranslate"><span class="pre">n</span></code> (showing normals), <code class="docutils literal notranslate"><span class="pre">w</span></code> (wire
+representation), <code class="docutils literal notranslate"><span class="pre">h</span></code> (show Oxy plane i.e. the water free surface) and <code class="docutils literal notranslate"><span class="pre">c</span></code> (to save a screenshot that is saved
+under the name <code class="docutils literal notranslate"><span class="pre">screenshot.png</span></code> in the current working directory.)</p>
 <p><strong>Just play with options to discover what is available !</strong></p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The frame at the lower left corner is draggable and resizable so that you can inspect your mesh for alignment or
+<p class="admonition-title">Note</p>
+<p>The frame at the lower left corner is draggable and resizable so that you can inspect your mesh for alignment or
 whatever you want.</p>
+</div>
+</div>
+<div class="section" id="mesh-file-concatenation">
+<h2><a class="toc-backref" href="#content">Mesh file concatenation</a><a class="headerlink" href="#mesh-file-concatenation" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to concatenate two mesh files and write it into a global file by simply using this command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick myMesh.ext1 -cc mySecondMesh.ext1 -o outMesh.ext2
+</pre></div>
+</div>
+<p>If the two files define faces that are joining, common vertices will me merged. This is of practical interest in BEM
+when dealing with multibody interactions of when lid are added to a mesh to remove irregular frequencies.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>File format for the two files to be concatenated has to be the same. The <code class="docutils literal notranslate"><span class="pre">-ifmt</span></code> command is used for both the
+files. The file format for the output file is driven normally (extension or <code class="docutils literal notranslate"><span class="pre">-ofmt</span></code> command).</p>
 </div>
 </div>
 <div class="section" id="mesh-healing">
@@ -445,14 +488,14 @@ vertices coordinates only, without using a connectivity table.</p>
 mesh generator. You may also want to flip every normals.</p>
 <div class="section" id="removing-duplicate-vertices">
 <h3><a class="toc-backref" href="#content">Removing duplicate vertices</a><a class="headerlink" href="#removing-duplicate-vertices" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal"><span class="pre">-md</span> <span class="pre">(--merge-duplicates)</span></code> option does this:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick coque.gdf -md
+<p>The <code class="docutils literal notranslate"><span class="pre">-md</span> <span class="pre">(--merge-duplicates)</span></code> option does this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick coque.gdf -md
 </pre></div>
 </div>
 <p>that gives:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/coque.gdf successfully loaded
 * Merging duplicate vertices that lie in an absolute proximity of 1.0E-08...
@@ -462,8 +505,8 @@ Copyright 2014-2017, Ecole Centrale de Nantes
 
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
@@ -473,57 +516,57 @@ Good Bye!
 </div>
 <div class="section" id="healing-normals">
 <h3><a class="toc-backref" href="#content">Healing normals</a><a class="headerlink" href="#healing-normals" title="Permalink to this headline">¶</a></h3>
-<p>This is obtained by using the <code class="docutils literal"><span class="pre">-hn</span> <span class="pre">(--heal-normals)</span></code> command line option. Let&#8217;s have an example. In the
-<cite>meshmagick/tests/data</cite> folder, you can find the file <code class="docutils literal"><span class="pre">cylinder.geo</span></code> that is a geometry file using the <em>GMSH</em>
+<p>This is obtained by using the <code class="docutils literal notranslate"><span class="pre">-hn</span> <span class="pre">(--heal-normals)</span></code> command line option. Let’s have an example. In the
+<cite>meshmagick/tests/data</cite> folder, you can find the file <code class="docutils literal notranslate"><span class="pre">cylinder.geo</span></code> that is a geometry file using the <em>GMSH</em>
 language for modeling geometry. It models the eighth of a cylinder.</p>
 <p>If you have <em>GMSH</em> on your computer, you can generate a mesh file from this file by issuing the
 following command in your terminal:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ gmsh -2 cylinder.geo
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ gmsh -2 cylinder.geo
 </pre></div>
 </div>
-<p>It will generate a file named <code class="docutils literal"><span class="pre">cylinder.msh</span></code> which is a surface mesh of the portion of cylinder. One thing that you
-can do is to visualize this mesh with the <code class="docutils literal"><span class="pre">--show</span></code> option:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh --show
+<p>It will generate a file named <code class="docutils literal notranslate"><span class="pre">cylinder.msh</span></code> which is a surface mesh of the portion of cylinder. One thing that you
+can do is to visualize this mesh with the <code class="docutils literal notranslate"><span class="pre">--show</span></code> option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh --show
 </pre></div>
 </div>
-<p>and stroke <code class="docutils literal"><span class="pre">n</span></code> to watch normals.</p>
+<p>and stroke <code class="docutils literal notranslate"><span class="pre">n</span></code> to watch normals.</p>
 <img alt="../_images/cylinder_msh_normals.png" src="../_images/cylinder_msh_normals.png" />
 <p>It is clear that <em>GMSH</em> did not orient the normals consistently. Now, you can heal them by issuing by e.g.:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh -hn -o cylinder_healed.vtp --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh -hn -o cylinder_healed.vtp --show
 </pre></div>
 </div>
-<p>which heals the normals, opens the Meshmagick&#8217;s viewer and writes the healed mesh as a <em>vtp</em> file that can be opened
+<p>which heals the normals, opens the Meshmagick’s viewer and writes the healed mesh as a <em>vtp</em> file that can be opened
 into <em>Paraview</em>.</p>
 <img alt="../_images/cylinder_msh_normals_healed.png" src="../_images/cylinder_msh_normals_healed.png" />
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This option uses a <a class="reference external" href="https://en.wikipedia.org/wiki/Flood_fill">flood fill algorithm</a> to diffuse the normal
+<p class="admonition-title">Note</p>
+<p>This option uses a <a class="reference external" href="https://en.wikipedia.org/wiki/Flood_fill">flood fill algorithm</a> to diffuse the normal
 orientation information. For doing so, it requires to establish a connectivity map for faces/faces adjacency. For
 this map to be realized, it is necessary to merge duplicate nodes before healing normals. When invoking the
-<code class="docutils literal"><span class="pre">-md</span> <span class="pre">(--merge-duplicates)</span></code> and <code class="docutils literal"><span class="pre">-hn</span> <span class="pre">(--heal-normals)</span></code> options at the same time, merging is done
+<code class="docutils literal notranslate"><span class="pre">-md</span> <span class="pre">(--merge-duplicates)</span></code> and <code class="docutils literal notranslate"><span class="pre">-hn</span> <span class="pre">(--heal-normals)</span></code> options at the same time, merging is done
 before healing so it is verified.</p>
 </div>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">If your mesh is not conformal, this option <strong>may</strong> fail as the connectivity map used by the flooding algorithm
+<p class="admonition-title">Warning</p>
+<p>If your mesh is not conformal, this option <strong>may</strong> fail as the connectivity map used by the flooding algorithm
 <strong>may</strong> present some non connected patches of faces that will be flooded independently, making the transit of
 normal orientation between these patch impossible.</p>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If the mesh is closed and conformal, a side effect of this option is to test if the normals are outgoing and
-correct them if they are not. This is achieved by &#8220;plunging the mesh in water&#8221; and integrate the hydrostatics
+<p class="admonition-title">Note</p>
+<p>If the mesh is closed and conformal, a side effect of this option is to test if the normals are outgoing and
+correct them if they are not. This is achieved by “plunging the mesh in water” and integrate the hydrostatics
 pressure to identify the resultant force orientation which must be along the positive vertical in case the
 normals are outgoing. If the mesh does not allow this checking, normals are nevertheless made consistent and you are
-warned about the eventual need to manually watch the normals from the Meshmagick&#8217;s viewer and issue a new command
+warned about the eventual need to manually watch the normals from the Meshmagick’s viewer and issue a new command
 to flip the whole normals as described in the following.</p>
 </div>
 </div>
 <div class="section" id="flipping-normals">
 <h3><a class="toc-backref" href="#content">Flipping normals</a><a class="headerlink" href="#flipping-normals" title="Permalink to this headline">¶</a></h3>
-<p>This can be done with the <code class="docutils literal"><span class="pre">-fn</span> <span class="pre">(--flip-normals)</span></code> option. Based on the <code class="docutils literal"><span class="pre">cylinder.vtp</span></code> file obtained just
+<p>This can be done with the <code class="docutils literal notranslate"><span class="pre">-fn</span> <span class="pre">(--flip-normals)</span></code> option. Based on the <code class="docutils literal notranslate"><span class="pre">cylinder.vtp</span></code> file obtained just
 before, if we issue the following command:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.vtp -fn --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.vtp -fn --show
 </pre></div>
 </div>
 <p>we get:</p>
@@ -531,23 +574,23 @@ before, if we issue the following command:</p>
 </div>
 <div class="section" id="global-healing">
 <h3><a class="toc-backref" href="#content">Global healing</a><a class="headerlink" href="#global-healing" title="Permalink to this headline">¶</a></h3>
-<p>When getting a mesh file from somewhere, you could use the <code class="docutils literal"><span class="pre">-hm</span> <span class="pre">(--heal-mesh)</span></code> option to automatically apply a
+<p>When getting a mesh file from somewhere, you could use the <code class="docutils literal notranslate"><span class="pre">-hm</span> <span class="pre">(--heal-mesh)</span></code> option to automatically apply a
 set of sanity checks and modifications on the mesh. It successively applies the following operations:</p>
 <ul class="simple">
-<li>Removes unused vertices</li>
-<li>Removes degenerated faces</li>
-<li>Merge duplicate vertices</li>
-<li>Heal triangles description</li>
-<li>Heal normal orientations</li>
+<li><p>Removes unused vertices</p></li>
+<li><p>Removes degenerated faces</p></li>
+<li><p>Merge duplicate vertices</p></li>
+<li><p>Heal triangles description</p></li>
+<li><p>Heal normal orientations</p></li>
 </ul>
 <p>The command is then:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh -hm
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh -hm
 </pre></div>
 </div>
 <p>that outputs:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/cylinder.msh successfully loaded
 
@@ -587,14 +630,38 @@ Boundary is not closed !!!
 Boundary is not closed !!!
 Boundary is not closed !!!
 Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
+Boundary is not closed !!!
 * Healing normals to make them consistent and if possible outward
 	--&gt; 2000 faces have been reversed to make normals consistent across the mesh
 	--&gt; WARNING: the mesh does not seem watertight althought marked as closed...
 	Done.
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
@@ -607,20 +674,20 @@ Good Bye!
 <p>Some basic mesh transformation options are available: translations, rotations, scaling.</p>
 <div class="section" id="translations">
 <h3><a class="toc-backref" href="#content">Translations</a><a class="headerlink" href="#translations" title="Permalink to this headline">¶</a></h3>
-<p>The options to use are <code class="docutils literal"><span class="pre">-tx</span> <span class="pre">(--translatex)</span></code>, <code class="docutils literal"><span class="pre">-ty</span> <span class="pre">(--translatey)</span></code>, <code class="docutils literal"><span class="pre">-tz</span> <span class="pre">(--translatez)</span></code>,
-<code class="docutils literal"><span class="pre">-t</span> <span class="pre">(--translate)</span></code> which respectively performs translations along the x axis, the y axis, the z axis and along a
+<p>The options to use are <code class="docutils literal notranslate"><span class="pre">-tx</span> <span class="pre">(--translatex)</span></code>, <code class="docutils literal notranslate"><span class="pre">-ty</span> <span class="pre">(--translatey)</span></code>, <code class="docutils literal notranslate"><span class="pre">-tz</span> <span class="pre">(--translatez)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">(--translate)</span></code> which respectively performs translations along the x axis, the y axis, the z axis and along a
 coordinate vector. The invocations are:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -tx 10
-&gt;$ meshmagick SEAREV.vtp -ty 10
-&gt;$ meshmagick SEAREV.vtp -tz 10
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -tx <span class="m">10</span>
+&gt;$ meshmagick SEAREV.vtp -ty <span class="m">10</span>
+&gt;$ meshmagick SEAREV.vtp -tz <span class="m">10</span>
 
 &gt;$ meshmagick SEAREV.vtp -t <span class="m">10</span> <span class="m">10</span> <span class="m">10</span> -i
 </pre></div>
 </div>
 <p>for translations of 10 along specific axes and along the coordinate vector (10, 10, 10). The last command gives:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -645,8 +712,8 @@ OPERATION: Translation by [10.000000, 10.000000, 10.000000]
         
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
@@ -655,21 +722,21 @@ Good Bye!
 </div>
 <div class="section" id="rotations">
 <h3><a class="toc-backref" href="#content">Rotations</a><a class="headerlink" href="#rotations" title="Permalink to this headline">¶</a></h3>
-<p>The options to use are <code class="docutils literal"><span class="pre">-rx</span> <span class="pre">(--rotatex)</span></code>, <code class="docutils literal"><span class="pre">-ry</span> <span class="pre">(--rotatey)</span></code>, <code class="docutils literal"><span class="pre">-rz</span> <span class="pre">(--rotatez)</span></code>,
-<code class="docutils literal"><span class="pre">-r</span> <span class="pre">(--rotate)</span></code> which respectively performs rotations around the x axis, the y axis, the z axis and a 3D
+<p>The options to use are <code class="docutils literal notranslate"><span class="pre">-rx</span> <span class="pre">(--rotatex)</span></code>, <code class="docutils literal notranslate"><span class="pre">-ry</span> <span class="pre">(--rotatey)</span></code>, <code class="docutils literal notranslate"><span class="pre">-rz</span> <span class="pre">(--rotatez)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">-r</span> <span class="pre">(--rotate)</span></code> which respectively performs rotations around the x axis, the y axis, the z axis and a 3D
 rotation along fixed axis rotation vector. The invocations are:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -rx 90
-&gt;$ meshmagick SEAREV.vtp -ry 90
-&gt;$ meshmagick SEAREV.vtp -rz 90
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -rx <span class="m">90</span>
+&gt;$ meshmagick SEAREV.vtp -ry <span class="m">90</span>
+&gt;$ meshmagick SEAREV.vtp -rz <span class="m">90</span>
 
 &gt;$ meshmagick SEAREV.vtp -r <span class="m">90</span> <span class="m">90</span> <span class="m">90</span> -i
 </pre></div>
 </div>
 <p>for rotations of 90° around specific axes and around the rotation coordinate vector (90, 90, 90). The last command
 gives:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -694,38 +761,38 @@ OPERATION: Rotation by [90.000000, 90.000000, 90.000000] (degrees)
         
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<ul class="last simple">
-<li>When using the <code class="docutils literal"><span class="pre">-r</span> <span class="pre">(--rotate)</span></code> option, please keep in mind that the angles given are not the Cardan angles
-(Roll, Pitch, Yaw) but angles around a fixed rotation axis.</li>
-<li>Angles must be given in degrees.</li>
+<p class="admonition-title">Warning</p>
+<ul class="simple">
+<li><p>When using the <code class="docutils literal notranslate"><span class="pre">-r</span> <span class="pre">(--rotate)</span></code> option, please keep in mind that the angles given are not the Cardan angles
+(Roll, Pitch, Yaw) but angles around a fixed rotation axis.</p></li>
+<li><p>Angles must be given in degrees.</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="scaling">
 <h3><a class="toc-backref" href="#content">Scaling</a><a class="headerlink" href="#scaling" title="Permalink to this headline">¶</a></h3>
-<p>The options to use are <code class="docutils literal"><span class="pre">-sx</span> <span class="pre">(--scalex)</span></code>, <code class="docutils literal"><span class="pre">-sy</span> <span class="pre">(--scaley)</span></code>, <code class="docutils literal"><span class="pre">-sz</span> <span class="pre">(--scalez)</span></code>,
-<code class="docutils literal"><span class="pre">-s</span> <span class="pre">(--scale)</span></code> which respectively performs scaling along the x axis, the y axis, the z axis and a 3D
+<p>The options to use are <code class="docutils literal notranslate"><span class="pre">-sx</span> <span class="pre">(--scalex)</span></code>, <code class="docutils literal notranslate"><span class="pre">-sy</span> <span class="pre">(--scaley)</span></code>, <code class="docutils literal notranslate"><span class="pre">-sz</span> <span class="pre">(--scalez)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">-s</span> <span class="pre">(--scale)</span></code> which respectively performs scaling along the x axis, the y axis, the z axis and a 3D
 scaling of the mesh. The invocations are:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -sx 2
-&gt;$ meshmagick SEAREV.vtp -sy 2
-&gt;$ meshmagick SEAREV.vtp -sz 2
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -sx <span class="m">2</span>
+&gt;$ meshmagick SEAREV.vtp -sy <span class="m">2</span>
+&gt;$ meshmagick SEAREV.vtp -sz <span class="m">2</span>
 
 &gt;$ meshmagick SEAREV.vtp -s <span class="m">2</span> -i
 </pre></div>
 </div>
 <p>for scaling of 2 along specific axes and of the whole mesh in space. The last command gives:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -750,30 +817,30 @@ OPERATION: Scaling by 2.000000
         
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">Scaling is performed before any translations when both options are used. So the translation magnitudes must be
+<p class="admonition-title">Warning</p>
+<p>Scaling is performed before any translations when both options are used. So the translation magnitudes must be
 adapted to be consistent with the new scale of the mesh.</p>
 </div>
 </div>
 </div>
 <div class="section" id="triangulating-quadrangles">
 <h2><a class="toc-backref" href="#content">Triangulating quadrangles</a><a class="headerlink" href="#triangulating-quadrangles" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal"><span class="pre">-tq</span> <span class="pre">(--triangulate-quadrangles)</span></code> allows to split every quadrangle faces in the mesh into two triangle:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh -tq --show
+<p>The <code class="docutils literal notranslate"><span class="pre">-tq</span> <span class="pre">(--triangulate-quadrangles)</span></code> allows to split every quadrangle faces in the mesh into two triangle:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh -tq --show
 </pre></div>
 </div>
 <p>that displays the following:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/cylinder.msh successfully loaded
 
@@ -781,8 +848,8 @@ Triangulating quadrangles
 	--&gt;3000 quadrangles have been split in triangles
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
@@ -790,8 +857,8 @@ Good Bye!
 </div>
 <img alt="../_images/triangulate.png" src="../_images/triangulate.png" />
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">The splitting procedure is basic and keep in mind that no check is done on the quality of the generated triangles.
+<p class="admonition-title">Warning</p>
+<p>The splitting procedure is basic and keep in mind that no check is done on the quality of the generated triangles.
 If your mesh faces does not have a good aspect ratio, it could produce some really tiny triangles.</p>
 </div>
 </div>
@@ -799,90 +866,89 @@ If your mesh faces does not have a good aspect ratio, it could produce some real
 <h2><a class="toc-backref" href="#content">Working with planes</a><a class="headerlink" href="#working-with-planes" title="Permalink to this headline">¶</a></h2>
 <p>Planes may be used in different situation as seen below. They can be defined so as to perform mesh clipping (useful
 to provide the submerged part of the mesh to hydrodynamics BEM software such as Nemoh), symmetrizing (when only a
-part of the mesh has been generated as in the <code class="docutils literal"><span class="pre">cylinder.geo</span></code> gmsh geometry file example) or mirroring.</p>
-<p>A plane is defined by its normal <span class="math">\(\vec{n}\)</span> and a scalar parameter <span class="math">\(c\)</span> following the equation
-<span class="math">\(\vec{n}.\vec{x} = c\)</span>, where <span class="math">\(\vec{x}\)</span> is the coordinate vector of a point belonging to the plane.</p>
-<p>The scalar parameter <span class="math">\(c\)</span> is practically the orthogonal distance between the origin of the reference frame and
+part of the mesh has been generated as in the <code class="docutils literal notranslate"><span class="pre">cylinder.geo</span></code> gmsh geometry file example) or mirroring.</p>
+<p>A plane is defined by its normal <span class="math notranslate nohighlight">\(\vec{n}\)</span> and a scalar parameter <span class="math notranslate nohighlight">\(c\)</span> following the equation
+<span class="math notranslate nohighlight">\(\vec{n}.\vec{x} = c\)</span>, where <span class="math notranslate nohighlight">\(\vec{x}\)</span> is the coordinate vector of a point belonging to the plane.</p>
+<p>The scalar parameter <span class="math notranslate nohighlight">\(c\)</span> is practically the orthogonal distance between the origin of the reference frame and
 the plane.</p>
 <p>Working with planes is quite flexible as you have 3 mean to use them along with plane dependent options:</p>
 <ul class="simple">
-<li>Defining the plane by 4 scalars:  <span class="math">\(n_x, n_y, n_z, c\)</span></li>
-<li><dl class="first docutils">
-<dt>Using predefined plane keywords:</dt>
-<dd><ul class="first last">
-<li>Oxy</li>
-<li>Oxz</li>
-<li>Oyz</li>
-<li>/Oxy</li>
-<li>/Oxz</li>
-<li>/Oyz</li>
+<li><p>Defining the plane by 4 scalars:  <span class="math notranslate nohighlight">\(n_x, n_y, n_z, c\)</span></p></li>
+<li><dl class="simple">
+<dt>Using predefined plane keywords:</dt><dd><ul>
+<li><p>Oxy</p></li>
+<li><p>Oxz</p></li>
+<li><p>Oyz</p></li>
+<li><p>/Oxy</p></li>
+<li><p>/Oxz</p></li>
+<li><p>/Oyz</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li>Using the index of a plane that has been defined with the <code class="docutils literal"><span class="pre">-p</span> <span class="pre">(--plane)</span></code> option.</li>
+<li><p>Using the index of a plane that has been defined with the <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">(--plane)</span></code> option.</p></li>
 </ul>
 <div class="section" id="defining-planes">
 <h3><a class="toc-backref" href="#content">Defining planes</a><a class="headerlink" href="#defining-planes" title="Permalink to this headline">¶</a></h3>
-<p>A plane may be defined at the command line level along with de <code class="docutils literal"><span class="pre">-p</span> <span class="pre">(--plane)</span></code> option:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -p <span class="m">0</span> <span class="m">0</span> <span class="m">1</span> 0
+<p>A plane may be defined at the command line level along with de <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">(--plane)</span></code> option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -p <span class="m">0</span> <span class="m">0</span> <span class="m">1</span> <span class="m">0</span>
 </pre></div>
 </div>
 <p>defines the plane with normal (0, 0, 1) and the scalar parameter 0.</p>
 <p>It is also possible to define the same plane by a predefined keyword argument:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -p Oxy
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -p Oxy
 </pre></div>
 </div>
 <p>Predefined keywords arguments are Oxy, Oxz, Oyz, /Oxy, /Oxz, /Oyz and are self descriptive. The slash indicates that
 the normals is reversed.</p>
 <p>It is possible to define several planes at once such as in:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -p Oxy -p /Oxz
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -p Oxy -p /Oxz
 </pre></div>
 </div>
-<p>When defining planes with the <code class="docutils literal"><span class="pre">-p</span> <span class="pre">(--plane)</span></code> option, the planes definitions are internally stored in a list in
+<p>When defining planes with the <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">(--plane)</span></code> option, the planes definitions are internally stored in a list in
 the order that you used in the command line and it is then possible to refer to them in other options by their index in
 the list, starting by 0. So in the above command line, the plane Oxy can be refereed as the plane index 0 and the /Oxz
 plane as the plane index 1.</p>
 </div>
 <div class="section" id="clipping-a-mesh-by-a-plane">
 <h3><a class="toc-backref" href="#content">Clipping a mesh by a plane</a><a class="headerlink" href="#clipping-a-mesh-by-a-plane" title="Permalink to this headline">¶</a></h3>
-<p>To clip a mesh against a plane, use the <code class="docutils literal"><span class="pre">-c</span> <span class="pre">(--clip)</span></code> option like in:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -c <span class="m">1</span> <span class="m">1</span> <span class="m">1</span> <span class="m">2</span> --show
+<p>To clip a mesh against a plane, use the <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">(--clip)</span></code> option like in:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -c <span class="m">1</span> <span class="m">1</span> <span class="m">1</span> <span class="m">2</span> --show
 </pre></div>
 </div>
 <p>that displays the following view:</p>
 <img alt="../_images/clip.png" src="../_images/clip.png" />
 <p>As said before, the above command is strictly equivalent to:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -p <span class="m">1</span> <span class="m">1</span> <span class="m">1</span> <span class="m">2</span> -c <span class="m">0</span> --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -p <span class="m">1</span> <span class="m">1</span> <span class="m">1</span> <span class="m">2</span> -c <span class="m">0</span> --show
 </pre></div>
 </div>
-<p>It is also possible to use several <code class="docutils literal"><span class="pre">-c</span> <span class="pre">(--clip)</span></code> option at a time:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -c Oxy -c Oyz --show
+<p>It is also possible to use several <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">(--clip)</span></code> option at a time:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -c Oxy -c Oyz --show
 </pre></div>
 </div>
 <p>that gives:</p>
 <img alt="../_images/clip2.png" src="../_images/clip2.png" />
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">It is possible to invoke the <code class="docutils literal"><span class="pre">-c</span> <span class="pre">(--clip)</span></code> option without any argument. In that case, a default Oxy plane
+<p class="admonition-title">Note</p>
+<p>It is possible to invoke the <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">(--clip)</span></code> option without any argument. In that case, a default Oxy plane
 is taken.</p>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The part of the mesh that is kept is that opposite to the plane&#8217;s normal orientation.</p>
+<p class="admonition-title">Note</p>
+<p>The part of the mesh that is kept is that opposite to the plane’s normal orientation.</p>
 </div>
 </div>
 <div class="section" id="symmetrizing-a-mesh-about-a-plane">
 <h3><a class="toc-backref" href="#content">Symmetrizing a mesh about a plane</a><a class="headerlink" href="#symmetrizing-a-mesh-about-a-plane" title="Permalink to this headline">¶</a></h3>
-<p>To symmetrize a mesh about a plane, use the <code class="docutils literal"><span class="pre">--sym</span> <span class="pre">(--symmetrize)</span></code> option. Taking back the <code class="docutils literal"><span class="pre">cylinder.msh</span></code>
+<p>To symmetrize a mesh about a plane, use the <code class="docutils literal notranslate"><span class="pre">--sym</span> <span class="pre">(--symmetrize)</span></code> option. Taking back the <code class="docutils literal notranslate"><span class="pre">cylinder.msh</span></code>
 example generated sooner, we can issue:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh --sym Oxy --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh --sym Oxy --show
 </pre></div>
 </div>
 <p>that gives:</p>
 <img alt="../_images/cylinder_sym.png" src="../_images/cylinder_sym.png" />
 <p>Combining the options allow us to close the cylinder:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh --sym Oxy --sym Oxz --sym Oyz --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh --sym Oxy --sym Oxz --sym Oyz --show
 </pre></div>
 </div>
 <p>that gives:</p>
@@ -890,20 +956,20 @@ example generated sooner, we can issue:</p>
 <p>Checking normals gives as expected:</p>
 <img alt="../_images/cylinder_sym3_normals.png" src="../_images/cylinder_sym3_normals.png" />
 <p>that we can heal:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh --sym Oxy --sym Oxz --sym Oyz -hn --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh --sym Oxy --sym Oxz --sym Oyz -hn --show
 </pre></div>
 </div>
 <img alt="../_images/cylinder_sym3_normals_healed.png" src="../_images/cylinder_sym3_normals_healed.png" />
 <p>and clip back:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh --sym Oxy --sym Oxz --sym Oyz -hn -c Oxy -c Oyz -c Oxz --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh --sym Oxy --sym Oxz --sym Oyz -hn -c Oxy -c Oyz -c Oxz --show
 </pre></div>
 </div>
 <p>making us confident with respect to the normal consistency and orientation (outward) of our open part of cylinder mesh:</p>
 <img alt="../_images/cylinder_sym3_normals_healed_clip.png" src="../_images/cylinder_sym3_normals_healed_clip.png" />
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Faces quality on the vicinity of the clipping plane is not checked. You can then generate faces with very poor
-aspect ratio. This will be fixed in a future Meshmagick&#8217;s release by applying a projection procedure that is
+<p class="admonition-title">Note</p>
+<p>Faces quality on the vicinity of the clipping plane is not checked. You can then generate faces with very poor
+aspect ratio. This will be fixed in a future Meshmagick’s release by applying a projection procedure that is
 nontrivial to develop as it must not modify the geometry locally.</p>
 </div>
 </div>
@@ -912,53 +978,50 @@ nontrivial to develop as it must not modify the geometry locally.</p>
 <h2><a class="toc-backref" href="#content">Getting inertial properties of the mesh</a><a class="headerlink" href="#getting-inertial-properties-of-the-mesh" title="Permalink to this headline">¶</a></h2>
 <p>Meshmagick allows to calculate inertial properties of meshes based on some assumptions on the mass distribution:</p>
 <ul class="simple">
-<li>A mesh which is <strong>uniformly filled</strong> with an homogeneous medium with a given density (the practical interest if for
-e.g. for ballast modeling).</li>
-<li>A mesh considered as a <strong>shell</strong> having a constant thickness and made in a medium of a given density (approximation
-for floating structures).</li>
+<li><p>A mesh which is <strong>uniformly filled</strong> with an homogeneous medium with a given density (the practical interest if for
+e.g. for ballast modeling).</p></li>
+<li><p>A mesh considered as a <strong>shell</strong> having a constant thickness and made in a medium of a given density (approximation
+for floating structures).</p></li>
 </ul>
-<div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">Add  keywords for available medium...</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Add  keywords for available medium…</p>
 </div>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<ul class="last">
-<li><p class="first"><strong>Inertial properties</strong> are:</p>
+<p class="admonition-title">Warning</p>
+<ul>
+<li><p><strong>Inertial properties</strong> are:</p>
 <blockquote>
 <div><ul class="simple">
-<li>The <strong>mass</strong> <span class="math">\(m\)</span> (tons)</li>
-<li>The position of the <strong>center of gravity</strong> in the mesh&#8217;s reference frame <span class="math">\(\vec{OG}\)</span></li>
-<li>The (3x3) symmetric 3D rotational <strong>inertia matrix</strong> <span class="math">\(\mathbf{I}_O\)</span></li>
+<li><p>The <strong>mass</strong> <span class="math notranslate nohighlight">\(m\)</span> (tons)</p></li>
+<li><p>The position of the <strong>center of gravity</strong> in the mesh’s reference frame <span class="math notranslate nohighlight">\(\vec{OG}\)</span></p></li>
+<li><p>The (3x3) symmetric 3D rotational <strong>inertia matrix</strong> <span class="math notranslate nohighlight">\(\mathbf{I}_O\)</span></p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">The inertia matrix must be expressed with respect to a <em>reduction point</em>. Internally, inertia calculations are
-done in the mesh&#8217;s reference frame (where vertices coordinates are expressed) so <strong>the default inertia matrix is
-expressed at the mesh&#8217;s origin</strong>. Please see the <code class="docutils literal"><span class="pre">--reduction-point</span></code> and <code class="docutils literal"><span class="pre">--at-cog</span></code> options to specify an
-other reduction point.</p>
-</li>
-<li><p class="first">Note also that the default unit for mass in Meshmagick is the ton ! This is of practical use in offshore
-applications.</p>
-</li>
+<li><p>The inertia matrix must be expressed with respect to a <em>reduction point</em>. Internally, inertia calculations are
+done in the mesh’s reference frame (where vertices coordinates are expressed) so <strong>the default inertia matrix is
+expressed at the mesh’s origin</strong>. Please see the <code class="docutils literal notranslate"><span class="pre">--reduction-point</span></code> and <code class="docutils literal notranslate"><span class="pre">--at-cog</span></code> options to specify an
+other reduction point.</p></li>
+<li><p>Note also that the default unit for mass in Meshmagick is the ton ! This is of practical use in offshore
+applications.</p></li>
 </ul>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ul class="last">
-<li><p class="first">Pay attention that the inertia products Ixy, Ixz and Iyz have the real significance and they should be used with
-a minus sign when put in a 3D rotational inertia matrix as in <span class="math">\(\mathbf{I}_O = \begin{bmatrix} I_{xx} &amp;
--I_{xy} &amp; -I_{xz} \\ -I_{xy} &amp; I_{yy} &amp; -I_{yz} \\ -I_{xy} &amp; -I_{yz} &amp; I_{zz} \end{bmatrix}\)</span>.</p>
-</li>
-<li><p class="first">Coefficients are given by:</p>
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>Pay attention that the inertia products Ixy, Ixz and Iyz have the real significance and they should be used with
+a minus sign when put in a 3D rotational inertia matrix as in <span class="math notranslate nohighlight">\(\mathbf{I}_O = \begin{bmatrix} I_{xx} &amp;
+-I_{xy} &amp; -I_{xz} \\ -I_{xy} &amp; I_{yy} &amp; -I_{yz} \\ -I_{xy} &amp; -I_{yz} &amp; I_{zz} \end{bmatrix}\)</span>.</p></li>
+<li><p>Coefficients are given by:</p>
 <blockquote>
 <div><ul class="simple">
-<li><span class="math">\(I_{xx} = \iint_{S_w}(y^2+z^2)dS\)</span></li>
-<li><span class="math">\(I_{xy} = \iint_{S_w}xydS\)</span></li>
-<li><span class="math">\(I_{xz} = \iint_{S_w}xzdS\)</span></li>
-<li><span class="math">\(I_{yy} = \iint_{S_w}(x^2+z^2)dS\)</span></li>
-<li><span class="math">\(I_{yz} = \iint_{S_w}yzdS\)</span></li>
-<li><span class="math">\(I_{zz} = \iint_{S_w}(x^2+y^2)dS\)</span></li>
+<li><p><span class="math notranslate nohighlight">\(I_{xx} = \iint_{S_w}(y^2+z^2)dS\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{xy} = \iint_{S_w}xydS\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{xz} = \iint_{S_w}xzdS\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{yy} = \iint_{S_w}(x^2+z^2)dS\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{yz} = \iint_{S_w}yzdS\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{zz} = \iint_{S_w}(x^2+y^2)dS\)</span></p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -966,104 +1029,104 @@ a minus sign when put in a 3D rotational inertia matrix as in <span class="math"
 </div>
 <div class="section" id="defining-the-medium-density">
 <h3><a class="toc-backref" href="#content">Defining the medium density</a><a class="headerlink" href="#defining-the-medium-density" title="Permalink to this headline">¶</a></h3>
-<p>The medium density, for both assumptions on mass distribution in the mesh, is done by using the <code class="docutils literal"><span class="pre">--rho-medium</span></code>
+<p>The medium density, for both assumptions on mass distribution in the mesh, is done by using the <code class="docutils literal notranslate"><span class="pre">--rho-medium</span></code>
 option:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp --rho-medium 1023
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp --rho-medium <span class="m">1023</span>
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Density must be given in kg/m**3 unit.</p>
+<p class="admonition-title">Note</p>
+<p>Density must be given in kg/m**3 unit.</p>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">In the above command line, we specified a meshfile as an option although we have no mesh processing at all, the
-aim being to get the list of available medium. This is a limitation of the <code class="docutils literal"><span class="pre">argparse</span></code> Python module that is
+<p class="admonition-title">Note</p>
+<p>In the above command line, we specified a meshfile as an option although we have no mesh processing at all, the
+aim being to get the list of available medium. This is a limitation of the <code class="docutils literal notranslate"><span class="pre">argparse</span></code> Python module that is
 used in Meshmagick to parse command line options and arguments. This module does not allow to define optional
-arguments that overhelms the mandatoriness of the positional arguments. Except for the <code class="docutils literal"><span class="pre">--help</span></code> command line
+arguments that overhelms the mandatoriness of the positional arguments. Except for the <code class="docutils literal notranslate"><span class="pre">--help</span></code> command line
 option, you always have to specify a mesh file while calling Meshmagick.</p>
 </div>
 <p>It is also possible to use some default medium density keywords. These keywords can be retrieved using the
-<code class="docutils literal"><span class="pre">--list-medium</span></code> option:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp --list-medium
+<code class="docutils literal notranslate"><span class="pre">--list-medium</span></code> option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp --list-medium
 </pre></div>
 </div>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
 +----------------------+----------------------+
 |NAME                  |     DENSITY (KG/M**3)|
 +----------------------+----------------------+
+|CONCRETE              |              2300.000|
++----------------------+----------------------+
+|REINFORCED_CONCRETE   |              2400.000|
++----------------------+----------------------+
+|FRESH_WATER           |              1000.000|
++----------------------+----------------------+
+|SALT_WATER            |              1025.000|
++----------------------+----------------------+
+|SAND                  |              1600.000|
++----------------------+----------------------+
 |STEEL                 |              7850.000|
-+----------------------+----------------------+
-|NITROGEN_-195DEGC     |               810.000|
-+----------------------+----------------------+
-|LEAD                  |             11350.000|
 +----------------------+----------------------+
 |ALUMINUM              |              2700.000|
 +----------------------+----------------------+
+|LEAD                  |             11350.000|
++----------------------+----------------------+
 |TITANIUM              |              4500.000|
-+----------------------+----------------------+
-|PROPANE               |                 2.010|
-+----------------------+----------------------+
-|REINFORCED_CONCRETE   |              2400.000|
 +----------------------+----------------------+
 |POLYSTYRENE           |              1050.000|
 +----------------------+----------------------+
 |GASOLINE              |               750.000|
 +----------------------+----------------------+
-|FRESH_WATER           |              1000.000|
-+----------------------+----------------------+
-|CONCRETE              |              2300.000|
-+----------------------+----------------------+
-|SAND                  |              1600.000|
-+----------------------+----------------------+
-|AIR_20DEGC            |                 1.204|
-+----------------------+----------------------+
-|HYDROGEN_-252DEGC     |                70.000|
+|DIESEL_FUEL           |               850.000|
 +----------------------+----------------------+
 |ETHANOL               |               789.000|
 +----------------------+----------------------+
+|AIR_20DEGC            |                 1.204|
++----------------------+----------------------+
 |BUTANE                |                 2.700|
 +----------------------+----------------------+
-|SALT_WATER            |              1025.000|
+|PROPANE               |                 2.010|
 +----------------------+----------------------+
-|DIESEL_FUEL           |               850.000|
+|HYDROGEN_-252DEGC     |                70.000|
++----------------------+----------------------+
+|NITROGEN_-195DEGC     |               810.000|
 +----------------------+----------------------+
 
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
-<p>An other solution is to look at the <code class="docutils literal"><span class="pre">--help</span></code> output.</p>
-<div class="admonition-todo admonition" id="index-1">
-<p class="first admonition-title">Todo</p>
-<ul class="last simple">
-<li>Faire que argparse émette un warning si on a des options non reconnues.</li>
-<li>Ajouter la possibilité d&#8217;exprimer les matrices résultat en un point de réduction particulier. Cette option
-qu&#8217;on nomera &#8211;reduction-point (-rp) sera utilisee a la fois par les inerties et par la matrice raideur</li>
-<li>On mettra aussi en place une option &#8211;at-cog pour que le poitn de reduction soit specifie au cetre de gravite</li>
+<p>An other solution is to look at the <code class="docutils literal notranslate"><span class="pre">--help</span></code> output.</p>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>Faire que argparse émette un warning si on a des options non reconnues.</p></li>
+<li><p>Ajouter la possibilité d’exprimer les matrices résultat en un point de réduction particulier. Cette option
+qu’on nomera –reduction-point (-rp) sera utilisee a la fois par les inerties et par la matrice raideur</p></li>
+<li><p>On mettra aussi en place une option –at-cog pour que le poitn de reduction soit specifie au cetre de gravite</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="guessing-the-mesh-is-filled-with-homogeneous-medium">
 <h3><a class="toc-backref" href="#content">Guessing the mesh is filled with homogeneous medium</a><a class="headerlink" href="#guessing-the-mesh-is-filled-with-homogeneous-medium" title="Permalink to this headline">¶</a></h3>
-<p>This is achieved by using the <code class="docutils literal"><span class="pre">-pi</span> <span class="pre">(--plain-inertia)</span></code> option:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -pi --rho-medium 800
+<p>This is achieved by using the <code class="docutils literal notranslate"><span class="pre">-pi</span> <span class="pre">(--plain-inertia)</span></code> option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -pi --rho-medium <span class="m">800</span>
 </pre></div>
 </div>
 <p>that gives:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -1081,29 +1144,29 @@ Inertial parameters for a uniform distribution of a medium of density 800.0 kg/m
 	Expressed at point : 		0.000E+00	0.000E+00	0.000E+00
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If the medium&#8217;s density is not specified, the <code class="docutils literal"><span class="pre">-pi</span></code> option guesses that the medium is salt water and then takes a
+<p class="admonition-title">Note</p>
+<p>If the medium’s density is not specified, the <code class="docutils literal notranslate"><span class="pre">-pi</span></code> option guesses that the medium is salt water and then takes a
 default density of 1023 kg/m**3.</p>
 </div>
 </div>
 <div class="section" id="guessing-the-mesh-is-a-shell">
 <h3><a class="toc-backref" href="#content">Guessing the mesh is a shell</a><a class="headerlink" href="#guessing-the-mesh-is-a-shell" title="Permalink to this headline">¶</a></h3>
-<p>This is achieved by using the <code class="docutils literal"><span class="pre">-si</span> <span class="pre">(--shell-inertia)</span></code> option:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -si --rho-medium <span class="m">5850</span> --thickness 0.02
+<p>This is achieved by using the <code class="docutils literal notranslate"><span class="pre">-si</span> <span class="pre">(--shell-inertia)</span></code> option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -si --rho-medium <span class="m">5850</span> --thickness <span class="m">0</span>.02
 </pre></div>
 </div>
 <p>that gives:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -1111,9 +1174,9 @@ Inertial parameters for a shell distribution of a medium of density 5850.0 kg/m*
 
 	Mass = 140.997 tons
 	COG (m):
-		xg = -0.002
+		xg = -0.266
 		yg = 0.000
-		zg = 0.006
+		zg = 0.647
 	Inertia matrix (SI):
 		1.578E+07	-1.375E+01	2.205E+05
 		-1.375E+01	3.799E+06	-6.452E+00
@@ -1121,20 +1184,20 @@ Inertial parameters for a shell distribution of a medium of density 5850.0 kg/m*
 	Expressed at point : 		0.000E+00	0.000E+00	0.000E+00
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ul class="last simple">
-<li>If the <code class="docutils literal"><span class="pre">--rho-medium</span></code> option is not specified, the medium density is by default considered that of steel (5850
-kg/m**3)</li>
-<li>If the <code class="docutils literal"><span class="pre">--thickness</span></code> option is not specified, the thickness of the shell is by default considered being 0.02
-meters.</li>
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>If the <code class="docutils literal notranslate"><span class="pre">--rho-medium</span></code> option is not specified, the medium density is by default considered that of steel (5850
+kg/m**3)</p></li>
+<li><p>If the <code class="docutils literal notranslate"><span class="pre">--thickness</span></code> option is not specified, the thickness of the shell is by default considered being 0.02
+meters.</p></li>
 </ul>
 </div>
 </div>
@@ -1142,14 +1205,14 @@ meters.</li>
 <div class="section" id="performing-hydrostatics-calculations-on-the-mesh">
 <h2><a class="toc-backref" href="#content">Performing hydrostatics calculations on the mesh</a><a class="headerlink" href="#performing-hydrostatics-calculations-on-the-mesh" title="Permalink to this headline">¶</a></h2>
 <p>Meshmagick allows to perform some hydrostatics computations on meshes. You can get the current hydrostatics
-properties of the mesh such as the hydrostatic stiffness matrix, metacentric heights, floating plane area...</p>
+properties of the mesh such as the hydrostatic stiffness matrix, metacentric heights, floating plane area…</p>
 <p>It is also able to compute the hydrostatic equilibrium of the mesh with respect to a given floater mass and/or a
 given position of the center of gravity as well as additional external forces.</p>
 <div class="section" id="expression-of-the-hydrostatic-data">
 <h3><a class="toc-backref" href="#content">Expression of the hydrostatic data</a><a class="headerlink" href="#expression-of-the-hydrostatic-data" title="Permalink to this headline">¶</a></h3>
 <p>The hydrostatic stiffness matrix coefficients only depend on the geometry of the flotation plane that is the polygon
 (s) generated by the intersection of the body with the horizontal plane Oxy. The matrix writes:</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[\begin{split}K_{hs} = \begin{bmatrix}
             0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
             0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
@@ -1158,10 +1221,10 @@ given position of the center of gravity as well as additional external forces.</
             0 &amp; 0 &amp; K_{53} &amp; K_{54} &amp; K_{55} &amp; 0 \\
             0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
          \end{bmatrix}\end{split}\]</div>
-<p>This matrix is symmetric so that we have <span class="math">\(K_{43}=K_{34}\)</span>, <span class="math">\(K_{53}=K_{35}\)</span> and <span class="math">\(K_{54}=K_{45}\)</span> and
+<p>This matrix is symmetric so that we have <span class="math notranslate nohighlight">\(K_{43}=K_{34}\)</span>, <span class="math notranslate nohighlight">\(K_{53}=K_{35}\)</span> and <span class="math notranslate nohighlight">\(K_{54}=K_{45}\)</span> and
 we will only present 6 coefficients in the hydrostatic reports.</p>
 <p>The expression of the hydrostatic coefficients is:</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \begin{eqnarray}
     K_{33} &amp;=&amp; \rho g S_f\\
     K_{34} &amp;=&amp; \rho g \iint_{S_f} y dS\\
@@ -1176,22 +1239,22 @@ we will only present 6 coefficients in the hydrostatic reports.</p>
     K_{55} &amp;=&amp; \rho g \nabla GM_l\\
     x_f &amp;=&amp; -\frac{K_{35}}{K_{33}}\\
     x_f &amp;=&amp; \frac{K_{34}}{K_{33}}
-\end{eqnarray}</div><p>where <span class="math">\(\nabla\)</span> is the volume displacement of the body, <span class="math">\(R_t\)</span> and <span class="math">\(R_l\)</span> are respectively the
-transversal and longitudinal metacentric radius, <span class="math">\(GM_t\)</span> and <span class="math">\(GM_l\)</span> are respectively the
-transversal and longitudinal metacentric heights, <span class="math">\(x_f\)</span> and <span class="math">\(y_f\)</span> are the horizontal position of the
+\end{eqnarray}</div><p>where <span class="math notranslate nohighlight">\(\nabla\)</span> is the volume displacement of the body, <span class="math notranslate nohighlight">\(R_t\)</span> and <span class="math notranslate nohighlight">\(R_l\)</span> are respectively the
+transversal and longitudinal metacentric radius, <span class="math notranslate nohighlight">\(GM_t\)</span> and <span class="math notranslate nohighlight">\(GM_l\)</span> are respectively the
+transversal and longitudinal metacentric heights, <span class="math notranslate nohighlight">\(x_f\)</span> and <span class="math notranslate nohighlight">\(y_f\)</span> are the horizontal position of the
 center of the flotation plane.</p>
 </div>
 <div class="section" id="getting-hydrostatics-properties-of-the-mesh">
 <h3><a class="toc-backref" href="#content">Getting hydrostatics properties of the mesh</a><a class="headerlink" href="#getting-hydrostatics-properties-of-the-mesh" title="Permalink to this headline">¶</a></h3>
 <p>To get an hydrostatic report on the current configuration of the mesh, you may use the <abbr title="--hydrostatics">-hs</abbr>
 option:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs
 </pre></div>
 </div>
 <p>that gives:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -1202,7 +1265,7 @@ Generating hydrostatic data for a zcog of 0.000 meters.
 	DENSITY OF WATER (KG/M**3)--------------&gt;   1023.0
 
 	WATERPLANE AREA (M**2)------------------&gt;   299.8
-	WATERPLANE CENTER (M)-------------------&gt;  -0.001    -0.000    
+	WATERPLANE CENTER (M)-------------------&gt;  -0.001     0.000    
 	WET AREA (M**2)-------------------------&gt;   549.6
 	DISPLACEMENT VOLUME (M**3)--------------&gt;   1176.831
 	DISPLACEMENT MASS (TONS)----------------&gt;   1203.898
@@ -1243,8 +1306,8 @@ Generating hydrostatic data for a zcog of 0.000 meters.
 
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
@@ -1253,14 +1316,14 @@ Good Bye!
 <p>When using this option alone (without giving a mass or center of gravity), the system considers that the current
 displacement correspond to the mass of the body. However, the vertical position of the center of gravity used in the
 computation of the K44 and K55 stiffness coefficients is considered to be 0 as specified at the beginning of the
-report. You may also want to specify this vertical position by using the &#8211;zcog option, by eg.:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --zcog 2
+report. You may also want to specify this vertical position by using the –zcog option, by eg.:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --zcog <span class="m">2</span>
 </pre></div>
 </div>
 <p>that gives the following report:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -1271,7 +1334,7 @@ Generating hydrostatic data for a zcog of 2.000 meters.
 	DENSITY OF WATER (KG/M**3)--------------&gt;   1023.0
 
 	WATERPLANE AREA (M**2)------------------&gt;   299.8
-	WATERPLANE CENTER (M)-------------------&gt;  -0.001    -0.000    
+	WATERPLANE CENTER (M)-------------------&gt;  -0.001     0.000    
 	WET AREA (M**2)-------------------------&gt;   549.6
 	DISPLACEMENT VOLUME (M**3)--------------&gt;   1176.831
 	DISPLACEMENT MASS (TONS)----------------&gt;   1203.898
@@ -1312,8 +1375,8 @@ Generating hydrostatic data for a zcog of 2.000 meters.
 
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
@@ -1322,44 +1385,43 @@ Good Bye!
 <p>In our case, taking a center of gravity so high results in an unstable configuration as you can see in the report, as
 the longitudinal metacentric height (GML) is negative.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ul class="last">
-<li><p class="first">Among the results, you will find the inertia coefficients of the immersed part of the body. The assumptions done
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>Among the results, you will find the inertia coefficients of the immersed part of the body. The assumptions done
 here are that the body is filled with water. Pay attention that the inertia products Ixy, Ixz and Iyz have the
 real significance and they should be used with a minus sign when put in a 3D rotational inertia matrix as in
-<span class="math">\(\mathbf{I}_O = \begin{bmatrix} I_{xx} &amp; -I_{xy} &amp; -I_{xz} \\ -I_{xy} &amp; I_{yy} &amp; -I_{yz} \\ -I_{xy} &amp;
--I_{yz} &amp; I_{zz} \end{bmatrix}\)</span>.</p>
-</li>
-<li><p class="first">Coefficients are given by:</p>
+<span class="math notranslate nohighlight">\(\mathbf{I}_O = \begin{bmatrix} I_{xx} &amp; -I_{xy} &amp; -I_{xz} \\ -I_{xy} &amp; I_{yy} &amp; -I_{yz} \\ -I_{xy} &amp;
+-I_{yz} &amp; I_{zz} \end{bmatrix}\)</span>.</p></li>
+<li><p>Coefficients are given by:</p>
 <blockquote>
 <div><ul class="simple">
-<li><span class="math">\(I_{xx} = \iint_{S_w}(y^2+z^2)dS\)</span></li>
-<li><span class="math">\(I_{xy} = \iint_{S_w}xydS\)</span></li>
-<li><span class="math">\(I_{xz} = \iint_{S_w}xzdS\)</span></li>
-<li><span class="math">\(I_{yy} = \iint_{S_w}(x^2+z^2)dS\)</span></li>
-<li><span class="math">\(I_{yz} = \iint_{S_w}yzdS\)</span></li>
-<li><span class="math">\(I_{zz} = \iint_{S_w}(x^2+y^2)dS\)</span></li>
+<li><p><span class="math notranslate nohighlight">\(I_{xx} = \iint_{S_w}(y^2+z^2)dS\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{xy} = \iint_{S_w}xydS\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{xz} = \iint_{S_w}xzdS\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{yy} = \iint_{S_w}(x^2+z^2)dS\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{yz} = \iint_{S_w}yzdS\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{zz} = \iint_{S_w}(x^2+y^2)dS\)</span></p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">You can easily change the default density of water as well as gravity by using the <code class="docutils literal"><span class="pre">--rho-water</span></code> and
-<code class="docutils literal"><span class="pre">--grav</span></code> options.</p>
+<p class="admonition-title">Note</p>
+<p>You can easily change the default density of water as well as gravity by using the <code class="docutils literal notranslate"><span class="pre">--rho-water</span></code> and
+<code class="docutils literal notranslate"><span class="pre">--grav</span></code> options.</p>
 </div>
 </div>
 <div class="section" id="displaying-the-mesh-with-hydrostatic-results">
 <h3><a class="toc-backref" href="#content">Displaying the mesh with hydrostatic results</a><a class="headerlink" href="#displaying-the-mesh-with-hydrostatic-results" title="Permalink to this headline">¶</a></h3>
-<p>As usual, you can combine the command line options with the <code class="docutils literal"><span class="pre">--show</span></code> option to display the mesh in the meshmagick
+<p>As usual, you can combine the command line options with the <code class="docutils literal notranslate"><span class="pre">--show</span></code> option to display the mesh in the meshmagick
 viewer. In hydrostatics mode, it will also show forces applying on the body:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --show
 </pre></div>
 </div>
 <p>will show the following:</p>
 <img alt="../_images/show_hydrostatics.png" src="../_images/show_hydrostatics.png" />
-<p>In the viewer, we have pressed the <code class="docutils literal"><span class="pre">w</span></code> key to get a wireframe representation and see the application points. We can
+<p>In the viewer, we have pressed the <code class="docutils literal notranslate"><span class="pre">w</span></code> key to get a wireframe representation and see the application points. We can
 see that the buoyancy center and the gravity center of the current configuration have nearly the same horizontal
 position.</p>
 </div>
@@ -1367,13 +1429,13 @@ position.</p>
 <h3><a class="toc-backref" href="#content">Getting the mesh vertical position that complies with a given mass displacement</a><a class="headerlink" href="#getting-the-mesh-vertical-position-that-complies-with-a-given-mass-displacement" title="Permalink to this headline">¶</a></h3>
 <p>In that mode, the mesh is displaced so that its mas displacement becomes equal to a specified mass. This is achieved
 by:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --disp 1500
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --disp <span class="m">1500</span>
 </pre></div>
 </div>
 <p>which gives:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -1416,42 +1478,42 @@ Complying with a displacement of 1500.000 tons
 
 	INERTIAS:
 	IXX-------------------------------------&gt;   1.162E+08
-	IXY-------------------------------------&gt;   4.072E-10
+	IXY-------------------------------------&gt;   4.654E-10
 	IXZ-------------------------------------&gt;  -1.132E+02
 	IYY-------------------------------------&gt;   1.369E+07
-	IYZ-------------------------------------&gt;   2.942E-09
+	IYZ-------------------------------------&gt;   2.729E-09
 	IZZ-------------------------------------&gt;   1.224E+08
 
 	RESIDUALS:
-	ABSOLUTE--------------------------------&gt;  -2.716E+02 1.398E-08 1.767E+03
-	RELATIVE--------------------------------&gt;  -1.846E-05 3.166E-17 1.225E-05
+	ABSOLUTE--------------------------------&gt;  -2.716E+02 1.312E-08 1.767E+03
+	RELATIVE--------------------------------&gt;  -1.846E-05 2.972E-17 1.225E-05
 	RELATIVE TOLERANCE----------------------&gt;   1.0E-02
 
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
-<p>This mode is active as long as you don&#8217;t use the <code class="docutils literal"><span class="pre">--cog</span></code> option that trig the 3D equilibrium searching algorithm
+<p>This mode is active as long as you don’t use the <code class="docutils literal notranslate"><span class="pre">--cog</span></code> option that trig the 3D equilibrium searching algorithm
 that is presented in the following.</p>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">The mass has to be given <strong>in tons</strong> as it is more representative of the order of magnitude of usual masses in
+<p class="admonition-title">Warning</p>
+<p>The mass has to be given <strong>in tons</strong> as it is more representative of the order of magnitude of usual masses in
 offshore.</p>
 </div>
 </div>
 <div class="section" id="d-hydrostatic-equilibrium">
 <h3><a class="toc-backref" href="#content">3D hydrostatic equilibrium</a><a class="headerlink" href="#d-hydrostatic-equilibrium" title="Permalink to this headline">¶</a></h3>
-<p>This mode is active as long as you use the <code class="docutils literal"><span class="pre">--cog</span></code> option such that:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --cog <span class="m">0</span> <span class="m">4</span> -2 --show
+<p>This mode is active as long as you use the <code class="docutils literal notranslate"><span class="pre">--cog</span></code> option such that:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --cog <span class="m">0</span> <span class="m">4</span> -2 --show
 </pre></div>
 </div>
 <p>That command outputs the following report:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>../meshmagick/meshmagick.py:1201: UserWarning: 
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>../meshmagick_cli.py:1228: UserWarning: 
 WARNING !! : Keep in mind that the mesh may have a new orientation in the Oxy plane so the hydrostatic
         stiffness matrix may be impractical as not expressed in a convenient axis system. Use the result
         with caution and have a look at the mesh by using the --show option.
@@ -1460,8 +1522,8 @@ WARNING !! : Keep in mind that the mesh may have a new orientation in the Oxy pl
   warn(msg)
 
 =============================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -1498,29 +1560,29 @@ Stable equilibrium reached after 6 iterations and 0 random restart
 
 	HYDROSTATIC STIFFNESS COEFFICIENTS:
 	K33 (N/M)-------------------------------&gt;   2.8759E+06
-	K34 (N)---------------------------------&gt;   3.0168E+05
-	K35 (N)---------------------------------&gt;   1.0349E+05
+	K34 (N)---------------------------------&gt;   3.0196E+05
+	K35 (N)---------------------------------&gt;   1.0359E+05
 	K44 (N.M)-------------------------------&gt;   2.1649E+08
-	K45 (N.M)-------------------------------&gt;   1.3589E+06
+	K45 (N.M)-------------------------------&gt;   1.1291E+06
 	K55 (N.M)-------------------------------&gt;   2.4733E+07
 
 	INERTIAS:
 	IXX-------------------------------------&gt;   7.609E+07
-	IXY-------------------------------------&gt;  -7.944E+04
-	IXZ-------------------------------------&gt;  -9.932E+03
+	IXY-------------------------------------&gt;  -7.775E+04
+	IXZ-------------------------------------&gt;  -1.012E+04
 	IYY-------------------------------------&gt;   1.118E+07
 	IYZ-------------------------------------&gt;  -6.477E+06
 	IZZ-------------------------------------&gt;   7.998E+07
 
 	RESIDUALS:
-	ABSOLUTE--------------------------------&gt;   2.072E+03-4.354E+05 9.319E+03
-	RELATIVE--------------------------------&gt;   1.755E-04-1.202E-03 7.892E-05
+	ABSOLUTE--------------------------------&gt;   2.078E+03-4.352E+05 1.378E+04
+	RELATIVE--------------------------------&gt;   1.760E-04-1.201E-03 1.167E-04
 	RELATIVE TOLERANCE----------------------&gt;   1.0E-02
 
 
 =============================================================
-meshmagick - version 1.0.6
-Copyright 2014-2017, Ecole Centrale de Nantes
+meshmagick - version 2.1.1
+Copyright 2014-2021, Ecole Centrale de Nantes
 Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
 Good Bye!
 =============================================================
@@ -1529,29 +1591,29 @@ Good Bye!
 <p>and displays the following viewer:</p>
 <img alt="../_images/3D_hydrostatics.png" src="../_images/3D_hydrostatics.png" />
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>The solver in charge of the hydrostatic equilibrium computation is iterative. It uses the hydrostatic stiffness
 matrix and the residual force to compute corrections in position and attitude of the floater (it solves a linear
 system at each iteration). Since we use here a linearized approximation that is only valid for tiny displacements
 and rotations, if the proposed correction is greater than some threshold, the correction is relaxed in magnitude.
 The solver is then a Newton type solver.</p>
-<p class="last">Sometimes, the solver could not converge to an equilibrium position (stable or not). This is detected by applying
+<p>Sometimes, the solver could not converge to an equilibrium position (stable or not). This is detected by applying
 a maximum of iteration number. If that number is reached without any convergence then the floater is rotated with
 random angles to generate a new initial configuration for iterations (it is called here a restart). A maximum
 number of restart is allowed. This method makes the solver very robust with respect to the initial configuration
 given and it is possible to specify some position of the center of gravity that makes the floater capsize.</p>
 </div>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<ul class="last simple">
-<li>Pay attention that when 3D hydrostatic equilibrium is performed, rotations around x and y as well as translation
+<p class="admonition-title">Warning</p>
+<ul class="simple">
+<li><p>Pay attention that when 3D hydrostatic equilibrium is performed, rotations around x and y as well as translation
 along z are applied iteratively in order to minimize the residual force with respect to a relative tolerance
 based on mesh principal dimensions. During iterations, you may have a drift of the orientation of the mesh around
 the z axis. Although the hydrostatic stiffness coefficient are correctly computed, this unpredictable orientation
 result in an impractical stiffness matrix as it is then not expressed in a convenient axis system. This should be
-fixed in a later release of meshmagick. Please use the meshmagick viewer to see what is going on.</li>
-<li>In order to perform 3D hydrostatic equilibrium searching possible, it is mandatory to use a watertight mesh so
-that the boundary intersection polygons are closed.</li>
+fixed in a later release of meshmagick. Please use the meshmagick viewer to see what is going on.</p></li>
+<li><p>In order to perform 3D hydrostatic equilibrium searching possible, it is mandatory to use a watertight mesh so
+that the boundary intersection polygons are closed.</p></li>
 </ul>
 </div>
 </div>
@@ -1565,28 +1627,28 @@ naturally the body during its position modifications. In <strong>relative</stron
 body. This is generally the case for the preceding wind turbine application example. In the absolute mode the
 direction of the force remains fixed with respect to the absolute frame. This is the case of mooring forces.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Note that for these options to be used, you always need to specify a center of gravity position along with the
-<code class="docutils literal"><span class="pre">--cog</span></code> option.</p>
+<p class="admonition-title">Note</p>
+<p>Note that for these options to be used, you always need to specify a center of gravity position along with the
+<code class="docutils literal notranslate"><span class="pre">--cog</span></code> option.</p>
 </div>
 <div class="section" id="absolute-forces">
 <h4><a class="toc-backref" href="#content">Absolute forces</a><a class="headerlink" href="#absolute-forces" title="Permalink to this headline">¶</a></h4>
-<p>This is achieved using the :<code class="docutils literal"><span class="pre">-af</span> <span class="pre">(--absolute-force)</span></code> option. By example, applying a vertical mooring load of
+<p>This is achieved using the :<code class="docutils literal notranslate"><span class="pre">-af</span> <span class="pre">(--absolute-force)</span></code> option. By example, applying a vertical mooring load of
 200 tons at one side of the SEAREV is obtained by issuing:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs -af <span class="m">0</span> <span class="m">15</span> -5 <span class="m">0</span> <span class="m">0</span> -2000000 --cog <span class="m">0</span> <span class="m">0</span> -2 --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs -af <span class="m">0</span> <span class="m">15</span> -5 <span class="m">0</span> <span class="m">0</span> -2000000 --cog <span class="m">0</span> <span class="m">0</span> -2 --show
 </pre></div>
 </div>
 <p>Note that the parameters of the options are first the 3 coordinates of the application point then the 3 components of
 the force vector.</p>
-<p>As the <code class="docutils literal"><span class="pre">--show</span></code> option has been used, the command displays the following viewer:</p>
+<p>As the <code class="docutils literal notranslate"><span class="pre">--show</span></code> option has been used, the command displays the following viewer:</p>
 <img alt="../_images/hs_absolute_force.png" src="../_images/hs_absolute_force.png" />
 <p>where you can observe that the force represented in blue has the right vertical orientation and made the SEAREV roll.</p>
 </div>
 <div class="section" id="relative-forces">
 <h4><a class="toc-backref" href="#content">Relative forces</a><a class="headerlink" href="#relative-forces" title="Permalink to this headline">¶</a></h4>
-<p>This is achieved using the <code class="docutils literal"><span class="pre">-af</span> <span class="pre">(--absolute-force)</span></code> option. By example, applying a vertical mooring load of
+<p>This is achieved using the <code class="docutils literal notranslate"><span class="pre">-af</span> <span class="pre">(--absolute-force)</span></code> option. By example, applying a vertical mooring load of
 200 tons at one side of the SEAREV is obtained by issuing:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --cog <span class="m">0</span> <span class="m">0</span> -3 -rf <span class="m">0</span> <span class="m">0</span> <span class="m">5</span> <span class="m">5000000</span> <span class="m">0</span> <span class="m">0</span> --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --cog <span class="m">0</span> <span class="m">0</span> -3 -rf <span class="m">0</span> <span class="m">0</span> <span class="m">5</span> <span class="m">5000000</span> <span class="m">0</span> <span class="m">0</span> --show
 </pre></div>
 </div>
 <p>which displays the following viewer:</p>
@@ -1596,8 +1658,8 @@ the force vector.</p>
 </div>
 <div class="section" id="saving-the-hydrostatic-report-in-a-text-file">
 <h3><a class="toc-backref" href="#content">Saving the hydrostatic report in a text file</a><a class="headerlink" href="#saving-the-hydrostatic-report-in-a-text-file" title="Permalink to this headline">¶</a></h3>
-<p>Use the <code class="docutils literal"><span class="pre">--hs-report</span></code> option followed by the name of the file:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --hs-report report.txt
+<p>Use the <code class="docutils literal notranslate"><span class="pre">--hs-report</span></code> option followed by the name of the file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --hs-report report.txt
 </pre></div>
 </div>
 </div>
@@ -1606,15 +1668,16 @@ the force vector.</p>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="cli_reference.html" class="btn btn-neutral float-right" title="Command Line Interface Reference Guide" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="cli_reference.html" class="btn btn-neutral float-right" title="Command Line Interface Reference Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Meshmagick’s Command Line Interface" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Meshmagick’s Command Line Interface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1623,8 +1686,10 @@ the force vector.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Ecole Centrale de Nantes.
-      Last updated on Mar 17, 2017.
+        &copy; Copyright 2021, Ecole Centrale de Nantes
+      <span class="lastupdated">
+        Last updated on Jan 07, 2021.
+      </span>
 
     </p>
   </div> 
@@ -1640,36 +1705,15 @@ the force vector.</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'1.0.5',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

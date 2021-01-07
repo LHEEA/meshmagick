@@ -8,47 +8,44 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>meshmagick.mesh_clipper &mdash; Meshmagick User&#39;s Guide 1.0.5 documentation</title>
+  <title>meshmagick.mesh_clipper &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
   
 
   
   
+  
+  
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Meshmagick User&#39;s Guide 1.0.5 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -62,7 +59,7 @@
             
             
               <div class="version">
-                1.0.5
+                2.1.1
               </div>
             
           
@@ -83,14 +80,17 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../install/install.html">Installation Instructions</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick’s Command Line Interface</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package&#8217;s modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package’s modules</a></li>
 </ul>
 
             
@@ -102,34 +102,52 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Meshmagick User's Guide</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Meshmagick User's Guide</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      
-    <li>meshmagick.mesh_clipper</li>
+        
+      <li>meshmagick.mesh_clipper</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -141,7 +159,7 @@
 
 <span class="sd">&quot;&quot;&quot;This module holds a tools to clip meshes against a plane&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">mesh</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.mesh</span> <span class="kn">import</span> <span class="o">*</span>
 
 
 <div class="viewcode-block" id="MeshClipper"><a class="viewcode-back" href="../../api/meshmagick.mesh_clipper.html#meshmagick.mesh_clipper.MeshClipper">[docs]</a><span class="k">class</span> <span class="nc">MeshClipper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -161,7 +179,7 @@
 <span class="sd">    verbose : bool, optional</span>
 <span class="sd">        False by default. If True, some messages on operations that are handled are printed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_mesh</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">Plane</span><span class="p">(),</span> <span class="n">vicinity_tol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">assert_closed_boundaries</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_mesh</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">Plane</span><span class="p">(),</span> <span class="n">vicinity_tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">assert_closed_boundaries</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_source_mesh</span> <span class="o">=</span> <span class="n">source_mesh</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span> <span class="o">=</span> <span class="n">plane</span>
 
@@ -492,7 +510,7 @@
 
         <span class="n">index</span> <span class="o">=</span> <span class="n">crown_mesh</span><span class="o">.</span><span class="n">nb_vertices</span>
 
-        <span class="k">for</span> <span class="n">face_id</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">crown_mesh</span><span class="o">.</span><span class="n">nb_faces</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">face_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">crown_mesh</span><span class="o">.</span><span class="n">nb_faces</span><span class="p">):</span>
 
             <span class="n">face</span> <span class="o">=</span> <span class="n">crown_mesh</span><span class="o">.</span><span class="n">get_face</span><span class="p">(</span><span class="n">face_id</span><span class="p">)</span>
 
@@ -783,7 +801,7 @@
                 
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="kn">import</span> <span class="nn">mmio</span>
+                    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">mmio</span>
                     <span class="n">mmio</span><span class="o">.</span><span class="n">write_VTP</span><span class="p">(</span><span class="s1">&#39;full_debug.vtp&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_mesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_mesh</span><span class="o">.</span><span class="n">faces</span><span class="p">)</span>
                     <span class="c1"># mmio.write_VTP(&#39;clipped_crown_debug.vtp&#39;, clipped_crown_mesh.vertices, clipped_crown_mesh.faces)</span>
                     <span class="n">mmio</span><span class="o">.</span><span class="n">write_VTP</span><span class="p">(</span><span class="s1">&#39;crown_debug.vtp&#39;</span><span class="p">,</span> <span class="n">crown_mesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="n">crown_mesh</span><span class="o">.</span><span class="n">faces</span><span class="p">)</span>
@@ -803,12 +821,12 @@
 
         <span class="c1"># TODO: faire un merge uniquement sur la liste instersections et non sur tout le maillage clipped_crown</span>
         <span class="c1"># FIXME: potentiellement, un bug a ete introduit ici !!! --&gt; l&#39;update n&#39;est plus bon sur les dictionnaires...</span>
-        <span class="n">new_id</span> <span class="o">=</span> <span class="n">clipped_crown_mesh</span><span class="o">.</span><span class="n">merge_duplicates</span><span class="p">(</span><span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># Warning: choosing a lower value</span>
+        <span class="n">new_id</span> <span class="o">=</span> <span class="n">clipped_crown_mesh</span><span class="o">.</span><span class="n">merge_duplicates</span><span class="p">(</span><span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>  <span class="c1"># Warning: choosing a lower value</span>
 
         <span class="c1"># Updating dictionaries</span>
         <span class="n">direct_boundary_edges</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="nb">zip</span><span class="p">(</span><span class="n">new_id</span><span class="p">[</span><span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">keys</span><span class="p">()],</span> <span class="n">new_id</span><span class="p">[</span><span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
-        <span class="n">inv_boundary_edges</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">new_id</span><span class="p">[</span><span class="n">inv_boundary_edges</span><span class="o">.</span><span class="n">keys</span><span class="p">()],</span> <span class="n">new_id</span><span class="p">[</span><span class="n">inv_boundary_edges</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
+            <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">new_id</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">keys</span><span class="p">())],</span> <span class="n">new_id</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">direct_boundary_edges</span><span class="o">.</span><span class="n">values</span><span class="p">())])))</span>
+        <span class="n">inv_boundary_edges</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">new_id</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">inv_boundary_edges</span><span class="o">.</span><span class="n">keys</span><span class="p">())],</span> <span class="n">new_id</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">inv_boundary_edges</span><span class="o">.</span><span class="n">values</span><span class="p">())])))</span>
 
         <span class="c1"># Ordering boundary edges in continuous lines</span>
         <span class="n">closed_polygons</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
@@ -846,7 +864,7 @@
                                     <span class="n">pend</span> <span class="o">=</span> <span class="n">clipped_crown_mesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
                                     
                                     <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">pstart</span><span class="o">-</span><span class="n">pend</span><span class="p">)</span>
-                                    <span class="nb">print</span> <span class="n">d</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
                                     
                                     <span class="n">open_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
                                     <span class="k">break</span>
@@ -857,12 +875,12 @@
             <span class="k">except</span><span class="p">:</span> <span class="c1"># FIXME: specifier quelle exception est attendue ici !</span>
                 <span class="c1"># TODO: retirer les deux lines suivantes</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-                    <span class="nb">print</span> <span class="s2">&quot;</span><span class="si">%u</span><span class="s2"> closed polygon</span><span class="se">\n</span><span class="si">%u</span><span class="s2"> open curve&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">closed_polygons</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">open_lines</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;</span><span class="si">%u</span><span class="s2"> closed polygon</span><span class="se">\n</span><span class="si">%u</span><span class="s2"> open curve&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">closed_polygons</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">open_lines</span><span class="p">))))</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_closed_boundaries</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">open_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="kn">import</span> <span class="nn">mmio</span>
+                            <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">mmio</span>
                             <span class="n">mmio</span><span class="o">.</span><span class="n">write_VTP</span><span class="p">(</span><span class="s1">&#39;full_debug.vtp&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_mesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_mesh</span><span class="o">.</span><span class="n">faces</span><span class="p">)</span>
                             <span class="n">mmio</span><span class="o">.</span><span class="n">write_VTP</span><span class="p">(</span><span class="s1">&#39;clipped_crown_debug.vtp&#39;</span><span class="p">,</span> <span class="n">clipped_crown_mesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="n">clipped_crown_mesh</span><span class="o">.</span><span class="n">faces</span><span class="p">)</span>
                             <span class="n">mmio</span><span class="o">.</span><span class="n">write_VTP</span><span class="p">(</span><span class="s1">&#39;crown_debug.vtp&#39;</span><span class="p">,</span> <span class="n">crown_mesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="n">crown_mesh</span><span class="o">.</span><span class="n">faces</span><span class="p">)</span>
@@ -870,9 +888,9 @@
                             <span class="k">pass</span>
                         
                         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">open_lines</span><span class="p">:</span>
-                            <span class="nb">print</span> <span class="n">line</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
                             
-                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">,</span> <span class="s1">&#39;Open intersection curve found with assert_closed_boundaries option enabled. Files full_debug.vtp, crown_debug.vtp and clipped_crown_debug.vtp written.&#39;</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Open intersection curve found with assert_closed_boundaries option enabled. Files full_debug.vtp, crown_debug.vtp and clipped_crown_debug.vtp written.&#39;</span><span class="p">)</span>
 
                 <span class="k">break</span>
 
@@ -893,6 +911,7 @@
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
   
@@ -901,8 +920,10 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Ecole Centrale de Nantes.
-      Last updated on Mar 17, 2017.
+        &copy; Copyright 2021, Ecole Centrale de Nantes
+      <span class="lastupdated">
+        Last updated on Jan 07, 2021.
+      </span>
 
     </p>
   </div> 
@@ -918,36 +939,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'1.0.5',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

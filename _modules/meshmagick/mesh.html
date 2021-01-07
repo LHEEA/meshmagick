@@ -8,47 +8,44 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>meshmagick.mesh &mdash; Meshmagick User&#39;s Guide 1.0.5 documentation</title>
+  <title>meshmagick.mesh &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
   
 
   
   
+  
+  
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Meshmagick User&#39;s Guide 1.0.5 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -62,7 +59,7 @@
             
             
               <div class="version">
-                1.0.5
+                2.1.1
               </div>
             
           
@@ -83,14 +80,17 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../install/install.html">Installation Instructions</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick’s Command Line Interface</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package&#8217;s modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package’s modules</a></li>
 </ul>
 
             
@@ -102,34 +102,52 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Meshmagick User's Guide</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Meshmagick User's Guide</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      
-    <li>meshmagick.mesh</li>
+        
+      <li>meshmagick.mesh</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -149,13 +167,13 @@
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">vtk</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">count</span>
-<span class="kn">from</span> <span class="nn">warnings</span> <span class="k">import</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 <span class="kn">import</span> <span class="nn">sys</span>  <span class="c1"># TODO: Retirer</span>
 
-<span class="kn">from</span> <span class="nn">tools</span> <span class="k">import</span> <span class="n">merge_duplicate_rows</span>
-<span class="kn">import</span> <span class="nn">MMviewer</span>
-<span class="kn">from</span> <span class="nn">inertia</span> <span class="k">import</span> <span class="n">RigidBodyInertia</span>
+<span class="kn">from</span> <span class="nn">.tools</span> <span class="kn">import</span> <span class="n">merge_duplicate_rows</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">MMviewer</span>
+<span class="kn">from</span> <span class="nn">.inertia</span> <span class="kn">import</span> <span class="n">RigidBodyInertia</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Francois Rongere&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2014-2015, Ecole Centrale de Nantes&quot;</span>
@@ -296,7 +314,7 @@
 <span class="sd">    scalar : float</span>
 <span class="sd">        The scalar parameter of the plane</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span> <span class="n">scalar</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span> <span class="n">scalar</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
@@ -310,7 +328,7 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">str_repr</span> <span class="o">=</span> <span class="s2">&quot;Plane{normal=[</span><span class="si">%f</span><span class="s2">, </span><span class="si">%f</span><span class="s2">, </span><span class="si">%f</span><span class="s2">], scalar=</span><span class="si">%f</span><span class="s2">}&quot;</span> <span class="o">%</span> \
                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_normal</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scalar</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">str_repr</span>
@@ -516,11 +534,11 @@
 
 
 <span class="k">class</span> <span class="nc">_3DPointsArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
-        <span class="n">cls</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">:</span> <span class="n">cls</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="n">cls</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">:</span> <span class="n">cls</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-        <span class="n">cls</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">:</span> <span class="n">cls</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">obj</span>
 
 
@@ -539,7 +557,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_ids</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         
@@ -548,7 +566,7 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;mesh_</span><span class="si">%u</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
@@ -557,7 +575,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="Mesh.__str__"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.__str__">[docs]</a>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh.__str__"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;String representation of the mesh</span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
@@ -672,7 +690,7 @@
 <span class="s2">        http://www.vtk.org/Wiki/images/6/6b/VerdictManual-revA.pdf</span><span class="se">\n</span><span class="s2">&quot;&quot;&quot;</span>
 
         <span class="n">res</span> <span class="o">+=</span> <span class="n">info</span>
-        <span class="nb">print</span> <span class="n">res</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
         <span class="k">return</span></div>
 
     <span class="nd">@property</span>
@@ -747,7 +765,7 @@
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        ndarray</span>
+<span class="sd">        np.ndarray</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span>
 
@@ -866,7 +884,7 @@
         <span class="k">if</span> <span class="s1">&#39;faces_centers&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_faces_properties</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="p">[</span><span class="s1">&#39;faces_centers&#39;</span><span class="p">]</span>
-
+    
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">faces_normals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the array of faces normals of the mesh</span>
@@ -1076,8 +1094,8 @@
         <span class="c1"># Building connectivities</span>
 
         <span class="c1"># Establishing v_v and v_f connectivities</span>
-        <span class="n">v_v</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">nv</span><span class="p">)])</span>
-        <span class="n">v_f</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">nv</span><span class="p">)])</span>
+        <span class="n">v_v</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">)])</span>
+        <span class="n">v_f</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">)])</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">iface</span><span class="p">,</span> <span class="n">face</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_faces</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">face</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
                 <span class="n">face_w</span> <span class="o">=</span> <span class="n">face</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
@@ -1091,8 +1109,8 @@
         <span class="c1"># Connectivity f_f</span>
         <span class="n">boundary_edges</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-        <span class="n">f_f</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">nf</span><span class="p">)])</span>
-        <span class="k">for</span> <span class="n">ivertex</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
+        <span class="n">f_f</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nf</span><span class="p">)])</span>
+        <span class="k">for</span> <span class="n">ivertex</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
             <span class="n">set1</span> <span class="o">=</span> <span class="n">v_f</span><span class="p">[</span><span class="n">ivertex</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">iadj_v</span> <span class="ow">in</span> <span class="n">v_v</span><span class="p">[</span><span class="n">ivertex</span><span class="p">]:</span>
                 <span class="n">set2</span> <span class="o">=</span> <span class="n">v_f</span><span class="p">[</span><span class="n">iadj_v</span><span class="p">]</span>
@@ -1135,7 +1153,7 @@
                         <span class="n">i_v0</span> <span class="o">=</span> <span class="n">i_v1</span>
                     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">boundary</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-                            <span class="nb">print</span> <span class="s1">&#39;Boundary is not closed !!!&#39;</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Boundary is not closed !!!&#39;</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">boundaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">boundary</span><span class="p">)</span>
                         <span class="k">break</span>
@@ -1290,7 +1308,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;This method is not stable yet !! Use with caution&#39;</span><span class="p">)</span>
         <span class="c1"># FIXME: experimental method</span>
-        <span class="n">tol</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">7</span>
+        <span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-7</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_connectivity</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_connectivity</span><span class="p">()</span>
@@ -1622,7 +1640,7 @@
 
         <span class="k">return</span></div>
 
-<div class="viewcode-block" id="Mesh.__add__"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.__add__">[docs]</a>    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh_to_add</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh.__add__"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.__add__">[docs]</a>    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh_to_add</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Adds two meshes</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -1659,7 +1677,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mesh.merge_duplicates"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.merge_duplicates">[docs]</a>    <span class="k">def</span> <span class="nf">merge_duplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh.merge_duplicates"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.merge_duplicates">[docs]</a>    <span class="k">def</span> <span class="nf">merge_duplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Merges the duplicate vertices of the mesh.</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -1690,14 +1708,14 @@
         <span class="n">nv_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_vertices</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;* Merging duplicate vertices that lie in an absolute proximity of </span><span class="si">%.1E</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="n">atol</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;* Merging duplicate vertices that lie in an absolute proximity of </span><span class="si">%.1E</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="n">atol</span><span class="p">))</span>
             <span class="n">delta_n</span> <span class="o">=</span> <span class="n">nv_init</span> <span class="o">-</span> <span class="n">nv_final</span>
             <span class="k">if</span> <span class="n">delta_n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; No duplicate vertices have been found&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; No duplicate vertices have been found&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; Initial number of vertices : </span><span class="si">%u</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">nv_init</span>
-                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; Final number of vertices   : </span><span class="si">%u</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">nv_final</span>
-                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; </span><span class="si">%u</span><span class="s2"> vertices have been merged</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">delta_n</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; Initial number of vertices : </span><span class="si">%u</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">nv_init</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; Final number of vertices   : </span><span class="si">%u</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">nv_final</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; </span><span class="si">%u</span><span class="s2"> vertices have been merged</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">delta_n</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_connectivity</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_remove_connectivity</span><span class="p">()</span>
@@ -1764,7 +1782,7 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">common_vertices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                     <span class="n">i_v1</span><span class="p">,</span> <span class="n">i_v2</span> <span class="o">=</span> <span class="n">common_vertices</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span> <span class="s1">&#39;WARNING: faces </span><span class="si">%u</span><span class="s1"> and </span><span class="si">%u</span><span class="s1"> have more than 2 vertices in common !&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">iface</span><span class="p">,</span> <span class="n">iadj_f</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;WARNING: faces </span><span class="si">%u</span><span class="s1"> and </span><span class="si">%u</span><span class="s1"> have more than 2 vertices in common !&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">iface</span><span class="p">,</span> <span class="n">iadj_f</span><span class="p">)))</span>
                     <span class="k">continue</span>
 
                 <span class="c1"># Checking normal consistency</span>
@@ -1785,11 +1803,11 @@
                 <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iadj_f</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;* Healing normals to make them consistent and if possible outward&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;* Healing normals to make them consistent and if possible outward&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">nb_reversed</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">--&gt; </span><span class="si">%u</span><span class="s1"> faces have been reversed to make normals consistent across the mesh&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nb_reversed</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">--&gt; </span><span class="si">%u</span><span class="s1"> faces have been reversed to make normals consistent across the mesh&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nb_reversed</span><span class="p">)))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; Normals orientations are consistent&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; Normals orientations are consistent&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span> <span class="o">=</span> <span class="n">faces</span>
 
@@ -1804,10 +1822,10 @@
 
             <span class="n">hs</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">centers</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">zmax</span><span class="p">)</span> <span class="o">*</span> <span class="n">areas</span><span class="p">,</span> <span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">normals</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-            <span class="n">tol</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">9</span>
+            <span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-9</span>
             <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">hs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">tol</span> <span class="ow">or</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">hs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">tol</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-                    <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; WARNING: the mesh does not seem watertight althought marked as closed...&quot;</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; WARNING: the mesh does not seem watertight althought marked as closed...&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">hs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">flipped</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1816,12 +1834,12 @@
                 <span class="n">flipped</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="ow">and</span> <span class="n">flipped</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">--&gt; Every normals have been reversed to be outward&#39;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">--&gt; Every normals have been reversed to be outward&#39;</span><span class="p">)</span>
 
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; Mesh is not closed, meshmagick cannot test if the normals are outward&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; Mesh is not closed, meshmagick cannot test if the normals are outward&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_faces_properties</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_remove_faces_properties</span><span class="p">()</span>
@@ -1838,7 +1856,7 @@
         <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span>
 
         <span class="n">used_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nv</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
-        <span class="n">used_v</span><span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">faces</span><span class="p">),</span> <span class="p">[])]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">used_v</span><span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">faces</span><span class="p">)),</span> <span class="p">[])]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">nb_used_v</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">used_v</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">nb_used_v</span> <span class="o">&lt;</span> <span class="n">nv</span><span class="p">:</span>
@@ -1850,13 +1868,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;* Removing unused vertices in the mesh:&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;* Removing unused vertices in the mesh:&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">nb_used_v</span> <span class="o">&lt;</span> <span class="n">nv</span><span class="p">:</span>
                 <span class="n">unused_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">used_v</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">vlist_str</span> <span class="o">=</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">iV</span><span class="p">)</span> <span class="k">for</span> <span class="n">iV</span> <span class="ow">in</span> <span class="n">unused_v</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span>
-                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; </span><span class="si">%u</span><span class="s2"> unused vertices have been removed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nv</span> <span class="o">-</span> <span class="n">nb_used_v</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; </span><span class="si">%u</span><span class="s2"> unused vertices have been removed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nv</span> <span class="o">-</span> <span class="n">nb_used_v</span><span class="p">)))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; No unused vertices&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; No unused vertices&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_connectivity</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_remove_connectivity</span><span class="p">()</span>
@@ -1889,16 +1907,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span> <span class="o">=</span> <span class="n">faces</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;* Ensuring consistent definition of triangles:&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;* Ensuring consistent definition of triangles:&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">nquads_final</span> <span class="o">&lt;</span> <span class="n">nquads_init</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; </span><span class="si">%u</span><span class="s2"> triangles were described the wrong way and have been corrected&quot;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">nquads_init</span> <span class="o">-</span> <span class="n">nquads_final</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; </span><span class="si">%u</span><span class="s2"> triangles were described the wrong way and have been corrected&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">nquads_init</span> <span class="o">-</span> <span class="n">nquads_final</span><span class="p">)))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; Triangle description is consistent&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">--&gt; Triangle description is consistent&quot;</span><span class="p">)</span>
 
         <span class="k">return</span></div>
 
-<div class="viewcode-block" id="Mesh.remove_degenerated_faces"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.remove_degenerated_faces">[docs]</a>    <span class="k">def</span> <span class="nf">remove_degenerated_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh.remove_degenerated_faces"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.remove_degenerated_faces">[docs]</a>    <span class="k">def</span> <span class="nf">remove_degenerated_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Removes tiny triangles from the mesh.</span>
 <span class="sd">        </span>
 <span class="sd">        Tiny triangles are those whose area is lower than the mean triangle area in the mesh times the relative</span>
@@ -1920,11 +1938,11 @@
         <span class="n">faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">areas</span> <span class="o">&lt;</span> <span class="n">area_threshold</span><span class="p">)]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
             <span class="n">nb_removed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_faces</span> <span class="o">-</span> <span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="nb">print</span> <span class="s1">&#39;* Removing degenerated faces&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;* Removing degenerated faces&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">nb_removed</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">--&gt;</span><span class="si">%u</span><span class="s1"> degenerated faces have been removed&#39;</span> <span class="o">%</span> <span class="n">nb_removed</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">--&gt;</span><span class="si">%u</span><span class="s1"> degenerated faces have been removed&#39;</span> <span class="o">%</span> <span class="n">nb_removed</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">--&gt; No degenerated faces&#39;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">--&gt; No degenerated faces&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span> <span class="o">=</span> <span class="n">faces</span>
         
@@ -1981,9 +1999,9 @@
         <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">faces</span><span class="p">,</span> <span class="n">new_faces</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Triangulating quadrangles&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Triangulating quadrangles&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_quadrangles</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">--&gt;</span><span class="si">{:d}</span><span class="s1"> quadrangles have been split in triangles&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_quadrangles</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">--&gt;</span><span class="si">{:d}</span><span class="s1"> quadrangles have been split in triangles&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_quadrangles</span><span class="p">)))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
@@ -2063,7 +2081,7 @@
         <span class="k">return</span>
     
 <div class="viewcode-block" id="Mesh.has_surface_integrals"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.has_surface_integrals">[docs]</a>    <span class="k">def</span> <span class="nf">has_surface_integrals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s1">&#39;surface_integrals&#39;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;surface_integrals&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__internals__</span></div>
 
 <div class="viewcode-block" id="Mesh.get_surface_integrals"><a class="viewcode-back" href="../../api/meshmagick.mesh.html#meshmagick.mesh.Mesh.get_surface_integrals">[docs]</a>    <span class="k">def</span> <span class="nf">get_surface_integrals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the mesh surface integrals</span>
@@ -2071,7 +2089,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        ndarray</span>
-<span class="sd">            The mesh surface inegrals array</span>
+<span class="sd">            The mesh surface integrals array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO: add an option to do the summation</span>
         <span class="c1"># TODO: decrire les integrales de surface en question</span>
@@ -2164,7 +2182,7 @@
 
         <span class="n">s0</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span><span class="p">,</span> <span class="n">s5</span><span class="p">,</span> <span class="n">s6</span><span class="p">,</span> <span class="n">s7</span><span class="p">,</span> <span class="n">s8</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_surface_integrals</span><span class="p">()[:</span><span class="mi">9</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         
-        <span class="n">cog</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s0</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">mass</span>
+        <span class="n">cog</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s0</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">surface</span>
         
         <span class="n">xx</span> <span class="o">=</span> <span class="n">surf_density</span> <span class="o">*</span> <span class="p">(</span><span class="n">s7</span> <span class="o">+</span> <span class="n">s8</span><span class="p">)</span>
         <span class="n">yy</span> <span class="o">=</span> <span class="n">surf_density</span> <span class="o">*</span> <span class="p">(</span><span class="n">s6</span> <span class="o">+</span> <span class="n">s8</span><span class="p">)</span>
@@ -2179,7 +2197,7 @@
         <span class="sd">&quot;&quot;&quot;Computes the min, max, and mean of the mesh&#39;s edge length&quot;&quot;&quot;</span>
         <span class="n">vertices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="p">]</span>
         <span class="n">edge_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_faces</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
             <span class="n">edge</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">vertices</span><span class="p">[:,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
             <span class="n">edge_length</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij, ij -&gt; i&#39;</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">edge</span><span class="p">))</span>
             
@@ -2218,7 +2236,7 @@
 
         <span class="n">s_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">15</span><span class="p">,</span> <span class="n">triangles_vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
-        <span class="n">point_0</span><span class="p">,</span> <span class="n">point_1</span><span class="p">,</span> <span class="n">point_2</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">_3DPointsArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">rollaxis</span><span class="p">(</span><span class="n">triangles_vertices</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">point_0</span><span class="p">,</span> <span class="n">point_1</span><span class="p">,</span> <span class="n">point_2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">_3DPointsArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">rollaxis</span><span class="p">(</span><span class="n">triangles_vertices</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
 
         <span class="n">t0</span> <span class="o">=</span> <span class="n">point_0</span> <span class="o">+</span> <span class="n">point_1</span>
         <span class="n">f1</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">point_2</span>
@@ -2267,14 +2285,15 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.vtp&#39;</span><span class="p">):</span>
             <span class="n">filename</span> <span class="o">+=</span> <span class="s1">&#39;.vtp&#39;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">mmio</span> <span class="k">import</span> <span class="n">write_VTP</span>
+            <span class="kn">from</span> <span class="nn">.mmio</span> <span class="kn">import</span> <span class="n">write_VTP</span>
             <span class="n">write_VTP</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="p">)</span>
-            <span class="nb">print</span> <span class="s1">&#39;File </span><span class="si">%s</span><span class="s1"> written&#39;</span> <span class="o">%</span> <span class="n">filename</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;File </span><span class="si">%s</span><span class="s1"> written&#39;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;mmio module not found&#39;</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
   
@@ -2283,8 +2302,10 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Ecole Centrale de Nantes.
-      Last updated on Mar 17, 2017.
+        &copy; Copyright 2021, Ecole Centrale de Nantes
+      <span class="lastupdated">
+        Last updated on Jan 07, 2021.
+      </span>
 
     </p>
   </div> 
@@ -2300,36 +2321,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'1.0.5',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

@@ -8,49 +8,46 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>meshmagick.hydrostatics module &mdash; Meshmagick User&#39;s Guide 1.0.5 documentation</title>
+  <title>meshmagick.hydrostatics module &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
   
 
   
   
+  
+  
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Meshmagick User&#39;s Guide 1.0.5 documentation" href="../index.html"/>
-        <link rel="up" title="Meshmagick Package’s modules" href="index.html"/>
-        <link rel="next" title="meshmagick.MMviewer module" href="meshmagick.MMviewer.html"/>
-        <link rel="prev" title="meshmagick.densities module" href="meshmagick.densities.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="meshmagick.MMviewer module" href="meshmagick.MMviewer.html" />
+    <link rel="prev" title="meshmagick.densities module" href="meshmagick.densities.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -64,7 +61,7 @@
             
             
               <div class="version">
-                1.0.5
+                2.1.1
               </div>
             
           
@@ -85,14 +82,17 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install/install.html">Installation Instructions</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../command_line/index.html">Meshmagick’s Command Line Interface</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package&#8217;s modules</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Meshmagick Package’s modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.mesh.html">meshmagick.mesh module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.mmio.html">meshmagick.mmio module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meshmagick.inertia.html">meshmagick.inertia module</a></li>
@@ -114,36 +114,56 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Meshmagick User's Guide</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Meshmagick User's Guide</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
-          <li><a href="index.html">Meshmagick Package&#8217;s modules</a> &raquo;</li>
-      
-    <li>meshmagick.hydrostatics module</li>
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Meshmagick Package’s modules</a> &raquo;</li>
+        
+      <li>meshmagick.hydrostatics module</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../_sources/api/meshmagick.hydrostatics.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -152,592 +172,541 @@
   <div class="section" id="module-meshmagick.hydrostatics">
 <span id="meshmagick-hydrostatics-module"></span><h1>meshmagick.hydrostatics module<a class="headerlink" href="#module-meshmagick.hydrostatics" title="Permalink to this headline">¶</a></h1>
 <p>This module allows to perform hydrostatics computations on meshes</p>
-<dl class="class">
+<dl class="py class">
 <dt id="meshmagick.hydrostatics.Force">
-<em class="property">class </em><code class="descclassname">meshmagick.hydrostatics.</code><code class="descname">Force</code><span class="sig-paren">(</span><em>point=(0</em>, <em>0</em>, <em>0)</em>, <em>value=(0</em>, <em>0</em>, <em>0)</em>, <em>name=''</em>, <em>mode='relative'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">meshmagick.hydrostatics.</code><code class="sig-name descname">Force</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">point</span><span class="o">=</span><span class="default_value">(0, 0, 0)</span></em>, <em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">(0, 0, 0)</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'relative'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class to handle a linear force (resultant).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>point</strong> (<em>array_like</em><em>, </em><em>optional</em>) &#8211; The force application point. Default is (0, 0, 0)</li>
-<li><strong>value</strong> (<em>array_like</em><em>, </em><em>optional</em>) &#8211; The value of the force. Default is (0, 0, 0)</li>
-<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a><em>, </em><em>optional</em>) &#8211; The name of the force</li>
-<li><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a><em>, </em><em></em><em>[</em><em>'relative'</em><em>, </em><em>'absolute'</em><em>]</em><em></em>) &#8211; The mode of the force whether its direction follows the body motion (&#8216;relative&#8217;) or remains fixed with
-respect to the reference frame (&#8216;absolute&#8217;). Default is &#8216;relative&#8217;.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The force application point. Default is (0, 0, 0)</p></li>
+<li><p><strong>value</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The value of the force. Default is (0, 0, 0)</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – The name of the force</p></li>
+<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>[</em><em>'relative'</em><em>, </em><em>'absolute'</em><em>]</em>) – The mode of the force whether its direction follows the body motion (‘relative’) or remains fixed with
+respect to the reference frame (‘absolute’). Default is ‘relative’.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-<dl class="attribute">
+</dd>
+</dl>
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Force.hs_force">
-<code class="descname">hs_force</code><a class="headerlink" href="#meshmagick.hydrostatics.Force.hs_force" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">hs_force</code><a class="headerlink" href="#meshmagick.hydrostatics.Force.hs_force" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the relevant force vector for hydrostatics computations.</p>
-<p>The return array&#8217;s components are the vertical force, x moment and y moment around the application point.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
-</tr>
-</tbody>
-</table>
+<p>The return array’s components are the vertical force, x moment and y moment around the application point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Force.reset">
-<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force.reset" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force.reset" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Force.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>dz=0.0, rot=array([[ 1.,  0.,  0.],        [ 0.,  1.,  0.],        [ 0.,  0.,  1.]])</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force.update" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dz</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">rot</span><span class="o">=</span><span class="default_value">array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]])</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates the vertical position and orientation of the force.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>dz</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; Update in the vertical position of the application point. Default is 0.</li>
-<li><strong>rot</strong> (<em>ndarray</em>) &#8211; The 3x3 rotation matrix for the force direction. Default is identity.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Update in the vertical position of the application point. Default is 0.</p></li>
+<li><p><strong>rot</strong> (<em>ndarray</em>) – The 3x3 rotation matrix for the force direction. Default is identity.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Force.update_xy">
-<code class="descname">update_xy</code><span class="sig-paren">(</span><em>dx</em>, <em>dy</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force.update_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force.update_xy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">update_xy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dx</span></em>, <em class="sig-param"><span class="n">dy</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Force.update_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Force.update_xy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates the horizontal position of the application point of the force.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; Update in the x position of the application point. Defaults is 0.</li>
-<li><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; Update in the y position of the application point. Defaults is 0.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Update in the x position of the application point. Defaults is 0.</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Update in the y position of the application point. Defaults is 0.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="meshmagick.hydrostatics.Hydrostatics">
-<em class="property">class </em><code class="descclassname">meshmagick.hydrostatics.</code><code class="descname">Hydrostatics</code><span class="sig-paren">(</span><em>working_mesh, cog=[0.0, 0.0, 0.0], mass=None, rho_water=1023, grav=9.81, verbose=False, animate=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">meshmagick.hydrostatics.</code><code class="sig-name descname">Hydrostatics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">working_mesh</span></em>, <em class="sig-param"><span class="n">cog</span><span class="o">=</span><span class="default_value">[0.0, 0.0, 0.0]</span></em>, <em class="sig-param"><span class="n">mass</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rho_water</span><span class="o">=</span><span class="default_value">1023</span></em>, <em class="sig-param"><span class="n">grav</span><span class="o">=</span><span class="default_value">9.81</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">animate</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class to perform hydrostatic computations on meshes.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>working_mesh</strong> (<a class="reference internal" href="meshmagick.mesh.html#meshmagick.mesh.Mesh" title="meshmagick.mesh.Mesh"><em>Mesh</em></a>) &#8211; The mesh we want to work with for hydrostatics computations</li>
-<li><strong>cog</strong> (<em>array_like</em><em>, </em><em>optional</em>) &#8211; The mesh&#8217;s center of gravity coordinates. Default is the origin (0, 0, 0)</li>
-<li><strong>mass</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; The mesh&#8217;s mass. Default is 0. Unit is Ton.</li>
-<li><strong>rho_water</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; The density of water (in kg/m**3). Default is that of salt water (1023 kg//m**3)</li>
-<li><strong>grav</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; The acceleration of gravity. Default is 9.81 m/s**2.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>working_mesh</strong> (<a class="reference internal" href="meshmagick.mesh.html#meshmagick.mesh.Mesh" title="meshmagick.mesh.Mesh"><em>Mesh</em></a>) – The mesh we want to work with for hydrostatics computations</p></li>
+<li><p><strong>cog</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The mesh’s center of gravity coordinates. Default is the origin (0, 0, 0)</p></li>
+<li><p><strong>mass</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – The mesh’s mass. Default is 0. Unit is Ton.</p></li>
+<li><p><strong>rho_water</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – The density of water (in kg/m**3). Default is that of salt water (1023 kg//m**3)</p></li>
+<li><p><strong>grav</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – The acceleration of gravity. Default is 9.81 m/s**2.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<ul class="last simple">
-<li>At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible
+<p class="admonition-title">Warning</p>
+<ul class="simple">
+<li><p>At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible
 directly for this position. The mesh may not be at equilibrium thought and residual force balance between
 hydrostatic force and gravity force may be not null. To trig the equilibrium computations, we have to call the
-equilibrate() method.</li>
-<li>Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally
-and automatically at each modification.</li>
-<li>Mass unit is the ton !</li>
+equilibrate() method.</p></li>
+<li><p>Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally
+and automatically at each modification.</p></li>
+<li><p>Mass unit is the ton !</p></li>
 </ul>
 </div>
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.S33">
-<code class="descname">S33</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S33" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">S33</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S33" title="Permalink to this definition">¶</a></dt>
 <dd><p>The S33 heave-heave stiffness coefficient</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.S34">
-<code class="descname">S34</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S34" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">S34</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S34" title="Permalink to this definition">¶</a></dt>
 <dd><p>The S34 heave-roll stiffness coefficient</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.S35">
-<code class="descname">S35</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S35" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">S35</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S35" title="Permalink to this definition">¶</a></dt>
 <dd><p>The S35 heave-pitch stiffness coefficient</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.S44">
-<code class="descname">S44</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S44" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">S44</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S44" title="Permalink to this definition">¶</a></dt>
 <dd><p>The S44 roll-roll stiffness coefficient</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.S45">
-<code class="descname">S45</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S45" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">S45</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S45" title="Permalink to this definition">¶</a></dt>
 <dd><p>The S45 roll-pitch stiffness coefficient</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.S55">
-<code class="descname">S55</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S55" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">S55</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.S55" title="Permalink to this definition">¶</a></dt>
 <dd><p>The S55 pitch-pitch stiffness coefficient</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.add_force">
-<code class="descname">add_force</code><span class="sig-paren">(</span><em>force</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.add_force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.add_force" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_force</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">force</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.add_force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.add_force" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a custom force applying on the body</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>force</strong> (<a class="reference internal" href="#meshmagick.hydrostatics.Force" title="meshmagick.hydrostatics.Force"><em>Force</em></a>) &#8211; External force</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>force</strong> (<a class="reference internal" href="#meshmagick.hydrostatics.Force" title="meshmagick.hydrostatics.Force"><em>Force</em></a>) – External force</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.allow_unstable">
-<code class="descname">allow_unstable</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.allow_unstable" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">allow_unstable</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.allow_unstable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Whether unstable equilibrium configurations allowed</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.allow_unstable_off">
-<code class="descname">allow_unstable_off</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.allow_unstable_off"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.allow_unstable_off" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">allow_unstable_off</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.allow_unstable_off"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.allow_unstable_off" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switches OFF the allowance of unstable equilibrium configurations finding</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.allow_unstable_on">
-<code class="descname">allow_unstable_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.allow_unstable_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.allow_unstable_on" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">allow_unstable_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.allow_unstable_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.allow_unstable_on" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switches ON the allowance of unstable equilibrium configurations finding</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.buoyancy_center">
-<code class="descname">buoyancy_center</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.buoyancy_center" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">buoyancy_center</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.buoyancy_center" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the position of the buoyancy center</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.delta_fz">
-<code class="descname">delta_fz</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.delta_fz" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">delta_fz</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.delta_fz" title="Permalink to this definition">¶</a></dt>
 <dd><p>The residual vertical force</p>
 <p>A non-zero value indicates that the mesh is not at hydrostatic equilibrium</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)">float</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.delta_mx">
-<code class="descname">delta_mx</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.delta_mx" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">delta_mx</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.delta_mx" title="Permalink to this definition">¶</a></dt>
 <dd><p>The residual moment around x</p>
 <p>A non-zero value indicates that the mesh is not at hydrostatic equilibrium</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)">float</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.delta_my">
-<code class="descname">delta_my</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.delta_my" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">delta_my</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.delta_my" title="Permalink to this definition">¶</a></dt>
 <dd><p>The residual moment around x</p>
 <p>A non-zero value indicates that the mesh is not at hydrostatic equilibrium</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)">float</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.displacement">
-<code class="descname">displacement</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.displacement" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">displacement</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.displacement" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the mass displacement (tons)</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.displacement_volume">
-<code class="descname">displacement_volume</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.displacement_volume" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">displacement_volume</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.displacement_volume" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the volume displacement (m**2)</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.equilibrate">
-<code class="descname">equilibrate</code><span class="sig-paren">(</span><em>init_disp=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.equilibrate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.equilibrate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">equilibrate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init_disp</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.equilibrate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.equilibrate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs 3D equilibrium search.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>init_disp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; Flag to indicate if the mesh has to be first placed at its displacement. Default is True.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A code indicating the state of the solver at the end of the computations</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)">int</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>init_disp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Flag to indicate if the mesh has to be first placed at its displacement. Default is True.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A code indicating the state of the solver at the end of the computations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
 <div class="admonition-notes admonition">
-<p class="first admonition-title">Notes</p>
+<p class="admonition-title">Notes</p>
 <p>The return code can have the following values:</p>
-<ul class="last simple">
-<li>0 : Failed to find an equilibrium position</li>
-<li>1 : A stable equilibrium configuration has been reached</li>
-<li>2 : An unstable equilibrium configuration has been reached</li>
+<ul class="simple">
+<li><p>0 : Failed to find an equilibrium position</p></li>
+<li><p>1 : A stable equilibrium configuration has been reached</p></li>
+<li><p>2 : An unstable equilibrium configuration has been reached</p></li>
 </ul>
 </div>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.flotation_center">
-<code class="descname">flotation_center</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.flotation_center" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">flotation_center</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.flotation_center" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the position of the center of the flotation plane</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.flotation_surface_area">
-<code class="descname">flotation_surface_area</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.flotation_surface_area" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">flotation_surface_area</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.flotation_surface_area" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the area of the flotation plane</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.get_buoyancy_force">
-<code class="descname">get_buoyancy_force</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.get_buoyancy_force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.get_buoyancy_force" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_buoyancy_force</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.get_buoyancy_force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.get_buoyancy_force" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the buoyancy force applied on the body</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#meshmagick.hydrostatics.Force" title="meshmagick.hydrostatics.Force">Force</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#meshmagick.hydrostatics.Force" title="meshmagick.hydrostatics.Force">Force</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.get_gravity_force">
-<code class="descname">get_gravity_force</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.get_gravity_force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.get_gravity_force" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_gravity_force</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.get_gravity_force"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.get_gravity_force" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the gravity force applied on the body</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#meshmagick.hydrostatics.Force" title="meshmagick.hydrostatics.Force">Force</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#meshmagick.hydrostatics.Force" title="meshmagick.hydrostatics.Force">Force</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.get_hydrostatic_report">
-<code class="descname">get_hydrostatic_report</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.get_hydrostatic_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.get_hydrostatic_report" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_hydrostatic_report</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.get_hydrostatic_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.get_hydrostatic_report" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a hydrostatic report for the current configuration</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)">str</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.gravity">
-<code class="descname">gravity</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.gravity" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">gravity</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.gravity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the gravity acceleration</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.gravity_center">
-<code class="descname">gravity_center</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.gravity_center" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">gravity_center</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.gravity_center" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the gravity center position</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.hydrostatic_mesh">
-<code class="descname">hydrostatic_mesh</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.hydrostatic_mesh" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">hydrostatic_mesh</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.hydrostatic_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the underwater part of the mesh</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.hydrostatic_stiffness_matrix">
-<code class="descname">hydrostatic_stiffness_matrix</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.hydrostatic_stiffness_matrix" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">hydrostatic_stiffness_matrix</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.hydrostatic_stiffness_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the hydrostatic stiffness matrix</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.is_at_equilibrium">
-<code class="descname">is_at_equilibrium</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_at_equilibrium"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_at_equilibrium" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_at_equilibrium</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_at_equilibrium"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_at_equilibrium" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the mesh is actually in an equilibrium configuration</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.is_sinking">
-<code class="descname">is_sinking</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_sinking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_sinking" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_sinking</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_sinking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_sinking" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the mesh is sinking with the current mass.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.is_stable_in_pitch">
-<code class="descname">is_stable_in_pitch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_stable_in_pitch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_stable_in_pitch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_stable_in_pitch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_stable_in_pitch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_stable_in_pitch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the mesh is stable in pitch (GMy positive)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.is_stable_in_roll">
-<code class="descname">is_stable_in_roll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_stable_in_roll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_stable_in_roll" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_stable_in_roll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.is_stable_in_roll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.is_stable_in_roll" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the mesh is stable in roll (GMx positive)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.isstable">
-<code class="descname">isstable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.isstable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.isstable" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">isstable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.isstable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.isstable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the mesh is both stable in roll and in pitch</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.longitudinal_metacentric_height">
-<code class="descname">longitudinal_metacentric_height</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.longitudinal_metacentric_height" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">longitudinal_metacentric_height</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.longitudinal_metacentric_height" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the longitudinal metacentric height (GMy)</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.longitudinal_metacentric_radius">
-<code class="descname">longitudinal_metacentric_radius</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.longitudinal_metacentric_radius" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">longitudinal_metacentric_radius</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.longitudinal_metacentric_radius" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the longitudinal metacentric radius</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.mass">
-<code class="descname">mass</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.mass" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">mass</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.mass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the mass (in tons)</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.max_iterations">
-<code class="descname">max_iterations</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.max_iterations" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">max_iterations</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.max_iterations" title="Permalink to this definition">¶</a></dt>
 <dd><p>The maximum number of iterations to find a hydrostatic equilibrium starting from an initial configuration</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.max_restart">
-<code class="descname">max_restart</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.max_restart" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">max_restart</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.max_restart" title="Permalink to this definition">¶</a></dt>
 <dd><p>The maximum number of random restart for hydrostatic equilibrium computations</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.reltol">
-<code class="descname">reltol</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.reltol" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">reltol</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.reltol" title="Permalink to this definition">¶</a></dt>
 <dd><p>The relative tolerance for hydrostatic equilibrium solver</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.reset">
-<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.reset" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset hydrostatics with respect to the initial mesh</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.residual">
-<code class="descname">residual</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.residual" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">residual</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.residual" title="Permalink to this definition">¶</a></dt>
 <dd><p>The residual force resulting from the balance between gravity, buoyancy and external forces</p>
 <p>It is composed of the vertical force and horizontal moments only.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.rho_water">
-<code class="descname">rho_water</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.rho_water" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">rho_water</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.rho_water" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the water density</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.set_displacement">
-<code class="descname">set_displacement</code><span class="sig-paren">(</span><em>disp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.set_displacement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.set_displacement" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_displacement</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">disp</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.set_displacement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.set_displacement" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displaces the mesh at a prescribed displacement</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>disp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Mass displacement of the hull (in tons)</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>disp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Mass displacement of the hull (in tons)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.show">
-<code class="descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.show" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.show" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays the mesh in the meshmagick viewer with additional graphics proper to hydrostatics</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.theta_relax">
-<code class="descname">theta_relax</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.theta_relax" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">theta_relax</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.theta_relax" title="Permalink to this definition">¶</a></dt>
 <dd><p>The angle relaxation value of the hydrostatic solver</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.transversal_metacentric_height">
-<code class="descname">transversal_metacentric_height</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.transversal_metacentric_height" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">transversal_metacentric_height</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.transversal_metacentric_height" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the transversal metacentric height (GMx)</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.transversal_metacentric_radius">
-<code class="descname">transversal_metacentric_radius</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.transversal_metacentric_radius" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">transversal_metacentric_radius</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.transversal_metacentric_radius" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the transversal metacentric radius</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.verbose">
-<code class="descname">verbose</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.verbose" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">verbose</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.verbose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the verbosity</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.verbose_off">
-<code class="descname">verbose_off</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.verbose_off"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.verbose_off" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">verbose_off</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.verbose_off"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.verbose_off" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch OFF the verbosity.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.verbose_on">
-<code class="descname">verbose_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.verbose_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.verbose_on" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">verbose_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/hydrostatics.html#Hydrostatics.verbose_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.verbose_on" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch ON the verbosity.</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.wet_surface_area">
-<code class="descname">wet_surface_area</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.wet_surface_area" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">wet_surface_area</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.wet_surface_area" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the area of the underwater surface (m**2)</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.z_relax">
-<code class="descname">z_relax</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.z_relax" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">z_relax</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.z_relax" title="Permalink to this definition">¶</a></dt>
 <dd><p>The distance relaxation value of the hydrostatic solver</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="meshmagick.hydrostatics.Hydrostatics.zg">
-<code class="descname">zg</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.zg" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">zg</code><a class="headerlink" href="#meshmagick.hydrostatics.Hydrostatics.zg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the gravity center vertical position</p>
 </dd></dl>
 
@@ -747,15 +716,16 @@ and automatically at each modification.</li>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="meshmagick.MMviewer.html" class="btn btn-neutral float-right" title="meshmagick.MMviewer module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="meshmagick.MMviewer.html" class="btn btn-neutral float-right" title="meshmagick.MMviewer module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="meshmagick.densities.html" class="btn btn-neutral" title="meshmagick.densities module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="meshmagick.densities.html" class="btn btn-neutral float-left" title="meshmagick.densities module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -764,8 +734,10 @@ and automatically at each modification.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Ecole Centrale de Nantes.
-      Last updated on Mar 17, 2017.
+        &copy; Copyright 2021, Ecole Centrale de Nantes
+      <span class="lastupdated">
+        Last updated on Jan 07, 2021.
+      </span>
 
     </p>
   </div> 
@@ -781,36 +753,15 @@ and automatically at each modification.</li>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'1.0.5',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

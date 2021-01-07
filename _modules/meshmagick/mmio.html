@@ -8,47 +8,44 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>meshmagick.mmio &mdash; Meshmagick User&#39;s Guide 1.0.5 documentation</title>
+  <title>meshmagick.mmio &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
   
 
   
   
+  
+  
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Meshmagick User&#39;s Guide 1.0.5 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -62,7 +59,7 @@
             
             
               <div class="version">
-                1.0.5
+                2.1.1
               </div>
             
           
@@ -83,14 +80,17 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../install/install.html">Installation Instructions</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick&#8217;s Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../command_line/index.html">Meshmagick’s Command Line Interface</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package&#8217;s modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Meshmagick Package’s modules</a></li>
 </ul>
 
             
@@ -102,34 +102,52 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Meshmagick User's Guide</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Meshmagick User's Guide</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      
-    <li>meshmagick.mmio</li>
+        
+      <li>meshmagick.mmio</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -143,7 +161,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="n">real_str</span> <span class="o">=</span> <span class="s1">r&#39;[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?&#39;</span>  <span class="c1"># Regex for floats</span>
+<span class="n">real_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;[+-]?(?:\d+\.\d*|\d*\.\d+)(?:[Ee][+-]?\d+)?&#39;</span>  <span class="c1"># Regex for floats</span>
 <span class="c1"># =======================================================================</span>
 <span class="c1"># MESH LOADERS</span>
 <span class="c1"># ======================================================================</span>
@@ -213,11 +231,11 @@
     <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="c1"># node_line = r&#39;\s*\d+(?:\s*&#39; + real_str + &#39;){3}&#39;</span>
-    <span class="n">node_line</span> <span class="o">=</span> <span class="s1">r&#39;\s*\d+\s*(&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)\s*(&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)\s*(&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
-    <span class="n">node_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">node_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
+    <span class="n">node_line</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\s*\d+\s*(&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)\s*(&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)\s*(&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+    <span class="n">node_section</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">node_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
 
-    <span class="n">elem_line</span> <span class="o">=</span> <span class="s1">r&#39;^\s*(?:\d+\s+)</span><span class="si">{6}</span><span class="s1">\d+\s*[\r\n]+&#39;</span>
-    <span class="n">elem_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">elem_line</span> <span class="o">+</span> <span class="s1">&#39;){3,})&#39;</span>
+    <span class="n">elem_line</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^\s*(?:\d+\s+)</span><span class="si">{6}</span><span class="s1">\d+\s*[\r\n]+&#39;</span>
+    <span class="n">elem_section</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">elem_line</span> <span class="o">+</span> <span class="s1">&#39;){3,})&#39;</span>
 
     <span class="n">pattern_node_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">node_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
     <span class="c1"># pattern_node_line_group = re.compile(node_line, re.MULTILINE)</span>
@@ -228,13 +246,13 @@
     <span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">node_section</span> <span class="o">=</span> <span class="n">pattern_node_section</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">pattern_node_line</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">node_section</span><span class="p">):</span>
-        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">groups</span><span class="p">())))</span>
+        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">groups</span><span class="p">()))))</span>
     <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
     <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">elem_section</span> <span class="o">=</span> <span class="n">pattern_elem_section</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">pattern_elem_line</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">elem_section</span><span class="p">):</span>
-        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">:]))</span>
+        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">:])))</span>
     <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
@@ -267,11 +285,11 @@
 
     <span class="kn">import</span> <span class="nn">re</span>
 
-    <span class="n">node_line</span> <span class="o">=</span> <span class="s1">r&#39;\s*\d+(?:\s+&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="si">{3}</span><span class="s1">&#39;</span>
-    <span class="n">node_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">node_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
+    <span class="n">node_line</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\s*\d+(?:\s+&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="si">{3}</span><span class="s1">&#39;</span>
+    <span class="n">node_section</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">node_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
 
-    <span class="n">elem_line</span> <span class="o">=</span> <span class="s1">r&#39;^\s*(?:\d+\s+)</span><span class="si">{3}</span><span class="s1">\d+\s*[\r\n]+&#39;</span>
-    <span class="n">elem_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">elem_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
+    <span class="n">elem_line</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^\s*(?:\d+\s+)</span><span class="si">{3}</span><span class="s1">\d+\s*[\r\n]+&#39;</span>
+    <span class="n">elem_section</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">elem_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
 
     <span class="n">pattern_node_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">node_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
     <span class="n">pattern_elem_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">elem_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
@@ -283,7 +301,7 @@
     <span class="n">nv</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">node_section</span> <span class="ow">in</span> <span class="n">pattern_node_section</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">pattern_node_line</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">node_section</span><span class="p">):</span>
-            <span class="n">vertices_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]))</span>
+            <span class="n">vertices_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">:])))</span>
         <span class="n">nv_tmp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertices_tmp</span><span class="p">)</span>
         <span class="n">vertices_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vertices_tmp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">nv</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -298,7 +316,7 @@
     <span class="n">nf</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">elem_section</span> <span class="ow">in</span> <span class="n">pattern_elem_section</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">pattern_elem_line</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">elem_section</span><span class="p">):</span>
-            <span class="n">faces_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+            <span class="n">faces_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">split</span><span class="p">())))</span>
         <span class="n">nf_tmp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">faces_tmp</span><span class="p">)</span>
         <span class="n">faces_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">faces_tmp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">nf</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -312,11 +330,72 @@
 
 
 <div class="viewcode-block" id="load_DAT"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_DAT">[docs]</a><span class="k">def</span> <span class="nf">load_DAT</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Not implemented.</span>
-<span class="sd">    Intended to load .DAT files used in DIODORE (PRINCIPIA (c))</span>
+    <span class="sd">&quot;&quot;&quot;Loads .DAT files used in DIODORE (PRINCIPIA (c))</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    
+    
+    <span class="kn">import</span> <span class="nn">re</span>
+    
+    <span class="c1"># NODE SECTION</span>
+    <span class="n">node_section_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;NODE\s*((?:\d+(?:\s+\S+)</span><span class="si">{3}</span><span class="s1">\s+)+)\*RETURN&#39;</span><span class="p">)</span>
+    <span class="n">node_sections</span> <span class="o">=</span> <span class="n">node_section_pattern</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_sections</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Not possible to have several NODE sections in Diodore DAT files&#39;</span><span class="p">)</span>
+    
+    <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">node_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">inode</span><span class="p">,</span> <span class="n">node_str</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">node_sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()):</span>
+        <span class="n">node_split</span> <span class="o">=</span> <span class="n">node_str</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node_split</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">node_dict</span><span class="p">[</span><span class="n">node_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">inode</span>
+        
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># TRIANGLE FACES SECTION</span>
+    <span class="n">triangle_section_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;ELEMENT\S+T3C000.+\s*((?:(?:\d+\s+)</span><span class="si">{4}</span><span class="s1">)+)\*RETURN&#39;</span><span class="p">)</span>
+    <span class="n">triangle_sections</span> <span class="o">=</span> <span class="n">triangle_section_pattern</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">triangle_sections</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">triangle</span> <span class="ow">in</span> <span class="n">triangle_sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+            <span class="n">triangle_split</span> <span class="o">=</span> <span class="n">triangle</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="n">triangle</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">node_dict</span><span class="p">[</span><span class="n">triangle_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                <span class="n">node_dict</span><span class="p">[</span><span class="n">triangle_split</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
+                <span class="n">node_dict</span><span class="p">[</span><span class="n">triangle_split</span><span class="p">[</span><span class="mi">3</span><span class="p">]],</span>
+                <span class="n">node_dict</span><span class="p">[</span><span class="n">triangle_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="p">]</span>
+
+            <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triangle</span><span class="p">)</span>
+    
+    <span class="c1"># QUADRANGLE FACES SECTION</span>
+    <span class="n">quadrangle_section_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;ELEMENT\S+Q4C000.+\s*((?:(?:\d+\s+)</span><span class="si">{5}</span><span class="s1">)+)\*RETURN&#39;</span><span class="p">)</span>
+    <span class="n">quadrangle_sections</span> <span class="o">=</span> <span class="n">quadrangle_section_pattern</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">quadrangle_sections</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">quadrangle</span> <span class="ow">in</span> <span class="n">quadrangle_sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+            <span class="n">quadrangle_split</span> <span class="o">=</span> <span class="n">quadrangle</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="n">quadrangle</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">node_dict</span><span class="p">[</span><span class="n">quadrangle_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                <span class="n">node_dict</span><span class="p">[</span><span class="n">quadrangle_split</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
+                <span class="n">node_dict</span><span class="p">[</span><span class="n">quadrangle_split</span><span class="p">[</span><span class="mi">3</span><span class="p">]],</span>
+                <span class="n">node_dict</span><span class="p">[</span><span class="n">quadrangle_split</span><span class="p">[</span><span class="mi">4</span><span class="p">]],</span>
+            <span class="p">]</span>
+
+            <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quadrangle</span><span class="p">)</span>
+
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
 
 
 <div class="viewcode-block" id="load_INP"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_INP">[docs]</a><span class="k">def</span> <span class="nf">load_INP</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
@@ -348,17 +427,17 @@
         <span class="n">text</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
     <span class="c1"># Retrieving frames into a dictionnary frames</span>
-    <span class="n">pattern_frame_str</span> <span class="o">=</span> <span class="s1">r&#39;^\s*\*FRAME,NAME=(.+)[\r\n]+(.*)&#39;</span>
+    <span class="n">pattern_frame_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^\s*\*FRAME,NAME=(.+)[\r\n]+(.*)&#39;</span>
     <span class="n">pattern_frame</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">pattern_frame_str</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
 
     <span class="n">frames</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">pattern_frame</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
         <span class="n">frame_name</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">frame_vector</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">r&#39;[, ]&#39;</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-        <span class="n">frames</span><span class="p">[</span><span class="n">frame_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">frame_vector</span><span class="p">))</span>
+        <span class="n">frame_vector</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[, ]&#39;</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">frames</span><span class="p">[</span><span class="n">frame_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">frame_vector</span><span class="p">)))</span>
 
     <span class="c1"># Storing the inp layout into a list of dictionary</span>
-    <span class="n">pattern_node_elements</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">r&#39;^\s*\*(NODE|ELEMENT),(.*)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">pattern_node_elements</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^\s*\*(NODE|ELEMENT),(.*)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
     <span class="n">layout</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">mesh_files</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">pattern_node_elements</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
@@ -385,10 +464,10 @@
 
         <span class="c1"># RETRIEVING DATA SECTIONS FROM MESHFILES</span>
         <span class="c1"># patterns for recognition of sections</span>
-    <span class="n">node_line</span> <span class="o">=</span> <span class="s1">r&#39;\s*\d+(?:\s+&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="si">{3}</span><span class="s1">&#39;</span>
-    <span class="n">node_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">node_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
-    <span class="n">elem_line</span> <span class="o">=</span> <span class="s1">r&#39;^ +\d+(?: +\d+){3,4}[\r\n]+&#39;</span>  <span class="c1"># 3 -&gt; triangle, 4 -&gt; quadrangle</span>
-    <span class="n">elem_section</span> <span class="o">=</span> <span class="s1">r&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">elem_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
+    <span class="n">node_line</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\s*\d+(?:\s+&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="si">{3}</span><span class="s1">&#39;</span>
+    <span class="n">node_section</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">node_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
+    <span class="n">elem_line</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^ +\d+(?: +\d+){3,4}[\r\n]+&#39;</span>  <span class="c1"># 3 -&gt; triangle, 4 -&gt; quadrangle</span>
+    <span class="n">elem_section</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;((?:&#39;</span> <span class="o">+</span> <span class="n">elem_line</span> <span class="o">+</span> <span class="s1">&#39;)+)&#39;</span>
     <span class="n">pattern_node_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">node_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
     <span class="n">pattern_elem_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">elem_line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
     <span class="n">pattern_node_section</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">node_section</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
@@ -404,8 +483,8 @@
 
         <span class="n">node_section</span> <span class="o">=</span> <span class="n">pattern_node_section</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_section</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;Several NODE sections into a .DAT file is not supported by meshmagick</span>
-<span class="s2">                              as it is considered as bad practice&quot;&quot;&quot;</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Several NODE sections into a .DAT file is not supported by meshmagick</span>
+<span class="s2">                              as it is considered as bad practice&quot;&quot;&quot;</span><span class="p">)</span>
         <span class="n">node_array</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">idx_array</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">pattern_node_line</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">node_section</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
@@ -413,7 +492,7 @@
 
             <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">idx_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
             <span class="n">node_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
 
         <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;NODE_SECTION&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_array</span>
@@ -431,13 +510,13 @@
 
             <span class="n">elem_array</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">pattern_elem_line</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">elem_section</span><span class="p">):</span>
-                <span class="n">elem</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
                 <span class="c1"># for node in elem[1:]:</span>
                 <span class="n">elem</span> <span class="o">=</span> <span class="n">id_new</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># Case of a triangle, we repeat the first node at the last position</span>
                     <span class="n">elem</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-                <span class="n">elem_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="p">))</span>
+                <span class="n">elem_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">elem</span><span class="p">)))</span>
             <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;ELEM_SECTIONS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem_array</span><span class="p">)</span>
         <span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;nb_elem_sections&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh_files</span><span class="p">[</span><span class="n">file</span><span class="p">][</span><span class="s1">&#39;ELEM_SECTIONS&#39;</span><span class="p">])</span>
 
@@ -516,9 +595,9 @@
     <span class="n">_check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
     <span class="n">data_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-                    <span class="s1">r&#39;ZONE.*\s*N\s*=\s*(\d+)\s*,\s*E=\s*(\d+)\s*,\s*F\s*=\s*FEPOINT\s*,\s*ET\s*=\s*QUADRILATERAL\s+&#39;</span>
-                    <span class="o">+</span> <span class="s1">r&#39;(^(?:\s*&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="s1">r&#39;){3,})\s+&#39;</span>
-                    <span class="o">+</span> <span class="s1">r&#39;(^(?:\s*\d+)*)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+                    <span class="sa">r</span><span class="s1">&#39;ZONE.*\s*N\s*=\s*(\d+)\s*,\s*E=\s*(\d+)\s*,\s*F\s*=\s*FEPOINT\s*,\s*ET\s*=\s*QUADRILATERAL\s+&#39;</span>
+                    <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39;(^(?:\s*&#39;</span> <span class="o">+</span> <span class="n">real_str</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39;){3,})\s+&#39;</span>
+                    <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39;(^(?:\s*\d+)*)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
@@ -527,8 +606,8 @@
     <span class="n">nv</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nv</span><span class="p">)</span>
     <span class="n">nf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nf</span><span class="p">)</span>
 
-    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">vertices</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nv</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">faces</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nf</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">vertices</span><span class="o">.</span><span class="n">split</span><span class="p">())),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nv</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">faces</span><span class="o">.</span><span class="n">split</span><span class="p">())),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nf</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
 
@@ -557,7 +636,7 @@
     
     <span class="n">_check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkXMLUnstructuredGridReader</span>
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="kn">import</span> <span class="n">vtkXMLUnstructuredGridReader</span>
     <span class="n">reader</span> <span class="o">=</span> <span class="n">vtkXMLUnstructuredGridReader</span><span class="p">()</span>
     <span class="n">reader</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">reader</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
@@ -590,7 +669,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkXMLPolyDataReader</span>
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="kn">import</span> <span class="n">vtkXMLPolyDataReader</span>
     <span class="n">reader</span> <span class="o">=</span> <span class="n">vtkXMLPolyDataReader</span><span class="p">()</span>
     <span class="n">reader</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">reader</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
@@ -608,7 +687,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    filename: str</span>
-<span class="sd">        name of the meh file on disk</span>
+<span class="sd">        name of the mesh file on disk</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -623,8 +702,41 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkPolyDataReader</span>
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="kn">import</span> <span class="n">vtkPolyDataReader</span>
     <span class="n">reader</span> <span class="o">=</span> <span class="n">vtkPolyDataReader</span><span class="p">()</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+    <span class="n">vtk_mesh</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span>
+
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">_dump_vtk</span><span class="p">(</span><span class="n">vtk_mesh</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span></div>
+
+
+<div class="viewcode-block" id="load_OBJ"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.load_OBJ">[docs]</a><span class="k">def</span> <span class="nf">load_OBJ</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads Wavefront OBJ file format.</span>
+<span class="sd">    </span>
+<span class="sd">    It relies on the reader from the VTK library.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: str</span>
+<span class="sd">        name of the mesh file on disk</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vertices: ndarray</span>
+<span class="sd">        numpy array of the coordinates of the mesh&#39;s nodes</span>
+<span class="sd">    faces: ndarray</span>
+<span class="sd">        numpy array of the faces&#39; nodes connectivities</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    VTU files have a 0-indexing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="kn">import</span> <span class="n">vtkOBJReader</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">vtkOBJReader</span><span class="p">()</span>
     <span class="n">reader</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">reader</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
     <span class="n">vtk_mesh</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span>
@@ -684,8 +796,8 @@
 <span class="sd">    ----</span>
 <span class="sd">    STL files have a 0-indexing</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkSTLReader</span>
-    <span class="kn">from</span> <span class="nn">tools</span> <span class="k">import</span> <span class="n">merge_duplicate_rows</span>
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="kn">import</span> <span class="n">vtkSTLReader</span>
+    <span class="kn">from</span> <span class="nn">.tools</span> <span class="kn">import</span> <span class="n">merge_duplicate_rows</span>
 
     <span class="n">_check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
@@ -763,16 +875,16 @@
 
     <span class="n">ifile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
     <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-    <span class="n">nv</span><span class="p">,</span> <span class="n">nf</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+    <span class="n">nv</span><span class="p">,</span> <span class="n">nf</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
 
     <span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
-        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())))</span>
     <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
     <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nf</span><span class="p">):</span>
-        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())))</span>
     <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
 
     <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -826,7 +938,7 @@
 
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
             <span class="n">iv</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">vertices</span><span class="p">[</span><span class="n">iv</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+            <span class="n">vertices</span><span class="p">[</span><span class="n">iv</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
             <span class="n">faces</span><span class="p">[</span><span class="n">icell</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">iv</span>
 
     <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -865,7 +977,7 @@
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
             <span class="k">break</span>
-        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:])))</span>
 
     <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
     <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
@@ -874,7 +986,7 @@
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
             <span class="k">break</span>
-        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
+        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">line</span><span class="p">)))</span>
 
     <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
 
@@ -910,22 +1022,22 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
-    <span class="n">nb_nodes</span><span class="p">,</span> <span class="n">nodes_data</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">r&#39;\$Nodes\n(\d+)\n(.+)\$EndNodes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
-    <span class="n">nb_elts</span><span class="p">,</span> <span class="n">elts_data</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">r&#39;\$Elements\n(\d+)\n(.+)\$EndElements&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+    <span class="n">nb_nodes</span><span class="p">,</span> <span class="n">nodes_data</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\$Nodes\n(\d+)\n(.+)\$EndNodes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+    <span class="n">nb_elts</span><span class="p">,</span> <span class="n">elts_data</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\$Elements\n(\d+)\n(.+)\$EndElements&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
 
-    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">nodes_data</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))[:,</span> <span class="mi">1</span><span class="p">:]</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">nodes_data</span><span class="o">.</span><span class="n">split</span><span class="p">())),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))[:,</span> <span class="mi">1</span><span class="p">:]</span>
     <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span>
     <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Triangles</span>
-    <span class="k">for</span> <span class="n">tri_elt</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">r&#39;(^\d+\s2(?:\s\d+)+?$)&#39;</span><span class="p">,</span> <span class="n">elts_data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>
-        <span class="n">tri_elt</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">tri_elt</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">tri_elt</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(^\d+\s2(?:\s\d+)+?$)&#39;</span><span class="p">,</span> <span class="n">elts_data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>
+        <span class="n">tri_elt</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">tri_elt</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
         <span class="n">triangle</span> <span class="o">=</span> <span class="n">tri_elt</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span>
         <span class="n">triangle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triangle</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triangle</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">quad_elt</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">r&#39;(^\d+\s3(?:\s\d+)+?$)&#39;</span><span class="p">,</span> <span class="n">elts_data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>
-        <span class="n">quad_elt</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">quad_elt</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">quad_elt</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(^\d+\s3(?:\s\d+)+?$)&#39;</span><span class="p">,</span> <span class="n">elts_data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>
+        <span class="n">quad_elt</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">quad_elt</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
         <span class="n">quadrangle</span> <span class="o">=</span> <span class="n">quad_elt</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span>
         <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quadrangle</span><span class="p">)</span>
 
@@ -1014,7 +1126,7 @@
 <span class="sd">        numpy array of the faces&#39; nodes connectivities</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkVRMLImporter</span>
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="kn">import</span> <span class="n">vtkVRMLImporter</span>
     <span class="kn">import</span> <span class="nn">re</span>
 
     <span class="n">_check_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -1022,7 +1134,7 @@
     <span class="c1"># Checking version</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-        <span class="n">ver</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">r&#39;#VRML\s+V(\d.\d)&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ver</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;#VRML\s+V(\d.\d)&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ver</span> <span class="o">==</span> <span class="s1">&#39;2.0&#39;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;VRML loader only supports VRML 2.0 format (version </span><span class="si">%s</span><span class="s1"> given)&#39;</span> <span class="o">%</span> <span class="n">ver</span><span class="p">)</span>
 
@@ -1065,13 +1177,13 @@
     <span class="n">nf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
     
     <span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">ivertex</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
-        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+    <span class="k">for</span> <span class="n">ivertex</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
+        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())))</span>
     <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
     
     <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">iface</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">nf</span><span class="p">):</span>
-        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+    <span class="k">for</span> <span class="n">iface</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nf</span><span class="p">):</span>
+        <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())))</span>
     <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
     <span class="n">faces</span> <span class="o">-=</span> <span class="mi">1</span>
     
@@ -1179,22 +1291,22 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
-    <span class="nb">print</span> <span class="s1">&#39;-------------------------------------------------&#39;</span>
-    <span class="nb">print</span> <span class="s1">&#39;Suggestion for .inp DIODORE input file :&#39;</span>
-    <span class="nb">print</span> <span class="s1">&#39;&#39;</span>
-    <span class="nb">print</span> <span class="s1">&#39;*NODE,INPUT=</span><span class="si">{0}</span><span class="s1">,FRAME=???&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------------------------&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Suggestion for .inp DIODORE input file :&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;*NODE,INPUT=</span><span class="si">{0}</span><span class="s1">,FRAME=???&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="p">)))</span>
 
     <span class="k">if</span> <span class="n">nq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">quad_block</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">quad_block</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">*RETURN</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
         <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">quad_block</span><span class="p">)</span>
-        <span class="nb">print</span> <span class="s1">&#39;*ELEMENT,TYPE=Q4C000,ELSTRUCTURE=</span><span class="si">{0}</span><span class="s1">,INPUT=</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;*ELEMENT,TYPE=Q4C000,ELSTRUCTURE=</span><span class="si">{0}</span><span class="s1">,INPUT=</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="p">)))</span>
     <span class="k">if</span> <span class="n">nt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">tri_block</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">tri_block</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">*RETURN</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
         <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tri_block</span><span class="p">)</span>
-        <span class="nb">print</span> <span class="s1">&#39;*ELEMENT,TYPE=T3C000,ELSTRUCTURE=</span><span class="si">{0}</span><span class="s1">,INPUT=</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;*ELEMENT,TYPE=T3C000,ELSTRUCTURE=</span><span class="si">{0}</span><span class="s1">,INPUT=</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_filename</span><span class="p">)))</span>
 
-    <span class="nb">print</span> <span class="s1">&#39;&#39;</span>
-    <span class="nb">print</span> <span class="s1">&#39;-------------------------------------------------&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------------------------&#39;</span><span class="p">)</span>
     <span class="n">ofile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
@@ -1314,7 +1426,7 @@
 <span class="sd">        numpy array of the faces&#39; nodes connectivities</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkXMLUnstructuredGridWriter</span><span class="p">,</span> <span class="n">VTK_MAJOR_VERSION</span>
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="kn">import</span> <span class="n">vtkXMLUnstructuredGridWriter</span><span class="p">,</span> <span class="n">VTK_MAJOR_VERSION</span>
     <span class="n">writer</span> <span class="o">=</span> <span class="n">vtkXMLUnstructuredGridWriter</span><span class="p">()</span>
     <span class="n">writer</span><span class="o">.</span><span class="n">SetDataModeToAscii</span><span class="p">()</span>
     <span class="n">writer</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -1343,7 +1455,7 @@
 <span class="sd">        numpy array of the faces&#39; nodes connectivities</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">from</span> <span class="nn">vtk</span> <span class="k">import</span> <span class="n">vtkXMLPolyDataWriter</span><span class="p">,</span> <span class="n">VTK_MAJOR_VERSION</span>
+    <span class="kn">from</span> <span class="nn">vtk</span> <span class="kn">import</span> <span class="n">vtkXMLPolyDataWriter</span><span class="p">,</span> <span class="n">VTK_MAJOR_VERSION</span>
     <span class="n">writer</span> <span class="o">=</span> <span class="n">vtkXMLPolyDataWriter</span><span class="p">()</span>
     <span class="n">writer</span><span class="o">.</span><span class="n">SetDataModeToAscii</span><span class="p">()</span>
     <span class="n">writer</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -1398,6 +1510,30 @@
             <span class="k">else</span><span class="p">:</span>  <span class="c1"># Quadrangle</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;4 </span><span class="si">%u</span><span class="s1"> </span><span class="si">%u</span><span class="s1"> </span><span class="si">%u</span><span class="s1"> </span><span class="si">%u</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span></div>
 
+
+<div class="viewcode-block" id="write_OBJ"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_OBJ">[docs]</a><span class="k">def</span> <span class="nf">write_OBJ</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ofile</span><span class="p">:</span>
+        
+        <span class="c1"># HEADER</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# Wavefront OBJ file exported by Meshmagick (Copyright Ecole Centrale de Nantes)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# File Created: </span><span class="si">%s</span><span class="se">\n\n\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%c</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# Vertices: </span><span class="si">%u</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+        <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
+            <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;v  </span><span class="si">%15.6f</span><span class="se">\t</span><span class="si">%15.6f</span><span class="se">\t</span><span class="si">%15.6f</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vertex</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        
+        <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n\n</span><span class="s2"># Faces: </span><span class="si">%u</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+            <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;f  </span><span class="si">%10u</span><span class="s2">  </span><span class="si">%10u</span><span class="s2">  </span><span class="si">%10u</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            
+            <span class="k">if</span> <span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">face</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="c1"># Triangle</span>
+                <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Quadrangle</span>
+                <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">%10u</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span></div>
+                
 
 <span class="k">def</span> <span class="nf">_build_vtkUnstructuredGrid</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Internal function that builds a VTK object for manipulation by the VTK library.</span>
@@ -1599,7 +1735,7 @@
     <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0:6d}{1:6d}{2:6d}{3:6d}{4:6d}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="n">cell_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-        <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">u&#39;</span><span class="si">{0:10d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">cell</span><span class="p">)</span>
+        <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0:10d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">cell</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">faces</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
     <span class="n">ofile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cell_block</span><span class="p">)</span>
@@ -1607,8 +1743,8 @@
 
     <span class="n">ofile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-    <span class="nb">print</span> <span class="s1">&#39;WARNING: if you described only one part of the mesh using symmetry for Nemoh, you may manually modify the &#39;</span> \
-          <span class="s1">&#39;file header accordingly&#39;</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: if you described only one part of the mesh using symmetry for Nemoh, you may manually modify the &#39;</span> \
+          <span class="s1">&#39;file header accordingly&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="write_RAD"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.write_RAD">[docs]</a><span class="k">def</span> <span class="nf">write_RAD</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
@@ -1693,7 +1829,7 @@
 
 
 <div class="viewcode-block" id="know_extension"><a class="viewcode-back" href="../../api/meshmagick.mmio.html#meshmagick.mmio.know_extension">[docs]</a><span class="k">def</span> <span class="nf">know_extension</span><span class="p">(</span><span class="n">ext</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">extension_dict</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">extension_dict</span></div>
 
 <span class="n">extension_dict</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># keyword,  reader,   writer</span>
     <span class="s1">&#39;mar&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_MAR</span><span class="p">,</span> <span class="n">write_MAR</span><span class="p">),</span>
@@ -1723,11 +1859,13 @@
     <span class="s1">&#39;vrml&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_WRL</span><span class="p">,</span> <span class="n">write_WRL</span><span class="p">),</span>
     <span class="s1">&#39;wrl&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_WRL</span><span class="p">,</span> <span class="n">write_WRL</span><span class="p">),</span>
     <span class="s1">&#39;nem&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_NEM</span><span class="p">,</span> <span class="n">write_NEM</span><span class="p">),</span>
-    <span class="s1">&#39;nemoh_mesh&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_NEM</span><span class="p">,</span> <span class="n">write_NEM</span><span class="p">)</span>
+    <span class="s1">&#39;nemoh_mesh&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_NEM</span><span class="p">,</span> <span class="n">write_NEM</span><span class="p">),</span>
+    <span class="s1">&#39;obj&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">load_OBJ</span><span class="p">,</span> <span class="n">write_OBJ</span><span class="p">)</span>
 <span class="p">}</span>
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
   
@@ -1736,8 +1874,10 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Ecole Centrale de Nantes.
-      Last updated on Mar 17, 2017.
+        &copy; Copyright 2021, Ecole Centrale de Nantes
+      <span class="lastupdated">
+        Last updated on Jan 07, 2021.
+      </span>
 
     </p>
   </div> 
@@ -1753,36 +1893,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'1.0.5',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

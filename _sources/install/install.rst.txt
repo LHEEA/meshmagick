@@ -1,11 +1,12 @@
 Installation Instructions
 =========================
 
-Meshmagick is packaged for every major OS (\*nix, Windows, OS/X) for both 32/64 bit systems.
+Meshmagick works on every major OS (\*nix, Windows, OS/X) for both 32/64 bit systems.
 
 .. warning::
 
-    Meshmagick is written in Python 2.7 only. So please ensure that you have a Python 2.7 distribution.
+    From version 2.0, Meshmagick is now written in Python 3. Compatibility with Python 2.7 is no more ensured. If special
+    needs for this compatibility, please contact the developers. Thanks.
 
 
 Installing with conda
@@ -39,6 +40,12 @@ which should now show you the embedded help of the command line tool.
 Updating to the latest meshmagick version is obtained by::
 
     conda update meshmagick
+
+.. warning::
+
+    This method for installation is quick. However, we do not systematically package Meshmagick for conda. We apologize
+    for that. The advice is to install Meshmagick from sources with pip using the edit mode -e (see below).
+
 
 Installing with pip
 -------------------
@@ -77,7 +84,7 @@ those wanting to develop into Meshmagick.
 
 3. Install:
 
-    * If you want to install from source for just use meshmagick, it can be achieved by::
+    * If you want to install from source for just using meshmagick, it can be achieved by::
 
         python setup.py install
 

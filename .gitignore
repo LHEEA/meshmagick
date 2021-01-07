@@ -1,1 +1,6 @@
 .idea
+__pycache__/
+_static
+doc/
+doctrees/
+meshmagick.egg-info/
