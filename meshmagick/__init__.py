@@ -1,5 +1,1 @@
-__version__ = '1.0.5'
-
-def main():
-    from . import meshmagick as mm
-    mm.main()
+__version__ = '2.1.1'

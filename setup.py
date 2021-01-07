@@ -3,6 +3,7 @@
 from setuptools import setup, find_packages
 import codecs
 import os
+import meshmagick
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -13,11 +14,12 @@ def read(*parts):
     # intentionally *not* adding an encoding option to open
     return codecs.open(os.path.join(HERE, *parts), 'r').read()
 
+
 LONG_DESCRIPTION = read('README.rst')
 
 setup(
     name='meshmagick',
-    version='2.0',
+    version=meshmagick.__version__,
     url='https://github.com/LHEEA/meshmagick',
     author='Francois Rongere -- Ecole Centrale de Nantes',
     author_email='Francois.Rongere@ec-nantes.fr',
@@ -31,7 +33,7 @@ setup(
     install_requires=['numpy', 'argcomplete', 'vtk'],
     entry_points={
         'console_scripts': [
-            'meshmagick=meshmagick:main',
+            'meshmagick=meshmagick_cli:main',
         ],
     },
     classifiers=[

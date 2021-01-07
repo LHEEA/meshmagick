@@ -59,7 +59,7 @@ Quick information on a mesh is given by the ``-i (--info)`` option::
 
 That gives us the following output:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -i
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -i
 
 
 Mesh quality metrics
@@ -71,7 +71,7 @@ You can get some quality metrics on the mesh by issuing::
 
 that gives:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp --quality
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp --quality
 
 .. note::
 
@@ -114,6 +114,20 @@ under the name ``screenshot.png`` in the current working directory.)
     The frame at the lower left corner is draggable and resizable so that you can inspect your mesh for alignment or
     whatever you want.
 
+Mesh file concatenation
+-----------------------
+
+It is possible to concatenate two mesh files and write it into a global file by simply using this command::
+
+    >$ meshmagick myMesh.ext1 -cc mySecondMesh.ext1 -o outMesh.ext2
+
+If the two files define faces that are joining, common vertices will me merged. This is of practical interest in BEM
+when dealing with multibody interactions of when lid are added to a mesh to remove irregular frequencies.
+
+.. note::
+    File format for the two files to be concatenated has to be the same. The ``-ifmt`` command is used for both the
+    files. The file format for the output file is driven normally (extension or ``-ofmt`` command).
+
 Mesh healing
 ------------
 
@@ -134,7 +148,7 @@ The ``-md (--merge-duplicates)`` option does this::
 
 that gives:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/coque.gdf -md
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/coque.gdf -md
 
 This allows to generate connectivity tables in the mesh and may drastically reduce the mesh size in memory and on disk.
 
@@ -221,7 +235,7 @@ The command is then::
 
 that outputs:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/cylinder.msh -hm
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/cylinder.msh -hm
 
 Mesh transformations
 --------------------
@@ -243,7 +257,7 @@ coordinate vector. The invocations are::
 
 for translations of 10 along specific axes and along the coordinate vector (10, 10, 10). The last command gives:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -t 10 10 10 -i
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -t 10 10 10 -i
 
 Rotations
 ~~~~~~~~~
@@ -261,7 +275,7 @@ rotation along fixed axis rotation vector. The invocations are::
 for rotations of 90° around specific axes and around the rotation coordinate vector (90, 90, 90). The last command
 gives:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -r 90 90 90 -i
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -r 90 90 90 -i
 
 .. warning::
 
@@ -284,7 +298,7 @@ scaling of the mesh. The invocations are::
 
 for scaling of 2 along specific axes and of the whole mesh in space. The last command gives:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -s 2 -i
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -s 2 -i
 
 .. warning::
 
@@ -300,7 +314,7 @@ The ``-tq (--triangulate-quadrangles)`` allows to split every quadrangle faces i
 
 that displays the following:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/cylinder.msh -tq
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/cylinder.msh -tq
 
 .. image:: ../img/triangulate.png
 
@@ -506,7 +520,7 @@ It is also possible to use some default medium density keywords. These keywords 
 
     >$ meshmagick SEAREV.vtp --list-medium
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp --list-medium
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp --list-medium
 
 An other solution is to look at the ``--help`` output.
 
@@ -527,7 +541,7 @@ This is achieved by using the ``-pi (--plain-inertia)`` option::
 
 that gives:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -pi --rho-medium 800
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -pi --rho-medium 800
 
 .. note::
     If the medium's density is not specified, the ``-pi`` option guesses that the medium is salt water and then takes a
@@ -542,7 +556,7 @@ This is achieved by using the ``-si (--shell-inertia)`` option::
 
 that gives:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -si --rho-medium 5850
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -si --rho-medium 5850
                     --thickness 0.02
 
 .. note::
@@ -617,7 +631,7 @@ option::
 
 that gives:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -hs
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -hs
 
 When using this option alone (without giving a mass or center of gravity), the system considers that the current
 displacement correspond to the mass of the body. However, the vertical position of the center of gravity used in the
@@ -628,7 +642,7 @@ report. You may also want to specify this vertical position by using the --zcog 
 
 that gives the following report:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -hs --zcog 2
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -hs --zcog 2
 
 In our case, taking a center of gravity so high results in an unstable configuration as you can see in the report, as
 the longitudinal metacentric height (GML) is negative.
@@ -680,7 +694,7 @@ by::
 
 which gives:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -hs --disp 1500
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -hs --disp 1500
 
 This mode is active as long as you don't use the ``--cog`` option that trig the 3D equilibrium searching algorithm
 that is presented in the following.
@@ -700,7 +714,7 @@ This mode is active as long as you use the ``--cog`` option such that::
 
 That command outputs the following report:
 
-.. program-output:: python ../meshmagick/meshmagick.py ../meshmagick/tests/data/SEAREV.vtp -hs --cog 0 4 -2
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -hs --cog 0 4 -2
 
 and displays the following viewer:
 
