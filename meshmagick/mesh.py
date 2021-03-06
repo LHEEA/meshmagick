@@ -160,7 +160,7 @@ class Plane(object):
     """
     def __init__(self, normal=(0., 0., 1.), scalar=0., name=None):
 
-        normal = np.asarray(normal, dtype=np.float)
+        normal = np.asarray(normal, dtype=float)
 
         self._normal = normal / np.linalg.norm(normal)
         self._scalar = float(scalar)
@@ -185,7 +185,7 @@ class Plane(object):
     @normal.setter
     def normal(self, value):
         """Set the plane's normal"""
-        value = np.asarray(value, dtype=np.float)
+        value = np.asarray(value, dtype=float)
         self._normal = value / np.linalg.norm(value)
 
     @property
@@ -408,8 +408,8 @@ class Mesh(object):
         assert np.array(vertices).shape[1] == 3
         assert np.array(faces).shape[1] == 4
         
-        self._vertices = np.array(vertices, dtype=np.float)
-        self._faces = np.array(faces, dtype=np.int)
+        self._vertices = np.array(vertices, dtype=float)
+        self._faces = np.array(faces, dtype=int)
         self._id = next(self._ids)
 
         if not name:
@@ -625,14 +625,14 @@ class Mesh(object):
 
     @vertices.setter
     def vertices(self, value):
-        self._vertices = np.asarray(value, dtype=np.float).copy()
+        self._vertices = np.asarray(value, dtype=float).copy()
         # self._vertices.setflags(write=False)
         self.__internals__.clear()
         return
 
     @faces.setter
     def faces(self, value):
-        self._faces = np.asarray(value, dtype=np.int).copy()
+        self._faces = np.asarray(value, dtype=int).copy()
         # self._faces.setflags(write=False)
         self.__internals__.clear()
         return
@@ -648,9 +648,9 @@ class Mesh(object):
         # quads_mask = np.invert(triangle_mask)
         # nb_quads = nf - nb_triangles
 
-        faces_areas = np.zeros(nf, dtype=np.float)
-        faces_normals = np.zeros((nf, 3), dtype=np.float)
-        faces_centers = np.zeros((nf, 3), dtype=np.float)
+        faces_areas = np.zeros(nf, dtype=float)
+        faces_normals = np.zeros((nf, 3), dtype=float)
+        faces_centers = np.zeros((nf, 3), dtype=float)
 
         # Collectively dealing with triangles
         # triangles = _faces[triangle_mask]
@@ -1255,7 +1255,7 @@ class Mesh(object):
         # TODO: docstring
         # FIXME : code en doublon par rapport a la fonction _rodrigues du debut de module
         
-        angles = np.asarray(angles, dtype=np.float)
+        angles = np.asarray(angles, dtype=float)
         theta = np.linalg.norm(angles)
         if theta == 0.:
             return np.eye(3)
@@ -1590,7 +1590,7 @@ class Mesh(object):
             mesh_closed = True
 
         # Flooding the mesh to find inconsistent normals
-        type_cell = np.zeros(nf, dtype=np.int32)
+        type_cell = np.zeros(nf, dtype=int)
         type_cell[:] = 4
         type_cell[self.triangles_ids] = 3
 
@@ -1699,7 +1699,7 @@ class Mesh(object):
         nv = self.nb_vertices
         vertices, faces = self._vertices, self._faces
 
-        used_v = np.zeros(nv, dtype=np.bool)
+        used_v = np.zeros(nv, dtype=bool)
         used_v[sum(list(map(list, faces)), [])] = True
         nb_used_v = sum(used_v)
 
@@ -1893,7 +1893,7 @@ class Mesh(object):
     def _compute_faces_integrals(self, sum_faces_contrib=False): # TODO: implementer le sum_surface_contrib
 
         # TODO: Utiliser sum_faces_contrib
-        surface_integrals = np.zeros((15, self.nb_faces), dtype=np.float)
+        surface_integrals = np.zeros((15, self.nb_faces), dtype=float)
 
         # First triangles
         if self.nb_triangles > 0:
@@ -2026,7 +2026,7 @@ class Mesh(object):
 
         s0, s1, s2, s3, s4, s5, s6, s7, s8 = self.get_surface_integrals()[:9].sum(axis=1)
         
-        cog = np.array([s0, s1, s2], dtype=np.float) / surface
+        cog = np.array([s0, s1, s2], dtype=float) / surface
         
         xx = surf_density * (s7 + s8)
         yy = surf_density * (s6 + s8)
@@ -2040,7 +2040,7 @@ class Mesh(object):
     def _edges_stats(self):
         """Computes the min, max, and mean of the mesh's edge length"""
         vertices = self.vertices[self.faces]
-        edge_length = np.zeros((self.nb_faces, 4), dtype=np.float)
+        edge_length = np.zeros((self.nb_faces, 4), dtype=float)
         for i in range(4):
             edge = vertices[:, i, :] - vertices[:, i-1, :]
             edge_length[:, i] = np.sqrt(np.einsum('ij, ij -> i', edge, edge))
@@ -2078,7 +2078,7 @@ class Mesh(object):
         Explicit the integrals
         """
 
-        s_int = np.zeros((15, triangles_vertices.shape[0]), dtype=np.float)
+        s_int = np.zeros((15, triangles_vertices.shape[0]), dtype=float)
 
         point_0, point_1, point_2 = list(map(_3DPointsArray, np.rollaxis(triangles_vertices, 1, 0)))
 
