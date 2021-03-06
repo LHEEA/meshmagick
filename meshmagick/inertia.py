@@ -105,7 +105,7 @@ class RigidBodyInertia(object):
         
         The reduction point is then cog.
         """
-        self._3d_rotational_inertia -= self._huygens_transport()
+        self._3d_rotational_inertia += self._huygens_transport()
         self._point = self._cog
     
     def is_at_cog(self):
