@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# PYTHON_ARGCOMPLTETE_OK
+# PYTHON_ARGCOMPLETE_OK
 
 # Python module to manipulate 2D meshes for hydrodynamics purposes
 # TODO: Change the following docstring as it is no more up to date
@@ -1177,8 +1177,10 @@ def main():
 
         reltol = 1e-4
 
+
+
         # nhs.disp_equilibrium(mesh, disp_tons, rho_water, grav, reltol=reltol, verbose=True)
-        nhs.full_equilibrium_old(mesh, cog, disp_tons, rho_water, grav, reltol=reltol, verbose=True)
+        nhs.full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=reltol, verbose=True)
 
         # # grav = args.grav
         # # rho_water = args.rho_water

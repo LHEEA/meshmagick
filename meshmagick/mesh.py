@@ -32,7 +32,8 @@ __status__ = "Development"
 # TODO: On doit pouvoir specifier des objets frame
 # TODO: voir si on ne peut pas mettre ces fonctions dans un module dedie --> module rotation !!!
 
-from .rotations import cardan_to_rotmat, rotmat_to_cardan
+# from .rotations import cardan_to_rotmat, rotmat_to_cardan
+from .htransform import HTransform
 
 def _rodrigues(thetax, thetay):
     """
@@ -1193,6 +1194,25 @@ class Mesh(object):
 
             return conformal
 
+    def transform(self, t):
+        assert isinstance(t, HTransform)
+        if self.has_surface_integrals():
+            self._remove_surface_integrals()
+
+        self._vertices = t * self._vertices
+
+
+        if self._has_faces_properties():
+            # Rotating normals and centers too
+            normals = self.__internals__['faces_normals']
+            centers = self.__internals__['faces_centers']
+            # self.__internals__['faces_normals'] = np.transpose(np.dot(rotmat, normals.T))
+            # self.__internals__['faces_centers'] = np.transpose(np.dot(rotmat, centers.T))
+            self.__internals__['faces_normals'] = t * normals
+            self.__internals__['faces_centers'] = t * centers
+
+
+
     def rotate_x(self, thetax):
         """Rotates the mesh around Ox axis.
         
@@ -1251,35 +1271,6 @@ class Mesh(object):
         ndarray
             The (3x3) rotation matrix that has been applied to rotate the mesh
         """
-        # if self.has_surface_integrals():
-        #     self._remove_surface_integrals()
-        # TODO: docstring
-        # FIXME : code en doublon par rapport a la fonction _rodrigues du debut de module
-        
-        # angles = np.asarray(angles, dtype=np.float)
-        # theta = np.linalg.norm(angles)
-        # if theta == 0.:
-        #     return np.eye(3)
-        #
-        # ctheta = math.cos(theta)
-        # stheta = math.sin(theta)
-        #
-        # nx, ny, nz = angles/theta
-        # nxny = nx*ny
-        # nxnz = nx*nz
-        # nynz = ny*nz
-        # nx2 = nx*nx
-        # ny2 = ny*ny
-        # nz2 = nz*nz
-        #
-        # rot_matrix = ctheta*np.eye(3) \
-        #     + (1-ctheta) * np.array([[nx2, nxny, nxnz],
-        #                              [nxny, ny2, nynz],
-        #                              [nxnz, nynz, nz2]]) \
-        #     + stheta * np.array([[0., -nz, ny],
-        #                         [nz, 0., -nx],
-        #                         [-ny, nx, 0.]])
-        #
 
         phi, theta, psi = angles
 
@@ -1287,21 +1278,6 @@ class Mesh(object):
 
         self.rotate_matrix(rotmat)
 
-        # # TODO: travailler avec une classe rotation
-        # self._vertices = np.transpose(np.dot(rot_matrix, self._vertices.copy().T))
-        #
-        # # Updating faces properties if any
-        # # TODO: use traitlets...
-        # if self._has_faces_properties():
-        #     # Rotating normals and centers too
-        #     normals = self.__internals__['faces_normals']
-        #     centers = self.__internals__['faces_centers']
-        #     self.__internals__['faces_normals'] = np.transpose(np.dot(rot_matrix, normals.T))
-        #     self.__internals__['faces_centers'] = np.transpose(np.dot(rot_matrix, centers.T))
-        #
-        # if self.has_surface_integrals():
-        #     self._remove_surface_integrals()
-            
         return rotmat
 
     def rotate_matrix(self, rotmat):
@@ -1319,6 +1295,9 @@ class Mesh(object):
 
         if self.has_surface_integrals():
             self._remove_surface_integrals()
+
+
+
 
     def translate_x(self, tx):
         """Translates the mesh along the Ox axis.
