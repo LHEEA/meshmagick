@@ -40,6 +40,7 @@ class Force(object):
         respect to the reference frame ('absolute'). Default is 'relative'.
     
     """
+
     def __init__(self, point=(0, 0, 0), value=(0, 0, 0), name='', mode='relative'):
         assert len(point) == 3
         assert len(value) == 3
@@ -64,7 +65,7 @@ class Force(object):
         rot : ndarray
             The 3x3 rotation matrix for the force direction. Default is identity.
         """
-        
+
         self.point[2] += dz
         self.point = np.dot(rot, self.point)
         if self.mode == 'relative':
@@ -80,7 +81,7 @@ class Force(object):
         dy : float, optional
             Update in the y position of the application point. Defaults is 0.
         """
-        
+
         self.point[0] += dx
         self.point[1] += dy
         return
@@ -670,7 +671,7 @@ class Hydrostatics(object):
         x_f = -s35 / s33
         y_f = s34 / s33
         # TODO: ajouter xf et yf dans le rapport hydro !!
-        
+
         xmin, xmax, ymin, ymax, zmin, zmax = clipped_mesh.axis_aligned_bbox
 
         # Storing data
@@ -702,7 +703,7 @@ class Hydrostatics(object):
         self.hs_data['Iyz'] = inertia.yz
 
         return
-        
+
     @property
     def faces(self):
         """Get the number of faces in the mesh
@@ -789,7 +790,7 @@ class Hydrostatics(object):
 
         return residual
 
-    def set_displacement(self, disp):
+    def set_displacement(self, disp, verbose=False):
         """
         Displaces the mesh at a prescribed displacement
 
@@ -797,9 +798,11 @@ class Hydrostatics(object):
         ----------
         disp : float
             Mass displacement of the hull (in tons)
+        verbose : bool
+            verbose
         """
 
-        if self.verbose:
+        if self.verbose and verbose:
             print(("\nComplying with a displacement of %.3f tons" % disp))
             print("----------------------------------------------")
 
@@ -809,7 +812,7 @@ class Hydrostatics(object):
         reltol = self._solver_parameters['reltol']
         z_relax = self._solver_parameters['z_relax']
 
-        total_dz = 0.
+        z_correction = 0.
 
         dz = 0.
         iter = 0
@@ -817,14 +820,14 @@ class Hydrostatics(object):
         while True:
             # print iter
             if iter == itermax:
-                if self.verbose:
+                if self.verbose and verbose:
                     print(('\t-> No convergence of the displacement after %u iterations' % itermax))
                 break
 
             # Translating the mesh
             self.mesh.translate_z(dz)
             self._gravity_center[2] += dz
-            total_dz += dz
+            z_correction += dz
 
             for force in self.additional_forces:
                 force.update(dz=dz)
@@ -834,9 +837,9 @@ class Hydrostatics(object):
 
             residual = self.delta_fz
             if math.fabs(residual / self._mg) < reltol:
-                if self.verbose:
+                if self.verbose and verbose:
                     print(('\t-> Convergence obtained after %u iterations' % iter))
-                    print(('\t-> Mesh has been translated in z by: %f' % total_dz))
+                    print(('\t-> Mesh has been translated in z by: %f' % z_correction))
                 break
 
             dz = residual / (self._rhog * self.flotation_surface_area)
@@ -844,9 +847,186 @@ class Hydrostatics(object):
                 dz = math.copysign(z_relax, dz)
             iter += 1
 
+        return z_correction
+
+
+
+
+
+
+
+
+    # def displacement_equilibrium(self, disp_tons):
+    #
+    #     from .rotations import cardan_to_rotmat, rotmat_to_cardan
+    #
+    #     wmesh = self.mesh.copy()
+    #     wcog = self._gravity_center.copy()
+    #
+    #     itermax = 100
+    #
+    #     iter = 1
+    #     z_corr = 0.
+    #
+    #     while True:
+    #
+    #         if iter == itermax:
+    #             break
+    #
+    #
+    #
+    #
+    #         residual = wmesh.
+    #
+    #
+    #
+    #
+    #         iter += 1
+
+
+
+
+
+
+
+    # def equilibrate(self, init_disp=True):
+    #     """Performs 3D equilibrium search.
+    #
+    #     Parameters
+    #     ----------
+    #     init_disp : bool, optional
+    #         Flag to indicate if the mesh has to be first placed at its displacement. Default is True.
+    #     Returns
+    #     -------
+    #     int
+    #         A code indicating the state of the solver at the end of the computations
+    #
+    #     Notes
+    #     -----
+    #
+    #     The return code can have the following values:
+    #
+    #     * 0 : Failed to find an equilibrium position
+    #     * 1 : A stable equilibrium configuration has been reached
+    #     * 2 : An unstable equilibrium configuration has been reached
+    #     """
+    #
+    #     from .rotations import cardan_to_rotmat, rotmat_to_cardan
+    #
+    #     linear_solver = np.linalg.solve
+    #
+    #
+    #     # Retrieving solver parameters
+    #     z_relax = self._solver_parameters['z_relax']
+    #     theta_relax = self._solver_parameters['theta_relax']
+    #     theta_relax_x = math.radians(theta_relax)
+    #     theta_relax_y = math.radians(theta_relax)
+    #
+    #     itermax = self._solver_parameters['itermax']
+    #     reltol = self._solver_parameters['reltol']
+    #
+    #     max_nb_restart = self._solver_parameters['max_nb_restart']
+    #
+    #     rhog = self._rhog
+    #     mg = self._mg
+    #
+    #     # Initialization
+    #     z_correction = 0.
+    #     dz = thetax = thetay = 0.
+    #     iter = nb_restart = 0
+    #     unstable_config = False
+    #
+    #     while True:
+    #
+    #         z_correction += self.set_displacement(self.mass)
+    #
+    #
+    #         rot_matrix = self.mesh.rotate([thetax, thetay, 0.])
+    #
+    #         # Tests matrice rotation
+    #         R = cardan_to_rotmat(thetax, thetay, 0.)
+    #         rx, ry, rz = rotmat_to_cardan(R)
+    #
+    #         print(thetax, rx)
+    #         print(thetay, ry)
+    #
+    #         # Fin test matrice rotation
+    #
+    #         self._gravity_center = np.dot(rot_matrix, self._gravity_center)
+    #         self._rotation = np.dot(rot_matrix, self._rotation)
+    #
+    #         # Updating force data
+    #         for force in self.additional_forces:
+    #             force.update(dz=dz, rot=rot_matrix)
+    #
+    #         self._reinit_clipper()
+    #         self._update_hydrostatic_properties()
+    #
+    #         # TODO: animation may be trigged here
+    #
+    #         residual = self.residual
+    #         scale = self._scale
+    #
+    #         if np.all(np.fabs(self.residual / scale) < reltol):
+    #             # Convergence at an equilibrium
+    #             if self.isstable():
+    #                 # Stable equilibrium
+    #                 code = 1
+    #                 break
+    #             else:
+    #                 if self._solver_parameters['stop_at_unstable']:
+    #                     # Unstable configuration reached
+    #                     code = 2
+    #                     break
+    #                 # TODO: mettre une option permettant de choisir si on s'arrete a des configs instables
+    #                 else:
+    #                     # We force the restart with an other random orientation as initial condition
+    #                     unstable_config = True
+    #                     iter += 1
+    #                     continue
+    #
+    #         # Computing correction
+    #         stiffness_matrix = self.hs_data['stiffness_matrix']
+    #         dz, thetax, thetay = linear_solver(stiffness_matrix, residual)
+    #
+    #         # Relaxation
+    #         if math.fabs(dz) > z_relax:
+    #             dz = math.copysign(z_relax, dz)
+    #
+    #         if math.fabs(thetax) > theta_relax_x:
+    #             thetax = math.copysign(theta_relax_x, thetax)
+    #
+    #         if math.fabs(thetay) > theta_relax_y:
+    #             thetay = math.copysign(theta_relax_y, thetay)
+    #
+    #         iter += 1
+    #
+    #     # Zeroing xcog and ycog
+    #     # self.mesh.translate([-self._gravity_center[0], -self._gravity_center[1], 0.])
+    #     # self.hs_data['buoy_center'][:2] -= self._gravity_center[:2]
+    #
+    #     z_correction += self.set_displacement(self.mass)
+    #
+    #     for force in self.additional_forces:
+    #         force.update_xy(-self._gravity_center[0], -self._gravity_center[1])
+    #
+    #     # self._gravity_center[:2] = 0.
+    #
+    #     if self.verbose:
+    #         if code == 0:
+    #             print("\t-> Maximum number of restart reached. Failed to find an equilibrum position.")
+    #         elif code == 1:
+    #             print(("Stable equilibrium reached after %u iterations and %u random restart" % (iter, nb_restart)))
+    #             print(('\t-> Mesh has been translated in z by: %f' % z_correction))
+    #         elif code == 2:
+    #             print(('Unstable equilibrium reached after %u iterations and %u random restart' % (iter, nb_restart)))
+    #
+    #     return code
+
+
     def equilibrate(self, init_disp=True):
         """Performs 3D equilibrium search.
-        
+
         Parameters
         ----------
         init_disp : bool, optional
@@ -855,25 +1035,25 @@ class Hydrostatics(object):
         -------
         int
             A code indicating the state of the solver at the end of the computations
-            
+
         Notes
         -----
-        
+
         The return code can have the following values:
-        
+
         * 0 : Failed to find an equilibrium position
         * 1 : A stable equilibrium configuration has been reached
         * 2 : An unstable equilibrium configuration has been reached
         """
-        
+
         linear_solver = np.linalg.solve
-        
+
         # Initial displacement equilibrium
         if init_disp:
             if self.verbose:
                 print("First placing the mesh at the target displacement")
                 print("-------------------------------------------------")
-            self.set_displacement(self.mass)
+            self.set_displacement(self.mass, verbose=True)
 
         if self.verbose:
             print('\nComputing equilibrium from initial condition.')
@@ -971,6 +1151,10 @@ class Hydrostatics(object):
                         iter += 1
                         continue
 
+            # residual = np.array([rhog_v - mg,
+            #                      rhog_v * yb - mg * yg,
+            #                      -rhog_v * xb + mg * xg])
+
             # Computing correction
             stiffness_matrix = self.hs_data['stiffness_matrix']
             dz, thetax, thetay = linear_solver(stiffness_matrix, residual)
@@ -1013,7 +1197,7 @@ class Hydrostatics(object):
         -------
         str
         """
-        
+
         def hspace():
             return '\n'
 
