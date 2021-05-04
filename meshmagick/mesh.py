@@ -20,11 +20,11 @@ from . import MMviewer
 from .inertia import RigidBodyInertia
 
 __author__ = "Francois Rongere"
-__copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes"
+__copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes / D-ICE ENGINEERING"
 __credits__ = "Francois Rongere"
-__licence__ = "CeCILL"
+__licence__ = "GPLv3"
 __maintainer__ = "Francois Rongere"
-__email__ = "Francois.Rongere@ec-nantes.fr"
+__email__ = "Francois.Rongere@dice-engineering.com"
 __status__ = "Development"
 
 # TODO: Use traitlets to manage updates into the Mesh class
@@ -32,8 +32,6 @@ __status__ = "Development"
 # TODO: On doit pouvoir specifier des objets frame
 # TODO: voir si on ne peut pas mettre ces fonctions dans un module dedie --> module rotation !!!
 
-# from .rotations import cardan_to_rotmat, rotmat_to_cardan
-from .htransform import HTransform
 
 def _rodrigues(thetax, thetay):
     """

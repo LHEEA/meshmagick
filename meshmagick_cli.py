@@ -42,7 +42,7 @@ from meshmagick import __version__
 __year__ = datetime.now().year
 
 __author__ = "Francois Rongere"
-__copyright__ = "Copyright 2014-%u, Ecole Centrale de Nantes" % __year__
+__copyright__ = "Copyright 2014-%u, Ecole Centrale de Nantes / D-ICE Engineering" % __year__
 __credits__ = "Francois Rongere"
 __licence__ = "GPLv3"
 __maintainer__ = "Francois Rongere"
@@ -1170,110 +1170,77 @@ def main():
         rho_water = args.rho_water
         grav = args.grav
 
-        disp_tons = args.disp
-        cog = list(map(float, args.cog))
-
         reltol = 1e-6
 
-        # nhs.disp_equilibrium(mesh, disp_tons, rho_water, grav, reltol=reltol, verbose=True)
-        z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=reltol, verbose=True)
+        has_disp = has_cog = has_zcog = False
 
-        hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=rotmat_corr, z_corr=z_corr, at_cog=True)
-        print(hs.get_hydrostatic_report(hs_data))
+        if args.disp is not None:
+            disp = args.disp
+            has_disp = True
+
+        if args.cog is not None:
+            cog = list(map(float, args.cog))
+            has_cog = True
+
+        if args.zcog is not None:
+            zcog = args.zcog
+            has_zcog = True
+
+        hs_data = dict()
+
+        if not has_disp and not has_cog:
+            print(">>>> Performing hydrostatic computation on the current hull configuration considered at equilibrium")
+            if not has_zcog:
+                raise RuntimeError("zcog should at least be given for correct stiffness values computations")
+
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), rho_water, grav, at_cog=False)
+            xb, yb, _ = hs_data["buoyancy_center"]
+            cog = np.array([xb, yb, zcog])
+            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, at_cog=True)
+
+        elif has_disp and not has_cog:
+            print(">>>> Computing equilibrium of the hull for the given displacement of %f tons" % disp)
+            if not has_zcog:
+                raise RuntimeError("zcog should at least be given for correct stiffness values computations")
+
+            z_corr = hs.disp_equilibrium(mesh, disp, rho_water, grav, reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), rho_water, grav, z_corr=z_corr, at_cog=False)
+            xb, yb, _ = hs_data["buoyancy_center"]
+            cog = np.array([xb, yb, zcog])
+            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr, at_cog=True)
+
+        elif has_disp and has_cog:
+            print(">>>> Computing equilibrium in 3DOF for the given displacement and COG")
+            if has_zcog:
+                warn("zcog is redundant with cog, taking cog and ignoring zcog")
+            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, rho_water, grav, reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr, rotmat_corr=rotmat_corr, at_cog=True)
+
+        elif not has_disp and has_cog:
+            print(">>>> Computing equilibrium in 3DOF for the given COG, considering the current configuration presents the "
+                  "target displacement")
+            if has_zcog:
+                warn("zcog is redundant with cog, taking cog and ignoring zcog")
+
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), rho_water, grav, at_cog=False)
+            disp = hs_data['disp_mass'] / 1000
+            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, rho_water, grav, reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr, rotmat_corr=rotmat_corr,
+                                              at_cog=True)
+
+        hs_report = hs.get_hydrostatic_report(hs_data)
+        print(hs_report)
 
 
-
-
-        # # grav = args.grav
-        # # rho_water = args.rho_water
-        # #
-        # hs_solver = hs.Hydrostatics(mesh, rho_water=rho_water, grav=grav, verbose=verbose)
-        # #
-        # # for force in additional_forces:
-        # #     hs_solver.add_force(force)
-        # #
-        # if args.disp is not None:
-        #     disp = args.disp
-        #     has_disp = True
-        # else:
-        #     disp = hs_solver.displacement
-        #     has_disp = False
-        #
-        # if args.cog is not None:
-        #     cog = list(map(float, args.cog))
-        #     has_cog = True
-        # else:
-        #     cog = hs_solver.gravity_center
-        #     has_cog = False
-        #
-        # if args.zcog is not None:
-        #     zcog = args.zcog
-        #     has_zcog = True
-        # else:
-        #     zcog = hs_solver.zg
-        #     has_zcog = False
-        #
-        # # Overwrite zcog by cog[2] in case both have been given
-        # if has_cog and has_zcog:
-        #     zcog = cog[2]
-        #
-        # case = (has_disp, has_cog, has_zcog)
-        #
-        # # if case == (True, False, False) or case == (True, False, True):
-        # #     if verbose:
-        # #         print(("\nSetting mesh displacement to %.3f tons" % disp))
-        # #     hs_solver.zg = zcog
-        # #     hs_solver.set_displacement(disp, True)
-        # #
-        # # # msg = """\nWARNING !! : Keep in mind that the mesh may have a new orientation in the Oxy plane so the hydrostatic
-        # # # stiffness matrix may be impractical as not expressed in a convenient axis system. Use the result
-        # # # with caution and have a look at the mesh by using the --show option.
-        # # #
-        # # # This should be fixed in a future release."""
-        # #
-        # # if case == (False, True, False) or case == (False, True, True):
-        # #     if verbose:
-        # #         print(("""
-        # #         \nSetting mesh position so that we are at the current displacement of %.3f tons and in a stable
-        # #         configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
-        # #               % (disp, cog[0], cog[1], cog[2])))
-        # #
-        # #     hs_solver.gravity_center = cog
-        # #     hs_solver.mass = disp
-        # #     hs_solver.equilibrate(init_disp=False)
-        # #     # warn(msg)
-        # #
-        # # if case == (False, False, True) or case == (False, False, False):
-        # #     if verbose:
-        # #         print(("\nGenerating hydrostatic data for a zcog of %.3f meters." % zcog))
-        # #     hs_solver.zg = zcog
-        #
-        # if case == (True, True, False) or case == (True, True, True):
-        #     if verbose:
-        #         print(("""
-        #         \nSetting mesh position so that the displacement is equal to %.3f tons and in a stable
-        #         configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
-        #               % (disp, cog[0], cog[1], cog[2])))
-        #     hs_solver.gravity_center = cog
-        #     hs_solver.mass = disp
-        #     hs_solver.equilibrate(init_disp=True)
-        #     # warn(msg)
-        #
-        # # TODO: voir pour une option pour sortir plutot le maillage coupe pour Nemoh
-        # mesh = hs_solver
-        # #
-        # # if verbose:
-        # #     print((hs_solver.get_hydrostatic_report()))
-        # #
-        # # if args.hs_report is not None:
-        # #     with open(args.hs_report, 'w') as f:
-        # #         f.write('==============================================\n')
-        # #         f.write('Hydrostatic report generated by Meshmagick\n')
-        # #         f.write('Meshfile: %s\n' % os.path.abspath(args.infilename))
-        # #         f.write('%s\n' % strftime('%c'))
-        # #         f.write('meshmagick - version %s\n%s\n' % (__version__, __copyright__))
-        # #         f.write('==============================================\n')
-        # #         f.write(hs_solver.get_hydrostatic_report())
+        if args.hs_report is not None:
+            with open(args.hs_report, 'w') as f:
+                f.write('==============================================\n')
+                f.write('Hydrostatic report generated by Meshmagick\n')
+                f.write('Meshfile: %s\n' % os.path.abspath(args.infilename))
+                f.write('%s\n' % strftime('%c'))
+                f.write('meshmagick - version %s\n%s\n' % (__version__, __copyright__))
+                f.write('==============================================\n')
+                f.write(hs_report)
 
 
 
@@ -1322,7 +1289,7 @@ def main():
 
     if verbose:
         print('\n=============================================================')
-        print(('meshmagick - version %s\n%s' % (__version__, __copyright__)))
+        print(('Meshmagick - version %s\n%s' % (__version__, __copyright__)))
         print(('Maintainer : %s <%s>' % (__maintainer__, __email__)))
         print('Good Bye!')
         print('=============================================================')
