@@ -37,6 +37,7 @@ def compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=np.eye(3), z_co
     inertia = cmesh.eval_plain_mesh_inertias(rho_water)
 
     xb, yb, zb = inertia.gravity_center
+    buoyancy_center = np.array([xb, yb, zb])
 
     disp_volume = inertia.mass / rho_water
 
@@ -134,13 +135,24 @@ def compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=np.eye(3), z_co
     y_f = s34 / s33
 
     if at_cog:
+        # To get the flotation center expressed in the initial mesh frame
         x_f += xb
         y_f += yb
 
+    waterplane_center = np.array([x_f, y_f, -z_corr])
+    waterplane_center = np.dot(np.transpose(rotmat_corr), waterplane_center)
+
+    # Buoyancy center in the initial frame
+    buoyancy_center[2] -= z_corr
+    buoyancy_center = np.dot(np.transpose(rotmat_corr), buoyancy_center)
+
+    # bounding box
     xmin, xmax, ymin, ymax, zmin, zmax = cmesh.axis_aligned_bbox
 
     # Storing data
     hs_data = dict()
+    hs_data['grav'] = grav
+    hs_data['rho_water'] = rho_water
     hs_data["mesh"] = mesh.copy()
     hs_data["rotmat_eq"] = rotmat_corr
     hs_data["z_eq"] = z_corr
@@ -149,8 +161,8 @@ def compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=np.eye(3), z_co
     hs_data['wet_surface_area'] = wet_surface_area
     hs_data['disp_volume'] = disp_volume
     hs_data['disp_mass'] = rho_water * disp_volume
-    hs_data['buoy_center'] = np.array([xb, yb, zb], dtype=np.float)
-    hs_data['waterplane_center'] = np.array([x_f, y_f, 0.], dtype=np.float)
+    hs_data['buoyancy_center'] = buoyancy_center
+    hs_data['waterplane_center'] = waterplane_center
     hs_data['waterplane_area'] = waterplane_area
     hs_data['transversal_metacentric_radius'] = transversal_metacentric_radius
     hs_data['longitudinal_metacentric_radius'] = longitudinal_metacentric_radius
@@ -268,7 +280,10 @@ def full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=1e-4, verbose
 
         # Computing the residue
         xg, yg, zg = wcog
-        xb, yb, zb = hs_data["buoy_center"]
+        buoyancy_center = hs_data["buoyancy_center"]
+        buoyancy_center = np.dot(rotmat_corr, buoyancy_center)
+        buoyancy_center[2] += z_corr
+        xb, yb, zb = buoyancy_center
         disp_volume = hs_data['disp_volume']
 
         rhogv = rhog * disp_volume
@@ -315,7 +330,7 @@ def full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=1e-4, verbose
     # print(get_hydrostatic_report(hs_data, cog, disp_tons, rho_water, grav))
 
 
-def get_hydrostatic_report(hs_data, cog, disp_tons, rho_water, grav):
+def get_hydrostatic_report(hs_data):
     """Returns a hydrostatic report for the current configuration
 
     Returns
@@ -364,27 +379,17 @@ def get_hydrostatic_report(hs_data, cog, disp_tons, rho_water, grav):
     msg += build_line('Trim correction (deg)', degrees(trim), precision=3)
 
     msg += hspace()
-    msg += build_line('Gravity acceleration (M/S**2)', grav, precision=2)
-    msg += build_line('Density of water (kg/M**3)', rho_water, precision=1)
+    msg += build_line('Gravity acceleration (M/S**2)', hs_data['grav'], precision=2)
+    msg += build_line('Density of water (kg/M**3)', hs_data['rho_water'], precision=1)
 
     msg += hspace()
     msg += build_line('Waterplane area (M**2)', hs_data['waterplane_area'], precision=1)
-
-    wpc = hs_data['waterplane_center']
-    wpc[2] -= hs_data['z_eq']
-    wpc = np.dot(np.transpose(hs_data['rotmat_eq']), wpc)
-
-    msg += build_line('Waterplane center (M)', wpc, precision=3)
+    msg += build_line('Waterplane center (M)', hs_data['waterplane_center'], precision=3)
     msg += build_line('Wetted Surface Area (M**2)', hs_data['wet_surface_area'], precision=1)
     msg += build_line('Displacement volume (M**3)', hs_data['disp_volume'], precision=3)
     msg += build_line('Displacement mass (tons)', hs_data['disp_mass'] / 1000., precision=3)
-
-    buoyancy_center = hs_data['buoy_center']
-    buoyancy_center[2] -= hs_data['z_eq']
-    buoyancy_center = np.dot(np.transpose(hs_data['rotmat_eq']), buoyancy_center)
-
-    msg += build_line('Buoyancy center (M)', buoyancy_center, precision=3)
-    msg += build_line('Center of gravity (M)', cog, precision=3)
+    msg += build_line('Buoyancy center (M)', hs_data["buoyancy_center"], precision=3)
+    msg += build_line('Center of gravity (M)', hs_data['cog'], precision=3)
 
     msg += hspace()
     msg += build_line('Draft (M)', hs_data['draught'], precision=3)  # TODO
@@ -400,7 +405,7 @@ def get_hydrostatic_report(hs_data, cog, disp_tons, rho_water, grav):
     msg += build_line('Longitudinal metacentric height GMl (M)', hs_data['longitudinal_metacentric_height'], precision=3)
 
     msg += hspace()
-    msg += '\tHYDROSTATIC STIFFNESS COEFFICIENTS:\n'
+    msg += '\tHYDROSTATIC STIFFNESS COEFFICIENTS (at buoyancy center):\n'
     msg += build_line('K33 (N/M)', hs_data['stiffness_matrix'][0, 0], precision=4, dtype='E')
     msg += build_line('K34 (N)', hs_data['stiffness_matrix'][0, 1], precision=4, dtype='E')
     msg += build_line('K35 (N)', hs_data['stiffness_matrix'][0, 2], precision=4, dtype='E')

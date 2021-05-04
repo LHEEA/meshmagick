@@ -1179,7 +1179,7 @@ def main():
         z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=reltol, verbose=True)
 
         hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=rotmat_corr, z_corr=z_corr, at_cog=True)
-        print(hs.get_hydrostatic_report(hs_data, cog, disp_tons, rho_water, grav))
+        print(hs.get_hydrostatic_report(hs_data))
 
 
 
