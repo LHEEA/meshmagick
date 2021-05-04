@@ -73,50 +73,87 @@ def _cardan_to_rotmat(phi, theta, psi):
 class HTransform:
 
     def __init__(self, rotmat=np.eye(3), trans=np.zeros(3)):
+        # TODO: si rotmat 3x3, matrice, sinon, 3x1, angles en radians...
         self.rotmat = np.asarray(rotmat)
-        self.trans = np.asarray(trans)
+        self.transvec = np.asarray(trans)
         assert self.rotmat.shape == (3, 3)
-        assert self.trans.shape == (3,)
+        assert self.transvec.shape == (3,)
 
-    def set_cardan(self, phi_rad, theta_rad, psi_rad, trans):
-        self.rotmat = _cardan_to_rotmat(phi_rad, theta_rad, psi_rad)
-        self.trans = trans
 
-    def set_rotmat(self, rotmat, trans):
-        self.rotmat = np.asarray(rotmat)
-        self.trans = np.asarray(trans)
+    @property
+    def trans(self):
+        return self.transvec
+
+    @trans.setter
+    def trans(self, t):
+        self.transvec = np.asarray(t)
+        assert self.transvec.shape == (3,)
+
+    @property
+    def rot(self):
+        return self.rotmat
+
+    @rot.setter
+    def rot(self, R):
+        self.rotmat = np.asarray(R)
         assert self.rotmat.shape == (3, 3)
-        assert self.trans.shape == (3,)
 
-    def get_cardan(self):
+    @property
+    def cardan_rad(self):
         return _rotmat_to_cardan(self.rotmat)
+
+    @cardan_rad.setter
+    def cardan_rad(self, angles_rad):
+        phi_rad, theta_rad, psi_rad = angles_rad
+        self.rotmat = _cardan_to_rotmat(phi_rad, theta_rad, psi_rad)
+
+    @property
+    def cardan_deg(self):
+        return map(degrees, self.cardan_rad)
+
+    @cardan_deg.setter
+    def cardan_deg(self, angles_deg):
+        self.cardan_rad = map(radians, angles_deg)
+
+    # def set_cardan(self, phi_rad, theta_rad, psi_rad, trans):
+    #     self.rotmat = _cardan_to_rotmat(phi_rad, theta_rad, psi_rad)
+    #     self.transvec = trans
+
+    # def set_rotmat(self, rotmat, trans):
+    #     self.rotmat = np.asarray(rotmat)
+    #     self.trans = np.asarray(trans)
+    #     assert self.rotmat.shape == (3, 3)
+    #     assert self.trans.shape == (3,)
+
+    # def get_cardan(self):
+    #     return _rotmat_to_cardan(self.rotmat)
 
     def inverse(self):
         t = HTransform()
-        t.set_rotmat(self.rotmat.transpose(), -np.dot(self.rotmat.transpose(), self.trans))
+        t.set_rotmat(self.rotmat.transpose(), -np.dot(self.rotmat.transpose(), self.transvec))
         return t
 
     def to_matrix44(self):
         mat = np.zeros((4, 4))
         mat[:3, :3] = self.rotmat
-        mat[:3, 3] = self.trans
+        mat[:3, 3] = self.transvec
         mat[3, :] = [0, 0, 0, 1]
         return mat
 
     def __mul__(self, other):
         if isinstance(other, HTransform):
             return HTransform(np.dot(self.rotmat, other.rotmat),
-                              np.dot(self.rotmat, other.trans) + self.trans)
+                              np.dot(self.rotmat, other.transvec) + self.transvec)
 
         elif isinstance(other, (np.ndarray, list,)):
             other = np.asarray(other)
 
             if other.ndim == 1:
                 assert other.shape == (3,)
-                return np.dot(self.rotmat, other) + self.trans
+                return np.dot(self.rotmat, other) + self.transvec
             elif other.ndim == 2:
                 assert other.shape[1] == 3
-                return np.einsum('ij, kj -> kj', self.rotmat, other) + self.trans  # FIXME: verifier !!
+                return np.einsum('ij, kj -> kj', self.rotmat, other) + self.transvec  # FIXME: verifier !!
         else:
             assert False
 

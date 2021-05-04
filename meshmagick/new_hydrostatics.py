@@ -18,8 +18,13 @@ __email__ = "Francois.Rongere@ec-nantes.fr"
 __status__ = "Development"
 
 
-def compute_hydrostatics(mesh, rho_water, grav, zcog=0.):
-    clipper = MeshClipper(mesh, assert_closed_boundaries=True, verbose=False)
+def compute_hydrostatics(mesh, rho_water, grav, rotmat_corr=np.eye(3), z_corr=0., zcog=0.):
+
+    wmesh = mesh.copy()
+    wmesh.rotate_matrix(rotmat_corr)
+    wmesh.translate_z(z_corr)
+
+    clipper = MeshClipper(wmesh, assert_closed_boundaries=True, verbose=False)
     cmesh = clipper.clipped_mesh
 
     wet_surface_area = cmesh.faces_areas
@@ -178,10 +183,7 @@ def disp_equilibrium(mesh, disp_tons, rho_water, grav, reltol=1e-6, verbose=Fals
             print("No convergence after %s" % itermax)
             break
 
-        wmesh = mesh.copy()
-        wmesh.translate_z(z_corr)
-
-        hs_data = compute_hydrostatics(wmesh, rho_water, grav)
+        hs_data = compute_hydrostatics(mesh, rho_water, grav, z_corr=z_corr)
 
         disp_volume = hs_data["disp_volume"]
         waterplane_area = hs_data["waterplane_area"]
@@ -208,7 +210,7 @@ def disp_equilibrium(mesh, disp_tons, rho_water, grav, reltol=1e-6, verbose=Fals
     return z_corr
 
 
-def full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=1e-6, verbose=False):
+def full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=1e-4, verbose=False):
     if verbose:
         print("========================")
         print("3DOF equilibrium")
@@ -216,22 +218,19 @@ def full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=1e-6, verbose
         print("Target diplacement:    {:.3f} tons".format(disp_tons))
         print("COG pos: ", cog)
 
-    hs_data_NW = dict()
-
     disp_kg = disp_tons * 1000
 
-    itermax = 10000
+    rhog = rho_water * grav
+    mg = disp_kg * grav
+
+    wmesh = mesh.copy()
+
+    # Initial equilibrium in displacement
+    z_corr = disp_equilibrium(wmesh, disp_tons, rho_water, grav, reltol=reltol, verbose=False)
+    rotmat_corr = np.eye(3)
+
+    itermax = 100
     iter = 1
-
-    wmesh_NW = mesh.copy()
-    wcog_NW = cog.copy()
-
-    z_corr_working = disp_equilibrium(wmesh_NW, disp_tons, rho_water, grav, reltol=reltol, verbose=True)
-    z_corr_NW = z_corr_working
-
-    rotmat_working = np.eye(3)
-
-    transform_NW = HTransform(trans=[0, 0, z_corr_NW])
 
     while True:
 
@@ -239,103 +238,48 @@ def full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=1e-6, verbose
             print("No convergence after %s" % itermax)
             break
 
-        # WORKING >>>>>>>>>>>>>>>>>>
-        wmesh_working = mesh.copy()
-        wcog_working = cog.copy()
+        wcog = cog.copy()
+        wcog = np.dot(rotmat_corr, wcog)
+        wcog[2] += z_corr
 
-        wcog_working = np.dot(rotmat_working, wcog_working)
-        wcog_working[2] += z_corr_working
-        wmesh_working.rotate_matrix(rotmat_working)
-        wmesh_working.translate_z(z_corr_working)
+        # Computing hydrostatics properties
+        hs_data = compute_hydrostatics(mesh, rho_water, grav, rotmat_corr=rotmat_corr, z_corr=z_corr, zcog=wcog[2])
 
-        hs_data_working = compute_hydrostatics(wmesh_working, rho_water, grav)
+        # Computing the residue
+        xg, yg, zg = wcog
+        xb, yb, zb = hs_data["buoy_center"]
+        disp_volume = hs_data['disp_volume']
 
-        xg_working, yg_working, zg_working = wcog_working
-        xb_working, yb_working, zb_working = hs_data_working["buoy_center"]
-        disp_volume_working = hs_data_working['disp_volume']
+        rhogv = rhog * disp_volume
+        residue = np.array([rhogv - mg,
+                            rhogv * yb - mg * yg,
+                            -rhogv * xb + mg * xg])
 
-        rhogv_working = rho_water * grav * disp_volume_working
-        mg = disp_kg * grav
+        # Computing scale for nondimensionalization
+        breadth = hs_data['breadth']
+        lwl = hs_data['lwl']
+        scale = np.array([mg, mg * breadth, mg * lwl])
 
-        residue_working = np.array([rhogv_working - mg,
-                                    rhogv_working * yb_working - mg * yg_working,
-                                    -rhogv_working * xb_working + mg * xg_working])
-        # <<<<<<<<<<<<<<<< END WORKING
-
-        # NOT WORKING >>>>>>>>>>>>>>>>>>>
-        wmesh_NW = mesh.copy()
-        wcog_NW = cog.copy()
-
-        wmesh_NW.transform(transform_NW)
-        wcog_NW = transform_NW * wcog_NW
-
-        hs_data_NW = compute_hydrostatics(wmesh_NW, rho_water, grav)
-
-        xg_NW, yg_NW, _ = wcog_NW
-        xb_NW, yb_NW, _ = hs_data_NW["buoy_center"]
-        disp_volume_NW = hs_data_NW['disp_volume']
-
-        rhogv_NW = rho_water * grav * disp_volume_NW
-        mg = disp_kg * grav
-
-        residue_NW = np.array([rhogv_NW - mg,
-                               rhogv_NW * yb_NW - mg * yg_NW,
-                               -rhogv_NW * xb_NW + mg * xg_NW])
-
-        # >>>>>>>>>>>>> NOT WORKING
-
-        # Computing scale [ COMMON ]
-        breadth_COMM = hs_data_NW['breadth']
-        lwl_COMM = hs_data_NW['lwl']
-        scale_COMM = np.array([mg, mg * breadth_COMM, mg * lwl_COMM])
-
-        # >>>>>>>>>>>>>>>WORKING
-        stiffness_matrix_working = hs_data_working["stiffness_matrix"]
-        tz_working, rx_working, ry_working = np.linalg.solve(stiffness_matrix_working, residue_working)
-
-        if np.all(np.fabs(residue_working / scale_COMM) < reltol):
+        # Convergence criterion
+        if np.all(np.fabs(residue / scale) < reltol):
             print("convergence in %u iterations" % iter)
             break
 
-        dR_WORKING = cardan_to_rotmat(rx_working, ry_working, 0.)
-        rotmat_working = np.dot(dR_WORKING, rotmat_working)
-        z_corr_working += tz_working
+        # Solving for the next incremental correction
+        tz, rx, ry = np.linalg.solve(hs_data["stiffness_matrix"], residue)
 
-        # TODO: remoonter au dessus de la resolution de system
-        # WORKING
-        # if np.all(np.fabs(residue_working / scale_COMM) < reltol):
-        #     print("convergence in %u iterations" % iter)
-        #     break
-        # >>>>>>>>>>>> WORKING
-
-
-
-        # >>>>>>>>>>>>>> NOT WORKING
-        if np.all(np.fabs(residue_NW / scale_COMM) < reltol):
-            print("convergence in %u iterations" % iter)
-            break
-
-        stiffness_matrix_NW = hs_data_NW["stiffness_matrix"]
-        tz_NW, rx_NW, ry_NW = np.linalg.solve(stiffness_matrix_NW, residue_NW)
-
-        dt_NW = HTransform()
-        # dt.set_cardan(rx, ry, 0., [0., 0., tz])
-        dt_NW.set_rotmat(dR_WORKING, np.dot(np.transpose(dR_WORKING), np.array([0., 0., tz_NW])))
-        # print(dt)
-        # print(transform_NW)
-        transform_NW = dt_NW * transform_NW
-        # print(transform_NW)
+        # Updating corrections
+        rotmat_corr = np.dot(cardan_to_rotmat(rx, ry, 0.), rotmat_corr)
+        z_corr += tz
 
         iter += 1
 
-    print("WORKING:")
-    rx_working, ry_working, _ = rotmat_to_cardan(rotmat_working)
-    print("%f\t%f\t%f" % (z_corr_working, math.degrees(rx_working), math.degrees(ry_working)))
 
-    print("NOT WORKING:")
-    rx_NW, ry_NW, _ = transform_NW.get_cardan()
-    # print(transform_NW.trans)
-    print("%f\t%f\t%f" % (transform_NW.trans[2], math.degrees(rx_NW), math.degrees(ry_NW)))
+
+
+    # rx, ry, _ = rotmat_to_cardan(rotmat_corr)
+    # print("%f\t%f\t%f" % (z_corr, math.degrees(rx), math.degrees(ry)))
+
 
 # TODO: reactiver plus tard !!! pour la relaxation
 # rx_relax = 2 * math.pi / 180
