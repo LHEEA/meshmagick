@@ -99,13 +99,25 @@ class RigidBodyInertia(object):
         inertia = deepcopy(self)
         inertia.shift_at_cog()
         return inertia
+
+    def set_cog(self, cog):
+        """Set a new center of gravity.
+
+        Parameters
+        ----------
+        cog : array_like
+        The 3D coordinates of the center of gravity
+        """
+        assert len(cog) == 3
+        assert isinstance(cog, (tuple,list,np.ndarray))
+        self._cog = np.asarray(cog, dtype=np.float)
     
     def shift_at_cog(self):
         """Shift the inertia matrix internally at cog.
         
         The reduction point is then cog.
         """
-        self._3d_rotational_inertia -= self._huygens_transport()
+        self._3d_rotational_inertia += self._huygens_transport()
         self._point = self._cog
     
     def is_at_cog(self):
