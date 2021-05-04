@@ -176,7 +176,6 @@ def compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=np.eye(3), z_co
     hs_data['fp'] = maxx
     hs_data['breadth'] = maxy - miny
 
-    # TODO: we should better store the inertia object !
     inertia.shift_at_cog()
     hs_data['Ixx'] = inertia.xx
     hs_data['Iyy'] = inertia.yy
