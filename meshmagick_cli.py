@@ -36,8 +36,6 @@ from meshmagick import mmio
 from meshmagick.mesh_clipper import MeshClipper
 from meshmagick import hydrostatics as hs
 
-from meshmagick import new_hydrostatics as nhs
-
 from meshmagick import densities
 from meshmagick import __version__
 
@@ -1175,12 +1173,16 @@ def main():
         disp_tons = args.disp
         cog = list(map(float, args.cog))
 
-        reltol = 1e-4
-
-
+        reltol = 1e-6
 
         # nhs.disp_equilibrium(mesh, disp_tons, rho_water, grav, reltol=reltol, verbose=True)
-        nhs.full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=reltol, verbose=True)
+        z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=reltol, verbose=True)
+
+        hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=rotmat_corr, z_corr=z_corr, at_cog=True)
+        print(hs.get_hydrostatic_report(hs_data, cog, disp_tons, rho_water, grav))
+
+
+
 
         # # grav = args.grav
         # # rho_water = args.rho_water
