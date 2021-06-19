@@ -669,7 +669,13 @@ parser.add_argument('--hs-report', type=str, metavar='filename',
                     help="""Write the hydrostatic report into the file given as an argument""")
 
 parser.add_argument('-lid', nargs='*', action='append', metavar='Arg',
-                    help="""Generate a polygonal lid from the set of vertices.""")
+                    help="""Generate a polygonal lid on the free surface z = 0from the set of points (x, y). 
+                    All the points are listed one after other such as: x1, y1, x2, y2, ...
+                    At least three points are required. The number of coordinates must be even.""")
+
+parser.add_argument('-mesh_size', '-ms', type=float,
+                    help="""Mesh size used for generating the lid meshes. Default is the mean edge length.
+                    """)
 
 # ARGUMENTS RELATED TO THE COMPUTATION OF INERTIA PARAMETERS
 # parser.add_argument('--rho-medium', default=7500., type=float,
@@ -1109,6 +1115,13 @@ def main():
         except:
             raise ImportError('pygmsh has to be available for generating lids.')
 
+        # Face size.
+        print(args.mesh_size)
+        if(args.mesh_size is not None):
+            mesh_size = args.mesh_size
+        else:
+            mesh_size = mesh.mean_edge_length
+
         # Generation of the lid mesh files.
         nb_lid = len(args.lid)
         for ilid, lid in enumerate(args.lid):
@@ -1125,7 +1138,7 @@ def main():
                     x = float(coord)
                     y = float(next(it))
                     list_vertices.append([x, y])
-                geom.add_polygon(list_vertices, mesh_size=2.0)
+                geom.add_polygon(list_vertices, mesh_size=mesh_size)
                 geom.generate_mesh()
                 pygmsh.write("Lid_" + str(ilid + 1) + ".msh")
 
