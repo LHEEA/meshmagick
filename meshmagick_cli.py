@@ -1115,17 +1115,20 @@ def main():
         except:
             raise ImportError('pygmsh has to be available for generating lids.')
 
+        nb_lid = len(args.lid)
+
         # Face size.
-        print(args.mesh_size)
         if(args.mesh_size is not None):
             mesh_size = args.mesh_size
         else:
             mesh_size = mesh.mean_edge_length
+            if(nb_lid == 1):
+                print("Mean edge length (%f m) is used as mesh size for generating the lid mesh." % mesh_size)
+            else:
+                print("Mean edge length (%f m) is used as mesh size for generating the lid meshes." % mesh_size)
 
         # Generation of the lid mesh files.
-        nb_lid = len(args.lid)
         for ilid, lid in enumerate(args.lid):
-            # print(ilid, lid, len(lid) % 2)
             if(len(lid) % 2 == 1):
                 raise KeyError("\nNumber of vertices (x, y) for generating a lid must be even.")
             if(int(len(lid) / 2.) < 3):
@@ -1145,10 +1148,15 @@ def main():
             # Conversation of the .msh lid files into .obj lid files.
             V, F = mmio.load_mesh("Lid_" + str(ilid + 1) + ".msh", "msh")
             mmio.write_OBJ("Lid_" + str(ilid + 1) + ".obj", V, F)
+            print("Lid_" + str(ilid + 1) + ".obj is generated.")
 
             # Concatenation of the meshfile and all the lids.
             mesh_c = Mesh(V, F, name="Lid_" + str(ilid + 1))
             mesh += mesh_c
+        if(nb_lid == 1):
+            print("%s concatenated with the lid mesh file." % args.infilename)
+        else:
+            print("%s concatenated with the lid mesh files." % args.infilename)
 
     # Listing available medium
     if args.list_medium:
