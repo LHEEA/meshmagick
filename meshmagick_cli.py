@@ -668,6 +668,9 @@ parser.add_argument('-rf', '--relative-force', nargs=6, action='append', type=fl
 parser.add_argument('--hs-report', type=str, metavar='filename',
                     help="""Write the hydrostatic report into the file given as an argument""")
 
+parser.add_argument('-lid', nargs='*', action='append', metavar='Arg',
+                    help="""Generate a polygonal lid from the set of vertices.""")
+
 # ARGUMENTS RELATED TO THE COMPUTATION OF INERTIA PARAMETERS
 # parser.add_argument('--rho-medium', default=7500., type=float,
 #                     help="""Specified the density of the medium used for the device. Default
@@ -1093,6 +1096,46 @@ def main():
 
         if verbose:
             print('\t-> Done.')
+
+    if args.lid is not None:
+
+        try:
+            import gmsh
+        except:
+            raise ImportError('gmsh has to be available for generating lids.')
+
+        try:
+            import pygmsh
+        except:
+            raise ImportError('pygmsh has to be available for generating lids.')
+
+        # Generation of the lid mesh files.
+        nb_lid = len(args.lid)
+        for ilid, lid in enumerate(args.lid):
+            # print(ilid, lid, len(lid) % 2)
+            if(len(lid) % 2 == 1):
+                raise KeyError("\nNumber of vertices (x, y) for generating a lid must be even.")
+            if(int(len(lid) / 2.) < 3):
+                raise KeyError("\nAt least three vertices are necessary to define a lid.")
+            nb_points = int(len(lid) / 2.)
+            with pygmsh.geo.Geometry() as geom:
+                list_vertices = []
+                it = iter(lid)
+                for coord in it:
+                    x = float(coord)
+                    y = float(next(it))
+                    list_vertices.append([x, y])
+                geom.add_polygon(list_vertices, mesh_size=2.0)
+                geom.generate_mesh()
+                pygmsh.write("Lid_" + str(ilid + 1) + ".msh")
+
+            # Conversation of the .msh lid files into .obj lid files.
+            V, F = mmio.load_mesh("Lid_" + str(ilid + 1) + ".msh", "msh")
+            mmio.write_OBJ("Lid_" + str(ilid + 1) + ".obj", V, F)
+
+            # Concatenation of the meshfile and all the lids.
+            mesh_c = Mesh(V, F, name="Lid_" + str(ilid + 1))
+            mesh += mesh_c
 
     # Listing available medium
     if args.list_medium:
