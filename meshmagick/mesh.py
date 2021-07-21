@@ -32,6 +32,7 @@ __status__ = "Development"
 # TODO: On doit pouvoir specifier des objets frame
 # TODO: voir si on ne peut pas mettre ces fonctions dans un module dedie --> module rotation !!!
 
+from .rotations import cardan_to_rotmat, rotmat_to_cardan
 
 def _rodrigues(thetax, thetay):
     """
@@ -1191,25 +1192,6 @@ class Mesh(object):
                 conformal = False
 
             return conformal
-
-    def transform(self, t):
-        assert isinstance(t, HTransform)
-        if self.has_surface_integrals():
-            self._remove_surface_integrals()
-
-        self._vertices = t * self._vertices
-
-
-        if self._has_faces_properties():
-            # Rotating normals and centers too
-            normals = self.__internals__['faces_normals']
-            centers = self.__internals__['faces_centers']
-            # self.__internals__['faces_normals'] = np.transpose(np.dot(rotmat, normals.T))
-            # self.__internals__['faces_centers'] = np.transpose(np.dot(rotmat, centers.T))
-            self.__internals__['faces_normals'] = t * normals
-            self.__internals__['faces_centers'] = t * centers
-
-
 
     def rotate_x(self, thetax):
         """Rotates the mesh around Ox axis.
