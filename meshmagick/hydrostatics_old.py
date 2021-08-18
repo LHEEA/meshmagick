@@ -26,7 +26,7 @@ GM_MIN = 0.15
 
 class Force(object):
     """Class to handle a linear force (resultant).
-    
+
     Parameters
     ----------
     point : array_like, optional
@@ -38,7 +38,7 @@ class Force(object):
     mode : str, ['relative', 'absolute']
         The mode of the force whether its direction follows the body motion ('relative') or remains fixed with
         respect to the reference frame ('absolute'). Default is 'relative'.
-    
+
     """
 
     def __init__(self, point=(0, 0, 0), value=(0, 0, 0), name='', mode='relative'):
@@ -46,8 +46,8 @@ class Force(object):
         assert len(value) == 3
         assert mode in ('relative', 'absolute')
 
-        self.point = np.asarray(point, dtype=np.float)
-        self.value = np.asarray(value, dtype=np.float)
+        self.point = np.asarray(point, dtype=float)
+        self.value = np.asarray(value, dtype=float)
         self.name = str(name)
         self.mode = mode
 
@@ -55,9 +55,9 @@ class Force(object):
         str_repr = "Force: %s\n\tPoint: %s\n\tValue: %s\n\tMode: %s" % (self.name, self.point, self.value, self.mode)
         return str_repr
 
-    def update(self, dz=0., rot=np.eye(3, dtype=np.float)):
+    def update(self, dz=0., rot=np.eye(3, dtype=float)):
         """Updates the vertical position and orientation of the force.
-        
+
         Parameters
         ----------
         dz : float, optional
@@ -73,7 +73,7 @@ class Force(object):
 
     def update_xy(self, dx, dy):
         """Updates the horizontal position of the application point of the force.
-        
+
         Parameters
         ----------
         dx : float, optional
@@ -89,9 +89,9 @@ class Force(object):
     @property
     def hs_force(self):
         """Returns the relevant force vector for hydrostatics computations.
-        
+
         The return array's components are the vertical force, x moment and y moment around the application point.
-        
+
         Returns
         -------
         ndarray
@@ -99,7 +99,7 @@ class Force(object):
         fz = self.value[2]
         moment = np.cross(self.point, self.value)
         mx, my = moment[:2]
-        return np.array([fz, mx, my], dtype=np.float)
+        return np.array([fz, mx, my], dtype=float)
 
     def reset(self):  # TODO: a appeler depuis le reset de Hydrostatics
         raise NotImplementedError
@@ -108,7 +108,7 @@ class Force(object):
 class Hydrostatics(object):
     # TODO: refactor this docstring
     """Class to perform hydrostatic computations on meshes.
-    
+
     Parameters
     ----------
     working_mesh : Mesh
@@ -121,18 +121,18 @@ class Hydrostatics(object):
         The density of water (in kg/m**3). Default is that of salt water (1023 kg//m**3)
     grav : float, optional
         The acceleration of gravity. Default is 9.81 m/s**2.
-    
-    
+
+
     Warnings
     --------
     * At class instantiation, no modification on the mesh position is done and hydrostatic properties are accessible
       directly for this position. The mesh may not be at equilibrium thought and residual force balance between
       hydrostatic force and gravity force may be not null. To trig the equilibrium computations, we have to call the
       equilibrate() method.
-    
+
     * Note that it is useless to call any method to get the hydrostatic properties up to date as it is done internally
       and automatically at each modification.
-      
+
     * Mass unit is the ton !
     """
 
@@ -144,7 +144,7 @@ class Hydrostatics(object):
         self.backup['init_mesh'] = working_mesh.copy()
         self.mesh = working_mesh.copy()
 
-        cog = np.array(cog, dtype=np.float)
+        cog = np.array(cog, dtype=float)
         assert cog.shape[0] == 3
         self.backup['gravity_center'] = cog.copy()
         self._gravity_center = cog.copy()
@@ -176,7 +176,7 @@ class Hydrostatics(object):
 
         self.animate = animate
 
-        self._rotation = np.eye(3, dtype=np.float)
+        self._rotation = np.eye(3, dtype=float)
 
         self.additional_forces = []
 
@@ -237,7 +237,7 @@ class Hydrostatics(object):
 
     def is_sinking(self):
         """Returns whether the mesh is sinking with the current mass.
-        
+
         Returns
         -------
         bool
@@ -250,7 +250,7 @@ class Hydrostatics(object):
     @property
     def gravity_center(self):
         """Get the gravity center position
-        
+
         Returns
         -------
         ndarray
@@ -260,7 +260,7 @@ class Hydrostatics(object):
     @gravity_center.setter
     def gravity_center(self, value):
         """Set the gravity center position"""
-        value = np.asarray(value, dtype=np.float)
+        value = np.asarray(value, dtype=float)
         self.backup['gravity_center'] = value
         assert value.shape[0] == 3
         self._gravity_center = value
@@ -347,11 +347,11 @@ class Hydrostatics(object):
 
         self._update_hydrostatic_properties()
 
-        self._rotation = np.eye(3, dtype=np.float)
+        self._rotation = np.eye(3, dtype=float)
 
     def is_stable_in_roll(self):
         """Returns whether the mesh is stable in roll (GMx positive)
-        
+
         Returns
         -------
         bool
@@ -378,7 +378,7 @@ class Hydrostatics(object):
 
     def is_at_equilibrium(self):
         """Returns whether the mesh is actually in an equilibrium configuration
-        
+
         Returns
         -------
         bool
@@ -398,9 +398,9 @@ class Hydrostatics(object):
     @property
     def delta_fz(self):
         """The residual vertical force
-        
+
         A non-zero value indicates that the mesh is not at hydrostatic equilibrium
-        
+
         Returns
         -------
         float
@@ -411,9 +411,9 @@ class Hydrostatics(object):
     @property
     def delta_mx(self):
         """The residual moment around x
-        
+
         A non-zero value indicates that the mesh is not at hydrostatic equilibrium
-        
+
         Returns
         -------
         float
@@ -426,7 +426,7 @@ class Hydrostatics(object):
         """The residual moment around x
 
         A non-zero value indicates that the mesh is not at hydrostatic equilibrium
-        
+
         Returns
         -------
         float
@@ -662,7 +662,7 @@ class Hydrostatics(object):
         # Assembling stiffness matrix
         stiffness_matrix = np.array([[s33, s34, s35],
                                      [s34, s44, s45],
-                                     [s35, s45, s55]], dtype=np.float)
+                                     [s35, s45, s55]], dtype=float)
 
         # Zeroing tiny coefficients
         stiffness_matrix[np.fabs(stiffness_matrix) < eps] = 0.
@@ -678,8 +678,8 @@ class Hydrostatics(object):
         self.hs_data['wet_surface_area'] = wet_surface_area
         self.hs_data['disp_volume'] = disp_volume
         self.hs_data['disp_mass'] = self._rho_water * disp_volume
-        self.hs_data['buoy_center'] = np.array([xb, yb, zb], dtype=np.float)
-        self.hs_data['flotation_center'] = np.array([x_f, y_f, 0.], dtype=np.float)
+        self.hs_data['buoy_center'] = np.array([xb, yb, zb], dtype=float)
+        self.hs_data['flotation_center'] = np.array([x_f, y_f, 0.], dtype=float)
         self.hs_data['waterplane_area'] = waterplane_area
         self.hs_data['transversal_metacentric_radius'] = transversal_metacentric_radius
         self.hs_data['longitudinal_metacentric_radius'] = longitudinal_metacentric_radius
@@ -707,7 +707,7 @@ class Hydrostatics(object):
     @property
     def faces(self):
         """Get the number of faces in the mesh
-        
+
         Returns
         -------
         int
@@ -717,7 +717,7 @@ class Hydrostatics(object):
     @property
     def vertices(self):
         """Get the vertices array coordinate of the mesh
-        
+
         Returns
         -------
         np.ndarray
@@ -726,7 +726,7 @@ class Hydrostatics(object):
 
     def get_gravity_force(self):
         """Returns the gravity force applied on the body
-        
+
         Returns
         -------
         Force
@@ -735,7 +735,7 @@ class Hydrostatics(object):
 
     def get_buoyancy_force(self):
         """Returns the buoyancy force applied on the body
-        
+
         Returns
         -------
         Force
@@ -745,7 +745,7 @@ class Hydrostatics(object):
 
     def add_force(self, force):
         """Add a custom force applying on the body
-        
+
         Parameters
         ----------
         force : Force
@@ -767,9 +767,9 @@ class Hydrostatics(object):
     @property
     def residual(self):
         """The residual force resulting from the balance between gravity, buoyancy and external forces
-        
+
         It is composed of the vertical force and horizontal moments only.
-        
+
         Returns
         -------
         ndarray
@@ -1192,7 +1192,7 @@ class Hydrostatics(object):
 
     def get_hydrostatic_report(self):
         """Returns a hydrostatic report for the current configuration
-        
+
         Returns
         -------
         str

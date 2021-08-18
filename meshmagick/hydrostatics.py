@@ -125,7 +125,7 @@ def compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=np.eye(3), z_co
     # Assembling stiffness matrix
     stiffness_matrix = np.array([[s33, s34, s35],
                                  [s34, s44, s45],
-                                 [s35, s45, s55]], dtype=np.float)
+                                 [s35, s45, s55]], dtype=float)
 
     # Zeroing tiny coefficients
     stiffness_matrix[np.fabs(stiffness_matrix) < 1e-4] = 0.

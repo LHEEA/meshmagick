@@ -20,7 +20,7 @@ This module aims at converting 3D rotations between the following representation
     * Rotation matrix
     * Axis angle
     * Cardan angles
-    
+
 Functions are written for any pair of representation, bidirectionally.
 
 Every angles are expected in radians
@@ -28,7 +28,7 @@ Quaternions are numpy arrays of shape (4, 1) but functions that accept a quatern
 
 Note that no check is done yet on the rotation nature of rotation matrices
 
-You may launch the test suite by running the test function in a python console or by lanching the script in a terminal, 
+You may launch the test suite by running the test function in a python console or by lanching the script in a terminal,
 eventually with the number of random rotation as a command line argument. Default is 1000.
 
 
@@ -44,19 +44,19 @@ Please contact Francois Rongere if any need of integration of this file into oth
 
 
 def is_unit_vector(vector):
-    vector = np.asarray(vector, dtype=np.float)
+    vector = np.asarray(vector, dtype=float)
     return np.isclose(norm(vector), 1.)
 
 def quat_to_axis_angle(quat):
     assert is_unit_vector(quat)
     assert quat.size == 4
-    quat = np.asarray(quat, dtype=np.float)
+    quat = np.asarray(quat, dtype=float)
     q0 = quat[0]
     d = 1. - q0*q0
 
     if np.isclose(d, 0.):
         angle = 0.
-        axis = np.array((0, 0, 1), dtype=np.float)
+        axis = np.array((0, 0, 1), dtype=float)
 
     else:
         angle = 2. * acos(q0)
@@ -71,12 +71,12 @@ def axis_angle_to_quat(axis, angle):
     c = cos(half_angle)
     s = sin(half_angle)
 
-    return np.array((c, s*axis[0], s*axis[1], s*axis[2]), dtype=np.float)
+    return np.array((c, s*axis[0], s*axis[1], s*axis[2]), dtype=float)
 
 def quat_to_rotmat(quat):
     assert is_unit_vector(quat)
     assert quat.size == 4
-    quat = np.asarray(quat, dtype=np.float)
+    quat = np.asarray(quat, dtype=float)
 
     q0q0 = quat[0] * quat[0]
     q1q1 = quat[1] * quat[1]
@@ -89,7 +89,7 @@ def quat_to_rotmat(quat):
     q1q3 = quat[1] * quat[3]
     q2q3 = quat[2] * quat[3]
 
-    rotmat = np.zeros((3, 3), dtype=np.float)
+    rotmat = np.zeros((3, 3), dtype=float)
     rotmat[0, 0] = (q0q0 + q1q1) * 2 - 1
     rotmat[0, 1] = (q1q2 - q0q3) * 2
     rotmat[0, 2] = (q1q3 + q0q2) * 2
@@ -131,7 +131,7 @@ def rotmat_to_quat(rotmat):
 
     else:
         i = 0
-        
+
         if r11 > r00:
             i = 1
             if r22 > r11:
@@ -164,7 +164,7 @@ def rotmat_to_quat(rotmat):
             q2 = (r12 + r21) * s
             q0 = (r10 - r01) * s
 
-    return np.array((q0, q1, q2, q3), dtype=np.float)
+    return np.array((q0, q1, q2, q3), dtype=float)
 
 def cardan_to_quat(phi, theta, psi):
 
@@ -184,7 +184,7 @@ def cardan_to_quat(phi, theta, psi):
     q2 = cphi_2 * cpsi_2 * stheta_2 + sphi_2 * ctheta_2 * spsi_2
     q3 = cphi_2 * ctheta_2 * spsi_2 - sphi_2 * cpsi_2 * stheta_2
 
-    return np.array((q0, q1, q2, q3), dtype=np.float)
+    return np.array((q0, q1, q2, q3), dtype=float)
 
 def rotmat_to_cardan(rotmat):
 
@@ -227,7 +227,7 @@ def cardan_to_rotmat(phi, theta, psi):
     cpsi = cos(psi)
     spsi = sin(psi)
 
-    rotmat = np.zeros((3, 3), dtype=np.float)
+    rotmat = np.zeros((3, 3), dtype=float)
 
     rotmat[0, 0] = ctheta * cpsi
     rotmat[0, 1] = sphi * stheta * cpsi - cphi * spsi

@@ -153,7 +153,7 @@ def generate_lid(V, F, max_area=None, verbose=False):
         # Testing the orientation of each polygon by computing the signed area of it
         signed_area = np.array(
             [points[j][0] * points[j + 1][1] - points[j + 1][0] * points[j][1] for j in range(n - 1)],
-            dtype=np.float).sum()
+            dtype=float).sum()
         if signed_area < 0.:
             holes.append(polygon)
         else:
@@ -229,11 +229,11 @@ def generate_lid(V, F, max_area=None, verbose=False):
 
         mesh_points = np.array(mesh.points)
         nmp = len(mesh_points)
-        mesh_tri = np.array(mesh.elements, dtype=np.int32)
+        mesh_tri = np.array(mesh.elements, dtype=int)
 
         # Resizing
         nmt = mesh_tri.shape[0]
-        mesh_quad = np.zeros((nmt, 4), dtype=np.int32)
+        mesh_quad = np.zeros((nmt, 4), dtype=int)
         mesh_quad[:, :-1] = mesh_tri + nv
         mesh_quad[:, -1] = mesh_quad[:, 0]
 
@@ -384,9 +384,9 @@ parser = argparse.ArgumentParser(
                 appropriate reader/writer. This behaviour might be bypassed using the
                 -ifmt and -ofmt optional arguments. When using these options, keywords
                 defined in the table above must be used as format identifiers.
-                
+
                 .. rubric:: Footnotes
-                
+
                 .. [#f1] NEMOH is an open source BEM Software for seakeeping developped at
                          Ecole Centrale de Nantes (LHHEA)
                 .. [#f2] WAMIT is a BEM Software for seakeeping developped by WAMIT, Inc.
@@ -643,9 +643,9 @@ parser.add_argument('-af', '--absolute-force', nargs=6, action='append',
                     orientation does not change during hydrostatic equilibrium
                     computations, but application point follows the mesh motion.
                     The option is called with 6 arguments such that:
-                    
+
                         -af x y z fx fy fz
-                     
+
                     where [x, y, z] are the coordinates of the application point
                     (in meters) and [fx, fy, fz] are the components of the force.
                     Those are expressed in the initial mesh frame.
@@ -657,9 +657,9 @@ parser.add_argument('-rf', '--relative-force', nargs=6, action='append', type=fl
                     hydrostatics equilibrium computations. It is relative as force
                     orientation follows the orientation of the mesh during equilibrium
                     computations. The option is called with 6 arguments such that:
-                     
+
                         -af x y z fx fy fz
-                     
+
                     where [x, y, z] are the coordinates of the application point
                     of the force and [fx, fy, fz] are the components of the force.
                     Those are expressed in the initial mesh frame.
@@ -828,7 +828,7 @@ def main():
 
             elif len(plane) == 1:
                 if plane[0] in plane_str_list:
-                    planes[iplane].normal = np.array(plane_str_list[plane[0]], dtype=np.float)
+                    planes[iplane].normal = np.array(plane_str_list[plane[0]], dtype=float)
                     planes[iplane].c = 0.
                 else:
                     raise AssertionError('%s key for plane is not known. Choices are [%s].'
