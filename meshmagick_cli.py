@@ -779,6 +779,7 @@ def main():
 
     if args.concatenate_file is not None:
         print('Concatenate %s with %s' % (args.infilename, args.concatenate_file))
+        print("WARNING: the two meshes must have the same format.")
         # Loading the file
         if os.path.isfile(args.concatenate_file):
             Vc, Fc = mmio.load_mesh(args.concatenate_file, format)
