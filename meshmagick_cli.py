@@ -1171,6 +1171,8 @@ def main():
         grav = args.grav
 
         reltol = 1e-6
+        z_corr = 0.
+        rotmat_corr = np.eye(3, 3)
 
         has_disp = has_cog = has_zcog = False
 
@@ -1227,6 +1229,8 @@ def main():
             z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, rho_water, grav, reltol=reltol, verbose=True)
             hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr, rotmat_corr=rotmat_corr,
                                               at_cog=True)
+        mesh.rotate_matrix(rotmat_corr)
+        mesh.translate_z(z_corr)
 
         hs_report = hs.get_hydrostatic_report(hs_data)
         print(hs_report)
