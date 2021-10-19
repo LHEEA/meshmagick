@@ -1281,6 +1281,9 @@ class Mesh(object):
         if self.has_surface_integrals():
             self._remove_surface_integrals()
 
+
+
+
     def translate_x(self, tx):
         """Translates the mesh along the Ox axis.
         
