@@ -1195,9 +1195,6 @@ class Mesh(object):
 
             return conformal
 
-
-
-
     def rotate_x(self, thetax):
         """Rotates the mesh around Ox axis.
         

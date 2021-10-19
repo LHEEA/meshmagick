@@ -20,7 +20,9 @@ __email__ = "Francois.Rongere@dice-engineering.com"
 __status__ = "Development"
 
 
-def compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=np.eye(3), z_corr=0., at_cog=False):
+
+def compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=np.eye(3), z_corr=0.,
+                         at_cog=False, lpp=None, orig_at_ap=False):
     wmesh = mesh.copy()
     wmesh.rotate_matrix(rotmat_corr)
     wmesh.translate_z(z_corr)
@@ -29,7 +31,11 @@ def compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=np.eye(3), z_co
     wcog = np.dot(rotmat_corr, wcog)
     wcog[2] += z_corr
 
-    clipper = MeshClipper(wmesh, assert_closed_boundaries=True, verbose=False)
+    try:
+        clipper = MeshClipper(wmesh, assert_closed_boundaries=True, verbose=False)
+    except RuntimeError as err:
+        raise err
+
     cmesh = clipper.clipped_mesh
 
     wet_surface_area = cmesh.faces_areas.sum()
@@ -169,12 +175,23 @@ def compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=np.eye(3), z_co
     hs_data['transversal_metacentric_height'] = transversal_metacentric_height
     hs_data['longitudinal_metacentric_height'] = longitudinal_metacentric_height
     hs_data['stiffness_matrix'] = stiffness_matrix
-    hs_data['lwl'] = maxx - minx
-    hs_data['los'] = xmax - xmin
-    hs_data['bos'] = ymax - ymin
+    hs_data['length_at_waterline'] = maxx - minx
+    hs_data['breadth_at_waterline'] = maxy - miny
+    hs_data['length_overall_submerged'] = xmax - xmin
+    hs_data['breadth_overall_submerged'] = ymax - ymin
     hs_data['draught'] = math.fabs(zmin)
-    hs_data['fp'] = maxx
+    hs_data['forward_perpendicular'] = maxx + xb
     hs_data['breadth'] = maxy - miny
+
+    hs_data['trust_lpp'] = True
+    if lpp is not None:
+        hs_data['length_between_perpendiculars'] = lpp
+    else:
+        if orig_at_ap:
+            hs_data['length_between_perpendiculars'] = hs_data['forward_perpendicular']
+        else:
+            hs_data['length_between_perpendiculars'] = hs_data['length_at_waterline']
+            hs_data['trust_lpp'] = False
 
     inertia.set_cog(wcog)
     inertia.shift_at_cog()
@@ -188,7 +205,7 @@ def compute_hydrostatics(mesh, cog, rho_water, grav, rotmat_corr=np.eye(3), z_co
     return hs_data
 
 
-def disp_equilibrium(mesh, disp_tons, rho_water, grav, cog=np.zeros(3), reltol=1e-6, verbose=False):
+def displacement_equilibrium(mesh, disp_tons, rho_water, grav, cog=np.zeros(3), reltol=1e-6, verbose=False):
     if verbose:
         print("========================")
         print("Displacement equilibrium")
@@ -214,7 +231,19 @@ def disp_equilibrium(mesh, disp_tons, rho_water, grav, cog=np.zeros(3), reltol=1
             print("No convergence after %s" % itermax)
             break
 
-        hs_data = compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr)
+        try:
+            hs_data = compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr)
+        except RuntimeError as err:
+            position = err.args[2]
+            if position == 'below':
+                z_corr = -zmax + (zmax - zmin) * 1e-4  # FIXME: is this choice robust ?
+                hs_data = compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr)
+                warnings.warn(
+                    "Impossible to reach a displacement of %.3f tons because of the mesh extend. Limited to %.3f tons" %
+                    (disp_tons, hs_data['disp_mass'] * 0.001))
+                return z_corr
+            else:
+                raise err
 
         disp_volume = hs_data["disp_volume"]
         waterplane_area = hs_data["waterplane_area"]
@@ -257,7 +286,7 @@ def full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=1e-6, verbose
     wmesh = mesh.copy()
 
     # Initial equilibrium in displacement
-    z_corr = disp_equilibrium(wmesh, disp_tons, rho_water, grav, reltol=reltol, verbose=False)
+    z_corr = displacement_equilibrium(wmesh, disp_tons, rho_water, grav, reltol=reltol, verbose=False)
     rotmat_corr = np.eye(3)
 
     hs_data = dict()
@@ -293,7 +322,7 @@ def full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=1e-6, verbose
 
         # Computing scale for nondimensionalization
         breadth = hs_data['breadth']
-        lwl = hs_data['lwl']
+        lwl = hs_data['length_at_waterline']
         scale = np.array([mg, mg * breadth, mg * lwl])
 
         # Convergence criterion
@@ -316,8 +345,7 @@ def full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=1e-6, verbose
         if math.fabs(ry) > ry_relax:
             ry = math.copysign(ry_relax, ry)
 
-        # Updating corrections
-        rotmat_corr = np.dot(cardan_to_rotmat(rx, ry, 0.), rotmat_corr)
+        rotmat_corr = np.dot(cardan_to_rotmat(rx, ry, 0.), rotmat_corr)  # fonctionne !
         z_corr += tz
 
         iter += 1
@@ -338,7 +366,7 @@ def get_hydrostatic_report(hs_data):
 
     def build_line(text, data, precision=3, dtype='f'):
         # TODO: ajouter unit
-        textwidth = 40
+        textwidth = 45
         try:
             line = '\t{:-<{textwidth}}>  {:< .{precision}{dtype}}\n'.format(str(text).upper(), data,
                                                                             precision=precision,
@@ -364,7 +392,7 @@ def get_hydrostatic_report(hs_data):
 
     msg = "HYDROSTATIC REPORT (Meshmagick version %s)\n\n" % version
 
-    msg += '\tCorrections made on initial mesh:\n'
+    msg += '[1]\tCorrections made on initial mesh:\n'
     msg += build_line('Z correction (M)', hs_data['z_eq'], precision=3)
     heel, trim, _ = rotmat_to_cardan(hs_data['rotmat_eq'])
     msg += build_line('Heel correction (deg)', degrees(heel), precision=3)
@@ -385,10 +413,16 @@ def get_hydrostatic_report(hs_data):
 
     msg += hspace()
     msg += build_line('Draft (M)', hs_data['draught'], precision=3)  # TODO
-    msg += build_line('Length overall submerged (M)', hs_data['los'], precision=2)
-    msg += build_line('Breadth overall submerged (M)', hs_data['bos'], precision=2)
-    msg += build_line('Length at Waterline LWL (M)', hs_data['lwl'], precision=2)
-    msg += build_line('Forward perpendicular FP (M)', hs_data['fp'], precision=2)
+    msg += build_line('Length overall submerged (M)', hs_data['length_overall_submerged'], precision=2)
+    msg += build_line('Breadth overall submerged (M)', hs_data['breadth_overall_submerged'], precision=2)
+    msg += build_line('Length at Waterline LWL (M)', hs_data['length_at_waterline'], precision=2)
+    msg += build_line('Forward perpendicular FP (M)', hs_data['forward_perpendicular'], precision=2)
+    if hs_data['trust_lpp']:
+        msg += build_line('Length between perpendiculars Lpp (M)', hs_data['length_between_perpendiculars'],
+                          precision=2)
+    else:
+        msg += build_line('[2] Length between perpendiculars Lpp (M)', hs_data['length_between_perpendiculars'],
+                          precision=2)
 
     msg += hspace()
     msg += build_line('Transversal metacentric radius (M)', hs_data['transversal_metacentric_radius'], precision=3)
@@ -410,14 +444,41 @@ def get_hydrostatic_report(hs_data):
     msg += build_line('K45 (N.M)', hs_data['stiffness_matrix'][1, 2], precision=4, dtype='E')
     msg += build_line('K55 (N.M)', hs_data['stiffness_matrix'][2, 2], precision=4, dtype='E')
 
-    # Il faut faire une correction avec le plan de la flottaison de certains coeffs
     msg += hspace()
-    msg += '\tINERTIAS:\n'
+    if hs_data['trust_lpp']:
+        msg += '\tINERTIAS from standard approximations: [Rxx = 0.3 B; Ryy = Rzz = 0.25 Lpp]\n'
+    else:
+        msg += '[2]\tINERTIAS from standard approximations: [Rxx = 0.3 B; Ryy = Rzz = 0.25 Lpp]\n'
+
+    Rxx = 0.3 * hs_data['breadth_overall_submerged']
+    Ryy_zz = 0.25 * hs_data['length_between_perpendiculars']
+    msg += build_line('Rxx (M)', Rxx, precision=3)
+    msg += build_line('Ryy (M)', Ryy_zz, precision=3)
+    msg += build_line('Rzz (M)', Ryy_zz, precision=3)
+    msg += build_line('Ixx', Rxx ** 2 * hs_data['disp_mass'], precision=3, dtype='E')
+    msg += build_line('Iyy', Ryy_zz ** 2 * hs_data['disp_mass'], precision=3, dtype='E')
+    msg += build_line('Izz', Ryy_zz ** 2 * hs_data['disp_mass'], precision=3, dtype='E')
+
+    msg += hspace()
+    msg += '\tINERTIAS from homogeneous immersed hull approximation:\n'
+    msg += build_line('Rxx', math.sqrt(hs_data['Ixx'] / hs_data['disp_mass']), precision=3)
+    msg += build_line('Ryy', math.sqrt(hs_data['Iyy'] / hs_data['disp_mass']), precision=3)
+    msg += build_line('Rzz', math.sqrt(hs_data['Izz'] / hs_data['disp_mass']), precision=3)
     msg += build_line('Ixx', hs_data['Ixx'], precision=3, dtype='E')
-    msg += build_line('Ixy', hs_data['Ixy'], precision=3, dtype='E')
-    msg += build_line('Ixz', hs_data['Ixz'], precision=3, dtype='E')
     msg += build_line('Iyy', hs_data['Iyy'], precision=3, dtype='E')
-    msg += build_line('Iyz', hs_data['Iyz'], precision=3, dtype='E')
     msg += build_line('Izz', hs_data['Izz'], precision=3, dtype='E')
+
+    msg += hspace()
+    msg += hspace()
+    msg += "NOTES\n"
+    msg += "=====\n"
+    msg += "[1] To get computed hydrostatic equilibrium position from initial mesh, corrections must be \n" \
+           "    applied in the following order:\n" \
+           "    \t* First rotations around initial X & Y axes w.r.t initial frame origin\n" \
+           "    \t* Second Z translation along initial Z-axis (not the one obtained after the rotations)\n"
+    if not hs_data['trust_lpp']:
+        msg += "[2] Not enough information to get a trusted Lpp. It has been approximated by Lwl instead.\n" \
+               "    It has an influence on the Iyy and Izz inertias calculated from standard approximations.\n" \
+               "    To get more accurate results, please specify a Lpp."
 
     return msg

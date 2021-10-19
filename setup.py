@@ -22,7 +22,7 @@ setup(
     version=meshmagick.__version__,
     url='https://github.com/LHEEA/meshmagick',
     author='Francois Rongere -- Ecole Centrale de Nantes',
-    author_email='Francois.Rongere@ec-nantes.fr',
+    author_email='Francois.Rongere@dice-engineering.com',
     description="""A command line tool to manipulate hydrodynamics meshes""",
     long_description=LONG_DESCRIPTION,
     license='GPLv3',
@@ -30,7 +30,7 @@ setup(
     packages=find_packages(exclude=['contrib', 'doc', 'tests*']),
     # setup_requires=['pytest-runner'],
     # tests_require=['pytest', 'pytest-cov'],
-    install_requires=['numpy', 'argcomplete', 'vtk'],
+    install_requires=['numpy', 'argcomplete', 'vtk', 'scipy'],
     entry_points={
         'console_scripts': [
             'meshmagick=meshmagick_cli:main',
