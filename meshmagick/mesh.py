@@ -18,6 +18,7 @@ import sys  # TODO: Retirer
 from .tools import merge_duplicate_rows
 from . import MMviewer
 from .inertia import RigidBodyInertia
+from meshmagick import rotations
 
 __author__ = "Francois Rongere"
 __copyright__ = "Copyright 2014-2015, Ecole Centrale de Nantes / D-ICE ENGINEERING"
@@ -1272,7 +1273,7 @@ class Mesh(object):
 
         phi, theta, psi = angles
 
-        rotmat = cardan_to_rotmat(phi, theta, psi)
+        rotmat = rotations.cardan_to_rotmat(phi, theta, psi)
 
         self.rotate_matrix(rotmat)
 
