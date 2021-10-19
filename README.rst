@@ -1,13 +1,6 @@
 Meshmagick
 ==========
 
-.. image:: https://travis-ci.org/LHEEA/meshmagick.svg?branch=master
-    :target: https://travis-ci.org/LHEEA/meshmagick
-
-.. image:: https://coveralls.io/repos/github/LHEEA/meshmagick/badge.svg?branch=master
-    :target: https://coveralls.io/github/LHEEA/meshmagick?branch=master
-
-
 **Meshmagick** is a command line utility as well as a python module for the manipulation of meshes encountered in the
 hydrodynamics community.
 
@@ -32,7 +25,7 @@ package that can be imported in a python script and give the full access to the 
 
 .. note::
     **Meshmagick** is the property of **Ecole Centrale de Nantes** and is maintained by François Rongère <francois
-    .rongere@ec-nantes.fr>. It is released under the **GNU GPLv3** open source licence (see LICENCE file).
+    .rongere@dice-engineering>. It is released under the **GNU GPLv3** open source licence (see LICENCE file).
 
 GitHub Repository
 -----------------
@@ -44,8 +37,6 @@ Documentation
 
 https://lheea.github.io/meshmagick
 
-.. warning::
-    Some pages (such as the installation page) are slightly out-of-date.
 
 Getting Meshmagick
 ------------------
