@@ -43,17 +43,17 @@ class RigidBodyInertia(object):
         self._mass = float(mass)
 
         assert len(cog) == 3
-        self._cog = np.asarray(cog, dtype=np.float)
+        self._cog = np.asarray(cog, dtype=float)
 
         if point is None:
             self._point = self._cog
         else:
             assert len(point) == 3
-            self._point = np.asarray(point, dtype=np.float)
+            self._point = np.asarray(point, dtype=float)
 
         self._3d_rotational_inertia = np.array([[float(xx), -float(xy), -float(xz)],
                                                 [-float(xy), float(yy), -float(yz)],
-                                                [-float(xz), -float(yz), float(zz)]], dtype=np.float)
+                                                [-float(xz), -float(yz), float(zz)]], dtype=float)
 
     @property
     def mass(self):
@@ -73,7 +73,7 @@ class RigidBodyInertia(object):
     @property
     def reduction_point(self):
         """The reduction point of the inertia matrix
-        
+
         Returns
         -------
         ndarray
@@ -85,15 +85,15 @@ class RigidBodyInertia(object):
         """Set the reduction point"""
         mat_at_cog = self.at_cog.inertia_matrix
         assert len(point) == 3
-        self._point = np.asarray(point, dtype=np.float)
+        self._point = np.asarray(point, dtype=float)
         self._3d_rotational_inertia = mat_at_cog + self._huygens_transport()
 
     @property
     def at_cog(self):
         """Returns a new inertia object that is expressed at cog.
-        
+
         It makes a copy of itself.
-        
+
         Returns
         -------
         ndarray
@@ -112,11 +112,11 @@ class RigidBodyInertia(object):
         """
         assert len(cog) == 3
         assert isinstance(cog, (tuple, list, np.ndarray))
-        self._cog = np.asarray(cog, dtype=np.float)
+        self._cog = np.asarray(cog, dtype=float)
 
     def shift_at_cog(self):
         """Shift the inertia matrix internally at cog.
-        
+
         The reduction point is then cog.
         """
         self._3d_rotational_inertia += self._huygens_transport()
@@ -124,7 +124,7 @@ class RigidBodyInertia(object):
 
     def is_at_cog(self):
         """Returns whether the object is expressed at cog
-        
+
         Returns
         -------
         bool
@@ -138,7 +138,7 @@ class RigidBodyInertia(object):
     @property
     def xx(self):
         """Get the principal inertia moment around x
-        
+
         Returns
         -------
         float
@@ -227,7 +227,7 @@ class RigidBodyInertia(object):
 # From "Handbook of equations for mass and area of various geometrical shapes, J.A. Myers, 1962"
 def right_circular_cylinder(radius, length, density=1.):
     """Get the inertia of a right circular cylinder
-    
+
     Returns
     -------
     RigidBodyInertia
@@ -266,7 +266,7 @@ def right_circular_cone(radius, length, density=1.):
     Returns
     -------
     RigidBodyInertia
-    
+
     Note
     ----
     The center of gravity is at an altitude of z = H/4 over the circular basis center
@@ -317,7 +317,7 @@ def hemisphere(radius, density=1.):
     Returns
     -------
     RigidBodyInertia
-    
+
     Note
     ----
     The center of gravity is situated at the altitude of z = 3R/8 over the circular basis center
@@ -337,7 +337,7 @@ def elliptical_cylinder(a, b, length, density=1.):
     Returns
     -------
     RigidBodyInertia
-    
+
     Note
     ----
     * The center of gravity is located at an altitude of z=H/2 over the elliptical basis center
@@ -362,7 +362,7 @@ def ellipsoid(a, b, c, density=1.):
     Returns
     -------
     RigidBodyInertia
-    
+
     Note
     ----
     * a is along z axis (ellipse semi axis)
@@ -439,7 +439,7 @@ def right_rectangular_pyramid(a, b, height, density=1.):
     Returns
     -------
     RigidBodyInertia
-    
+
     Note
     ----
     The center of gravity is located at the altitude z=H/4 over the rectangular basis center
@@ -476,7 +476,7 @@ def rectangular_prism(a, b, h, density=1.):
     Returns
     -------
     RigidBodyInertia
-    
+
     Note
     ----
     * a is along x
@@ -500,7 +500,7 @@ def circular_cone_shell(R, height, density=densities.get_density('STEEL'), thick
     Returns
     -------
     RigidBodyInertia
-    
+
     Note
     ----
     The center of gravity is located at an altitude of z=H/3 over the circular basis center
@@ -522,7 +522,7 @@ def frustrum_of_circular_cone_shell(r, R, height, density=densities.get_density(
     Returns
     -------
     RigidBodyInertia
-    
+
     Note
     ----
     The center of gravity is located at an altitude of z=(H/3)*(2*r+R)/(r+R)
@@ -596,7 +596,7 @@ def hemispherical_shell(R, density=densities.get_density('STEEL'), thickness=0.0
     Returns
     -------
     RigidBodyInertia
-    
+
     Note
     ----
     The center of gravity is located at an altitude of z=R/2 over the circular basis center
@@ -620,7 +620,7 @@ class RotationalInertia3D(np.ndarray):
     __array_priority__ = 15
 
     def __new__(cls, xx, xy, yy, xz, yz, zz, point):
-        lower_triangular = np.array([xx, xy, yy, xz, yz, zz], dtype=np.float)
+        lower_triangular = np.array([xx, xy, yy, xz, yz, zz], dtype=float)
         obj = lower_triangular.view(cls)
 
         return obj
@@ -628,7 +628,7 @@ class RotationalInertia3D(np.ndarray):
     @property
     def array(self):
         print("generating full array")
-        array = np.asarray(self, dtype=np.float)[[0, 1, 3, 1, 2, 4, 3, 4, 5]]
+        array = np.asarray(self, dtype=float)[[0, 1, 3, 1, 2, 4, 3, 4, 5]]
         array[[1, 2, 3, 5, 6, 7]] *= -1
         return array.reshape((3, 3))
 
@@ -700,7 +700,7 @@ class AngularVelocityVector(np.ndarray):
 
     def __new__(cls, array):
         assert len(array) == 3
-        return np.asarray(array, dtype=np.float).view(cls)
+        return np.asarray(array, dtype=float).view(cls)
 
 
 if __name__ == '__main__':
