@@ -121,9 +121,9 @@ parser = argparse.ArgumentParser(
                 appropriate reader/writer. This behaviour might be bypassed using the
                 -ifmt and -ofmt optional arguments. When using these options, keywords
                 defined in the table above must be used as format identifiers.
-                
+
                 .. rubric:: Footnotes
-                
+
                 .. [#f1] NEMOH is an open source BEM Software for seakeeping developped at
                          Ecole Centrale de Nantes (LHHEA)
                 .. [#f2] WAMIT is a BEM Software for seakeeping developped by WAMIT, Inc.
@@ -552,7 +552,7 @@ def main():
 
             elif len(plane) == 1:
                 if plane[0] in plane_str_list:
-                    planes[iplane].normal = np.array(plane_str_list[plane[0]], dtype=np.float)
+                    planes[iplane].normal = np.array(plane_str_list[plane[0]], dtype=float)
                     planes[iplane].c = 0.
                 else:
                     raise AssertionError('%s key for plane is not known. Choices are [%s].'
@@ -841,7 +841,7 @@ def main():
 
         if verbose:
             print(("\nInertial parameters for a uniform distribution of a medium of density %.1f kg/m**3 in the mesh:\n" \
-                   % rho_medium))
+                  % rho_medium))
             print(("\tMass = %.3f tons" % (inertia.mass / 1000.)))
             cog = inertia.gravity_center
             print(("\tCOG (m):\n\t\txg = %.3f\n\t\tyg = %.3f\n\t\tzg = %.3f" % (cog[0], cog[1], cog[2])))
@@ -867,7 +867,7 @@ def main():
 
         if verbose:
             print(("\nInertial parameters for a shell distribution of a medium of density %.1f kg/m**3 and a thickness " \
-                   "of %.3f m over the mesh:\n" % (rho_medium, thickness)))
+                  "of %.3f m over the mesh:\n" % (rho_medium, thickness)))
             print(("\tMass = %.3f tons" % (inertia.mass / 1000.)))
             cog = inertia.gravity_center
             print(("\tCOG (m):\n\t\txg = %.3f\n\t\tyg = %.3f\n\t\tzg = %.3f" % (cog[0], cog[1], cog[2])))
@@ -879,45 +879,39 @@ def main():
             point = inertia.reduction_point
             print(("\tExpressed at point : \t\t%.3E\t%.3E\t%.3E" % (point[0], point[1], point[2])))
 
+    additional_forces = []
+    if args.relative_force is not None:
+        for item in args.relative_force:
+            force = hs.Force(point=list(map(float, item[:3])), value=list(map(float, item[3:])), mode='relative')
+            additional_forces.append(force)
 
-    has_disp = has_cog = has_zcog = False
-
-    if args.mass_displacement is not None:
-        disp = args.mass_displacement
-        has_disp = True
-
-    cog = np.zeros(3)
-    if args.cog is not None:
-        cog = list(map(float, args.cog))
-        has_cog = True
-
-    if args.zcog is not None:
-        zcog = args.zcog
-        has_zcog = True
-
-    orig_at_ap = False
-    if args.orig_at_ap:
-        orig_at_ap = True
-
-    # parameters
-    water_density = args.water_density
-    grav = args.grav
-    lpp = args.lpp
-
-    project_name = args.project_name
-
-
-    # FIXME: il faut prendre en compte dans les z_corr et rotmat_corr les informations de transformation donnees
-    # dans les operations de translation et de rotation precedemment !!!
-
-    z_corr = 0.
-    rotmat_corr = np.eye(3, 3)
+    if args.absolute_force is not None:
+        for item in args.absolute_force:
+            force = hs.Force(point=list(map(float, item[:3])), value=list(map(float, item[3:])), mode='absolute')
+            additional_forces.append(force)
 
     if args.hydrostatics:
+        rho_water = args.rho_water
+        grav = args.grav
 
         reltol = 1e-6
         z_corr = 0.
         rotmat_corr = np.eye(3, 3)
+
+        has_disp = has_cog = has_zcog = False
+
+        if args.disp is not None:
+            disp = args.disp
+            has_disp = True
+
+        if args.cog is not None:
+            cog = list(map(float, args.cog))
+            has_cog = True
+
+        if args.zcog is not None:
+            zcog = args.zcog
+            has_zcog = True
+
         hs_data = dict()
 
         if not has_disp and not has_cog:
@@ -925,61 +919,48 @@ def main():
             if not has_zcog:
                 raise RuntimeError("zcog should at least be given for correct stiffness values computations")
 
-            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), water_density, grav)
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), rho_water, grav, at_cog=False)
             xb, yb, _ = hs_data["buoyancy_center"]
             cog = np.array([xb, yb, zcog])
-            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav,
-                                              at_cog=True, lpp=lpp, orig_at_ap=orig_at_ap)
+            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, at_cog=True)
 
         elif has_disp and not has_cog:
             print(">>>> Computing equilibrium of the hull for the given displacement of %f tons" % disp)
             if not has_zcog:
                 raise RuntimeError("zcog should at least be given for correct stiffness values computations")
 
-            z_corr = hs.displacement_equilibrium(mesh, disp, water_density, grav,
-                                                 reltol=reltol, verbose=True)
-            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), water_density, grav,
-                                              z_corr=z_corr, at_cog=False)
+            z_corr = hs.disp_equilibrium(mesh, disp, rho_water, grav, reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), rho_water, grav, z_corr=z_corr, at_cog=False)
             xb, yb, _ = hs_data["buoyancy_center"]
             cog = np.array([xb, yb, zcog])
-            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav,
-                                              z_corr=z_corr, at_cog=True, lpp=lpp, orig_at_ap=orig_at_ap)
+            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr, at_cog=True)
 
         elif has_disp and has_cog:
             print(">>>> Computing equilibrium in 3DOF for the given displacement and COG")
             if has_zcog:
                 warn("zcog is redundant with cog, taking cog and ignoring zcog")
-            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, water_density, grav, reltol=reltol, verbose=True)
-            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav,
-                                              z_corr=z_corr, rotmat_corr=rotmat_corr, at_cog=True, lpp=lpp,
-                                              orig_at_ap=orig_at_ap)
+            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, rho_water, grav, reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr, rotmat_corr=rotmat_corr, at_cog=True)
 
         elif not has_disp and has_cog:
-            print(
-                ">>>> Computing equilibrium in 3DOF for the given COG, considering the current configuration presents the "
-                "target displacement")
+            print(">>>> Computing equilibrium in 3DOF for the given COG, considering the current configuration presents the "
+                  "target displacement")
             if has_zcog:
                 warn("zcog is redundant with cog, taking cog and ignoring zcog")
 
-            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), water_density, grav,
-                                              at_cog=False)
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), rho_water, grav, at_cog=False)
             disp = hs_data['disp_mass'] / 1000
-            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, water_density, grav,
-                                                      reltol=reltol, verbose=True)
-            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav,
-                                              z_corr=z_corr, rotmat_corr=rotmat_corr, at_cog=True, lpp=lpp,
-                                              orig_at_ap=orig_at_ap)
+            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, rho_water, grav, reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr, rotmat_corr=rotmat_corr,
+                                              at_cog=True)
 
         mesh.rotate_matrix(rotmat_corr)
         mesh.translate_z(z_corr)
-        # cog = np.dot(rotmat_corr, cog)
-        # cog[2] += z_corr
-        has_cog = True
-        has_disp = True
-        has_zcog = False
+
 
         hs_report = hs.get_hydrostatic_report(hs_data)
         print(hs_report)
+
 
         if args.hs_report is not None:
             with open(args.hs_report, 'w') as f:
@@ -991,10 +972,9 @@ def main():
                 f.write('==============================================\n')
                 f.write(hs_report)
 
-    
-    # ==================================================================================================================
-    # WARNING : No more mesh modification should be released below this point and until the end of the main function
-    # ==================================================================================================================
+
+
+    # WARNING : No more mesh modification should be released from this point until the end of the main
 
     if args.info:
         print(mesh)
@@ -1027,8 +1007,7 @@ def main():
                 else:
                     format = os.path.splitext(args.infilename)[1][1:].lower()
                     if not mmio.know_extension(format):
-                        raise IOError('Could not determine a format from input file extension, '
-                                      'please specify an input format or an extension')
+                        raise IOError('Could not determine a format from input file extension, please specify an input format or an extension')
             else:
                 format = os.path.splitext(args.outfilename)[1][1:].lower()
 
