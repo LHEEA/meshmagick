@@ -879,19 +879,8 @@ def main():
             point = inertia.reduction_point
             print(("\tExpressed at point : \t\t%.3E\t%.3E\t%.3E" % (point[0], point[1], point[2])))
 
-    additional_forces = []
-    if args.relative_force is not None:
-        for item in args.relative_force:
-            force = hs.Force(point=list(map(float, item[:3])), value=list(map(float, item[3:])), mode='relative')
-            additional_forces.append(force)
-
-    if args.absolute_force is not None:
-        for item in args.absolute_force:
-            force = hs.Force(point=list(map(float, item[:3])), value=list(map(float, item[3:])), mode='absolute')
-            additional_forces.append(force)
-
     if args.hydrostatics:
-        rho_water = args.rho_water
+        water_density = args.water_density
         grav = args.grav
 
         reltol = 1e-6
@@ -900,8 +889,8 @@ def main():
 
         has_disp = has_cog = has_zcog = False
 
-        if args.disp is not None:
-            disp = args.disp
+        if args.mass_displacement is not None:
+            disp = args.mass_displacement
             has_disp = True
 
         if args.cog is not None:
@@ -919,28 +908,28 @@ def main():
             if not has_zcog:
                 raise RuntimeError("zcog should at least be given for correct stiffness values computations")
 
-            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), rho_water, grav, at_cog=False)
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), water_density, grav, at_cog=False)
             xb, yb, _ = hs_data["buoyancy_center"]
             cog = np.array([xb, yb, zcog])
-            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, at_cog=True)
+            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav, at_cog=True)
 
         elif has_disp and not has_cog:
             print(">>>> Computing equilibrium of the hull for the given displacement of %f tons" % disp)
             if not has_zcog:
                 raise RuntimeError("zcog should at least be given for correct stiffness values computations")
 
-            z_corr = hs.disp_equilibrium(mesh, disp, rho_water, grav, reltol=reltol, verbose=True)
-            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), rho_water, grav, z_corr=z_corr, at_cog=False)
+            z_corr = hs.disp_equilibrium(mesh, disp, water_density, grav, reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), water_density, grav, z_corr=z_corr, at_cog=False)
             xb, yb, _ = hs_data["buoyancy_center"]
             cog = np.array([xb, yb, zcog])
-            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr, at_cog=True)
+            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav, z_corr=z_corr, at_cog=True)
 
         elif has_disp and has_cog:
             print(">>>> Computing equilibrium in 3DOF for the given displacement and COG")
             if has_zcog:
                 warn("zcog is redundant with cog, taking cog and ignoring zcog")
-            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, rho_water, grav, reltol=reltol, verbose=True)
-            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr, rotmat_corr=rotmat_corr, at_cog=True)
+            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, water_density, grav, reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav, z_corr=z_corr, rotmat_corr=rotmat_corr, at_cog=True)
 
         elif not has_disp and has_cog:
             print(">>>> Computing equilibrium in 3DOF for the given COG, considering the current configuration presents the "
@@ -948,10 +937,10 @@ def main():
             if has_zcog:
                 warn("zcog is redundant with cog, taking cog and ignoring zcog")
 
-            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), rho_water, grav, at_cog=False)
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), water_density, grav, at_cog=False)
             disp = hs_data['disp_mass'] / 1000
-            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, rho_water, grav, reltol=reltol, verbose=True)
-            hs_data = hs.compute_hydrostatics(mesh, cog, rho_water, grav, z_corr=z_corr, rotmat_corr=rotmat_corr,
+            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, water_density, grav, reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav, z_corr=z_corr, rotmat_corr=rotmat_corr,
                                               at_cog=True)
 
         mesh.rotate_matrix(rotmat_corr)
