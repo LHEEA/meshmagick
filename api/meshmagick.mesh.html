@@ -5,10 +5,11 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>meshmagick.mesh module &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
+  <title>meshmagick.mesh module &mdash; Meshmagick User&#39;s Guide 3.2 documentation</title>
   
 
   
@@ -21,10 +22,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -33,6 +35,8 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -61,7 +65,7 @@
             
             
               <div class="version">
-                2.1.1
+                3.2
               </div>
             
           
@@ -169,14 +173,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-meshmagick.mesh">
+  <section id="module-meshmagick.mesh">
 <span id="meshmagick-mesh-module"></span><h1>meshmagick.mesh module<a class="headerlink" href="#module-meshmagick.mesh" title="Permalink to this headline">¶</a></h1>
 <p>This module concerns mesh data structures.</p>
 <p>TODO: mettre des examples d’utilisation</p>
 <dl class="py class">
-<dt id="meshmagick.mesh.Mesh">
-<em class="property">class </em><code class="sig-prename descclassname">meshmagick.mesh.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vertices</span></em>, <em class="sig-param"><span class="n">faces</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">meshmagick.mesh.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A class to handle unstructured meshes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -184,13 +188,13 @@
 <li><p><strong>vertices</strong> (<em>array_like</em>) – (nv x 3) Array of mesh vertices coordinates. Each line of the array represents one vertex coordinates</p></li>
 <li><p><strong>faces</strong> (<em>array_like</em>) – Arrays of mesh connectivities for faces. Each line of the array represents indices of vertices that form the
 face, expressed in counterclockwise order to ensure outward normals description.</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – The mesh’s name. If None, mesh is given an automatic name based on its internal ID.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – The mesh’s name. If None, mesh is given an automatic name based on its internal ID.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.__add__">
-<code class="sig-name descname">__add__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh_to_add</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.__add__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.__add__">
+<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh_to_add</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.__add__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.__add__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds two meshes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -210,43 +214,43 @@ face, expressed in counterclockwise order to ensure outward normals description.
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.__str__">
-<code class="sig-name descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.__str__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.__str__" title="Permalink to this definition">¶</a></dt>
 <dd><p>String representation of the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.axis_aligned_bbox">
-<em class="property">property </em><code class="sig-name descname">axis_aligned_bbox</code><a class="headerlink" href="#meshmagick.mesh.Mesh.axis_aligned_bbox" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.axis_aligned_bbox">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">axis_aligned_bbox</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.axis_aligned_bbox" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the axis aligned bounding box of the mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>(xmin, xmax, ymin, ymax, zmin, zmax)</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)">tuple</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.boundaries">
-<em class="property">property </em><code class="sig-name descname">boundaries</code><a class="headerlink" href="#meshmagick.mesh.Mesh.boundaries" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.boundaries">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">boundaries</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.boundaries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the list of boundaries of the mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>list that stores lists of boundary connected vertices</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a></p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -256,8 +260,8 @@ face, expressed in counterclockwise order to ensure outward normals description.
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.copy">
-<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.copy" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a copy of the current mesh instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -270,12 +274,12 @@ face, expressed in counterclockwise order to ensure outward normals description.
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.eval_plain_mesh_inertias">
-<code class="sig-name descname">eval_plain_mesh_inertias</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rho_medium</span><span class="o">=</span><span class="default_value">1023.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.eval_plain_mesh_inertias"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.eval_plain_mesh_inertias" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.eval_plain_mesh_inertias">
+<span class="sig-name descname"><span class="pre">eval_plain_mesh_inertias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho_medium</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1023.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.eval_plain_mesh_inertias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.eval_plain_mesh_inertias" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluates the mesh inertia under the assumption of an enclosed volume made of an homogeneous medium of the given density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>rho_medium</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – The medium density (kg/m**3). Default is 1023 kg.m**3 (salt water)</p>
+<dd class="field-odd"><p><strong>rho_medium</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – The medium density (kg/m**3). Default is 1023 kg.m**3 (salt water)</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The mesh inertia instance expressed at origin (0, 0, 0)</p>
@@ -287,14 +291,14 @@ face, expressed in counterclockwise order to ensure outward normals description.
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.eval_shell_mesh_inertias">
-<code class="sig-name descname">eval_shell_mesh_inertias</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rho_medium</span><span class="o">=</span><span class="default_value">7850.0</span></em>, <em class="sig-param"><span class="n">thickness</span><span class="o">=</span><span class="default_value">0.02</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.eval_shell_mesh_inertias"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.eval_shell_mesh_inertias" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.eval_shell_mesh_inertias">
+<span class="sig-name descname"><span class="pre">eval_shell_mesh_inertias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho_medium</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7850.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.eval_shell_mesh_inertias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.eval_shell_mesh_inertias" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluates the mesh inertia under the assumption of an enclosed volume made of an homogeneous medium of the
 given density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>rho_medium</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – The medium density (kg/m**3). Default is 7850 kg/m**3 (Steel density)</p></li>
+<li><p><strong>rho_medium</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – The medium density (kg/m**3). Default is 7850 kg/m**3 (Steel density)</p></li>
 <li><p><strong>thickness</strong> (<em>flaot</em><em>, </em><em>optional</em>) – The hull thickness (m). Default is 0.02 m.</p></li>
 </ul>
 </dd>
@@ -308,14 +312,14 @@ given density.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.extract_faces">
-<code class="sig-name descname">extract_faces</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id_faces_to_extract</span></em>, <em class="sig-param"><span class="n">return_index</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.extract_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.extract_faces" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.extract_faces">
+<span class="sig-name descname"><span class="pre">extract_faces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_faces_to_extract</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.extract_faces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.extract_faces" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extracts a new mesh from a selection of faces ids</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id_faces_to_extract</strong> (<em>ndarray</em>) – Indices of faces that have to be extracted</p></li>
-<li><p><strong>return_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Flag to output old indices</p></li>
+<li><p><strong>return_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Flag to output old indices</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -327,9 +331,9 @@ given density.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.faces">
-<em class="property">property </em><code class="sig-name descname">faces</code><a class="headerlink" href="#meshmagick.mesh.Mesh.faces" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.faces">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">faces</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.faces" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the faces connectivity array of the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -341,9 +345,9 @@ given density.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.faces_areas">
-<em class="property">property </em><code class="sig-name descname">faces_areas</code><a class="headerlink" href="#meshmagick.mesh.Mesh.faces_areas" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.faces_areas">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">faces_areas</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.faces_areas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the array of faces areas of the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -355,9 +359,9 @@ given density.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.faces_centers">
-<em class="property">property </em><code class="sig-name descname">faces_centers</code><a class="headerlink" href="#meshmagick.mesh.Mesh.faces_centers" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.faces_centers">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">faces_centers</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.faces_centers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the array of faces centers of the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -369,9 +373,9 @@ given density.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.faces_normals">
-<em class="property">property </em><code class="sig-name descname">faces_normals</code><a class="headerlink" href="#meshmagick.mesh.Mesh.faces_normals" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.faces_normals">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">faces_normals</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.faces_normals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the array of faces normals of the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -383,33 +387,33 @@ given density.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.ff">
-<em class="property">property </em><code class="sig-name descname">ff</code><a class="headerlink" href="#meshmagick.mesh.Mesh.ff" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.ff">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">ff</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.ff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the face / faces connectivity dictionary</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.flip_normals">
-<code class="sig-name descname">flip_normals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.flip_normals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.flip_normals" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.flip_normals">
+<span class="sig-name descname"><span class="pre">flip_normals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.flip_normals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.flip_normals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flips every normals of the mesh.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.get_face">
-<code class="sig-name descname">get_face</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">face_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.get_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.get_face" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.get_face">
+<span class="sig-name descname"><span class="pre">get_face</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">face_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.get_face"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.get_face" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the face described by its vertices connectivity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>face_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Face id</p>
+<dd class="field-odd"><p><strong>face_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Face id</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>If the face is a triangle, the array has 3 components, else it has 4 (quadrangle)</p>
@@ -421,8 +425,8 @@ given density.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.get_surface_integrals">
-<code class="sig-name descname">get_surface_integrals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.get_surface_integrals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.get_surface_integrals" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.get_surface_integrals">
+<span class="sig-name descname"><span class="pre">get_surface_integrals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.get_surface_integrals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.get_surface_integrals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the mesh surface integrals</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -435,13 +439,13 @@ given density.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.has_surface_integrals">
-<code class="sig-name descname">has_surface_integrals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.has_surface_integrals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.has_surface_integrals" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.has_surface_integrals">
+<span class="sig-name descname"><span class="pre">has_surface_integrals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.has_surface_integrals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.has_surface_integrals" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.heal_mesh">
-<code class="sig-name descname">heal_mesh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.heal_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.heal_mesh" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.heal_mesh">
+<span class="sig-name descname"><span class="pre">heal_mesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.heal_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.heal_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Heals the mesh for different tests available.</p>
 <p>It applies:</p>
 <ul class="simple">
@@ -454,56 +458,56 @@ given density.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.heal_normals">
-<code class="sig-name descname">heal_normals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.heal_normals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.heal_normals" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.heal_normals">
+<span class="sig-name descname"><span class="pre">heal_normals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.heal_normals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.heal_normals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Heals the mesh’s normals orientations so that they have a consistent orientation and try to make them outward.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.heal_triangles">
-<code class="sig-name descname">heal_triangles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.heal_triangles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.heal_triangles" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.heal_triangles">
+<span class="sig-name descname"><span class="pre">heal_triangles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.heal_triangles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.heal_triangles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes the triangle connectivity consistent.</p>
 <p>A general face is stored internally as a 4 integer array. It allows to describe indices of a quadrangle’s vertices. For triangles, the first index should be equal to the last. This method ensures that this rule is applied everywhere and correct bad triangles description.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.id">
-<em class="property">property </em><code class="sig-name descname">id</code><a class="headerlink" href="#meshmagick.mesh.Mesh.id" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.id">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the id of the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>hash id of the instance</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.is_mesh_closed">
-<code class="sig-name descname">is_mesh_closed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.is_mesh_closed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.is_mesh_closed" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.is_mesh_closed">
+<span class="sig-name descname"><span class="pre">is_mesh_closed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.is_mesh_closed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.is_mesh_closed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns if the mesh is a closed manifold.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>True if the mesh is closed (i.e. it has no boundaries)</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.is_mesh_conformal">
-<code class="sig-name descname">is_mesh_conformal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.is_mesh_conformal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.is_mesh_conformal" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.is_mesh_conformal">
+<span class="sig-name descname"><span class="pre">is_mesh_conformal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.is_mesh_conformal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.is_mesh_conformal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns if the mesh is conformal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>True if the mesh is conformal.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 <div class="admonition warning">
@@ -513,43 +517,43 @@ given density.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.is_triangle">
-<code class="sig-name descname">is_triangle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">face_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.is_triangle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.is_triangle" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.is_triangle">
+<span class="sig-name descname"><span class="pre">is_triangle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">face_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.is_triangle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.is_triangle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns if a face is a triangle</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>face_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Face id</p>
+<dd class="field-odd"><p><strong>face_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Face id</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>True if the face with id face_id is a triangle</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.max_edge_length">
-<em class="property">property </em><code class="sig-name descname">max_edge_length</code><a class="headerlink" href="#meshmagick.mesh.Mesh.max_edge_length" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.max_edge_length">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">max_edge_length</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.max_edge_length" title="Permalink to this definition">¶</a></dt>
 <dd><p>The mesh’s maximum edge length</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.mean_edge_length">
-<em class="property">property </em><code class="sig-name descname">mean_edge_length</code><a class="headerlink" href="#meshmagick.mesh.Mesh.mean_edge_length" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.mean_edge_length">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">mean_edge_length</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.mean_edge_length" title="Permalink to this definition">¶</a></dt>
 <dd><p>The mesh’s mean edge length</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.merge_duplicates">
-<code class="sig-name descname">merge_duplicates</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">atol</span><span class="o">=</span><span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">return_index</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.merge_duplicates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.merge_duplicates" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.merge_duplicates">
+<span class="sig-name descname"><span class="pre">merge_duplicates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.merge_duplicates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.merge_duplicates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merges the duplicate vertices of the mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>atol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Absolute tolerance. default is 1e-8</p></li>
-<li><p><strong>return_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Flag to return</p></li>
+<li><p><strong>atol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Absolute tolerance. default is 1e-8</p></li>
+<li><p><strong>return_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Flag to return</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -565,15 +569,15 @@ given density.</p>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.min_edge_length">
-<em class="property">property </em><code class="sig-name descname">min_edge_length</code><a class="headerlink" href="#meshmagick.mesh.Mesh.min_edge_length" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.min_edge_length">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">min_edge_length</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.min_edge_length" title="Permalink to this definition">¶</a></dt>
 <dd><p>The mesh’s minimum edge length</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.mirror">
-<code class="sig-name descname">mirror</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">plane</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.mirror"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.mirror" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.mirror">
+<span class="sig-name descname"><span class="pre">mirror</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.mirror"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.mirror" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mirrors the mesh instance with respect to a plane.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -582,93 +586,93 @@ given density.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.name">
-<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#meshmagick.mesh.Mesh.name" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.name">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the name of the mesh</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.nb_boundaries">
-<em class="property">property </em><code class="sig-name descname">nb_boundaries</code><a class="headerlink" href="#meshmagick.mesh.Mesh.nb_boundaries" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.nb_boundaries">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nb_boundaries</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.nb_boundaries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the number of boundaries in the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Number of boundaries</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.nb_faces">
-<em class="property">property </em><code class="sig-name descname">nb_faces</code><a class="headerlink" href="#meshmagick.mesh.Mesh.nb_faces" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.nb_faces">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nb_faces</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.nb_faces" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the number of faces in the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.nb_quadrangles">
-<em class="property">property </em><code class="sig-name descname">nb_quadrangles</code><a class="headerlink" href="#meshmagick.mesh.Mesh.nb_quadrangles" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.nb_quadrangles">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nb_quadrangles</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.nb_quadrangles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the number of quadrangles in the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.nb_triangles">
-<em class="property">property </em><code class="sig-name descname">nb_triangles</code><a class="headerlink" href="#meshmagick.mesh.Mesh.nb_triangles" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.nb_triangles">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nb_triangles</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.nb_triangles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the number of triangles in the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.nb_vertices">
-<em class="property">property </em><code class="sig-name descname">nb_vertices</code><a class="headerlink" href="#meshmagick.mesh.Mesh.nb_vertices" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.nb_vertices">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nb_vertices</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.nb_vertices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the number of vertices in the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.print_quality">
-<code class="sig-name descname">print_quality</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.print_quality"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.print_quality" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.print_quality">
+<span class="sig-name descname"><span class="pre">print_quality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.print_quality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.print_quality" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns data on the mesh quality</p>
 <p>It uses VTK and is reproduced from
 <a class="reference external" href="http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py">http://vtk.org/gitweb?p=VTK.git;a=blob;f=Filters/Verdict/Testing/Python/MeshQuality.py</a></p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.quadrangles_ids">
-<em class="property">property </em><code class="sig-name descname">quadrangles_ids</code><a class="headerlink" href="#meshmagick.mesh.Mesh.quadrangles_ids" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.quadrangles_ids">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">quadrangles_ids</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.quadrangles_ids" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the array of ids of qudrangle shaped faces</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -681,41 +685,41 @@ given density.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.quick_save">
-<code class="sig-name descname">quick_save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.quick_save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.quick_save" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.quick_save">
+<span class="sig-name descname"><span class="pre">quick_save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.quick_save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.quick_save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves the current mesh instance in a VTK file.</p>
 <p>It is mainly for debugging purpose.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – If None, the file is automatically saved under the name quick_save.vtp.
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – If None, the file is automatically saved under the name quick_save.vtp.
 If the name given does not have a .vtp extension, the latter is appended automatically.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.remove_degenerated_faces">
-<code class="sig-name descname">remove_degenerated_faces</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rtol</span><span class="o">=</span><span class="default_value">1e-05</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.remove_degenerated_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.remove_degenerated_faces" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.remove_degenerated_faces">
+<span class="sig-name descname"><span class="pre">remove_degenerated_faces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rtol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.remove_degenerated_faces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.remove_degenerated_faces" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes tiny triangles from the mesh.</p>
 <p>Tiny triangles are those whose area is lower than the mean triangle area in the mesh times the relative
 tolerance given.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>rtol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Positive relative tolerance</p>
+<dd class="field-odd"><p><strong>rtol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Positive relative tolerance</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.remove_unused_vertices">
-<code class="sig-name descname">remove_unused_vertices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.remove_unused_vertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.remove_unused_vertices" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.remove_unused_vertices">
+<span class="sig-name descname"><span class="pre">remove_unused_vertices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.remove_unused_vertices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.remove_unused_vertices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes unused vertices in the mesh.</p>
 <p>Those are vertices that are not used by any face connectivity.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.rotate">
-<code class="sig-name descname">rotate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">angles</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.rotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.rotate" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.rotate">
+<span class="sig-name descname"><span class="pre">rotate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angles</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.rotate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.rotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rotates the mesh in 3D giving the 3 rotation angles that are defined around fixed axes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -731,12 +735,17 @@ tolerance given.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.rotate_x">
-<code class="sig-name descname">rotate_x</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">thetax</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.rotate_x"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.rotate_x" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.rotate_matrix">
+<span class="sig-name descname"><span class="pre">rotate_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rotmat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.rotate_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.rotate_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.rotate_x">
+<span class="sig-name descname"><span class="pre">rotate_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thetax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.rotate_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.rotate_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rotates the mesh around Ox axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>thetax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Angle (rad)</p>
+<dd class="field-odd"><p><strong>thetax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Angle (rad)</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The (3x3) rotation matrix that has been applied to rotate the mesh</p>
@@ -748,12 +757,12 @@ tolerance given.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.rotate_y">
-<code class="sig-name descname">rotate_y</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">thetay</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.rotate_y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.rotate_y" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.rotate_y">
+<span class="sig-name descname"><span class="pre">rotate_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thetay</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.rotate_y"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.rotate_y" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rotates the mesh around Oy axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>thetay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Angle (rad)</p>
+<dd class="field-odd"><p><strong>thetay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Angle (rad)</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The (3x3) rotation matrix that has been applied to rotate the mesh</p>
@@ -765,12 +774,12 @@ tolerance given.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.rotate_z">
-<code class="sig-name descname">rotate_z</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">thetaz</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.rotate_z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.rotate_z" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.rotate_z">
+<span class="sig-name descname"><span class="pre">rotate_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thetaz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.rotate_z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.rotate_z" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rotates the mesh around Oz axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>thetaz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Angle (rad)</p>
+<dd class="field-odd"><p><strong>thetaz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Angle (rad)</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The (3x3) rotation matrix that has been applied to rotate the mesh</p>
@@ -782,65 +791,65 @@ tolerance given.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.scale">
-<code class="sig-name descname">scale</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alpha</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.scale" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.scale">
+<span class="sig-name descname"><span class="pre">scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.scale" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scales the mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – A positive scaling factor</p>
+<dd class="field-odd"><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – A positive scaling factor</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.scalex">
-<code class="sig-name descname">scalex</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alpha</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.scalex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.scalex" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.scalex">
+<span class="sig-name descname"><span class="pre">scalex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.scalex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.scalex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scales the mesh along the x axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – A positive scaling factor</p>
+<dd class="field-odd"><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – A positive scaling factor</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.scaley">
-<code class="sig-name descname">scaley</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alpha</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.scaley"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.scaley" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.scaley">
+<span class="sig-name descname"><span class="pre">scaley</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.scaley"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.scaley" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scales the mesh along the y axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – A positive scaling factor</p>
+<dd class="field-odd"><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – A positive scaling factor</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.scalez">
-<code class="sig-name descname">scalez</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alpha</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.scalez"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.scalez" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.scalez">
+<span class="sig-name descname"><span class="pre">scalez</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.scalez"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.scalez" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scales the mesh along the z axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – A positive scaling factor</p>
+<dd class="field-odd"><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – A positive scaling factor</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.show">
-<code class="sig-name descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.show" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.show">
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.show" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shows the mesh in the meshmagick viewer</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.squared_axis_aligned_bbox">
-<em class="property">property </em><code class="sig-name descname">squared_axis_aligned_bbox</code><a class="headerlink" href="#meshmagick.mesh.Mesh.squared_axis_aligned_bbox" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.squared_axis_aligned_bbox">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">squared_axis_aligned_bbox</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.squared_axis_aligned_bbox" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a squared axis aligned bounding box of the mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>(xmin, xmax, ymin, ymax, zmin, zmax)</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)">tuple</a></p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -850,8 +859,8 @@ tolerance given.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.symmetrize">
-<code class="sig-name descname">symmetrize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">plane</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.symmetrize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.symmetrize" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.symmetrize">
+<span class="sig-name descname"><span class="pre">symmetrize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.symmetrize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.symmetrize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Symmetrize the mesh with respect to a plane.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -861,8 +870,8 @@ tolerance given.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.translate">
-<code class="sig-name descname">translate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.translate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.translate" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.translate">
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.translate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.translate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translates the mesh in 3D giving the 3 distances along coordinate axes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -872,41 +881,41 @@ tolerance given.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.translate_x">
-<code class="sig-name descname">translate_x</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tx</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.translate_x"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.translate_x" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.translate_x">
+<span class="sig-name descname"><span class="pre">translate_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.translate_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.translate_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translates the mesh along the Ox axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>tx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Distance</p>
+<dd class="field-odd"><p><strong>tx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Distance</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.translate_y">
-<code class="sig-name descname">translate_y</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ty</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.translate_y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.translate_y" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.translate_y">
+<span class="sig-name descname"><span class="pre">translate_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.translate_y"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.translate_y" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translates the mesh along the Oy axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ty</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Distance</p>
+<dd class="field-odd"><p><strong>ty</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Distance</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.translate_z">
-<code class="sig-name descname">translate_z</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tz</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.translate_z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.translate_z" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.translate_z">
+<span class="sig-name descname"><span class="pre">translate_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.translate_z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.translate_z" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translates the mesh along the Oz axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>tz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Distance</p>
+<dd class="field-odd"><p><strong>tz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Distance</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.triangles_ids">
-<em class="property">property </em><code class="sig-name descname">triangles_ids</code><a class="headerlink" href="#meshmagick.mesh.Mesh.triangles_ids" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.triangles_ids">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">triangles_ids</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.triangles_ids" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the array of ids of triangle shaped faces</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -919,8 +928,8 @@ tolerance given.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.triangulate_quadrangles">
-<code class="sig-name descname">triangulate_quadrangles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.triangulate_quadrangles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.triangulate_quadrangles" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.triangulate_quadrangles">
+<span class="sig-name descname"><span class="pre">triangulate_quadrangles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.triangulate_quadrangles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.triangulate_quadrangles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Triangulates every quadrangles of the mesh by simple spliting.</p>
 <p>Each quadrangle gives two triangles.</p>
 <div class="admonition note">
@@ -929,35 +938,35 @@ tolerance given.</p>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.verbose">
-<em class="property">property </em><code class="sig-name descname">verbose</code><a class="headerlink" href="#meshmagick.mesh.Mesh.verbose" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.verbose">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.verbose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get verbosity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.verbose_off">
-<code class="sig-name descname">verbose_off</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.verbose_off"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.verbose_off" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.verbose_off">
+<span class="sig-name descname"><span class="pre">verbose_off</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.verbose_off"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.verbose_off" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the verbosity level of the instance to off.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Mesh.verbose_on">
-<code class="sig-name descname">verbose_on</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.verbose_on"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.verbose_on" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.verbose_on">
+<span class="sig-name descname"><span class="pre">verbose_on</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Mesh.verbose_on"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Mesh.verbose_on" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the verbosity level of the instance to on.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.vertices">
-<em class="property">property </em><code class="sig-name descname">vertices</code><a class="headerlink" href="#meshmagick.mesh.Mesh.vertices" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.vertices">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">vertices</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.vertices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the vertices array coordinate of the mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -969,44 +978,44 @@ tolerance given.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.vf">
-<em class="property">property </em><code class="sig-name descname">vf</code><a class="headerlink" href="#meshmagick.mesh.Mesh.vf" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.vf">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">vf</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.vf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the vertex / faces connectivity dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.volume">
-<em class="property">property </em><code class="sig-name descname">volume</code><a class="headerlink" href="#meshmagick.mesh.Mesh.volume" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.volume">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">volume</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.volume" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the mesh enclosed volume</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The mesh volume</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Mesh.vv">
-<em class="property">property </em><code class="sig-name descname">vv</code><a class="headerlink" href="#meshmagick.mesh.Mesh.vv" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Mesh.vv">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">vv</span></span><a class="headerlink" href="#meshmagick.mesh.Mesh.vv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the vertex / vertex connectivity dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1014,9 +1023,9 @@ tolerance given.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="meshmagick.mesh.Plane">
-<em class="property">class </em><code class="sig-prename descclassname">meshmagick.mesh.</code><code class="sig-name descname">Plane</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">normal</span><span class="o">=</span><span class="default_value">(0.0, 0.0, 1.0)</span></em>, <em class="sig-param"><span class="n">scalar</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">meshmagick.mesh.</span></span><span class="sig-name descname"><span class="pre">Plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class to handle plane geometry.</p>
 <p>A plane is represented by the equation <span class="math notranslate nohighlight">\(\vec{n}.\vec{x} = c\)</span> where <span class="math notranslate nohighlight">\(\vec{n}\)</span> is the plane’s normal,
 <span class="math notranslate nohighlight">\(\vec{x}\)</span> a point in the space and <span class="math notranslate nohighlight">\(c\)</span> a scalar parameter being the signed distance between the
@@ -1025,19 +1034,19 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>normal</strong> (<em>array_like</em>) – 3 component vector of the plane normal</p></li>
-<li><p><strong>scalar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The scalar parameter of the plane</p></li>
+<li><p><strong>scalar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – The scalar parameter of the plane</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt id="meshmagick.mesh.Plane.c">
-<em class="property">property </em><code class="sig-name descname">c</code><a class="headerlink" href="#meshmagick.mesh.Plane.c" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.c">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">c</span></span><a class="headerlink" href="#meshmagick.mesh.Plane.c" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the plane’s scalar parameter</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Plane.coord_in_plane">
-<code class="sig-name descname">coord_in_plane</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">points</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.coord_in_plane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.coord_in_plane" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.coord_in_plane">
+<span class="sig-name descname"><span class="pre">coord_in_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.coord_in_plane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane.coord_in_plane" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the coordinates of points in the frame of the plane</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1053,14 +1062,14 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Plane.flip_normal">
-<code class="sig-name descname">flip_normal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.flip_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.flip_normal" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.flip_normal">
+<span class="sig-name descname"><span class="pre">flip_normal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.flip_normal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane.flip_normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flips the Normal of the plane</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Plane.get_edge_intersection">
-<code class="sig-name descname">get_edge_intersection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p0</span></em>, <em class="sig-param"><span class="n">p1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.get_edge_intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.get_edge_intersection" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.get_edge_intersection">
+<span class="sig-name descname"><span class="pre">get_edge_intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.get_edge_intersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane.get_edge_intersection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the coordinates of the intersection point between the plane and the edge P0P1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1079,20 +1088,20 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Plane.get_normal_orientation_wrt_z">
-<code class="sig-name descname">get_normal_orientation_wrt_z</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.get_normal_orientation_wrt_z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.get_normal_orientation_wrt_z" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.get_normal_orientation_wrt_z">
+<span class="sig-name descname"><span class="pre">get_normal_orientation_wrt_z</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.get_normal_orientation_wrt_z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane.get_normal_orientation_wrt_z" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the angles theta_x and theta_y giving the orientation of the plane normal</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Plane.get_origin">
-<code class="sig-name descname">get_origin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.get_origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.get_origin" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.get_origin">
+<span class="sig-name descname"><span class="pre">get_origin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.get_origin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane.get_origin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the coordinates of the plane’s origin</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Plane.get_point_dist_wrt_plane">
-<code class="sig-name descname">get_point_dist_wrt_plane</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">points</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.get_point_dist_wrt_plane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.get_point_dist_wrt_plane" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.get_point_dist_wrt_plane">
+<span class="sig-name descname"><span class="pre">get_point_dist_wrt_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.get_point_dist_wrt_plane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane.get_point_dist_wrt_plane" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the orthogonal distance of points with respect to the plane</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1107,15 +1116,15 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.mesh.Plane.normal">
-<em class="property">property </em><code class="sig-name descname">normal</code><a class="headerlink" href="#meshmagick.mesh.Plane.normal" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.normal">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">normal</span></span><a class="headerlink" href="#meshmagick.mesh.Plane.normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the plane’s normal</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Plane.orthogonal_projection_on_plane">
-<code class="sig-name descname">orthogonal_projection_on_plane</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">points</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.orthogonal_projection_on_plane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.orthogonal_projection_on_plane" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.orthogonal_projection_on_plane">
+<span class="sig-name descname"><span class="pre">orthogonal_projection_on_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.orthogonal_projection_on_plane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane.orthogonal_projection_on_plane" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the coordinates of the orthogonal projection of points</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1131,43 +1140,43 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Plane.rotate_normal">
-<code class="sig-name descname">rotate_normal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta_x</span></em>, <em class="sig-param"><span class="n">theta_y</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.rotate_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.rotate_normal" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.rotate_normal">
+<span class="sig-name descname"><span class="pre">rotate_normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.rotate_normal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane.rotate_normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rotates the current plane normal by fixed angles theta_x and theta_y.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Angle of rotation around Ox (rad)</p></li>
-<li><p><strong>theta_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Angle of rotation around Oy (rad)</p></li>
+<li><p><strong>theta_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Angle of rotation around Ox (rad)</p></li>
+<li><p><strong>theta_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Angle of rotation around Oy (rad)</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Plane.set_normal_from_angles">
-<code class="sig-name descname">set_normal_from_angles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta_x</span></em>, <em class="sig-param"><span class="n">theta_y</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.set_normal_from_angles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.set_normal_from_angles" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.set_normal_from_angles">
+<span class="sig-name descname"><span class="pre">set_normal_from_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.set_normal_from_angles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane.set_normal_from_angles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the normal orientation given angles theta_x and theta_y.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Angle around Ox (rad)</p></li>
-<li><p><strong>theta_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Angle around Oy (rad)</p></li>
+<li><p><strong>theta_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Angle around Ox (rad)</p></li>
+<li><p><strong>theta_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Angle around Oy (rad)</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.mesh.Plane.set_plane_parameters">
-<code class="sig-name descname">set_plane_parameters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scalar</span></em>, <em class="sig-param"><span class="n">theta_x</span></em>, <em class="sig-param"><span class="n">theta_y</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.set_plane_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.mesh.Plane.set_plane_parameters" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.mesh.Plane.set_plane_parameters">
+<span class="sig-name descname"><span class="pre">set_plane_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scalar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/mesh.html#Plane.set_plane_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.mesh.Plane.set_plane_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates the plane parameters (normal and scalar parameter) given scalar and angles.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scalar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Plane scalar parameter (m)</p></li>
-<li><p><strong>theta_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Normal angle around Ox (rad)</p></li>
-<li><p><strong>theta_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Normal angle around Oy (rad)</p></li>
+<li><p><strong>scalar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Plane scalar parameter (m)</p></li>
+<li><p><strong>theta_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Normal angle around Ox (rad)</p></li>
+<li><p><strong>theta_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Normal angle around Oy (rad)</p></li>
 </ul>
 </dd>
 </dl>
@@ -1175,7 +1184,7 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -1199,7 +1208,7 @@ reference frame origin and the its otrhogonal projection on the plane.</p>
     <p>
         &copy; Copyright 2021, Ecole Centrale de Nantes
       <span class="lastupdated">
-        Last updated on Jan 07, 2021.
+        Last updated on Oct 19, 2021.
       </span>
 
     </p>

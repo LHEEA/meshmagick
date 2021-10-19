@@ -5,10 +5,11 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Using Meshmagick &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
+  <title>Using Meshmagick &mdash; Meshmagick User&#39;s Guide 3.2 documentation</title>
   
 
   
@@ -21,10 +22,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -33,6 +35,8 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -61,7 +65,7 @@
             
             
               <div class="version">
-                2.1.1
+                3.2
               </div>
             
           
@@ -130,10 +134,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#performing-hydrostatics-calculations-on-the-mesh">Performing hydrostatics calculations on the mesh</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#expression-of-the-hydrostatic-data">Expression of the hydrostatic data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#getting-hydrostatics-properties-of-the-mesh">Getting hydrostatics properties of the mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#displaying-the-mesh-with-hydrostatic-results">Displaying the mesh with hydrostatic results</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#getting-the-mesh-vertical-position-that-complies-with-a-given-mass-displacement">Getting the mesh vertical position that complies with a given mass displacement</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#d-hydrostatic-equilibrium">3D hydrostatic equilibrium</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#adding-external-static-forces">Adding external static forces</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saving-the-hydrostatic-report-in-a-text-file">Saving the hydrostatic report in a text file</a></li>
 </ul>
 </li>
@@ -211,7 +213,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="using-meshmagick">
+  <section id="using-meshmagick">
 <h1>Using Meshmagick<a class="headerlink" href="#using-meshmagick" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -271,29 +273,22 @@ keystroke.</p></li>
 <ul>
 <li><p><a class="reference internal" href="#expression-of-the-hydrostatic-data" id="id30">Expression of the hydrostatic data</a></p></li>
 <li><p><a class="reference internal" href="#getting-hydrostatics-properties-of-the-mesh" id="id31">Getting hydrostatics properties of the mesh</a></p></li>
-<li><p><a class="reference internal" href="#displaying-the-mesh-with-hydrostatic-results" id="id32">Displaying the mesh with hydrostatic results</a></p></li>
-<li><p><a class="reference internal" href="#getting-the-mesh-vertical-position-that-complies-with-a-given-mass-displacement" id="id33">Getting the mesh vertical position that complies with a given mass displacement</a></p></li>
-<li><p><a class="reference internal" href="#d-hydrostatic-equilibrium" id="id34">3D hydrostatic equilibrium</a></p></li>
-<li><p><a class="reference internal" href="#adding-external-static-forces" id="id35">Adding external static forces</a></p>
-<ul>
-<li><p><a class="reference internal" href="#absolute-forces" id="id36">Absolute forces</a></p></li>
-<li><p><a class="reference internal" href="#relative-forces" id="id37">Relative forces</a></p></li>
-</ul>
-</li>
-<li><p><a class="reference internal" href="#saving-the-hydrostatic-report-in-a-text-file" id="id38">Saving the hydrostatic report in a text file</a></p></li>
+<li><p><a class="reference internal" href="#getting-the-mesh-vertical-position-that-complies-with-a-given-mass-displacement" id="id32">Getting the mesh vertical position that complies with a given mass displacement</a></p></li>
+<li><p><a class="reference internal" href="#d-hydrostatic-equilibrium" id="id33">3D hydrostatic equilibrium</a></p></li>
+<li><p><a class="reference internal" href="#saving-the-hydrostatic-report-in-a-text-file" id="id34">Saving the hydrostatic report in a text file</a></p></li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="section" id="getting-help">
+<section id="getting-help">
 <h2><a class="toc-backref" href="#content">Getting help</a><a class="headerlink" href="#getting-help" title="Permalink to this headline">¶</a></h2>
 <p>You can get command line help by issuing the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick -h
 </pre></div>
 </div>
 <p>The output of this command is reproduced in the <a class="reference internal" href="cli_reference.html"><span class="doc">Command Line Interface Reference Guide</span></a>.</p>
-</div>
-<div class="section" id="converting-a-mesh-file">
+</section>
+<section id="converting-a-mesh-file">
 <h2><a class="toc-backref" href="#content">Converting a mesh file</a><a class="headerlink" href="#converting-a-mesh-file" title="Permalink to this headline">¶</a></h2>
 <p>Converting a mesh file is one of the most basic usage of Meshmagick:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -o SEAREV.mar
@@ -307,17 +302,17 @@ enough to guess the file format. You should then use the <code class="docutils l
 </div>
 <p>This way, we told Meshmagick that SEAREV.dat must be in the
 <a class="reference external" href="https://lheea.ec-nantes.fr/doku.php/emo/nemoh/start">Nemoh</a> input mesh file format.</p>
-</div>
-<div class="section" id="quiet-mode">
+</section>
+<section id="quiet-mode">
 <h2><a class="toc-backref" href="#content">Quiet mode</a><a class="headerlink" href="#quiet-mode" title="Permalink to this headline">¶</a></h2>
 <p>To switch off outputs of Meshmagick, use the <code class="docutils literal notranslate"><span class="pre">-q</span> <span class="pre">(--quiet)</span></code> option:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -q
 </pre></div>
 </div>
-</div>
-<div class="section" id="getting-information-on-a-mesh">
+</section>
+<section id="getting-information-on-a-mesh">
 <h2><a class="toc-backref" href="#content">Getting information on a mesh</a><a class="headerlink" href="#getting-information-on-a-mesh" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="quick-information">
+<section id="quick-information">
 <h3><a class="toc-backref" href="#content">Quick information</a><a class="headerlink" href="#quick-information" title="Permalink to this headline">¶</a></h3>
 <p>Quick information on a mesh is given by the <code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">(--info)</span></code> option:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -i
@@ -325,8 +320,8 @@ enough to guess the file format. You should then use the <code class="docutils l
 </div>
 <p>That gives us the following output:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -348,15 +343,15 @@ Copyright 2014-2021, Ecole Centrale de Nantes
         
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
-</div>
-<div class="section" id="mesh-quality-metrics">
+</section>
+<section id="mesh-quality-metrics">
 <h3><a class="toc-backref" href="#content">Mesh quality metrics</a><a class="headerlink" href="#mesh-quality-metrics" title="Permalink to this headline">¶</a></h3>
 <p>You can get some quality metrics on the mesh by issuing:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp --quality
@@ -364,8 +359,8 @@ Good Bye!
 </div>
 <p>that gives:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -421,9 +416,9 @@ Definition of the different quality measures is given
 
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
@@ -435,9 +430,9 @@ metrics. It relies on the <strong>verdict</strong> library, initially developed 
 information on the metrics can be seen in the
 <a class="reference external" href="http://www.vtk.org/Wiki/images/6/6b/VerdictManual-revA.pdf">Verdict manual</a>.</p>
 </div>
-</div>
-</div>
-<div class="section" id="mesh-file-visualization">
+</section>
+</section>
+<section id="mesh-file-visualization">
 <h2><a class="toc-backref" href="#content">Mesh file visualization</a><a class="headerlink" href="#mesh-file-visualization" title="Permalink to this headline">¶</a></h2>
 <p>Quickly viewing a mesh can be achieved by using the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp --show
@@ -463,8 +458,8 @@ under the name <code class="docutils literal notranslate"><span class="pre">scre
 <p>The frame at the lower left corner is draggable and resizable so that you can inspect your mesh for alignment or
 whatever you want.</p>
 </div>
-</div>
-<div class="section" id="mesh-file-concatenation">
+</section>
+<section id="mesh-file-concatenation">
 <h2><a class="toc-backref" href="#content">Mesh file concatenation</a><a class="headerlink" href="#mesh-file-concatenation" title="Permalink to this headline">¶</a></h2>
 <p>It is possible to concatenate two mesh files and write it into a global file by simply using this command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick myMesh.ext1 -cc mySecondMesh.ext1 -o outMesh.ext2
@@ -477,8 +472,8 @@ when dealing with multibody interactions of when lid are added to a mesh to remo
 <p>File format for the two files to be concatenated has to be the same. The <code class="docutils literal notranslate"><span class="pre">-ifmt</span></code> command is used for both the
 files. The file format for the output file is driven normally (extension or <code class="docutils literal notranslate"><span class="pre">-ofmt</span></code> command).</p>
 </div>
-</div>
-<div class="section" id="mesh-healing">
+</section>
+<section id="mesh-healing">
 <h2><a class="toc-backref" href="#content">Mesh healing</a><a class="headerlink" href="#mesh-healing" title="Permalink to this headline">¶</a></h2>
 <p>Meshmagick offers some options to deal with mesh description. Sometimes, meshes are produced with duplicated vertices
 description, making it impossible to establish some advanced connectivities. This is intrinsically the case for e.g. in
@@ -486,7 +481,7 @@ GDF files, the input mesh file format of <a class="reference external" href="htt
 vertices coordinates only, without using a connectivity table.</p>
 <p>Sometimes also, faces normals are not consistent. This is often the case by e.g. when using <a class="reference external" href="http://gmsh.info/">GMSH</a>
 mesh generator. You may also want to flip every normals.</p>
-<div class="section" id="removing-duplicate-vertices">
+<section id="removing-duplicate-vertices">
 <h3><a class="toc-backref" href="#content">Removing duplicate vertices</a><a class="headerlink" href="#removing-duplicate-vertices" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">-md</span> <span class="pre">(--merge-duplicates)</span></code> option does this:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick coque.gdf -md
@@ -494,8 +489,8 @@ mesh generator. You may also want to flip every normals.</p>
 </div>
 <p>that gives:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/coque.gdf successfully loaded
 * Merging duplicate vertices that lie in an absolute proximity of 1.0E-08...
@@ -505,16 +500,16 @@ Copyright 2014-2021, Ecole Centrale de Nantes
 
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
 <p>This allows to generate connectivity tables in the mesh and may drastically reduce the mesh size in memory and on disk.</p>
-</div>
-<div class="section" id="healing-normals">
+</section>
+<section id="healing-normals">
 <h3><a class="toc-backref" href="#content">Healing normals</a><a class="headerlink" href="#healing-normals" title="Permalink to this headline">¶</a></h3>
 <p>This is obtained by using the <code class="docutils literal notranslate"><span class="pre">-hn</span> <span class="pre">(--heal-normals)</span></code> command line option. Let’s have an example. In the
 <cite>meshmagick/tests/data</cite> folder, you can find the file <code class="docutils literal notranslate"><span class="pre">cylinder.geo</span></code> that is a geometry file using the <em>GMSH</em>
@@ -561,8 +556,8 @@ normals are outgoing. If the mesh does not allow this checking, normals are neve
 warned about the eventual need to manually watch the normals from the Meshmagick’s viewer and issue a new command
 to flip the whole normals as described in the following.</p>
 </div>
-</div>
-<div class="section" id="flipping-normals">
+</section>
+<section id="flipping-normals">
 <h3><a class="toc-backref" href="#content">Flipping normals</a><a class="headerlink" href="#flipping-normals" title="Permalink to this headline">¶</a></h3>
 <p>This can be done with the <code class="docutils literal notranslate"><span class="pre">-fn</span> <span class="pre">(--flip-normals)</span></code> option. Based on the <code class="docutils literal notranslate"><span class="pre">cylinder.vtp</span></code> file obtained just
 before, if we issue the following command:</p>
@@ -571,8 +566,8 @@ before, if we issue the following command:</p>
 </div>
 <p>we get:</p>
 <img alt="../_images/cylinder_msh_normals_flipped.png" src="../_images/cylinder_msh_normals_flipped.png" />
-</div>
-<div class="section" id="global-healing">
+</section>
+<section id="global-healing">
 <h3><a class="toc-backref" href="#content">Global healing</a><a class="headerlink" href="#global-healing" title="Permalink to this headline">¶</a></h3>
 <p>When getting a mesh file from somewhere, you could use the <code class="docutils literal notranslate"><span class="pre">-hm</span> <span class="pre">(--heal-mesh)</span></code> option to automatically apply a
 set of sanity checks and modifications on the mesh. It successively applies the following operations:</p>
@@ -589,8 +584,8 @@ set of sanity checks and modifications on the mesh. It successively applies the 
 </div>
 <p>that outputs:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/cylinder.msh successfully loaded
 
@@ -603,76 +598,26 @@ OPERATION: heal the mesh
 	--&gt; No duplicate vertices have been found
 * Ensuring consistent definition of triangles:
 	--&gt; Triangle description is consistent
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
-Boundary is not closed !!!
+FOUND OPEN BOUNDARY!!!
 * Healing normals to make them consistent and if possible outward
 	--&gt; 2000 faces have been reversed to make normals consistent across the mesh
 	--&gt; WARNING: the mesh does not seem watertight althought marked as closed...
 	Done.
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="mesh-transformations">
+</section>
+</section>
+<section id="mesh-transformations">
 <h2><a class="toc-backref" href="#content">Mesh transformations</a><a class="headerlink" href="#mesh-transformations" title="Permalink to this headline">¶</a></h2>
 <p>Some basic mesh transformation options are available: translations, rotations, scaling.</p>
-<div class="section" id="translations">
+<section id="translations">
 <h3><a class="toc-backref" href="#content">Translations</a><a class="headerlink" href="#translations" title="Permalink to this headline">¶</a></h3>
 <p>The options to use are <code class="docutils literal notranslate"><span class="pre">-tx</span> <span class="pre">(--translatex)</span></code>, <code class="docutils literal notranslate"><span class="pre">-ty</span> <span class="pre">(--translatey)</span></code>, <code class="docutils literal notranslate"><span class="pre">-tz</span> <span class="pre">(--translatez)</span></code>,
 <code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">(--translate)</span></code> which respectively performs translations along the x axis, the y axis, the z axis and along a
@@ -686,8 +631,8 @@ coordinate vector. The invocations are:</p>
 </div>
 <p>for translations of 10 along specific axes and along the coordinate vector (10, 10, 10). The last command gives:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -712,15 +657,15 @@ OPERATION: Translation by [10.000000, 10.000000, 10.000000]
         
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
 </div>
-</div>
-<div class="section" id="rotations">
+</section>
+<section id="rotations">
 <h3><a class="toc-backref" href="#content">Rotations</a><a class="headerlink" href="#rotations" title="Permalink to this headline">¶</a></h3>
 <p>The options to use are <code class="docutils literal notranslate"><span class="pre">-rx</span> <span class="pre">(--rotatex)</span></code>, <code class="docutils literal notranslate"><span class="pre">-ry</span> <span class="pre">(--rotatey)</span></code>, <code class="docutils literal notranslate"><span class="pre">-rz</span> <span class="pre">(--rotatez)</span></code>,
 <code class="docutils literal notranslate"><span class="pre">-r</span> <span class="pre">(--rotate)</span></code> which respectively performs rotations around the x axis, the y axis, the z axis and a 3D
@@ -735,8 +680,8 @@ rotation along fixed axis rotation vector. The invocations are:</p>
 <p>for rotations of 90° around specific axes and around the rotation coordinate vector (90, 90, 90). The last command
 gives:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -753,17 +698,17 @@ OPERATION: Rotation by [90.000000, 90.000000, 90.000000] (degrees)
         Number of triangles:   2904
         Number of quadrangles: 12900
 
-        xmin = -10.603241	xmax = 12.371918
-        ymin = -8.932214	ymax = 8.932176
-        zmin = -16.367325	zmax = 15.536390
+        xmin = -5.000000	xmax = 6.000000
+        ymin = -15.000000	ymax = 15.000000
+        zmin = -4.998167	zmax = 4.999371
 
 
         
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
@@ -776,8 +721,8 @@ Good Bye!
 <li><p>Angles must be given in degrees.</p></li>
 </ul>
 </div>
-</div>
-<div class="section" id="scaling">
+</section>
+<section id="scaling">
 <h3><a class="toc-backref" href="#content">Scaling</a><a class="headerlink" href="#scaling" title="Permalink to this headline">¶</a></h3>
 <p>The options to use are <code class="docutils literal notranslate"><span class="pre">-sx</span> <span class="pre">(--scalex)</span></code>, <code class="docutils literal notranslate"><span class="pre">-sy</span> <span class="pre">(--scaley)</span></code>, <code class="docutils literal notranslate"><span class="pre">-sz</span> <span class="pre">(--scalez)</span></code>,
 <code class="docutils literal notranslate"><span class="pre">-s</span> <span class="pre">(--scale)</span></code> which respectively performs scaling along the x axis, the y axis, the z axis and a 3D
@@ -791,8 +736,8 @@ scaling of the mesh. The invocations are:</p>
 </div>
 <p>for scaling of 2 along specific axes and of the whole mesh in space. The last command gives:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -817,9 +762,9 @@ OPERATION: Scaling by 2.000000
         
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
@@ -829,9 +774,9 @@ Good Bye!
 <p>Scaling is performed before any translations when both options are used. So the translation magnitudes must be
 adapted to be consistent with the new scale of the mesh.</p>
 </div>
-</div>
-</div>
-<div class="section" id="triangulating-quadrangles">
+</section>
+</section>
+<section id="triangulating-quadrangles">
 <h2><a class="toc-backref" href="#content">Triangulating quadrangles</a><a class="headerlink" href="#triangulating-quadrangles" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">-tq</span> <span class="pre">(--triangulate-quadrangles)</span></code> allows to split every quadrangle faces in the mesh into two triangle:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick cylinder.msh -tq --show
@@ -839,8 +784,8 @@ adapted to be consistent with the new scale of the mesh.</p>
 </div>
 <p>that displays the following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/cylinder.msh successfully loaded
 
@@ -848,9 +793,9 @@ Triangulating quadrangles
 	--&gt;3000 quadrangles have been split in triangles
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
@@ -861,8 +806,8 @@ Good Bye!
 <p>The splitting procedure is basic and keep in mind that no check is done on the quality of the generated triangles.
 If your mesh faces does not have a good aspect ratio, it could produce some really tiny triangles.</p>
 </div>
-</div>
-<div class="section" id="working-with-planes">
+</section>
+<section id="working-with-planes">
 <h2><a class="toc-backref" href="#content">Working with planes</a><a class="headerlink" href="#working-with-planes" title="Permalink to this headline">¶</a></h2>
 <p>Planes may be used in different situation as seen below. They can be defined so as to perform mesh clipping (useful
 to provide the submerged part of the mesh to hydrodynamics BEM software such as Nemoh), symmetrizing (when only a
@@ -888,7 +833,7 @@ the plane.</p>
 </li>
 <li><p>Using the index of a plane that has been defined with the <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">(--plane)</span></code> option.</p></li>
 </ul>
-<div class="section" id="defining-planes">
+<section id="defining-planes">
 <h3><a class="toc-backref" href="#content">Defining planes</a><a class="headerlink" href="#defining-planes" title="Permalink to this headline">¶</a></h3>
 <p>A plane may be defined at the command line level along with de <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">(--plane)</span></code> option:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -p <span class="m">0</span> <span class="m">0</span> <span class="m">1</span> <span class="m">0</span>
@@ -909,8 +854,8 @@ the normals is reversed.</p>
 the order that you used in the command line and it is then possible to refer to them in other options by their index in
 the list, starting by 0. So in the above command line, the plane Oxy can be refereed as the plane index 0 and the /Oxz
 plane as the plane index 1.</p>
-</div>
-<div class="section" id="clipping-a-mesh-by-a-plane">
+</section>
+<section id="clipping-a-mesh-by-a-plane">
 <h3><a class="toc-backref" href="#content">Clipping a mesh by a plane</a><a class="headerlink" href="#clipping-a-mesh-by-a-plane" title="Permalink to this headline">¶</a></h3>
 <p>To clip a mesh against a plane, use the <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">(--clip)</span></code> option like in:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -c <span class="m">1</span> <span class="m">1</span> <span class="m">1</span> <span class="m">2</span> --show
@@ -937,8 +882,8 @@ is taken.</p>
 <p class="admonition-title">Note</p>
 <p>The part of the mesh that is kept is that opposite to the plane’s normal orientation.</p>
 </div>
-</div>
-<div class="section" id="symmetrizing-a-mesh-about-a-plane">
+</section>
+<section id="symmetrizing-a-mesh-about-a-plane">
 <h3><a class="toc-backref" href="#content">Symmetrizing a mesh about a plane</a><a class="headerlink" href="#symmetrizing-a-mesh-about-a-plane" title="Permalink to this headline">¶</a></h3>
 <p>To symmetrize a mesh about a plane, use the <code class="docutils literal notranslate"><span class="pre">--sym</span> <span class="pre">(--symmetrize)</span></code> option. Taking back the <code class="docutils literal notranslate"><span class="pre">cylinder.msh</span></code>
 example generated sooner, we can issue:</p>
@@ -972,9 +917,9 @@ example generated sooner, we can issue:</p>
 aspect ratio. This will be fixed in a future Meshmagick’s release by applying a projection procedure that is
 nontrivial to develop as it must not modify the geometry locally.</p>
 </div>
-</div>
-</div>
-<div class="section" id="getting-inertial-properties-of-the-mesh">
+</section>
+</section>
+<section id="getting-inertial-properties-of-the-mesh">
 <h2><a class="toc-backref" href="#content">Getting inertial properties of the mesh</a><a class="headerlink" href="#getting-inertial-properties-of-the-mesh" title="Permalink to this headline">¶</a></h2>
 <p>Meshmagick allows to calculate inertial properties of meshes based on some assumptions on the mass distribution:</p>
 <ul class="simple">
@@ -1027,7 +972,7 @@ a minus sign when put in a 3D rotational inertia matrix as in <span class="math 
 </li>
 </ul>
 </div>
-<div class="section" id="defining-the-medium-density">
+<section id="defining-the-medium-density">
 <h3><a class="toc-backref" href="#content">Defining the medium density</a><a class="headerlink" href="#defining-the-medium-density" title="Permalink to this headline">¶</a></h3>
 <p>The medium density, for both assumptions on mass distribution in the mesh, is done by using the <code class="docutils literal notranslate"><span class="pre">--rho-medium</span></code>
 option:</p>
@@ -1052,8 +997,8 @@ option, you always have to specify a mesh file while calling Meshmagick.</p>
 </pre></div>
 </div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -1099,9 +1044,9 @@ Copyright 2014-2021, Ecole Centrale de Nantes
 
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
@@ -1116,8 +1061,8 @@ qu’on nomera –reduction-point (-rp) sera utilisee a la fois par les inerties
 <li><p>On mettra aussi en place une option –at-cog pour que le poitn de reduction soit specifie au cetre de gravite</p></li>
 </ul>
 </div>
-</div>
-<div class="section" id="guessing-the-mesh-is-filled-with-homogeneous-medium">
+</section>
+<section id="guessing-the-mesh-is-filled-with-homogeneous-medium">
 <h3><a class="toc-backref" href="#content">Guessing the mesh is filled with homogeneous medium</a><a class="headerlink" href="#guessing-the-mesh-is-filled-with-homogeneous-medium" title="Permalink to this headline">¶</a></h3>
 <p>This is achieved by using the <code class="docutils literal notranslate"><span class="pre">-pi</span> <span class="pre">(--plain-inertia)</span></code> option:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -pi --rho-medium <span class="m">800</span>
@@ -1125,8 +1070,8 @@ qu’on nomera –reduction-point (-rp) sera utilisee a la fois par les inerties
 </div>
 <p>that gives:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -1144,9 +1089,9 @@ Inertial parameters for a uniform distribution of a medium of density 800.0 kg/m
 	Expressed at point : 		0.000E+00	0.000E+00	0.000E+00
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
@@ -1156,8 +1101,8 @@ Good Bye!
 <p>If the medium’s density is not specified, the <code class="docutils literal notranslate"><span class="pre">-pi</span></code> option guesses that the medium is salt water and then takes a
 default density of 1023 kg/m**3.</p>
 </div>
-</div>
-<div class="section" id="guessing-the-mesh-is-a-shell">
+</section>
+<section id="guessing-the-mesh-is-a-shell">
 <h3><a class="toc-backref" href="#content">Guessing the mesh is a shell</a><a class="headerlink" href="#guessing-the-mesh-is-a-shell" title="Permalink to this headline">¶</a></h3>
 <p>This is achieved by using the <code class="docutils literal notranslate"><span class="pre">-si</span> <span class="pre">(--shell-inertia)</span></code> option:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -si --rho-medium <span class="m">5850</span> --thickness <span class="m">0</span>.02
@@ -1165,8 +1110,8 @@ default density of 1023 kg/m**3.</p>
 </div>
 <p>that gives:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
@@ -1184,9 +1129,9 @@ Inertial parameters for a shell distribution of a medium of density 5850.0 kg/m*
 	Expressed at point : 		0.000E+00	0.000E+00	0.000E+00
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
@@ -1200,15 +1145,15 @@ kg/m**3)</p></li>
 meters.</p></li>
 </ul>
 </div>
-</div>
-</div>
-<div class="section" id="performing-hydrostatics-calculations-on-the-mesh">
+</section>
+</section>
+<section id="performing-hydrostatics-calculations-on-the-mesh">
 <h2><a class="toc-backref" href="#content">Performing hydrostatics calculations on the mesh</a><a class="headerlink" href="#performing-hydrostatics-calculations-on-the-mesh" title="Permalink to this headline">¶</a></h2>
 <p>Meshmagick allows to perform some hydrostatics computations on meshes. You can get the current hydrostatics
 properties of the mesh such as the hydrostatic stiffness matrix, metacentric heights, floating plane area…</p>
 <p>It is also able to compute the hydrostatic equilibrium of the mesh with respect to a given floater mass and/or a
 given position of the center of gravity as well as additional external forces.</p>
-<div class="section" id="expression-of-the-hydrostatic-data">
+<section id="expression-of-the-hydrostatic-data">
 <h3><a class="toc-backref" href="#content">Expression of the hydrostatic data</a><a class="headerlink" href="#expression-of-the-hydrostatic-data" title="Permalink to this headline">¶</a></h3>
 <p>The hydrostatic stiffness matrix coefficients only depend on the geometry of the flotation plane that is the polygon
 (s) generated by the intersection of the body with the horizontal plane Oxy. The matrix writes:</p>
@@ -1243,141 +1188,93 @@ we will only present 6 coefficients in the hydrostatic reports.</p>
 transversal and longitudinal metacentric radius, <span class="math notranslate nohighlight">\(GM_t\)</span> and <span class="math notranslate nohighlight">\(GM_l\)</span> are respectively the
 transversal and longitudinal metacentric heights, <span class="math notranslate nohighlight">\(x_f\)</span> and <span class="math notranslate nohighlight">\(y_f\)</span> are the horizontal position of the
 center of the flotation plane.</p>
-</div>
-<div class="section" id="getting-hydrostatics-properties-of-the-mesh">
+</section>
+<section id="getting-hydrostatics-properties-of-the-mesh">
 <h3><a class="toc-backref" href="#content">Getting hydrostatics properties of the mesh</a><a class="headerlink" href="#getting-hydrostatics-properties-of-the-mesh" title="Permalink to this headline">¶</a></h3>
 <p>To get an hydrostatic report on the current configuration of the mesh, you may use the <abbr title="--hydrostatics">-hs</abbr>
-option:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs
+option along with the <abbr>–zcog</abbr> option to specify the z position of the center of gravity (mandatory):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --zcog -2
 </pre></div>
 </div>
 <p>that gives:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
-
-Generating hydrostatic data for a zcog of 0.000 meters.
-
-
-	GRAVITY ACCELERATION (M/S**2)-----------&gt;   9.81
-	DENSITY OF WATER (KG/M**3)--------------&gt;   1023.0
-
-	WATERPLANE AREA (M**2)------------------&gt;   299.8
-	WATERPLANE CENTER (M)-------------------&gt;  -0.001     0.000    
-	WET AREA (M**2)-------------------------&gt;   549.6
-	DISPLACEMENT VOLUME (M**3)--------------&gt;   1176.831
-	DISPLACEMENT MASS (TONS)----------------&gt;   1203.898
-	BUOYANCY CENTER (M)---------------------&gt;  -0.000     0.000    -2.121    
-	CENTER OF GRAVITY (M)-------------------&gt;   0.000     0.000     0.000    
-
-	DRAUGHT (M)-----------------------------&gt;   5.000
-	LENGTH OVERALL SUBMERGED (M)------------&gt;   10.00
-	BREADTH OVERALL SUBMERGED (M)-----------&gt;   30.00
-	LENGTH AT WATERLINE LWL (M)-------------&gt;   9.99
-	FORWARD PERPENDICULAR (M)---------------&gt;   5.00
-
-	TRANSVERSAL METACENTRIC RADIUS (M)------&gt;   19.107
-	TRANSVERSAL METACENTRIC HEIGHT GMT (M)--&gt;   16.986
-	LONGITUDINAL METACENTRIC RADIUS (M)-----&gt;   2.120
-	LONGITUDINAL METACENTRIC HEIGHT GML (M)-&gt;  -0.001
-
-	HYDROSTATIC STIFFNESS COEFFICIENTS:
-	K33 (N/M)-------------------------------&gt;   3.0088E+06
-	K34 (N)---------------------------------&gt;   0.0000E+00
-	K35 (N)---------------------------------&gt;   1.7289E+03
-	K44 (N.M)-------------------------------&gt;   2.0061E+08
-	K45 (N.M)-------------------------------&gt;   0.0000E+00
-	K55 (N.M)-------------------------------&gt;  -6.1076E+03
-
-	INERTIAS:
-	IXX-------------------------------------&gt;   9.239E+07
-	IXY-------------------------------------&gt;   0.000E+00
-	IXZ-------------------------------------&gt;   9.572E+01
-	IYY-------------------------------------&gt;   9.617E+06
-	IYZ-------------------------------------&gt;   9.304E-10
-	IZZ-------------------------------------&gt;   9.781E+07
-
-	RESIDUALS:
-	ABSOLUTE--------------------------------&gt;   1.863E-09 0.000E+00 6.889E+02
-	RELATIVE--------------------------------&gt;   1.577E-16 0.000E+00 5.837E-06
-	RELATIVE TOLERANCE----------------------&gt;   1.0E-02
+&gt;&gt;&gt;&gt; Performing hydrostatic computation on the current hull configuration considered at equilibrium
 
 
-=============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
-Good Bye!
-=============================================================
-</pre></div>
-</div>
-<p>When using this option alone (without giving a mass or center of gravity), the system considers that the current
-displacement correspond to the mass of the body. However, the vertical position of the center of gravity used in the
-computation of the K44 and K55 stiffness coefficients is considered to be 0 as specified at the beginning of the
-report. You may also want to specify this vertical position by using the –zcog option, by eg.:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --zcog <span class="m">2</span>
-</pre></div>
-</div>
-<p>that gives the following report:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-=============================================
-../meshmagick/tests/data/SEAREV.vtp successfully loaded
 
-Generating hydrostatic data for a zcog of 2.000 meters.
+HYDROSTATIC REPORT (Meshmagick version 3.2)
+
+[1]	Corrections made on initial mesh:
+	Z CORRECTION (M)-----------------------------&gt;   0.000
+	HEEL CORRECTION (DEG)------------------------&gt;   0.000
+	TRIM CORRECTION (DEG)------------------------&gt;  -0.000
+
+	GRAVITY ACCELERATION (M/S**2)----------------&gt;   9.81
+	DENSITY OF WATER (KG/M**3)-------------------&gt;   1025.0
+
+	WATERPLANE AREA (M**2)-----------------------&gt;   299.8
+	WATERPLANE CENTER (M)------------------------&gt;  -0.001     0.000     0.000    
+	WETTED SURFACE AREA (M**2)-------------------&gt;   549.6
+	DISPLACEMENT VOLUME (M**3)-------------------&gt;   1176.831
+	DISPLACEMENT MASS (TONS)---------------------&gt;   1206.252
+	BUOYANCY CENTER (M)--------------------------&gt;  -0.000     0.000    -2.121    
+	CENTER OF GRAVITY (M)------------------------&gt;  -0.000     0.000    -2.000    
+
+	DRAFT (M)------------------------------------&gt;   5.000
+	LENGTH OVERALL SUBMERGED (M)-----------------&gt;   10.00
+	BREADTH OVERALL SUBMERGED (M)----------------&gt;   30.00
+	LENGTH AT WATERLINE LWL (M)------------------&gt;   9.99
+	FORWARD PERPENDICULAR FP (M)-----------------&gt;   5.00
+	[2] LENGTH BETWEEN PERPENDICULARS LPP (M)----&gt;   9.99
+
+	TRANSVERSAL METACENTRIC RADIUS (M)-----------&gt;   19.107
+	LONGITUDINAL METACENTRIC RADIUS (M)----------&gt;   2.120
+	TRANSVERSAL METACENTRIC HEIGHT GMT (M)-------&gt;   18.986
+	LONGITUDINAL METACENTRIC HEIGHT GML (M)------&gt;   1.999
+
+	HYDROSTATIC STIFFNESS COEFFICIENTS (at COG horiz. Pos.):
+	K33 (N/M)------------------------------------&gt;   3.0147E+06
+	K34 (N)--------------------------------------&gt;   0.0000E+00
+	K35 (N)--------------------------------------&gt;   1.5564E+03
+	K44 (N.M)------------------------------------&gt;   2.2467E+08
+	K45 (N.M)------------------------------------&gt;   0.0000E+00
+	K55 (N.M)------------------------------------&gt;   2.3661E+07
+
+[2]	INERTIAS from standard approximations: [Rxx = 0.3 B; Ryy = Rzz = 0.25 Lpp]
+	RXX (M)--------------------------------------&gt;   9.000
+	RYY (M)--------------------------------------&gt;   2.498
+	RZZ (M)--------------------------------------&gt;   2.498
+	IXX------------------------------------------&gt;   9.771E+07
+	IYY------------------------------------------&gt;   7.530E+06
+	IZZ------------------------------------------&gt;   7.530E+06
+
+	INERTIAS from homogeneous immersed hull approximation:
+	RXX------------------------------------------&gt;   9.233
+	RYY------------------------------------------&gt;   4.060
+	RZZ------------------------------------------&gt;   9.014
+	IXX------------------------------------------&gt;   1.028E+08
+	IYY------------------------------------------&gt;   1.989E+07
+	IZZ------------------------------------------&gt;   9.800E+07
 
 
-	GRAVITY ACCELERATION (M/S**2)-----------&gt;   9.81
-	DENSITY OF WATER (KG/M**3)--------------&gt;   1023.0
-
-	WATERPLANE AREA (M**2)------------------&gt;   299.8
-	WATERPLANE CENTER (M)-------------------&gt;  -0.001     0.000    
-	WET AREA (M**2)-------------------------&gt;   549.6
-	DISPLACEMENT VOLUME (M**3)--------------&gt;   1176.831
-	DISPLACEMENT MASS (TONS)----------------&gt;   1203.898
-	BUOYANCY CENTER (M)---------------------&gt;  -0.000     0.000    -2.121    
-	CENTER OF GRAVITY (M)-------------------&gt;   0.000     0.000     2.000    
-
-	DRAUGHT (M)-----------------------------&gt;   5.000
-	LENGTH OVERALL SUBMERGED (M)------------&gt;   10.00
-	BREADTH OVERALL SUBMERGED (M)-----------&gt;   30.00
-	LENGTH AT WATERLINE LWL (M)-------------&gt;   9.99
-	FORWARD PERPENDICULAR (M)---------------&gt;   5.00
-
-	TRANSVERSAL METACENTRIC RADIUS (M)------&gt;   19.107
-	TRANSVERSAL METACENTRIC HEIGHT GMT (M)--&gt;   14.986
-	LONGITUDINAL METACENTRIC RADIUS (M)-----&gt;   2.120
-	LONGITUDINAL METACENTRIC HEIGHT GML (M)-&gt;  -2.001
-
-	HYDROSTATIC STIFFNESS COEFFICIENTS:
-	K33 (N/M)-------------------------------&gt;   3.0088E+06
-	K34 (N)---------------------------------&gt;   0.0000E+00
-	K35 (N)---------------------------------&gt;   1.7289E+03
-	K44 (N.M)-------------------------------&gt;   1.7699E+08
-	K45 (N.M)-------------------------------&gt;   0.0000E+00
-	K55 (N.M)-------------------------------&gt;  -2.3627E+07
-
-	INERTIAS:
-	IXX-------------------------------------&gt;   9.239E+07
-	IXY-------------------------------------&gt;   0.000E+00
-	IXZ-------------------------------------&gt;   9.572E+01
-	IYY-------------------------------------&gt;   9.617E+06
-	IYZ-------------------------------------&gt;   9.304E-10
-	IZZ-------------------------------------&gt;   9.781E+07
-
-	RESIDUALS:
-	ABSOLUTE--------------------------------&gt;   1.863E-09 0.000E+00 6.889E+02
-	RELATIVE--------------------------------&gt;   1.577E-16 0.000E+00 5.837E-06
-	RELATIVE TOLERANCE----------------------&gt;   1.0E-02
-
+NOTES
+=====
+[1] To get computed hydrostatic equilibrium position from initial mesh, corrections must be 
+    applied in the following order:
+    	* First rotations around initial X &amp; Y axes w.r.t initial frame origin
+    	* Second Z translation along initial Z-axis (not the one obtained after the rotations)
+[2] Not enough information to get a trusted Lpp. It has been approximated by Lwl instead.
+    It has an influence on the Iyy and Izz inertias calculated from standard approximations.
+    To get more accurate results, please specify a Lpp.
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
@@ -1411,89 +1308,98 @@ real significance and they should be used with a minus sign when put in a 3D rot
 <p>You can easily change the default density of water as well as gravity by using the <code class="docutils literal notranslate"><span class="pre">--rho-water</span></code> and
 <code class="docutils literal notranslate"><span class="pre">--grav</span></code> options.</p>
 </div>
-</div>
-<div class="section" id="displaying-the-mesh-with-hydrostatic-results">
-<h3><a class="toc-backref" href="#content">Displaying the mesh with hydrostatic results</a><a class="headerlink" href="#displaying-the-mesh-with-hydrostatic-results" title="Permalink to this headline">¶</a></h3>
-<p>As usual, you can combine the command line options with the <code class="docutils literal notranslate"><span class="pre">--show</span></code> option to display the mesh in the meshmagick
-viewer. In hydrostatics mode, it will also show forces applying on the body:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --show
-</pre></div>
-</div>
-<p>will show the following:</p>
-<img alt="../_images/show_hydrostatics.png" src="../_images/show_hydrostatics.png" />
-<p>In the viewer, we have pressed the <code class="docutils literal notranslate"><span class="pre">w</span></code> key to get a wireframe representation and see the application points. We can
-see that the buoyancy center and the gravity center of the current configuration have nearly the same horizontal
-position.</p>
-</div>
-<div class="section" id="getting-the-mesh-vertical-position-that-complies-with-a-given-mass-displacement">
+</section>
+<section id="getting-the-mesh-vertical-position-that-complies-with-a-given-mass-displacement">
 <h3><a class="toc-backref" href="#content">Getting the mesh vertical position that complies with a given mass displacement</a><a class="headerlink" href="#getting-the-mesh-vertical-position-that-complies-with-a-given-mass-displacement" title="Permalink to this headline">¶</a></h3>
 <p>In that mode, the mesh is displaced so that its mas displacement becomes equal to a specified mass. This is achieved
 by:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --disp <span class="m">1500</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --zcog -2 -mdisp <span class="m">1500</span>
 </pre></div>
 </div>
 <p>which gives:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
+&gt;&gt;&gt;&gt; Computing equilibrium of the hull for the given displacement of 1500.000000 tons
+========================
+Displacement equilibrium
+========================
+Target displacement:    1500.000 tons
+Achieved displacement: 1500.000 tons (3 iterations)
 
-Setting mesh displacement to 1500.000 tons
-
-Complying with a displacement of 1500.000 tons
-----------------------------------------------
-	-&gt; Convergence obtained after 10 iterations
 
 
-	GRAVITY ACCELERATION (M/S**2)-----------&gt;   9.81
-	DENSITY OF WATER (KG/M**3)--------------&gt;   1023.0
+HYDROSTATIC REPORT (Meshmagick version 3.2)
 
-	WATERPLANE AREA (M**2)------------------&gt;   294.2
-	WATERPLANE CENTER (M)-------------------&gt;  -0.002    -0.000    
-	WET AREA (M**2)-------------------------&gt;   627.5
-	DISPLACEMENT VOLUME (M**3)--------------&gt;   1466.249
-	DISPLACEMENT MASS (TONS)----------------&gt;   1499.972
-	BUOYANCY CENTER (M)---------------------&gt;  -0.000     0.000    -2.578    
-	CENTER OF GRAVITY (M)-------------------&gt;   0.000     0.000    -0.971    
+[1]	Corrections made on initial mesh:
+	Z CORRECTION (M)-----------------------------&gt;  -0.962
+	HEEL CORRECTION (DEG)------------------------&gt;   0.000
+	TRIM CORRECTION (DEG)------------------------&gt;  -0.000
 
-	DRAUGHT (M)-----------------------------&gt;   5.971
-	LENGTH OVERALL SUBMERGED (M)------------&gt;   10.00
-	BREADTH OVERALL SUBMERGED (M)-----------&gt;   30.00
-	LENGTH AT WATERLINE LWL (M)-------------&gt;   9.81
-	FORWARD PERPENDICULAR (M)---------------&gt;   4.90
+	GRAVITY ACCELERATION (M/S**2)----------------&gt;   9.81
+	DENSITY OF WATER (KG/M**3)-------------------&gt;   1025.0
 
-	TRANSVERSAL METACENTRIC RADIUS (M)------&gt;   15.050
-	TRANSVERSAL METACENTRIC HEIGHT GMT (M)--&gt;   13.443
-	LONGITUDINAL METACENTRIC RADIUS (M)-----&gt;   1.608
-	LONGITUDINAL METACENTRIC HEIGHT GML (M)-&gt;   0.002
+	WATERPLANE AREA (M**2)-----------------------&gt;   294.3
+	WATERPLANE CENTER (M)------------------------&gt;  -0.002    -0.000     0.962    
+	WETTED SURFACE AREA (M**2)-------------------&gt;   626.7
+	DISPLACEMENT VOLUME (M**3)-------------------&gt;   1463.414
+	DISPLACEMENT MASS (TONS)---------------------&gt;   1500.000
+	BUOYANCY CENTER (M)--------------------------&gt;  -0.000     0.000    -1.612    
+	CENTER OF GRAVITY (M)------------------------&gt;  -0.000     0.000    -2.000    
 
-	HYDROSTATIC STIFFNESS COEFFICIENTS:
-	K33 (N/M)-------------------------------&gt;   2.9527E+06
-	K34 (N)---------------------------------&gt;   0.0000E+00
-	K35 (N)---------------------------------&gt;   6.4136E+03
-	K44 (N.M)-------------------------------&gt;   1.9781E+08
-	K45 (N.M)-------------------------------&gt;   0.0000E+00
-	K55 (N.M)-------------------------------&gt;   2.4450E+04
+	DRAFT (M)------------------------------------&gt;   5.962
+	LENGTH OVERALL SUBMERGED (M)-----------------&gt;   10.00
+	BREADTH OVERALL SUBMERGED (M)----------------&gt;   30.00
+	LENGTH AT WATERLINE LWL (M)------------------&gt;   9.81
+	FORWARD PERPENDICULAR FP (M)-----------------&gt;   4.90
+	[2] LENGTH BETWEEN PERPENDICULARS LPP (M)----&gt;   9.81
 
-	INERTIAS:
-	IXX-------------------------------------&gt;   1.162E+08
-	IXY-------------------------------------&gt;   4.654E-10
-	IXZ-------------------------------------&gt;  -1.132E+02
-	IYY-------------------------------------&gt;   1.369E+07
-	IYZ-------------------------------------&gt;   2.729E-09
-	IZZ-------------------------------------&gt;   1.224E+08
+	TRANSVERSAL METACENTRIC RADIUS (M)-----------&gt;   15.084
+	LONGITUDINAL METACENTRIC RADIUS (M)----------&gt;   1.613
+	TRANSVERSAL METACENTRIC HEIGHT GMT (M)-------&gt;   15.472
+	LONGITUDINAL METACENTRIC HEIGHT GML (M)------&gt;   2.001
 
-	RESIDUALS:
-	ABSOLUTE--------------------------------&gt;  -2.716E+02 1.312E-08 1.767E+03
-	RELATIVE--------------------------------&gt;  -1.846E-05 2.972E-17 1.225E-05
-	RELATIVE TOLERANCE----------------------&gt;   1.0E-02
+	HYDROSTATIC STIFFNESS COEFFICIENTS (at COG horiz. Pos.):
+	K33 (N/M)------------------------------------&gt;   2.9595E+06
+	K34 (N)--------------------------------------&gt;   0.0000E+00
+	K35 (N)--------------------------------------&gt;   6.0626E+03
+	K44 (N.M)------------------------------------&gt;   2.2768E+08
+	K45 (N.M)------------------------------------&gt;   0.0000E+00
+	K55 (N.M)------------------------------------&gt;   2.9452E+07
 
+[2]	INERTIAS from standard approximations: [Rxx = 0.3 B; Ryy = Rzz = 0.25 Lpp]
+	RXX (M)--------------------------------------&gt;   9.000
+	RYY (M)--------------------------------------&gt;   2.453
+	RZZ (M)--------------------------------------&gt;   2.453
+	IXX------------------------------------------&gt;   1.215E+08
+	IYY------------------------------------------&gt;   9.024E+06
+	IZZ------------------------------------------&gt;   9.024E+06
+
+	INERTIAS from homogeneous immersed hull approximation:
+	RXX------------------------------------------&gt;   9.637
+	RYY------------------------------------------&gt;   4.951
+	RZZ------------------------------------------&gt;   9.035
+	IXX------------------------------------------&gt;   1.393E+08
+	IYY------------------------------------------&gt;   3.676E+07
+	IZZ------------------------------------------&gt;   1.224E+08
+
+
+NOTES
+=====
+[1] To get computed hydrostatic equilibrium position from initial mesh, corrections must be 
+    applied in the following order:
+    	* First rotations around initial X &amp; Y axes w.r.t initial frame origin
+    	* Second Z translation along initial Z-axis (not the one obtained after the rotations)
+[2] Not enough information to get a trusted Lpp. It has been approximated by Lwl instead.
+    It has an influence on the Iyy and Izz inertias calculated from standard approximations.
+    To get more accurate results, please specify a Lpp.
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
@@ -1505,85 +1411,98 @@ that is presented in the following.</p>
 <p>The mass has to be given <strong>in tons</strong> as it is more representative of the order of magnitude of usual masses in
 offshore.</p>
 </div>
-</div>
-<div class="section" id="d-hydrostatic-equilibrium">
+</section>
+<section id="d-hydrostatic-equilibrium">
 <h3><a class="toc-backref" href="#content">3D hydrostatic equilibrium</a><a class="headerlink" href="#d-hydrostatic-equilibrium" title="Permalink to this headline">¶</a></h3>
 <p>This mode is active as long as you use the <code class="docutils literal notranslate"><span class="pre">--cog</span></code> option such that:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --cog <span class="m">0</span> <span class="m">4</span> -2 --show
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --cog <span class="m">0</span> <span class="m">4</span> -2
 </pre></div>
 </div>
 <p>That command outputs the following report:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>../meshmagick_cli.py:1228: UserWarning: 
-WARNING !! : Keep in mind that the mesh may have a new orientation in the Oxy plane so the hydrostatic
-        stiffness matrix may be impractical as not expressed in a convenient axis system. Use the result
-        with caution and have a look at the mesh by using the --show option.
-        
-        This should be fixed in a future release.
-  warn(msg)
-
-=============================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>=============================================
+meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
 =============================================
 ../meshmagick/tests/data/SEAREV.vtp successfully loaded
+&gt;&gt;&gt;&gt; Computing equilibrium in 3DOF for the given COG, considering the current configuration presents the target displacement
+========================
+3DOF equilibrium
+========================
+Target diplacement:    1206.252 tons
+COG pos:  [0.0, 4.0, -2.0]
+	&gt;&gt;&gt; Convergence reached in 9 iterations
 
-                
-Setting mesh position so that we are at the current displacement of 1203.898 tons and in a stable
-                configuration with a gravity center located at [0.000, 4.000, -2.000] meters.
-
-Computing equilibrium from initial condition.
-----------------------------------------------
-Stable equilibrium reached after 6 iterations and 0 random restart
 
 
-	GRAVITY ACCELERATION (M/S**2)-----------&gt;   9.81
-	DENSITY OF WATER (KG/M**3)--------------&gt;   1023.0
+HYDROSTATIC REPORT (Meshmagick version 3.2)
 
-	WATERPLANE AREA (M**2)------------------&gt;   286.6
-	WATERPLANE CENTER (M)-------------------&gt;  -0.036     0.105    
-	WET AREA (M**2)-------------------------&gt;   549.1
-	DISPLACEMENT VOLUME (M**3)--------------&gt;   1177.038
-	DISPLACEMENT MASS (TONS)----------------&gt;   1204.110
-	BUOYANCY CENTER (M)---------------------&gt;  -0.001    -0.037    -2.484    
-	CENTER OF GRAVITY (M)-------------------&gt;   0.000     0.000    -2.784    
+[1]	Corrections made on initial mesh:
+	Z CORRECTION (M)-----------------------------&gt;   0.005
+	HEEL CORRECTION (DEG)------------------------&gt;  -12.114
+	TRIM CORRECTION (DEG)------------------------&gt;   0.148
 
-	DRAUGHT (M)-----------------------------&gt;   8.006
-	LENGTH OVERALL SUBMERGED (M)------------&gt;   10.00
-	BREADTH OVERALL SUBMERGED (M)-----------&gt;   31.14
-	LENGTH AT WATERLINE LWL (M)-------------&gt;   10.00
-	FORWARD PERPENDICULAR (M)---------------&gt;   5.00
+	GRAVITY ACCELERATION (M/S**2)----------------&gt;   9.81
+	DENSITY OF WATER (KG/M**3)-------------------&gt;   1025.0
 
-	TRANSVERSAL METACENTRIC RADIUS (M)------&gt;   18.027
-	TRANSVERSAL METACENTRIC HEIGHT GMT (M)--&gt;   18.327
-	LONGITUDINAL METACENTRIC RADIUS (M)-----&gt;   1.794
-	LONGITUDINAL METACENTRIC HEIGHT GML (M)-&gt;   2.094
+	WATERPLANE AREA (M**2)-----------------------&gt;   286.3
+	WATERPLANE CENTER (M)------------------------&gt;  -0.037     0.107     0.018    
+	WETTED SURFACE AREA (M**2)-------------------&gt;   549.0
+	DISPLACEMENT VOLUME (M**3)-------------------&gt;   1176.831
+	DISPLACEMENT MASS (TONS)---------------------&gt;   1206.252
+	BUOYANCY CENTER (M)--------------------------&gt;  -0.001     3.937    -1.707    
+	CENTER OF GRAVITY (M)------------------------&gt;   0.000     4.000    -2.000    
 
-	HYDROSTATIC STIFFNESS COEFFICIENTS:
-	K33 (N/M)-------------------------------&gt;   2.8759E+06
-	K34 (N)---------------------------------&gt;   3.0196E+05
-	K35 (N)---------------------------------&gt;   1.0359E+05
-	K44 (N.M)-------------------------------&gt;   2.1649E+08
-	K45 (N.M)-------------------------------&gt;   1.1291E+06
-	K55 (N.M)-------------------------------&gt;   2.4733E+07
+	DRAFT (M)------------------------------------&gt;   8.032
+	LENGTH OVERALL SUBMERGED (M)-----------------&gt;   10.01
+	BREADTH OVERALL SUBMERGED (M)----------------&gt;   31.14
+	LENGTH AT WATERLINE LWL (M)------------------&gt;   10.00
+	FORWARD PERPENDICULAR FP (M)-----------------&gt;   5.00
+	[2] LENGTH BETWEEN PERPENDICULARS LPP (M)----&gt;   10.00
 
-	INERTIAS:
-	IXX-------------------------------------&gt;   7.609E+07
-	IXY-------------------------------------&gt;  -7.775E+04
-	IXZ-------------------------------------&gt;  -1.012E+04
-	IYY-------------------------------------&gt;   1.118E+07
-	IYZ-------------------------------------&gt;  -6.477E+06
-	IZZ-------------------------------------&gt;   7.998E+07
+	TRANSVERSAL METACENTRIC RADIUS (M)-----------&gt;   20.785
+	LONGITUDINAL METACENTRIC RADIUS (M)----------&gt;   1.788
+	TRANSVERSAL METACENTRIC HEIGHT GMT (M)-------&gt;   21.084
+	LONGITUDINAL METACENTRIC HEIGHT GML (M)------&gt;   2.088
 
-	RESIDUALS:
-	ABSOLUTE--------------------------------&gt;   2.078E+03-4.352E+05 1.378E+04
-	RELATIVE--------------------------------&gt;   1.760E-04-1.201E-03 1.167E-04
-	RELATIVE TOLERANCE----------------------&gt;   1.0E-02
+	HYDROSTATIC STIFFNESS COEFFICIENTS (at COG horiz. Pos.):
+	K33 (N/M)------------------------------------&gt;   2.8786E+06
+	K34 (N)--------------------------------------&gt;  -9.7380E+06
+	K35 (N)--------------------------------------&gt;   8.6414E+04
+	K44 (N.M)------------------------------------&gt;   2.4950E+08
+	K45 (N.M)------------------------------------&gt;   9.3365E+05
+	K55 (N.M)------------------------------------&gt;   2.4706E+07
 
+[2]	INERTIAS from standard approximations: [Rxx = 0.3 B; Ryy = Rzz = 0.25 Lpp]
+	RXX (M)--------------------------------------&gt;   9.343
+	RYY (M)--------------------------------------&gt;   2.499
+	RZZ (M)--------------------------------------&gt;   2.499
+	IXX------------------------------------------&gt;   1.053E+08
+	IYY------------------------------------------&gt;   7.535E+06
+	IZZ------------------------------------------&gt;   7.535E+06
+
+	INERTIAS from homogeneous immersed hull approximation:
+	RXX------------------------------------------&gt;   10.065
+	RYY------------------------------------------&gt;   4.826
+	RZZ------------------------------------------&gt;   9.515
+	IXX------------------------------------------&gt;   1.222E+08
+	IYY------------------------------------------&gt;   2.810E+07
+	IZZ------------------------------------------&gt;   1.092E+08
+
+
+NOTES
+=====
+[1] To get computed hydrostatic equilibrium position from initial mesh, corrections must be 
+    applied in the following order:
+    	* First rotations around initial X &amp; Y axes w.r.t initial frame origin
+    	* Second Z translation along initial Z-axis (not the one obtained after the rotations)
+[2] Not enough information to get a trusted Lpp. It has been approximated by Lwl instead.
+    It has an influence on the Iyy and Izz inertias calculated from standard approximations.
+    To get more accurate results, please specify a Lpp.
 
 =============================================================
-meshmagick - version 2.1.1
-Copyright 2014-2021, Ecole Centrale de Nantes
-Maintainer : Francois Rongere &lt;Francois.Rongere@ec-nantes.fr&gt;
+Meshmagick - version 3.2
+Copyright 2014-2021, Ecole Centrale de Nantes / D-ICE Engineering
+Maintainer : Francois Rongere &lt;Francois.Rongere@dice-engineering.com&gt;
 Good Bye!
 =============================================================
 </pre></div>
@@ -1616,55 +1535,16 @@ fixed in a later release of meshmagick. Please use the meshmagick viewer to see 
 that the boundary intersection polygons are closed.</p></li>
 </ul>
 </div>
-</div>
-<div class="section" id="adding-external-static-forces">
-<h3><a class="toc-backref" href="#content">Adding external static forces</a><a class="headerlink" href="#adding-external-static-forces" title="Permalink to this headline">¶</a></h3>
-<p>Beside the default gravity and buoyancy forces used in hydrostatic equilibrium, it is possible to add some external
-forces to the floater. This may be by e.g. the force applied by the wind on the rotor of a floating wind turbine or
-anchor forces.</p>
-<p>Two modes are available: <strong>relative</strong> or <strong>absolute</strong> force. In both mode, the force application point follows
-naturally the body during its position modifications. In <strong>relative</strong> mode, the direction of the force follows the
-body. This is generally the case for the preceding wind turbine application example. In the absolute mode the
-direction of the force remains fixed with respect to the absolute frame. This is the case of mooring forces.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Note that for these options to be used, you always need to specify a center of gravity position along with the
-<code class="docutils literal notranslate"><span class="pre">--cog</span></code> option.</p>
-</div>
-<div class="section" id="absolute-forces">
-<h4><a class="toc-backref" href="#content">Absolute forces</a><a class="headerlink" href="#absolute-forces" title="Permalink to this headline">¶</a></h4>
-<p>This is achieved using the :<code class="docutils literal notranslate"><span class="pre">-af</span> <span class="pre">(--absolute-force)</span></code> option. By example, applying a vertical mooring load of
-200 tons at one side of the SEAREV is obtained by issuing:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs -af <span class="m">0</span> <span class="m">15</span> -5 <span class="m">0</span> <span class="m">0</span> -2000000 --cog <span class="m">0</span> <span class="m">0</span> -2 --show
-</pre></div>
-</div>
-<p>Note that the parameters of the options are first the 3 coordinates of the application point then the 3 components of
-the force vector.</p>
-<p>As the <code class="docutils literal notranslate"><span class="pre">--show</span></code> option has been used, the command displays the following viewer:</p>
-<img alt="../_images/hs_absolute_force.png" src="../_images/hs_absolute_force.png" />
-<p>where you can observe that the force represented in blue has the right vertical orientation and made the SEAREV roll.</p>
-</div>
-<div class="section" id="relative-forces">
-<h4><a class="toc-backref" href="#content">Relative forces</a><a class="headerlink" href="#relative-forces" title="Permalink to this headline">¶</a></h4>
-<p>This is achieved using the <code class="docutils literal notranslate"><span class="pre">-af</span> <span class="pre">(--absolute-force)</span></code> option. By example, applying a vertical mooring load of
-200 tons at one side of the SEAREV is obtained by issuing:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --cog <span class="m">0</span> <span class="m">0</span> -3 -rf <span class="m">0</span> <span class="m">0</span> <span class="m">5</span> <span class="m">5000000</span> <span class="m">0</span> <span class="m">0</span> --show
-</pre></div>
-</div>
-<p>which displays the following viewer:</p>
-<img alt="../_images/hs_relative_force.png" src="../_images/hs_relative_force.png" />
-<p>where you can observe that the force represented in blue has followed the pitch of the body.</p>
-</div>
-</div>
-<div class="section" id="saving-the-hydrostatic-report-in-a-text-file">
+</section>
+<section id="saving-the-hydrostatic-report-in-a-text-file">
 <h3><a class="toc-backref" href="#content">Saving the hydrostatic report in a text file</a><a class="headerlink" href="#saving-the-hydrostatic-report-in-a-text-file" title="Permalink to this headline">¶</a></h3>
 <p>Use the <code class="docutils literal notranslate"><span class="pre">--hs-report</span></code> option followed by the name of the file:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;$ meshmagick SEAREV.vtp -hs --hs-report report.txt
 </pre></div>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
@@ -1688,7 +1568,7 @@ the force vector.</p>
     <p>
         &copy; Copyright 2021, Ecole Centrale de Nantes
       <span class="lastupdated">
-        Last updated on Jan 07, 2021.
+        Last updated on Oct 19, 2021.
       </span>
 
     </p>

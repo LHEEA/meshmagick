@@ -5,10 +5,11 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Command Line Interface Reference Guide &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
+  <title>Command Line Interface Reference Guide &mdash; Meshmagick User&#39;s Guide 3.2 documentation</title>
   
 
   
@@ -21,10 +22,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -33,6 +34,8 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                2.1.1
+                3.2
               </div>
             
           
@@ -167,7 +170,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="command-line-interface-reference-guide">
+  <section id="command-line-interface-reference-guide">
 <h1>Command Line Interface Reference Guide<a class="headerlink" href="#command-line-interface-reference-guide" title="Permalink to this headline">¶</a></h1>
 <p><blockquote>
 <div><dl>
@@ -321,19 +324,19 @@ developped by EDF-R&amp;D</p>
 </p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">meshmagick</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTFILENAME</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ifmt</span> <span class="n">INPUT_FORMAT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ofmt</span> <span class="n">OUTPUT_FORMAT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">quality</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">t</span> <span class="n">Tx</span> <span class="n">Ty</span> <span class="n">Tz</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">tx</span> <span class="n">Tx</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ty</span> <span class="n">Ty</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">tz</span> <span class="n">Tz</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">Rx</span> <span class="n">Ry</span> <span class="n">Rz</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">rx</span> <span class="n">Rx</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ry</span> <span class="n">Ry</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">rz</span> <span class="n">Rz</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">S</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">sx</span> <span class="n">Sx</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">sy</span> <span class="n">Sy</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">sz</span> <span class="n">Sz</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hn</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">fn</span><span class="p">]</span>
                   <span class="p">[</span><span class="o">-</span><span class="n">hm</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">Arg</span> <span class="p">[</span><span class="n">Arg</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="p">[</span><span class="n">Arg</span> <span class="p">[</span><span class="n">Arg</span> <span class="o">...</span><span class="p">]]]</span> <span class="p">[</span><span class="o">-</span><span class="n">cc</span> <span class="n">CONCATENATE_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">md</span> <span class="p">[</span><span class="n">Tol</span><span class="p">]]</span> <span class="p">[</span><span class="o">-</span><span class="n">tq</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">sym</span> <span class="p">[</span><span class="n">Arg</span> <span class="p">[</span><span class="n">Arg</span> <span class="o">...</span><span class="p">]]]</span> <span class="p">[</span><span class="o">--</span><span class="n">mirror</span> <span class="n">Arg</span> <span class="p">[</span><span class="n">Arg</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">-</span><span class="n">pi</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">si</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">rho</span><span class="o">-</span><span class="n">medium</span> <span class="n">RHO_MEDIUM</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">medium</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">thickness</span> <span class="n">THICKNESS</span><span class="p">]</span>
-                  <span class="p">[</span><span class="o">-</span><span class="n">hs</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">disp</span> <span class="n">Disp</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cog</span> <span class="n">Xg</span> <span class="n">Yg</span> <span class="n">Zg</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">zcog</span> <span class="n">Zcog</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">rho</span><span class="o">-</span><span class="n">water</span> <span class="n">Rho</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">g</span> <span class="n">G</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">af</span> <span class="n">X</span> <span class="n">Y</span> <span class="n">Z</span> <span class="n">Fx</span> <span class="n">Fy</span> <span class="n">Fz</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">rf</span> <span class="n">X</span> <span class="n">Y</span> <span class="n">Z</span> <span class="n">Fx</span> <span class="n">Fy</span> <span class="n">Fz</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">hs</span><span class="o">-</span><span class="n">report</span> <span class="n">filename</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">show</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">pn</span> <span class="n">Project</span> <span class="n">Name</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hs</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">mdisp</span> <span class="n">Disp</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">cog</span> <span class="n">Xg</span> <span class="n">Yg</span> <span class="n">Zg</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">zg</span> <span class="n">Zcog</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lpp</span> <span class="n">Lpp</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ap</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">wd</span> <span class="n">Rho</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">g</span> <span class="n">G</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">hs</span><span class="o">-</span><span class="n">report</span> <span class="n">filename</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">sh</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                   <span class="n">infilename</span>
 </pre></div>
 </div>
-<div class="section" id="Positional Arguments">
+<section id="Positional Arguments">
 <h2>Positional Arguments<a class="headerlink" href="#Positional Arguments" title="Permalink to this headline">¶</a></h2>
 <dl class="option-list">
 <dt><kbd>infilename</kbd></dt>
 <dd><p>path of the input mesh file in any supported format</p>
 </dd>
 </dl>
-</div>
-<div class="section" id="Named Arguments">
+</section>
+<section id="Named Arguments">
 <h2>Named Arguments<a class="headerlink" href="#Named Arguments" title="Permalink to this headline">¶</a></h2>
 <dl class="option-list">
 <dt><kbd>-o, --outfilename</kbd></dt>
@@ -568,28 +571,32 @@ currently: CONCRETE, REINFORCED_CONCRETE, FRESH_WATER, SALT_WATER, SAND, STEEL, 
 </dd>
 </dl>
 </dd>
+<dt><kbd>-pn, --project-name</kbd></dt>
+<dd><p>The project name for hydrostatics ourput</p>
+<p>Default: “NO_NAME”</p>
+</dd>
 <dt><kbd>-hs, --hydrostatics</kbd></dt>
 <dd><dl class="simple">
-<dt>Compute hydrostatics data and throws a report on the</dt><dd><p>command line. When used along with options –disp, –cog or
+<dt>Compute hydrostatics data and throws a report on the</dt><dd><p>command line. When used along with options -mdisp, –cog or
 –zcog, the behaviour is different.</p>
 </dd>
 </dl>
 <p>Default: False</p>
 </dd>
-<dt><kbd>--disp</kbd></dt>
+<dt><kbd>-mdisp, --mass-displacement</kbd></dt>
 <dd><dl class="simple">
-<dt>Specifies the mass of the mesh for hydrostatic computations.</dt><dd><p>It must be given in tons.</p>
+<dt>Specifies the mass of the mesh for hydrostatic computations.</dt><dd><p>It MUST be given in tons.</p>
 </dd>
 </dl>
 </dd>
-<dt><kbd>--cog</kbd></dt>
+<dt><kbd>-cog, --cog</kbd></dt>
 <dd><dl class="simple">
 <dt>Specifies the 3D position of the center of gravity.</dt><dd><p>The third coordinate given has priority over the value given
 with the –zcog option.</p>
 </dd>
 </dl>
 </dd>
-<dt><kbd>--zcog</kbd></dt>
+<dt><kbd>-zg, --zcog</kbd></dt>
 <dd><dl class="simple">
 <dt>Specifies the z position of the center of gravity. This</dt><dd><p>is the minimal data needed for hydrostatic stiffness matrix
 computation. It is however overwriten by the third component
@@ -598,9 +605,25 @@ is given, zcog is set to 0.</p>
 </dd>
 </dl>
 </dd>
-<dt><kbd>--rho-water</kbd></dt>
-<dd><p>Specifies the density of salt water. Default is 1023 kg/m**3.</p>
-<p>Default: 1023.0</p>
+<dt><kbd>-lpp, --lpp</kbd></dt>
+<dd><dl class="simple">
+<dt>Specifies the Lpp value as it cannot be calculated with</dt><dd><p>only the mesh as it depends on the AP position that is a
+rudder position dependent information that the mesh does not
+enclose. It helps do better inertia (Iyy &amp; Izz) approximations
+using standard formulas. See also the alternative -AP formula.</p>
+</dd>
+</dl>
+</dd>
+<dt><kbd>-ap, --orig-at-ap</kbd></dt>
+<dd><dl class="simple">
+<dt>Tell the solver that the origin is ar After perpendicular</dt><dd><p>sot that lpp can be calculated from this information.</p>
+</dd>
+</dl>
+<p>Default: False</p>
+</dd>
+<dt><kbd>-wd, --water-density</kbd></dt>
+<dd><p>Specifies the density of salt water. Default is 1025 kg/m**3.</p>
+<p>Default: 1025.0</p>
 </dd>
 <dt><kbd>-g, --grav</kbd></dt>
 <dd><dl class="simple">
@@ -609,50 +632,21 @@ is given, zcog is set to 0.</p>
 </dl>
 <p>Default: 9.81</p>
 </dd>
-<dt><kbd>-af, --absolute-force</kbd></dt>
-<dd><dl>
-<dt>Add an additional absolute force applied to the mesh in</dt><dd><p>hydrostatics equilibrium computations. It is absolute as force
-orientation does not change during hydrostatic equilibrium
-computations, but application point follows the mesh motion.
-The option is called with 6 arguments such that:</p>
-<blockquote>
-<div><p>-af x y z fx fy fz</p>
-</div></blockquote>
-<p>where [x, y, z] are the coordinates of the application point
-(in meters) and [fx, fy, fz] are the components of the force.
-Those are expressed in the initial mesh frame.</p>
-</dd>
-</dl>
-</dd>
-<dt><kbd>-rf, --relative-force</kbd></dt>
-<dd><dl>
-<dt>Add an additional relative force applied to the mesh in</dt><dd><p>hydrostatics equilibrium computations. It is relative as force
-orientation follows the orientation of the mesh during equilibrium
-computations. The option is called with 6 arguments such that:</p>
-<blockquote>
-<div><p>-af x y z fx fy fz</p>
-</div></blockquote>
-<p>where [x, y, z] are the coordinates of the application point
-of the force and [fx, fy, fz] are the components of the force.
-Those are expressed in the initial mesh frame.</p>
-</dd>
-</dl>
-</dd>
 <dt><kbd>--hs-report</kbd></dt>
 <dd><p>Write the hydrostatic report into the file given as an argument</p>
 </dd>
-<dt><kbd>--show</kbd></dt>
+<dt><kbd>-sh, --show</kbd></dt>
 <dd><p>Shows the input mesh in an interactive window</p>
 <p>Default: False</p>
 </dd>
-<dt><kbd>--version</kbd></dt>
+<dt><kbd>-v, --version</kbd></dt>
 <dd><p>Shows the version number and exit</p>
 </dd>
 </dl>
-</div>
+</section>
 <p><p>–  Copyright 2014-2021  -  Francois Rongere  /  Ecole Centrale de Nantes  –</p>
 </p>
-</div>
+</section>
 
 
            </div>
@@ -676,7 +670,7 @@ Those are expressed in the initial mesh frame.</p>
     <p>
         &copy; Copyright 2021, Ecole Centrale de Nantes
       <span class="lastupdated">
-        Last updated on Jan 07, 2021.
+        Last updated on Oct 19, 2021.
       </span>
 
     </p>

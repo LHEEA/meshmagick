@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>meshmagick.inertia &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
+  <title>meshmagick.inertia &mdash; Meshmagick User&#39;s Guide 3.2 documentation</title>
   
 
   
@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -33,6 +33,8 @@
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -59,7 +61,7 @@
             
             
               <div class="version">
-                2.1.1
+                3.2
               </div>
             
           
@@ -164,6 +166,7 @@
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">densities</span>
 
+
 <span class="c1"># FIXME: attention, changer les signes pour les produits d&#39;inertie !</span>
 <span class="c1"># TODO: ajouter la production d&#39;inerties de solides connus --&gt; utile pour comparaison !!</span>
 <span class="c1"># TODO: indiquer une frame d&#39;expression ...</span>
@@ -192,62 +195,63 @@
 <span class="sd">    point : array_like, optional</span>
 <span class="sd">        The reduction point. If None, it is set to be cog</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">yz</span><span class="p">,</span> <span class="n">xz</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mass</span><span class="p">)</span>
-        
+
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">cog</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cog</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cog</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">point</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-        
+            <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="nb">float</span><span class="p">(</span><span class="n">xx</span><span class="p">),</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">xy</span><span class="p">),</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">xz</span><span class="p">)],</span>
                                                 <span class="p">[</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">xy</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">yy</span><span class="p">),</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">yz</span><span class="p">)],</span>
-                                                <span class="p">[</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">xz</span><span class="p">),</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">yz</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">zz</span><span class="p">)]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    
+                                                <span class="p">[</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">xz</span><span class="p">),</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">yz</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">zz</span><span class="p">)]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The mass of the body&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gravity_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The position of the center of gravity&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">inertia_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The 3D rotational inertia matrix&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reduction_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The reduction point of the inertia matrix</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        ndarray</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span>
-    
+
     <span class="nd">@reduction_point</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">reduction_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the reduction point&quot;&quot;&quot;</span>
         <span class="n">mat_at_cog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">at_cog</span><span class="o">.</span><span class="n">inertia_matrix</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span> <span class="o">=</span> <span class="n">mat_at_cog</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_huygens_transport</span><span class="p">()</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">at_cog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns a new inertia object that is expressed at cog.</span>
-<span class="sd">        </span>
+
 <span class="sd">        It makes a copy of itself.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        ndarray</span>
@@ -255,38 +259,50 @@
         <span class="n">inertia</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">inertia</span><span class="o">.</span><span class="n">shift_at_cog</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">inertia</span>
-    
+
+<div class="viewcode-block" id="RigidBodyInertia.set_cog"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.RigidBodyInertia.set_cog">[docs]</a>    <span class="k">def</span> <span class="nf">set_cog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cog</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set a new center of gravity.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cog : array_like</span>
+<span class="sd">        The 3D coordinates of the center of gravity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">cog</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cog</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cog</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="RigidBodyInertia.shift_at_cog"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.RigidBodyInertia.shift_at_cog">[docs]</a>    <span class="k">def</span> <span class="nf">shift_at_cog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Shift the inertia matrix internally at cog.</span>
-<span class="sd">        </span>
+
 <span class="sd">        The reduction point is then cog.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_huygens_transport</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_huygens_transport</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span></div>
-    
+
 <div class="viewcode-block" id="RigidBodyInertia.is_at_cog"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.RigidBodyInertia.is_at_cog">[docs]</a>    <span class="k">def</span> <span class="nf">is_at_cog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns whether the object is expressed at cog</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span><span class="p">)</span></div>
-    
+
     <span class="k">def</span> <span class="nf">_huygens_transport</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">p_g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cog</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p_g</span><span class="p">,</span> <span class="n">p_g</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">p_g</span><span class="p">,</span> <span class="n">p_g</span><span class="p">))</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the principal inertia moment around x</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">yy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the principal inertia moment around y</span>
@@ -296,7 +312,7 @@
 <span class="sd">        float</span>
 <span class="sd">                &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">zz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the principal inertia moment around z</span>
@@ -306,7 +322,7 @@
 <span class="sd">        float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">yz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the yz inertia product</span>
@@ -316,7 +332,7 @@
 <span class="sd">        float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the xz inertia product</span>
@@ -326,7 +342,7 @@
 <span class="sd">        float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the xy inertia product</span>
@@ -336,19 +352,19 @@
 <span class="sd">        float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-    
+
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">width</span> <span class="o">=</span> <span class="mi">15</span>
         <span class="n">precision</span> <span class="o">=</span> <span class="mi">6</span>
         <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;E&#39;</span>
         <span class="n">fformat</span> <span class="o">=</span> <span class="s1">&#39;&lt; </span><span class="si">{width:}</span><span class="s1">.</span><span class="si">{precision:}{dtype:}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">precision</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        
+
         <span class="n">str_repr</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Pincipal inertial parameters:</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">str_repr</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Mass: {mass:</span><span class="si">{fformat}</span><span class="s1">} kg</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fformat</span><span class="o">=</span><span class="n">fformat</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mass</span><span class="p">)</span>
-        
+
         <span class="n">str_repr</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">COG:  {cog[0]:</span><span class="si">{fformat}</span><span class="s1">}{cog[1]:</span><span class="si">{fformat}</span><span class="s1">}{cog[2]:</span><span class="si">{fformat}</span><span class="s1">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">fformat</span><span class="o">=</span><span class="n">fformat</span><span class="p">,</span> <span class="n">cog</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cog</span><span class="p">)</span>
-        
+
         <span class="n">str_repr</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Inertia matrix expressed at: {p[0]:</span><span class="si">{fformat}</span><span class="s1">}{p[1]:</span><span class="si">{fformat}</span><span class="s1">}{p[2]:</span><span class="si">{fformat}</span><span class="s1">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">fformat</span><span class="o">=</span><span class="n">fformat</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_point</span>
         <span class="p">)</span>
@@ -361,7 +377,7 @@
         <span class="n">str_repr</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">{i[0]:</span><span class="si">{fformat}</span><span class="s1">}{i[1]:</span><span class="si">{fformat}</span><span class="s1">}{i[2]:</span><span class="si">{fformat}</span><span class="s1">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">fformat</span><span class="o">=</span><span class="n">fformat</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_3d_rotational_inertia</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="p">)</span>
-        
+
         <span class="k">return</span> <span class="n">str_repr</span></div>
 
 
@@ -369,18 +385,18 @@
 <span class="c1"># From &quot;Handbook of equations for mass and area of various geometrical shapes, J.A. Myers, 1962&quot;</span>
 <div class="viewcode-block" id="right_circular_cylinder"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.right_circular_cylinder">[docs]</a><span class="k">def</span> <span class="nf">right_circular_cylinder</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get the inertia of a right circular cylinder</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">vol</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">length</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
+
     <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span>
     <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">2.</span>
-    
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -391,14 +407,14 @@
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">vol</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">length</span> <span class="o">*</span> <span class="p">(</span><span class="n">ext_radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">int_radius</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
+
     <span class="n">R2r2</span> <span class="o">=</span> <span class="n">ext_radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">int_radius</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">R2r2</span> <span class="o">+</span> <span class="n">length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span>
     <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">R2r2</span> <span class="o">/</span> <span class="mf">2.</span>
-    
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -408,18 +424,18 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
-<span class="sd">    </span>
+
 <span class="sd">    Note</span>
 <span class="sd">    ----</span>
 <span class="sd">    The center of gravity is at an altitude of z = H/4 over the circular basis center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">vol</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">length</span> <span class="o">**</span> <span class="mi">2</span><span class="o">/</span><span class="mf">4.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">20.</span>
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">length</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">4.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">20.</span>
     <span class="n">Izz</span> <span class="o">=</span> <span class="mf">3.</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">10.</span>
-    
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -430,10 +446,10 @@
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">vol</span> <span class="o">=</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
+
     <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">Izz</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">5.</span>
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span></div>
 
@@ -445,10 +461,10 @@
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">vol</span> <span class="o">=</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">ext_radius</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">int_radius</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
+
     <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">Izz</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">ext_radius</span> <span class="o">**</span> <span class="mi">5</span> <span class="o">-</span> <span class="n">int_radius</span> <span class="o">**</span> <span class="mi">5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ext_radius</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">int_radius</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mi">5</span>
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span></div>
 
@@ -459,17 +475,17 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
-<span class="sd">    </span>
+
 <span class="sd">    Note</span>
 <span class="sd">    ----</span>
 <span class="sd">    The center of gravity is situated at the altitude of z = 3R/8 over the circular basis center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">vol</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
+
     <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">Izz</span> <span class="o">=</span> <span class="mf">0.26</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span>
-    
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -479,7 +495,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
-<span class="sd">    </span>
+
 <span class="sd">    Note</span>
 <span class="sd">    ----</span>
 <span class="sd">    * The center of gravity is located at an altitude of z=H/2 over the elliptical basis center</span>
@@ -487,14 +503,14 @@
 <span class="sd">    * b is along y axis (ellipse semi axis)</span>
 <span class="sd">    * length is along z axis</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">vol</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">length</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
+
     <span class="n">Ixx</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">b</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span>
     <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span>
     <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">b</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span>
-    
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -504,22 +520,23 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
-<span class="sd">    </span>
+
 <span class="sd">    Note</span>
 <span class="sd">    ----</span>
 <span class="sd">    * a is along z axis (ellipse semi axis)</span>
 <span class="sd">    * b is along x axis (ellipse semi axis)</span>
 <span class="sd">    * c is along y axis (ellipse semi axis)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">vol</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
+
     <span class="n">Ixx</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">c</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">5.</span>
     <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">b</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">5.</span>
     <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">c</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">5.</span>
-    
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="torus"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.torus">[docs]</a><span class="k">def</span> <span class="nf">torus</span><span class="p">(</span><span class="n">chord_radius</span><span class="p">,</span> <span class="n">tube_radius</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get the inertia of a torus</span>
@@ -528,13 +545,13 @@
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">vol</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">tube_radius</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">chord_radius</span>
+
+    <span class="n">vol</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">tube_radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">chord_radius</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">chord_radius</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">5</span><span class="o">*</span><span class="n">tube_radius</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">8.</span>
-    <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">chord_radius</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">tube_radius</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span>
-    
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">chord_radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">tube_radius</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">8.</span>
+    <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">chord_radius</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">tube_radius</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span>
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -545,13 +562,13 @@
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">vol</span> <span class="o">=</span> <span class="n">base</span><span class="o">*</span><span class="n">height</span><span class="o">*</span><span class="n">length</span> <span class="o">/</span> <span class="mf">2.</span>
+
+    <span class="n">vol</span> <span class="o">=</span> <span class="n">base</span> <span class="o">*</span> <span class="n">height</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="mf">2.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">height</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">length</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">36.</span>
-    <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">base</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">height</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">18.</span>
-    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">base</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">length</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">36.</span>
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">height</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">36.</span>
+    <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">base</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">height</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">18.</span>
+    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">base</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">36.</span>
 
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
@@ -563,13 +580,13 @@
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">vol</span> <span class="o">=</span> <span class="n">base</span> <span class="o">*</span> <span class="n">height</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="mf">2.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
 
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">height</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">length</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">36.</span>
-    <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">height</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">base</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">72.</span>
-    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">length</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">base</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">24.</span>
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">height</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">36.</span>
+    <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">height</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">base</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">72.</span>
+    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">length</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">base</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">24.</span>
 
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
@@ -580,19 +597,19 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
-<span class="sd">    </span>
+
 <span class="sd">    Note</span>
 <span class="sd">    ----</span>
 <span class="sd">    The center of gravity is located at the altitude z=H/4 over the rectangular basis center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">vol</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">height</span> <span class="o">/</span> <span class="mf">3.</span>
+
+    <span class="n">vol</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">height</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">height</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">4.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">20.</span>
-    <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">height</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">4.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">20.</span>
-    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">20.</span>
-    
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">height</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">4.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">20.</span>
+    <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">height</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">4.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">20.</span>
+    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">b</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">20.</span>
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -603,11 +620,11 @@
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">vol</span> <span class="o">=</span> <span class="n">a</span><span class="o">**</span><span class="mi">3</span>
+
+    <span class="n">vol</span> <span class="o">=</span> <span class="n">a</span> <span class="o">**</span> <span class="mi">3</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">6.</span>
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">6.</span>
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -617,21 +634,21 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
-<span class="sd">    </span>
+
 <span class="sd">    Note</span>
 <span class="sd">    ----</span>
 <span class="sd">    * a is along x</span>
 <span class="sd">    * b is along y</span>
 <span class="sd">    * h is along z</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">vol</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">h</span>
+
+    <span class="n">vol</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">h</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vol</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span>
-    <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span>
-    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span>
-    
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">h</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span>
+    <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">h</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span>
+    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">b</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span>
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -641,19 +658,19 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
-<span class="sd">    </span>
+
 <span class="sd">    Note</span>
 <span class="sd">    ----</span>
 <span class="sd">    The center of gravity is located at an altitude of z=H/3 over the circular basis center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">surface</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">height</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">surface</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">height</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">height</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">9.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span>
-    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">R</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">2.</span>
-    
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">height</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">9.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span>
+    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">2.</span>
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -663,19 +680,19 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
-<span class="sd">    </span>
+
 <span class="sd">    Note</span>
 <span class="sd">    ----</span>
 <span class="sd">    The center of gravity is located at an altitude of z=(H/3)*(2*r+R)/(r+R)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">surface</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">height</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">R</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">surface</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">height</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">R</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mf">4.</span> <span class="o">+</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">height</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">R</span><span class="o">*</span><span class="n">r</span><span class="o">/</span><span class="p">(</span><span class="n">R</span><span class="o">+</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">18.</span>
-    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
-    
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">r</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span> <span class="o">+</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">height</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">r</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">18.</span>
+    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">r</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -686,14 +703,14 @@
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">surface</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">R</span><span class="o">*</span><span class="n">H</span>
+
+    <span class="n">surface</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">H</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">H</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">6.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
-    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">R</span><span class="o">**</span><span class="mi">2</span>
-    
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">H</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">6.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">R</span> <span class="o">**</span> <span class="mi">2</span>
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -704,30 +721,30 @@
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">surface</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">H</span><span class="p">)</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">R</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">H</span><span class="p">)</span> <span class="o">+</span> <span class="n">H</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">R</span><span class="o">+</span><span class="n">H</span><span class="p">))</span> <span class="o">/</span> <span class="mf">12.</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span><span class="o">+</span><span class="n">H</span><span class="p">)</span>
-    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">R</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">((</span><span class="n">R</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">H</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span><span class="o">+</span><span class="n">H</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.</span>
-    
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">H</span><span class="p">)</span> <span class="o">+</span> <span class="n">H</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">R</span> <span class="o">+</span> <span class="n">H</span><span class="p">))</span> <span class="o">/</span> <span class="mf">12.</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">H</span><span class="p">)</span>
+    <span class="n">Izz</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">((</span><span class="n">R</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">H</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">H</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.</span>
+
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="spherical_shell"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.spherical_shell">[docs]</a><span class="k">def</span> <span class="nf">spherical_shell</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="s1">&#39;STEEL&#39;</span><span class="p">)</span> <span class="p">,</span><span class="n">thickness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
+<div class="viewcode-block" id="spherical_shell"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.spherical_shell">[docs]</a><span class="k">def</span> <span class="nf">spherical_shell</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="s1">&#39;STEEL&#39;</span><span class="p">),</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get the inertia of a spherical shell</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">surface</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="n">surface</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">R</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
-    
-    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">Izz</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mass</span><span class="o">*</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">3.</span>
+
+    <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="n">Izz</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
@@ -737,16 +754,16 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RigidBodyInertia</span>
-<span class="sd">    </span>
+
 <span class="sd">    Note</span>
 <span class="sd">    ----</span>
 <span class="sd">    The center of gravity is located at an altitude of z=R/2 over the circular basis center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">surface</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">R</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">thickness</span>
     <span class="n">mass</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">surface</span>
-    
+
     <span class="n">Ixx</span> <span class="o">=</span> <span class="n">Iyy</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">12.</span>
     <span class="n">Izz</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">R</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">3.</span>
     <span class="k">return</span> <span class="n">RigidBodyInertia</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Ixx</span><span class="p">,</span> <span class="n">Iyy</span><span class="p">,</span> <span class="n">Izz</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
@@ -758,23 +775,21 @@
 
 
 <div class="viewcode-block" id="RotationalInertia3D"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.RotationalInertia3D">[docs]</a><span class="k">class</span> <span class="nc">RotationalInertia3D</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-    
     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">15</span>
-    
+
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">xz</span><span class="p">,</span> <span class="n">yz</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        
-        <span class="n">lower_triangular</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xx</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">xz</span><span class="p">,</span> <span class="n">yz</span><span class="p">,</span> <span class="n">zz</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="n">lower_triangular</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xx</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">xz</span><span class="p">,</span> <span class="n">yz</span><span class="p">,</span> <span class="n">zz</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">lower_triangular</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-        
+
         <span class="k">return</span> <span class="n">obj</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;generating full array&quot;</span><span class="p">)</span>
-        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]</span>
         <span class="n">array</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">return</span> <span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-    
+
     <span class="c1"># def __mul__(self, other):</span>
     <span class="c1">#     print &#39;\nOperation %s * %s&#39; % (repr(self), repr(other))</span>
     <span class="c1">#</span>
@@ -804,20 +819,18 @@
     <span class="k">def</span> <span class="nf">__numpy_ufunc__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ufunc</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;In __numpy_ufunc__&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">NotImplemented</span></div>
-    
 
     <span class="c1"># def __array_finalize(self, obj):</span>
     <span class="c1">#     print &quot;In __array_finalize__ :&quot;</span>
     <span class="c1">#     print &#39;\tself is %s&#39; % repr(self)</span>
     <span class="c1">#     print &#39;\tobj is %s&#39; % repr(obj)</span>
     <span class="c1">#     if obj is None: return</span>
-    
+
     <span class="c1"># def __array_prepare__(self, array, context=None):</span>
     <span class="c1">#     print &quot;In __array_prepare__:&quot;</span>
     <span class="c1">#     (func, args, _) = context</span>
     <span class="c1">#     print func</span>
     <span class="c1">#     print args</span>
-
 
     <span class="c1"># def __array_wrap__(self, obj, context=None):</span>
     <span class="c1">#     print &#39;In __array_wrap__ :&#39;</span>
@@ -830,10 +843,10 @@
     <span class="c1">#</span>
     <span class="c1">#</span>
     <span class="c1">#     return np.ndarray.__array_wrap__(self, obj, context)</span>
-    
+
     <span class="c1"># def __array__(self):</span>
     <span class="c1">#     print &quot;In __array__&quot;</span>
-    
+
     <span class="c1"># def __getitem__(self, key):</span>
     <span class="c1">#     print &#39;In __getitem__ with key :&#39;</span>
     <span class="c1">#     print key</span>
@@ -842,19 +855,19 @@
 
 <div class="viewcode-block" id="AngularVelocityVector"><a class="viewcode-back" href="../../api/meshmagick.inertia.html#meshmagick.inertia.AngularVelocityVector">[docs]</a><span class="k">class</span> <span class="nc">AngularVelocityVector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">15</span>
+
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    
     <span class="c1"># inertia = RigidBodyInertia(1, [0, 0, 0], 1, 2, 3, 4, 5, 6)</span>
-    
+
     <span class="n">inertia</span> <span class="o">=</span> <span class="n">RotationalInertia3D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-    
+
     <span class="n">w</span> <span class="o">=</span> <span class="n">AngularVelocityVector</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-    
+
     <span class="c1"># print inertia.array</span>
     <span class="c1"># print inertia * 2</span>
     <span class="c1"># print inertia.__array_priority__</span>
@@ -870,7 +883,7 @@
     <span class="c1"># print inertia[:3]</span>
 
     <span class="c1"># inertia = RigidBodyInertia(1, [0, 0, 0], 1, 2, 3, 4, 5, 6, point=[1, 2, 3])</span>
-    
+
     <span class="c1"># print inertia.inertia_matrix</span>
     <span class="c1"># print inertia.reduction_point</span>
     <span class="c1"># print inertia.at_cog.inertia_matrix</span>
@@ -883,7 +896,7 @@
     <span class="c1"># print inertia.inertia_matrix</span>
     <span class="c1">#</span>
     <span class="c1"># print inertia</span>
-    
+
     <span class="c1"># R = 5</span>
     <span class="c1"># r = 4.5</span>
     <span class="c1"># R1 = 4.75</span>
@@ -915,7 +928,7 @@
     <p>
         &copy; Copyright 2021, Ecole Centrale de Nantes
       <span class="lastupdated">
-        Last updated on Jan 07, 2021.
+        Last updated on Oct 19, 2021.
       </span>
 
     </p>

@@ -5,10 +5,11 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>meshmagick.inertia module &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
+  <title>meshmagick.inertia module &mdash; Meshmagick User&#39;s Guide 3.2 documentation</title>
   
 
   
@@ -21,10 +22,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -33,6 +34,8 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                2.1.1
+                3.2
               </div>
             
           
@@ -169,37 +172,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-meshmagick.inertia">
+  <section id="module-meshmagick.inertia">
 <span id="meshmagick-inertia-module"></span><h1>meshmagick.inertia module<a class="headerlink" href="#module-meshmagick.inertia" title="Permalink to this headline">¶</a></h1>
 <p>This module defines a RigidBodyInertia class to handle 3D rotational inertia of rigid bodies</p>
 <dl class="py class">
-<dt id="meshmagick.inertia.AngularVelocityVector">
-<em class="property">class </em><code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">AngularVelocityVector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#AngularVelocityVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.AngularVelocityVector" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.AngularVelocityVector">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">AngularVelocityVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#AngularVelocityVector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.AngularVelocityVector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="meshmagick.inertia.RigidBodyInertia">
-<em class="property">class </em><code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">RigidBodyInertia</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mass</span></em>, <em class="sig-param"><span class="n">cog</span></em>, <em class="sig-param"><span class="n">xx</span></em>, <em class="sig-param"><span class="n">yy</span></em>, <em class="sig-param"><span class="n">zz</span></em>, <em class="sig-param"><span class="n">yz</span></em>, <em class="sig-param"><span class="n">xz</span></em>, <em class="sig-param"><span class="n">xy</span></em>, <em class="sig-param"><span class="n">point</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RigidBodyInertia"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">RigidBodyInertia</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RigidBodyInertia"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mass</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The mass of the body in kg</p></li>
+<li><p><strong>mass</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – The mass of the body in kg</p></li>
 <li><p><strong>cog</strong> (<em>array_like</em>) – The 3D coordinates of the center of gravity</p></li>
-<li><p><strong>xx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The principal inertia moment around x axis</p></li>
-<li><p><strong>yy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The principal inertia moment around y axis</p></li>
-<li><p><strong>zz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The principal inertia moment around z axis</p></li>
-<li><p><strong>yz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Inertia product</p></li>
-<li><p><strong>xz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Inertia product</p></li>
-<li><p><strong>xy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Inertia product</p></li>
+<li><p><strong>xx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – The principal inertia moment around x axis</p></li>
+<li><p><strong>yy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – The principal inertia moment around y axis</p></li>
+<li><p><strong>zz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – The principal inertia moment around z axis</p></li>
+<li><p><strong>yz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Inertia product</p></li>
+<li><p><strong>xz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Inertia product</p></li>
+<li><p><strong>xy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Inertia product</p></li>
 <li><p><strong>point</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The reduction point. If None, it is set to be cog</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.at_cog">
-<em class="property">property </em><code class="sig-name descname">at_cog</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.at_cog" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.at_cog">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">at_cog</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.at_cog" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new inertia object that is expressed at cog.</p>
 <p>It makes a copy of itself.</p>
 <dl class="field-list simple">
@@ -212,41 +215,41 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.gravity_center">
-<em class="property">property </em><code class="sig-name descname">gravity_center</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.gravity_center" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.gravity_center">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">gravity_center</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.gravity_center" title="Permalink to this definition">¶</a></dt>
 <dd><p>The position of the center of gravity</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.inertia_matrix">
-<em class="property">property </em><code class="sig-name descname">inertia_matrix</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.inertia_matrix" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.inertia_matrix">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">inertia_matrix</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.inertia_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>The 3D rotational inertia matrix</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.is_at_cog">
-<code class="sig-name descname">is_at_cog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RigidBodyInertia.is_at_cog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.is_at_cog" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.is_at_cog">
+<span class="sig-name descname"><span class="pre">is_at_cog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RigidBodyInertia.is_at_cog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.is_at_cog" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the object is expressed at cog</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.mass">
-<em class="property">property </em><code class="sig-name descname">mass</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.mass" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.mass">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">mass</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.mass" title="Permalink to this definition">¶</a></dt>
 <dd><p>The mass of the body</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.reduction_point">
-<em class="property">property </em><code class="sig-name descname">reduction_point</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.reduction_point" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.reduction_point">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">reduction_point</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.reduction_point" title="Permalink to this definition">¶</a></dt>
 <dd><p>The reduction point of the inertia matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -259,92 +262,106 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.shift_at_cog">
-<code class="sig-name descname">shift_at_cog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RigidBodyInertia.shift_at_cog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.shift_at_cog" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.set_cog">
+<span class="sig-name descname"><span class="pre">set_cog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cog</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RigidBodyInertia.set_cog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.set_cog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a new center of gravity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cog</strong> (<em>array_like</em>) – </p></li>
+<li><p><strong>3D coordinates of the center of gravity</strong> (<em>The</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.shift_at_cog">
+<span class="sig-name descname"><span class="pre">shift_at_cog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RigidBodyInertia.shift_at_cog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.shift_at_cog" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shift the inertia matrix internally at cog.</p>
 <p>The reduction point is then cog.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.xx">
-<em class="property">property </em><code class="sig-name descname">xx</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.xx" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.xx">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">xx</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.xx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the principal inertia moment around x</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.xy">
-<em class="property">property </em><code class="sig-name descname">xy</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.xy" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.xy">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">xy</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.xy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the xy inertia product</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.xz">
-<em class="property">property </em><code class="sig-name descname">xz</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.xz" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.xz">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">xz</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.xz" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the xz inertia product</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.yy">
-<em class="property">property </em><code class="sig-name descname">yy</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.yy" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.yy">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">yy</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.yy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the principal inertia moment around y</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.yz">
-<em class="property">property </em><code class="sig-name descname">yz</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.yz" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.yz">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">yz</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.yz" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the yz inertia product</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="meshmagick.inertia.RigidBodyInertia.zz">
-<em class="property">property </em><code class="sig-name descname">zz</code><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.zz" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RigidBodyInertia.zz">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">zz</span></span><a class="headerlink" href="#meshmagick.inertia.RigidBodyInertia.zz" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the principal inertia moment around z</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -352,19 +369,19 @@
 </dd></dl>
 
 <dl class="py class">
-<dt id="meshmagick.inertia.RotationalInertia3D">
-<em class="property">class </em><code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">RotationalInertia3D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xx</span></em>, <em class="sig-param"><span class="n">xy</span></em>, <em class="sig-param"><span class="n">yy</span></em>, <em class="sig-param"><span class="n">xz</span></em>, <em class="sig-param"><span class="n">yz</span></em>, <em class="sig-param"><span class="n">zz</span></em>, <em class="sig-param"><span class="n">point</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RotationalInertia3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.RotationalInertia3D" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.RotationalInertia3D">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">RotationalInertia3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#RotationalInertia3D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.RotationalInertia3D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p>
-<dl class="py method">
-<dt id="meshmagick.inertia.RotationalInertia3D.array">
-<em class="property">property </em><code class="sig-name descname">array</code><a class="headerlink" href="#meshmagick.inertia.RotationalInertia3D.array" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="meshmagick.inertia.RotationalInertia3D.array">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">array</span></span><a class="headerlink" href="#meshmagick.inertia.RotationalInertia3D.array" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.circular_cone_shell">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">circular_cone_shell</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">R</span></em>, <em class="sig-param"><span class="n">height</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">7850.0</span></em>, <em class="sig-param"><span class="n">thickness</span><span class="o">=</span><span class="default_value">0.02</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#circular_cone_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.circular_cone_shell" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.circular_cone_shell">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">circular_cone_shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7850.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#circular_cone_shell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.circular_cone_shell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a circular cone shell</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -381,8 +398,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.cube">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">cube</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#cube"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.cube" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.cube">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.cube" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a cube</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -395,8 +412,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.ellipsoid">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">ellipsoid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#ellipsoid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.ellipsoid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.ellipsoid">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">ellipsoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#ellipsoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.ellipsoid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of an ellipsoid</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -417,8 +434,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.elliptical_cylinder">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">elliptical_cylinder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">length</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#elliptical_cylinder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.elliptical_cylinder" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.elliptical_cylinder">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">elliptical_cylinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#elliptical_cylinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.elliptical_cylinder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of an elliptical cylinder</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -440,8 +457,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.frustrum_of_circular_cone_shell">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">frustrum_of_circular_cone_shell</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">r</span></em>, <em class="sig-param"><span class="n">R</span></em>, <em class="sig-param"><span class="n">height</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">7850.0</span></em>, <em class="sig-param"><span class="n">thickness</span><span class="o">=</span><span class="default_value">0.02</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#frustrum_of_circular_cone_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.frustrum_of_circular_cone_shell" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.frustrum_of_circular_cone_shell">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">frustrum_of_circular_cone_shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7850.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#frustrum_of_circular_cone_shell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.frustrum_of_circular_cone_shell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a frustrum of circular cone shell</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -458,8 +475,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.hemisphere">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">hemisphere</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radius</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hemisphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.hemisphere" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.hemisphere">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">hemisphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hemisphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.hemisphere" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a hemisphere</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -476,8 +493,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.hemispherical_shell">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">hemispherical_shell</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">R</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">7850.0</span></em>, <em class="sig-param"><span class="n">thickness</span><span class="o">=</span><span class="default_value">0.02</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hemispherical_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.hemispherical_shell" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.hemispherical_shell">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">hemispherical_shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7850.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hemispherical_shell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.hemispherical_shell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a hemispherical shell</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -494,8 +511,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.hollow_right_circular_cylinder">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">hollow_right_circular_cylinder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">int_radius</span></em>, <em class="sig-param"><span class="n">ext_radius</span></em>, <em class="sig-param"><span class="n">length</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hollow_right_circular_cylinder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.hollow_right_circular_cylinder" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.hollow_right_circular_cylinder">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">hollow_right_circular_cylinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">int_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hollow_right_circular_cylinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.hollow_right_circular_cylinder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a hollow right circular cylinder</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -508,8 +525,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.hollow_sphere">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">hollow_sphere</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">int_radius</span></em>, <em class="sig-param"><span class="n">ext_radius</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hollow_sphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.hollow_sphere" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.hollow_sphere">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">hollow_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">int_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#hollow_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.hollow_sphere" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a hollow sphere</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -522,8 +539,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.isoceles_wedge">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">isoceles_wedge</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base</span></em>, <em class="sig-param"><span class="n">height</span></em>, <em class="sig-param"><span class="n">length</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#isoceles_wedge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.isoceles_wedge" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.isoceles_wedge">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">isoceles_wedge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#isoceles_wedge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.isoceles_wedge" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of an isocele wedge</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -536,8 +553,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.lateral_cylindrical_shell">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">lateral_cylindrical_shell</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">R</span></em>, <em class="sig-param"><span class="n">H</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">7850.0</span></em>, <em class="sig-param"><span class="n">thickness</span><span class="o">=</span><span class="default_value">0.02</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#lateral_cylindrical_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.lateral_cylindrical_shell" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.lateral_cylindrical_shell">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">lateral_cylindrical_shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7850.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#lateral_cylindrical_shell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.lateral_cylindrical_shell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a lateral cylindrical shell</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -550,8 +567,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.rectangular_prism">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">rectangular_prism</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">h</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#rectangular_prism"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.rectangular_prism" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.rectangular_prism">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">rectangular_prism</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#rectangular_prism"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.rectangular_prism" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a rectangular prism</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -572,8 +589,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.right_angle_wedge">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">right_angle_wedge</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base</span></em>, <em class="sig-param"><span class="n">height</span></em>, <em class="sig-param"><span class="n">length</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_angle_wedge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.right_angle_wedge" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.right_angle_wedge">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">right_angle_wedge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_angle_wedge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.right_angle_wedge" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a right angle wedge</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -586,8 +603,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.right_circular_cone">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">right_circular_cone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radius</span></em>, <em class="sig-param"><span class="n">length</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_circular_cone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.right_circular_cone" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.right_circular_cone">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">right_circular_cone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_circular_cone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.right_circular_cone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a right circular cone</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -604,8 +621,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.right_circular_cylinder">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">right_circular_cylinder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radius</span></em>, <em class="sig-param"><span class="n">length</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_circular_cylinder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.right_circular_cylinder" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.right_circular_cylinder">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">right_circular_cylinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_circular_cylinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.right_circular_cylinder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a right circular cylinder</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -618,8 +635,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.right_rectangular_pyramid">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">right_rectangular_pyramid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">height</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_rectangular_pyramid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.right_rectangular_pyramid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.right_rectangular_pyramid">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">right_rectangular_pyramid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#right_rectangular_pyramid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.right_rectangular_pyramid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a right rectangular pyramid</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -636,8 +653,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.sphere">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">sphere</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radius</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#sphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.sphere" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.sphere">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.sphere" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a sphere</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -650,8 +667,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.spherical_shell">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">spherical_shell</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">R</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">7850.0</span></em>, <em class="sig-param"><span class="n">thickness</span><span class="o">=</span><span class="default_value">0.02</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#spherical_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.spherical_shell" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.spherical_shell">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">spherical_shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7850.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#spherical_shell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.spherical_shell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a spherical shell</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -664,8 +681,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.torus">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">torus</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">chord_radius</span></em>, <em class="sig-param"><span class="n">tube_radius</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#torus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.torus" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.torus">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">torus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chord_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tube_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#torus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.torus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a torus</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -678,8 +695,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="meshmagick.inertia.total_cylindrical_shell">
-<code class="sig-prename descclassname">meshmagick.inertia.</code><code class="sig-name descname">total_cylindrical_shell</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">R</span></em>, <em class="sig-param"><span class="n">H</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">7850.0</span></em>, <em class="sig-param"><span class="n">thickness</span><span class="o">=</span><span class="default_value">0.02</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#total_cylindrical_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#meshmagick.inertia.total_cylindrical_shell" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="meshmagick.inertia.total_cylindrical_shell">
+<span class="sig-prename descclassname"><span class="pre">meshmagick.inertia.</span></span><span class="sig-name descname"><span class="pre">total_cylindrical_shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7850.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meshmagick/inertia.html#total_cylindrical_shell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meshmagick.inertia.total_cylindrical_shell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the inertia of a total cylindrical shell</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -691,7 +708,7 @@
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -715,7 +732,7 @@
     <p>
         &copy; Copyright 2021, Ecole Centrale de Nantes
       <span class="lastupdated">
-        Last updated on Jan 07, 2021.
+        Last updated on Oct 19, 2021.
       </span>
 
     </p>

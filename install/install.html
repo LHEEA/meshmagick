@@ -5,10 +5,11 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation Instructions &mdash; Meshmagick User&#39;s Guide 2.1.1 documentation</title>
+  <title>Installation Instructions &mdash; Meshmagick User&#39;s Guide 3.2 documentation</title>
   
 
   
@@ -21,10 +22,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -33,11 +34,13 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Meshmagick’s Command Line Interface" href="../command_line/index.html" />
-    <link rel="prev" title="Meshmagick User’s Guide (2.1.1)" href="../index.html" /> 
+    <link rel="prev" title="Meshmagick User’s Guide (3.2)" href="../index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                2.1.1
+                3.2
               </div>
             
           
@@ -86,12 +89,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation Instructions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installing-with-conda">Installing with conda</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installing-with-pip">Installing with pip</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installing-from-source">Installing from source</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation Instructions</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../command_line/index.html">Meshmagick’s Command Line Interface</a></li>
@@ -162,107 +160,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="installation-instructions">
+  <section id="installation-instructions">
 <h1>Installation Instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this headline">¶</a></h1>
 <p>Meshmagick works on every major OS (*nix, Windows, OS/X) for both 32/64 bit systems.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>From version 2.0, Meshmagick is now written in Python 3. Compatibility with Python 2.7 is no more ensured. If special
-needs for this compatibility, please contact the developers. Thanks.</p>
-</div>
-<div class="section" id="installing-with-conda">
-<h2>Installing with conda<a class="headerlink" href="#installing-with-conda" title="Permalink to this headline">¶</a></h2>
-<p>This is the prefered method to get your own packaged copy of Meshmagick as <a class="reference external" href="http://conda.pydata.org/docs/">conda</a>
-is known to deal with every dependencies of Meshmagick. For this, you will need to install
-<a class="reference external" href="https://www.continuum.io/downloads">Anaconda</a> Python distribution or simply
-<a class="reference external" href="http://conda.pydata.org/miniconda.html">Miniconda</a> for your architecture which are shipped with the conda package
-manager. If you are not an everyday Python developer, maybe you will prefer installing Miniconda which is far mush
-lighter than Anaconda.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><strong>For Windows users</strong>, current version of conda (4.3.*) appears to be buggy with respect to conda install of
-meshmagick. One workaround is to downgrade conda to version 4.2.* by typing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">conda</span><span class="o">=</span><span class="mf">4.2</span>
+<p>The major advice to give is to rely on <a class="reference external" href="https://www.anaconda.com/products/individual">Anaconda</a> or
+<a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a> python distribution.</p>
+<p>There is one and only one supported installation procedure that is currently and it relies on <code class="docutils literal notranslate"><span class="pre">pip</span></code> package installer.</p>
+<p>After cloning the repository from GitHub and choosing the desired version (say 3.2):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">LHEEA</span><span class="o">/</span><span class="n">meshmagick</span><span class="o">.</span><span class="n">git</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="mf">3.2</span>
 </pre></div>
 </div>
-</div>
-<p>Once conda installed, just try this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">frongere</span> <span class="n">meshmagick</span>
-</pre></div>
-</div>
-<p>It will download the Meshmagick package corresponding to your architecture. If everything goes well, it will install
-for you the dependencies. You may now test the install by:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">meshmagick</span> <span class="o">-</span><span class="n">h</span>
-</pre></div>
-</div>
-<p>which should now show you the embedded help of the command line tool.</p>
-<p>Updating to the latest meshmagick version is obtained by:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">update</span> <span class="n">meshmagick</span>
-</pre></div>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This method for installation is quick. However, we do not systematically package Meshmagick for conda. We apologize
-for that. The advice is to install Meshmagick from sources with pip using the edit mode -e (see below).</p>
-</div>
-</div>
-<div class="section" id="installing-with-pip">
-<h2>Installing with pip<a class="headerlink" href="#installing-with-pip" title="Permalink to this headline">¶</a></h2>
-<p>For those wanting to use pip, just do:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">meshmagick</span>
-</pre></div>
-</div>
-<p>It will install Meshmagick from Pypi.</p>
-<p>Update to the newest version is achieved by:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">meshmagick</span> <span class="o">--</span><span class="n">upgrade</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This is not the preferred method as Meshmagick depends on vtk for its visualization features which is sadly not
-available on Pypi. You will then have to deal with this dependency by yourself.</p>
-<ul class="simple">
-<li><p><strong>On Linux</strong> : You may use the current package manager of your system to install vtk</p></li>
-<li><p><strong>On Mac</strong> : You may follow the instructions given in <em>bemio</em> documentation:
-<a class="reference external" href="https://wec-sim.github.io/bemio/installing.html#installing-vtk-with-python-bindings">https://wec-sim.github.io/bemio/installing.html#installing-vtk-with-python-bindings</a></p></li>
-<li><p><strong>On Windows</strong> : We had success in installing unofficial pakage from here:
-<a class="reference external" href="http://www.lfd.uci.edu/~gohlke/pythonlibs/">http://www.lfd.uci.edu/~gohlke/pythonlibs/</a></p></li>
-</ul>
-</div>
-</div>
-<div class="section" id="installing-from-source">
-<h2>Installing from source<a class="headerlink" href="#installing-from-source" title="Permalink to this headline">¶</a></h2>
-<p>This can be done by checking out the source files from the Git source code repository. This option is mainly for
-those wanting to develop into Meshmagick.</p>
-<ol class="arabic">
-<li><p>Clone the meshmagick repository:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">LHEEA</span><span class="o">/</span><span class="n">meshmagick</span><span class="o">.</span><span class="n">git</span>
-</pre></div>
-</div>
-</li>
-<li><p>Change directory to meshmagick</p></li>
-<li><p>Install:</p>
-<blockquote>
-<div><ul>
-<li><p>If you want to install from source for just using meshmagick, it can be achieved by:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
-</pre></div>
-</div>
-</li>
-<li><p>If you want to install from soruce for development purposes, you should better install meshmagick in
-development mode so that your code modifications are directly taken into account with respect to your install.
-It is achieved by the command:</p>
+<p>All you need to do from the root directory of the repository is:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
 </pre></div>
 </div>
-</li>
-</ul>
-</div></blockquote>
-</li>
-<li><p>(Optional) Run <code class="docutils literal notranslate"><span class="pre">pytest</span></code> if you have <a class="reference external" href="http://doc.pytest.org/en/latest/">pytest</a> installed.</p></li>
-</ol>
-</div>
-</div>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">-e</span></code> option stands for editable and it says pip not to copy files from the repository to the python conda
+install but keep the files in place. Although not mandatory, this option is very usefull as to update meshmagick to a
+newer version, you only have to pull it from GiHub and it will be readily available to you, without having to reinstall.</p>
+<p>(Optional) Run <code class="docutils literal notranslate"><span class="pre">pytest</span></code> if you have <a class="reference external" href="http://doc.pytest.org/en/latest/">pytest</a> installed.</p>
+</section>
 
 
            </div>
@@ -275,7 +192,7 @@ It is achieved by the command:</p>
         <a href="../command_line/index.html" class="btn btn-neutral float-right" title="Meshmagick’s Command Line Interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../index.html" class="btn btn-neutral float-left" title="Meshmagick User’s Guide (2.1.1)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="Meshmagick User’s Guide (3.2)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -286,7 +203,7 @@ It is achieved by the command:</p>
     <p>
         &copy; Copyright 2021, Ecole Centrale de Nantes
       <span class="lastupdated">
-        Last updated on Jan 07, 2021.
+        Last updated on Oct 19, 2021.
       </span>
 
     </p>
