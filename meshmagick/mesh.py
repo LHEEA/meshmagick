@@ -704,6 +704,8 @@ class Mesh(object):
             del self.__internals__['faces_normals']
         if self.has_surface_integrals():
             del self.__internals__['surface_integrals']
+        if self._has_triangles_quadrangles():
+            self._remove_triangles_quadrangles()
         return
 
     @property

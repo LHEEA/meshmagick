@@ -125,6 +125,14 @@ class MeshClipper(object):
                               'vertices_on_mask': np.fabs(vertices_distances) < self._vicinity_tol,
                               'vertices_below_mask': vertices_distances < -self._vicinity_tol
                               }
+
+        if np.all(vertices_positions['vertices_above_mask']):
+            # Cannot clip as this mesh is totally above or below the clipping plane. Throwing an error
+            raise RuntimeError("Mesh does not crosses the clipping plane", "above")
+
+        if np.all(vertices_positions['vertices_below_mask']):
+            raise RuntimeError("Mesh does not crosses the clipping plane", "below")
+
         self.__internals__.update(vertices_positions)
 
     def _partition_mesh(self):
@@ -708,8 +716,7 @@ class MeshClipper(object):
                                     pend = clipped_crown_mesh.vertices[line[-1]]
                                     
                                     d = np.linalg.norm(pstart-pend)
-                                    print(d)
-                                    
+
                                     open_lines.append(line)
                                     break
                         else:

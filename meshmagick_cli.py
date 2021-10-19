@@ -21,6 +21,16 @@ file format use indexing starting at 1. This different convention might be trans
 to user and 1-indexing may not be present outside the I/O functions
 """
 
+""" Pour activer l'aucompletion meshmagick:
+installer argcomplete (conda install argcomplete)
+Activer la completion globale:
+    activate-global-python-argcomplete --dest=/home/<username>/
+Ca installe un fichier /home/<username>/python-argcomplete
+qu'il faut sourcer dans le .bashrc soit ajotuer la ligne suivante dans le bashrc:
+    source /home/<username>/python-argcomplete
+L'autocompletion devrait etre maintenant active pour meshmagick
+"""
+
 # TODO: move meshmagick.py at the root level of the project ?
 
 import os, sys
@@ -47,279 +57,10 @@ __email__ = "Francois.Rongere@dice-engineering.com"
 
 __all__ = ['main']
 
-# =======================================================================
-#                         MESH MANIPULATION HELPERS
-# =======================================================================
-# TODO: those functions should disappear from this module
-
-def _is_point_inside_polygon(point, poly):
-    """_is_point_inside_polygon(point, poly)
-
-    Internal function to Determine if a point is inside a given polygon.
-    This algorithm is a ray casting method.
-
-    Parameters:
-        point: ndarray
-            2D coordinates of the point to be tested
-        poly: ndarray
-            numpy array of shape (nv, 2) of 2D coordinates
-            of the polygon
-    """
-    # TODO: place this code into a utils module
-    # FIXME : Do we have to repeat the first point at the last position
-    # of polygon ???
-
-    x = point[0]
-    y = point[1]
-
-    n = len(poly)
-    inside = False
-
-    p1x, p1y = poly[0]
-    for i in range(n):
-        p2x, p2y = poly[i]
-        if y > min(p1y, p2y):
-            if y <= max(p1y, p2y):
-                if x <= max(p1x, p2x):
-                    if p1y != p2y:
-                        xints = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
-                    if p1x == p2x or x <= xints:
-                        inside = not inside
-        p1x, p1y = p2x, p2y
-
-    return inside
-
-
-def generate_lid(V, F, max_area=None, verbose=False):
-    """generate_lid(_vertices, _faces, max_area=None, verbose=False)
-
-    Meshes the lid of a mesh with triangular _faces to be used in irregular frequency
-    removal in BEM softwares. It clips the mesh againt the plane Oxy, extract the intersection
-    polygon and relies on meshpy (that is a wrapper around the TRIANGLE meshing library).
-    It is able to deal with moonpools.
-
-    Parameters:
-        V: ndarray
-            numpy array of the coordinates of the mesh's nodes
-        F: ndarray
-            numpy array of the _faces' nodes connectivities
-        max_area[optional]: float
-            The maximum area of triangles to be generated
-        verbose[optional]: bool
-            If set to True, generates output along the processing
-
-    """
-
-    # TODO: rely on the wrapper done for the triangle lib that has been done in cython and no more on meshpy.
-
-    # TODO: Put the reference of TRIANGLE and meshpy (authors...) in the docstring
-
-    # TODO: remove verbose mode and place it into the main of meshmagick !!!
-
-    # TODO: Faire de cette fonction une methode dans mesh ??? --> non on a un autre module qui wrappe triangle avec
-    # cython...
-
-    try:
-        import meshpy.triangle as triangle
-    except:
-        raise ImportError('Meshpy has to be available to use the generate_lid() function')
-
-    if verbose:
-        print('\n--------------')
-        print('Lid generation')
-        print('--------------\n')
-
-    # Clipping the mesh with Oxy plane
-    V, F, clip_infos = clip_by_plane(V, F, Plane(), infos=True)
-
-    nv = V.shape[0]
-    nf = F.shape[0]
-
-    if max_area is None:
-        max_area = get_all_faces_properties(V, F)[0].mean()
-
-    # Analysing polygons to find holes
-    polygons = clip_infos['PolygonsNewID']
-    nb_pol = len(polygons)
-
-    holes = []
-    boundaries = []
-    for ipoly, polygon in enumerate(polygons):
-        points = V[polygon][:, :2]
-        n = points.shape[0]
-        # Testing the orientation of each polygon by computing the signed area of it
-        signed_area = np.array(
-            [points[j][0] * points[j + 1][1] - points[j + 1][0] * points[j][1] for j in range(n - 1)],
-            dtype=np.float).sum()
-        if signed_area < 0.:
-            holes.append(polygon)
-        else:
-            boundaries.append(polygon)
-
-    nb_hole = len(holes)
-    nb_bound = len(boundaries)
-
-    hole_dict = dict([(j, []) for j in range(nb_bound)])
-    if nb_hole > 0:
-        if verbose:
-            if nb_hole == 1:
-                word = 'moonpool has'
-            else:
-                word = 'moonpools have'
-            print(('\t-> %u %s been detected' % (nb_hole, word)))
-
-        # TODO : getting a point inside the hole polygon
-
-        def pick_point_inside_hole(hole):
-
-            # First testing with the geometric center of the hole
-            point = np.array(hole).sum(axis=0) / len(hole)
-            if not _is_point_inside_polygon(point, hole):
-                # Testing something else
-                raise RuntimeError('The algorithm should be refined to more complex polygon topologies... up to you ?')
-
-            return point
-
-        # Assigning holes to boundaries
-        if nb_bound == 1 and nb_hole == 1:
-            # Obvious case
-            hole_dict[0].append((0, pick_point_inside_hole(V[holes[0]][:, :2])))
-        else:
-            # We may do a more elaborate search
-            for ihole, hole in enumerate(holes):
-                P0 = V[hole[0]][:2]
-                # Testing against all boundary polygons
-                for ibound, bound in enumerate(boundaries):
-                    if _is_point_inside_polygon(P0, V[bound][:, :2]):
-                        hole_dict[ibound].append((ihole, pick_point_inside_hole(V[hole][:, :2])))
-                        break
-
-    def round_trip_connect(start, end):
-        return [(j, j + 1) for j in range(start, end)] + [(end, start)]
-
-    # Meshing every boundaries, taking into account holes
-    for ibound, bound in enumerate(boundaries):
-
-        nvp = len(bound) - 1
-
-        # Building the loop
-        points = list(map(tuple, list(V[bound][:-1, :2])))
-
-        edges = round_trip_connect(0, nvp - 1)
-
-        info = triangle.MeshInfo()
-
-        if len(hole_dict[ibound]) > 0:
-            for ihole, point in hole_dict[ibound]:
-                hole = holes[ihole]
-                points.extend(list(map(tuple, list(V[hole][:-1, :2]))))
-                edges.extend(round_trip_connect(nvp, len(points) - 1))
-
-                # Marking the point as a hole
-                info.set_holes([tuple(point)])
-
-        info.set_points(points)
-        info.set_facets(edges)
-
-        # Generating the lid
-        mesh = triangle.build(info, max_volume=max_area, allow_boundary_steiner=False)
-
-        mesh_points = np.array(mesh.points)
-        nmp = len(mesh_points)
-        mesh_tri = np.array(mesh.elements, dtype=np.int32)
-
-        # Resizing
-        nmt = mesh_tri.shape[0]
-        mesh_quad = np.zeros((nmt, 4), dtype=np.int32)
-        mesh_quad[:, :-1] = mesh_tri + nv
-        mesh_quad[:, -1] = mesh_quad[:, 0]
-
-        mesh_points_3D = np.zeros((nmp, 3))
-        mesh_points_3D[:, :-1] = mesh_points
-
-        # show(_vertices, _faces)
-        # return
-
-        # Adding the lid to the initial mesh
-        V = np.append(V, mesh_points_3D, axis=0)
-        nv += nmp
-        F = np.append(F, mesh_quad, axis=0)
-        nf += nmt
-
-    # Merging duplicates
-    V, F = merge_duplicates(V, F)
-
-    if verbose:
-        if nb_bound == 1:
-            verb = 'lid has'
-        else:
-            verb = 'lids have'
-        print(("\n\t-> %u %s been added successfully\n" % (nb_bound, verb)))
-
-    return V, F
-
-
-def fill_holes(V, F, verbose=False):
-    import vtk
-
-    if verbose:
-        print("Filling holes")
-
-    polydata = _build_vtkPolyData(V, F)
-
-    fillHolesFilter = vtk.vtkFillHolesFilter()
-
-    if vtk.VTK_MAJOR_VERSION <= 5:
-        fillHolesFilter.SetInputConnection(polydata.GetProducerPort())
-    else:
-        fillHolesFilter.SetInputData(polydata)
-
-    fillHolesFilter.Update()
-
-    polydata_filled = fillHolesFilter.GetOutput()
-
-    V, F = _dump_vtk(polydata_filled)
-
-    if verbose:
-        print("\t--> Done!")
-
-    return V, F
-
-
-def detect_features(V, F, verbose=True):
-    mesh = Mesh(V, F, verbose=verbose)
-    mesh.detect_features(verbose=verbose)
-
-    return
-
-
-def _build_polyline(curve):
-    import vtk
-
-    npoints = len(curve)
-
-    points = vtk.vtkPoints()
-    for point in curve:
-        points.InsertNextPoint(point)
-
-    polyline = vtk.vtkPolyLine()
-    polyline.GetPointIds().SetNumberOfIds(npoints)
-
-    for id in range(npoints):
-        polyline.GetPointIds().SetId(id, id)
-
-    cells = vtk.vtkCellArray()
-    cells.InsertNextCell(polyline)
-
-    polydata = vtk.vtkPolyData()
-    polydata.SetPoints(points)
-    polydata.SetLines(cells)
-
-    return polydata
-
 
 def list_medium():
     return ', '.join(densities.list_medium())
+
 
 # =======================================================================
 #                         COMMAND LINE USAGE
@@ -328,10 +69,9 @@ def list_medium():
 
 try:
     import argcomplete
-
-    acok = True
+    has_argcomplete = True
 except:
-    acok = False
+    has_argcomplete = False
 
 parser = argparse.ArgumentParser(
     description="""  --  MESHMAGICK --
@@ -594,27 +334,31 @@ parser.add_argument('--thickness', type=float,
                     help="""The thickness of the shell used for the evaluation of inertia
                     parameters of the mesh. The default value is 0.02m.""")
 
-
 # Arguments for hydrostatics computations
 # TODO: l'option -hs devrait etre une sous-commande au sens de argparse
 # TODO: completer l'aide de -hs
+
+parser.add_argument('-pn', '--project-name', default="NO_NAME", type=str, metavar='Project Name',
+                    help="""The project name for hydrostatics ourput
+                    """)
+
 parser.add_argument('-hs', '--hydrostatics', action='store_true',
                     help="""Compute hydrostatics data and throws a report on the
-                    command line. When used along with options --disp, --cog or
+                    command line. When used along with options -mdisp, --cog or
                     --zcog, the behaviour is different.""")
 
 # TODO: replace disp by mass as it is more correct...
-parser.add_argument('--disp', default=None, type=float, metavar='Disp',
+parser.add_argument('-mdisp', '--mass-displacement', default=None, type=float, metavar='Disp',
                     help="""Specifies the mass of the mesh for hydrostatic computations.
-                        It must be given in tons.
+                        It MUST be given in tons.
                         """)
 
-parser.add_argument('--cog', nargs=3, metavar=('Xg', 'Yg', 'Zg'),
+parser.add_argument('-cog', '--cog', nargs=3, metavar=('Xg', 'Yg', 'Zg'),
                     help="""Specifies the 3D position of the center of gravity.
                     The third coordinate given has priority over the value given
                     with the --zcog option.""")
 
-parser.add_argument('--zcog', default=None, type=float, metavar='Zcog',
+parser.add_argument('-zg', '--zcog', default=None, type=float, metavar='Zcog',
                     help="""Specifies the z position of the center of gravity. This
                         is the minimal data needed for hydrostatic stiffness matrix
                         computation. It is however overwriten by the third component
@@ -622,8 +366,20 @@ parser.add_argument('--zcog', default=None, type=float, metavar='Zcog',
                         is given, zcog is set to 0.
                         """)
 
-parser.add_argument('--rho-water', default=1023., type=float, metavar='Rho',
-                    help="""Specifies the density of salt water. Default is 1023 kg/m**3.
+parser.add_argument('-lpp', '--lpp', default=None, type=float, metavar='Lpp',
+                    help="""Specifies the Lpp value as it cannot be calculated with
+                        only the mesh as it depends on the AP position that is a 
+                        rudder position dependent information that the mesh does not
+                        enclose. It helps do better inertia (Iyy & Izz) approximations
+                        using standard formulas. See also the alternative -AP formula.  
+                        """)
+
+parser.add_argument('-ap', '--orig-at-ap', action='store_true',
+                    help="""Tell the solver that the origin is ar After perpendicular 
+                    sot that lpp can be calculated from this information.""")
+
+parser.add_argument('-wd', '--water-density', default=1025., type=float, metavar='Rho',
+                    help="""Specifies the density of salt water. Default is 1025 kg/m**3.
                     """)
 
 parser.add_argument('-g', '--grav', default=9.81, type=float, metavar='G',
@@ -633,34 +389,6 @@ parser.add_argument('-g', '--grav', default=9.81, type=float, metavar='G',
 
 # parser.add_argument('--hs_solver_params', nargs='+')
 
-parser.add_argument('-af', '--absolute-force', nargs=6, action='append',
-                    metavar=('X', 'Y', 'Z', 'Fx', 'Fy', 'Fz'),
-                    help="""Add an additional absolute force applied to the mesh in
-                    hydrostatics equilibrium computations. It is absolute as force
-                    orientation does not change during hydrostatic equilibrium
-                    computations, but application point follows the mesh motion.
-                    The option is called with 6 arguments such that:
-                    
-                        -af x y z fx fy fz
-                     
-                    where [x, y, z] are the coordinates of the application point
-                    (in meters) and [fx, fy, fz] are the components of the force.
-                    Those are expressed in the initial mesh frame.
-                     """)
-
-parser.add_argument('-rf', '--relative-force', nargs=6, action='append', type=float,
-                    metavar=('X', 'Y', 'Z', 'Fx', 'Fy', 'Fz'),
-                    help="""Add an additional relative force applied to the mesh in
-                    hydrostatics equilibrium computations. It is relative as force
-                    orientation follows the orientation of the mesh during equilibrium
-                    computations. The option is called with 6 arguments such that:
-                     
-                        -af x y z fx fy fz
-                     
-                    where [x, y, z] are the coordinates of the application point
-                    of the force and [fx, fy, fz] are the components of the force.
-                    Those are expressed in the initial mesh frame.
-                     """)
 
 parser.add_argument('--hs-report', type=str, metavar='filename',
                     help="""Write the hydrostatic report into the file given as an argument""")
@@ -712,26 +440,24 @@ parser.add_argument('--hs-report', type=str, metavar='filename',
 #                     help="""Fill little holes by triangulation if any.
 #                     """)
 
-parser.add_argument('--show', action='store_true',
+parser.add_argument('-sh', '--show', action='store_true',
                     help="""Shows the input mesh in an interactive window""")
 
-parser.add_argument('--version', action='version',
+parser.add_argument('-v', '--version', action='version',
                     version='meshmagick - version %s\n%s' % (__version__, __copyright__),
                     help="""Shows the version number and exit""")
 
 
 def main():
-    if acok:
+    if has_argcomplete:
         argcomplete.autocomplete(parser)
 
-    # TODO : Utiliser des sous-commandes pour l'utilisation de meshmagick
+    # Parse command line arguments
+    args = parser.parse_args()
 
-    args, unknown = parser.parse_known_args()
-
+    verbose = True
     if args.quiet:
         verbose = False
-    else:
-        verbose = True
 
     if verbose:
         print('\n=============================================')
@@ -746,7 +472,8 @@ def main():
         _, ext = os.path.splitext(args.infilename)
         format = ext[1:].lower()
         if format == '':
-            raise IOError('Unable to determine the input file format from its extension. Please specify an input format.')
+            raise IOError(
+                'Unable to determine the input file format from its extension. Please specify an input format.')
 
     # Loading mesh elements from file
     if os.path.isfile(args.infilename):
@@ -764,6 +491,26 @@ def main():
             print(('%s successfully loaded' % args.infilename))
     else:
         raise IOError('file %s not found' % args.infilename)
+
+    if args.concatenate_file is not None:
+        print('Concatenate %s with %s' % (args.infilename, args.concatenate_file))
+        # Loading the file
+        if os.path.isfile(args.concatenate_file):
+            Vc, Fc = mmio.load_mesh(args.concatenate_file, format)
+
+            # Give the name of the mesh the filename
+            basename = os.path.basename(args.concatenate_file)
+            mesh_name, _ = os.path.splitext(basename)
+
+            mesh_c = Mesh(Vc, Fc, name=mesh_name)
+            # Ensuring triangles are following the right convention (last id = first id)
+            mesh_c.heal_triangles()
+            if verbose:
+                mesh_c.verbose_on()
+                print(('%s successfully loaded' % args.concatenate_file))
+        else:
+            raise IOError('file %s not found' % args.concatenate_file)
+        mesh += mesh_c
 
     # Merge duplicate _vertices
     if args.merge_duplicates is not None:
@@ -1094,7 +841,7 @@ def main():
 
         if verbose:
             print(("\nInertial parameters for a uniform distribution of a medium of density %.1f kg/m**3 in the mesh:\n" \
-                  % rho_medium))
+                   % rho_medium))
             print(("\tMass = %.3f tons" % (inertia.mass / 1000.)))
             cog = inertia.gravity_center
             print(("\tCOG (m):\n\t\txg = %.3f\n\t\tyg = %.3f\n\t\tzg = %.3f" % (cog[0], cog[1], cog[2])))
@@ -1120,7 +867,7 @@ def main():
 
         if verbose:
             print(("\nInertial parameters for a shell distribution of a medium of density %.1f kg/m**3 and a thickness " \
-                  "of %.3f m over the mesh:\n" % (rho_medium, thickness)))
+                   "of %.3f m over the mesh:\n" % (rho_medium, thickness)))
             print(("\tMass = %.3f tons" % (inertia.mass / 1000.)))
             cog = inertia.gravity_center
             print(("\tCOG (m):\n\t\txg = %.3f\n\t\tyg = %.3f\n\t\tzg = %.3f" % (cog[0], cog[1], cog[2])))
@@ -1132,98 +879,107 @@ def main():
             point = inertia.reduction_point
             print(("\tExpressed at point : \t\t%.3E\t%.3E\t%.3E" % (point[0], point[1], point[2])))
 
-    additional_forces = []
-    if args.relative_force is not None:
-        for item in args.relative_force:
-            force = hs.Force(point=list(map(float, item[:3])), value=list(map(float, item[3:])), mode='relative')
-            additional_forces.append(force)
 
-    if args.absolute_force is not None:
-        for item in args.absolute_force:
-            force = hs.Force(point=list(map(float, item[:3])), value=list(map(float, item[3:])), mode='absolute')
-            additional_forces.append(force)
+    has_disp = has_cog = has_zcog = False
+
+    if args.mass_displacement is not None:
+        disp = args.mass_displacement
+        has_disp = True
+
+    cog = np.zeros(3)
+    if args.cog is not None:
+        cog = list(map(float, args.cog))
+        has_cog = True
+
+    if args.zcog is not None:
+        zcog = args.zcog
+        has_zcog = True
+
+    orig_at_ap = False
+    if args.orig_at_ap:
+        orig_at_ap = True
+
+    # parameters
+    water_density = args.water_density
+    grav = args.grav
+    lpp = args.lpp
+
+    project_name = args.project_name
+
+
+    # FIXME: il faut prendre en compte dans les z_corr et rotmat_corr les informations de transformation donnees
+    # dans les operations de translation et de rotation precedemment !!!
+
+    z_corr = 0.
+    rotmat_corr = np.eye(3, 3)
 
     if args.hydrostatics:
-        grav = args.grav
-        rho_water = args.rho_water
 
-        hs_solver = hs.Hydrostatics(mesh, rho_water=rho_water, grav=grav, verbose=verbose)
+        reltol = 1e-6
+        z_corr = 0.
+        rotmat_corr = np.eye(3, 3)
+        hs_data = dict()
 
-        for force in additional_forces:
-            hs_solver.add_force(force)
+        if not has_disp and not has_cog:
+            print(">>>> Performing hydrostatic computation on the current hull configuration considered at equilibrium")
+            if not has_zcog:
+                raise RuntimeError("zcog should at least be given for correct stiffness values computations")
 
-        if args.disp is not None:
-            disp = args.disp
-            has_disp = True
-        else:
-            disp = hs_solver.displacement
-            has_disp = False
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), water_density, grav)
+            xb, yb, _ = hs_data["buoyancy_center"]
+            cog = np.array([xb, yb, zcog])
+            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav,
+                                              at_cog=True, lpp=lpp, orig_at_ap=orig_at_ap)
 
-        if args.cog is not None:
-            cog = list(map(float, args.cog))
-            has_cog = True
-        else:
-            cog = hs_solver.gravity_center
-            has_cog = False
+        elif has_disp and not has_cog:
+            print(">>>> Computing equilibrium of the hull for the given displacement of %f tons" % disp)
+            if not has_zcog:
+                raise RuntimeError("zcog should at least be given for correct stiffness values computations")
 
-        if args.zcog is not None:
-            zcog = args.zcog
-            has_zcog = True
-        else:
-            zcog = hs_solver.zg
-            has_zcog = False
+            z_corr = hs.displacement_equilibrium(mesh, disp, water_density, grav,
+                                                 reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), water_density, grav,
+                                              z_corr=z_corr, at_cog=False)
+            xb, yb, _ = hs_data["buoyancy_center"]
+            cog = np.array([xb, yb, zcog])
+            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav,
+                                              z_corr=z_corr, at_cog=True, lpp=lpp, orig_at_ap=orig_at_ap)
 
-        # Overwrite zcog by cog[2] in case both have been given
-        if has_cog and has_zcog:
-            zcog = cog[2]
+        elif has_disp and has_cog:
+            print(">>>> Computing equilibrium in 3DOF for the given displacement and COG")
+            if has_zcog:
+                warn("zcog is redundant with cog, taking cog and ignoring zcog")
+            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, water_density, grav, reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav,
+                                              z_corr=z_corr, rotmat_corr=rotmat_corr, at_cog=True, lpp=lpp,
+                                              orig_at_ap=orig_at_ap)
 
-        case = (has_disp, has_cog, has_zcog)
+        elif not has_disp and has_cog:
+            print(
+                ">>>> Computing equilibrium in 3DOF for the given COG, considering the current configuration presents the "
+                "target displacement")
+            if has_zcog:
+                warn("zcog is redundant with cog, taking cog and ignoring zcog")
 
-        if case == (True, False, False) or case == (True, False, True):
-            if verbose:
-                print(("\nSetting mesh displacement to %.3f tons" % disp))
-            hs_solver.zg = zcog
-            hs_solver.set_displacement(disp)
+            hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), water_density, grav,
+                                              at_cog=False)
+            disp = hs_data['disp_mass'] / 1000
+            z_corr, rotmat_corr = hs.full_equilibrium(mesh, cog, disp, water_density, grav,
+                                                      reltol=reltol, verbose=True)
+            hs_data = hs.compute_hydrostatics(mesh, cog, water_density, grav,
+                                              z_corr=z_corr, rotmat_corr=rotmat_corr, at_cog=True, lpp=lpp,
+                                              orig_at_ap=orig_at_ap)
 
-        msg = """\nWARNING !! : Keep in mind that the mesh may have a new orientation in the Oxy plane so the hydrostatic
-        stiffness matrix may be impractical as not expressed in a convenient axis system. Use the result
-        with caution and have a look at the mesh by using the --show option.
-        
-        This should be fixed in a future release."""
+        mesh.rotate_matrix(rotmat_corr)
+        mesh.translate_z(z_corr)
+        # cog = np.dot(rotmat_corr, cog)
+        # cog[2] += z_corr
+        has_cog = True
+        has_disp = True
+        has_zcog = False
 
-        if case == (False, True, False) or case == (False, True, True):
-            if verbose:
-                print(("""
-                \nSetting mesh position so that we are at the current displacement of %.3f tons and in a stable
-                configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
-                      % (disp, cog[0], cog[1], cog[2])))
-
-            hs_solver.gravity_center = cog
-            hs_solver.mass = disp
-            hs_solver.equilibrate(init_disp=False)
-            warn(msg)
-
-        if case == (False, False, True) or case == (False, False, False):
-            if verbose:
-                print(("\nGenerating hydrostatic data for a zcog of %.3f meters." % zcog))
-            hs_solver.zg = zcog
-
-        if case == (True, True, False) or case == (True, True, True):
-            if verbose:
-                print(("""
-                \nSetting mesh position so that the displacement is equal to %.3f tons and in a stable
-                configuration with a gravity center located at [%.3f, %.3f, %.3f] meters.""" \
-                      % (disp, cog[0], cog[1], cog[2])))
-            hs_solver.gravity_center = cog
-            hs_solver.mass = disp
-            hs_solver.equilibrate(init_disp=True)
-            warn(msg)
-
-        # TODO: voir pour une option pour sortir plutot le maillage coupe pour Nemoh
-        mesh = hs_solver
-
-        if verbose:
-            print((hs_solver.get_hydrostatic_report()))
+        hs_report = hs.get_hydrostatic_report(hs_data)
+        print(hs_report)
 
         if args.hs_report is not None:
             with open(args.hs_report, 'w') as f:
@@ -1233,11 +989,12 @@ def main():
                 f.write('%s\n' % strftime('%c'))
                 f.write('meshmagick - version %s\n%s\n' % (__version__, __copyright__))
                 f.write('==============================================\n')
-                f.write(hs_solver.get_hydrostatic_report())
+                f.write(hs_report)
 
-
-
-    # WARNING : No more mesh modification should be released from this point until the end of the main
+    
+    # ==================================================================================================================
+    # WARNING : No more mesh modification should be released below this point and until the end of the main function
+    # ==================================================================================================================
 
     if args.info:
         print(mesh)
@@ -1270,7 +1027,8 @@ def main():
                 else:
                     format = os.path.splitext(args.infilename)[1][1:].lower()
                     if not mmio.know_extension(format):
-                        raise IOError('Could not determine a format from input file extension, please specify an input format or an extension')
+                        raise IOError('Could not determine a format from input file extension, '
+                                      'please specify an input format or an extension')
             else:
                 format = os.path.splitext(args.outfilename)[1][1:].lower()
 
@@ -1282,7 +1040,7 @@ def main():
 
     if verbose:
         print('\n=============================================================')
-        print(('meshmagick - version %s\n%s' % (__version__, __copyright__)))
+        print(('Meshmagick - version %s\n%s' % (__version__, __copyright__)))
         print(('Maintainer : %s <%s>' % (__maintainer__, __email__)))
         print('Good Bye!')
         print('=============================================================')

@@ -59,6 +59,7 @@ class MMViewer:
                        "s : surface representation\n" + \
                        "w : wire representation\n" + \
                        "h : (un)show Oxy plane\n" + \
+                       "g : (un)show Axes planes\n" + \
                        "x : save\n" + \
                        "c : screenshot\n" + \
                        "q : quit"
@@ -84,6 +85,7 @@ class MMViewer:
         self.normals = []
         self.axes = []
         self.oxy_plane = None
+        self.axes_planes = None
 
         self.polydatas = list()
         self.hiden = dict()  # TODO: A terminer -> cf methode self.hide()
@@ -102,12 +104,11 @@ class MMViewer:
         """Displays the Oxy plane"""
         
         pd = self.polydatas[0]
-        
-        plane = vtk.vtkPlaneSource()
         (xmin, xmax, ymin, ymax, _, _) = pd.GetBounds()
-        
         dx = 0.1 * (xmax - xmin)
         dy = 0.1 * (ymax - ymin)
+
+        plane = vtk.vtkPlaneSource()
 
         plane.SetOrigin(xmin - dx, ymax + dy, 0)
         plane.SetPoint1(xmin - dx, ymin - dy, 0)
@@ -133,6 +134,75 @@ class MMViewer:
         self.renderer.Modified()
         self.oxy_plane = actor
         
+    def axes_planes_on(self):
+        """Displays the Oxy plane"""
+
+        pd = self.polydatas[0]
+        (xmin, xmax, ymin, ymax, zmin, zmax) = pd.GetBounds()
+        dx = 0.1 * (xmax - xmin)
+        dy = 0.1 * (ymax - ymin)
+        dz = 0.1 * (zmax - zmin)
+
+        plane_oxy = vtk.vtkPlaneSource()
+        plane_oxz = vtk.vtkPlaneSource()
+        plane_oyz = vtk.vtkPlaneSource()
+
+        plane_oxy.SetOrigin(xmin - dx, ymax + dy, 0)
+        plane_oxy.SetPoint1(xmin - dx, ymin - dy, 0)
+        plane_oxy.SetPoint2(xmax + dx, ymax + dy, 0)
+        plane_oxy.Update()
+        polydata_oxy = plane_oxy.GetOutput()
+
+        plane_oxz.SetOrigin(xmin - dx, 0, zmax + dz)
+        plane_oxz.SetPoint1(xmin - dx, 0, zmin - dz)
+        plane_oxz.SetPoint2(xmax + dx, 0, zmax + dz)
+        plane_oxz.Update()
+        polydata_oxz = plane_oxz.GetOutput()
+
+        plane_oyz.SetOrigin(0, ymin - dy, zmax + dz)
+        plane_oyz.SetPoint1(0, ymin - dy, zmin - dz)
+        plane_oyz.SetPoint2(0, ymax + dy, zmax + dz)
+        plane_oyz.Update()
+        polydata_oyz = plane_oyz.GetOutput()
+
+        mapper_oxy = vtk.vtkPolyDataMapper()
+        mapper_oxz = vtk.vtkPolyDataMapper()
+        mapper_oyz = vtk.vtkPolyDataMapper()
+        if vtk.VTK_MAJOR_VERSION <= 5:
+            mapper_oxy.SetInput(polydata_oxy)
+            mapper_oxz.SetInput(polydata_oxz)
+            mapper_oyz.SetInput(polydata_oyz)
+        else:
+            mapper_oxy.SetInputData(polydata_oxy)
+            mapper_oxz.SetInputData(polydata_oxz)
+            mapper_oyz.SetInputData(polydata_oyz)
+
+        actor_oxy = vtk.vtkActor()
+        actor_oxy.SetMapper(mapper_oxy)
+        actor_oxy.GetProperty().SetColor(0, 0, 255)
+        actor_oxy.GetProperty().SetEdgeColor(0, 0, 0)
+        actor_oxy.GetProperty().SetLineWidth(1)
+
+        actor_oxz = vtk.vtkActor()
+        actor_oxz.SetMapper(mapper_oxz)
+        actor_oxz.GetProperty().SetColor(0, 255, 0)
+        actor_oxz.GetProperty().SetEdgeColor(0, 0, 0)
+        actor_oxz.GetProperty().SetLineWidth(1)
+
+        actor_oyz = vtk.vtkActor()
+        actor_oyz.SetMapper(mapper_oyz)
+        actor_oxz.GetProperty().SetColor(255, 0, 0)
+        actor_oyz.GetProperty().SetEdgeColor(0, 0, 0)
+        actor_oyz.GetProperty().SetLineWidth(1)
+
+        self.renderer.AddActor(actor_oxy)
+        self.renderer.Modified()
+        self.renderer.AddActor(actor_oxz)
+        self.renderer.Modified()
+        self.renderer.AddActor(actor_oyz)
+        self.renderer.Modified()
+        self.axes_planes = [actor_oxy, actor_oxz, actor_oyz]
+
     def add_point(self, pos, color=(0, 0, 0)):
         """Add a point to the viewer
         
@@ -490,3 +560,11 @@ class MMViewer:
                 self.oxy_plane = None
             else:
                 self.plane_on()
+
+        elif key == 'g':
+            if self.axes_planes:
+                for actor in self.axes_planes:
+                    self.renderer.RemoveActor(actor)
+                self.axes_planes = None
+            else:
+                self.axes_planes_on()
