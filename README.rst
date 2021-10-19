@@ -44,7 +44,12 @@ Documentation
 
 https://lheea.github.io/meshmagick
 
+.. warning::
+    Some pages (such as the installation page) are slightly out-of-date.
+
 Getting Meshmagick
 ------------------
 
-https://lheea.github.io/meshmagick/install/install.html
+Getting the latest version::
+
+    pip install https://github.com/LHEEA/meshmagick/archive/master.zip
