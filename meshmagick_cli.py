@@ -387,58 +387,9 @@ parser.add_argument('-g', '--grav', default=9.81, type=float, metavar='G',
                     Default is 9.81 m/s**2.
                     """)
 
-# parser.add_argument('--hs_solver_params', nargs='+')
-
-
 parser.add_argument('--hs-report', type=str, metavar='filename',
                     help="""Write the hydrostatic report into the file given as an argument""")
 
-# ARGUMENTS RELATED TO THE COMPUTATION OF INERTIA PARAMETERS
-# parser.add_argument('--rho-medium', default=7500., type=float,
-#                     help="""Specified the density of the medium used for the device. Default
-#                     is steel and is 7500 kg/m**3.
-#                     """)
-
-# parser.add_argument('--thickness', default=0.01, type=float,
-#                     help="""Specifies the thickness of the hull. This option is only used if
-#                     both the --inertias and --hull are used. Default is 0.01 m.
-#                     """)
-
-# parser.add_argument('-gz', '--gz-curves', nargs='?', const=5., default=None, type=float,
-#                     help=""" [EXPERIMENTAL] Computes the GZ curves with angle spacing given as argument.
-#                     Default is 5 degrees (if no argument given)
-#                     """)
-
-# TODO : permettre de rajouter des ballasts
-# parser.add_argument('--inertias', action='store_true', # TODO : specifier un point de calcul
-#                     help="""Compute the principal inertia properties of the mesh. By default,
-#                     the device is considered to be a hull. Then the --thickness and --rho-medium
-#                     options may be used to tune the properties.
-#                     If the --no-hull option is used, then the device will be considered to be
-#                     filled with the medium of density rho-medium. Be carefull that the default
-#                     medium is steel so that you may get a really heavy device. Please consider
-#                     to specify an other density with the --rho-medium option.
-#
-#                     Note that the inertia matrix is expressed at center of gravity
-#                     location.
-#
-#                     A side effect of this option is that for hydrostatics computations, the values
-#                     computed by this option will be used instead of other options --mass and --cog
-#                     that will be overriden. Be carefull that the device may need some ballast.
-#                     """)
-
-# parser.add_argument('--no-hull', action='store_true',
-#                     help="""Specifies that the device should be considered as being filled with
-#                     the material of density rho-medium. It is only used by the --inertias option.
-#                     """)
-
-# parser.add_argument('--lid', nargs='?', const=1., default=None, type=float,
-#                     help="""Generate a triangle mesh lid on the mesh clipped by the Oxy plane.
-#                     """)
-
-# parser.add_argument('--fill-holes', '-fh', action='store_true',
-#                     help="""Fill little holes by triangulation if any.
-#                     """)
 
 parser.add_argument('-sh', '--show', action='store_true',
                     help="""Shows the input mesh in an interactive window""")
@@ -918,7 +869,7 @@ def main():
             if not has_zcog:
                 raise RuntimeError("zcog should at least be given for correct stiffness values computations")
 
-            z_corr = hs.disp_equilibrium(mesh, disp, water_density, grav, reltol=reltol, verbose=True)
+            z_corr = hs.displacement_equilibrium(mesh, disp, water_density, grav, reltol=reltol, verbose=True)
             hs_data = hs.compute_hydrostatics(mesh, np.zeros(3), water_density, grav, z_corr=z_corr, at_cog=False)
             xb, yb, _ = hs_data["buoyancy_center"]
             cog = np.array([xb, yb, zcog])

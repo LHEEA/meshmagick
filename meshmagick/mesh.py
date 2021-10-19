@@ -1000,12 +1000,15 @@ class Mesh(object):
                         i_v0 = i_v1
                     except KeyError:
                         if boundary[0] != boundary[-1]:
-                            print('Boundary is not closed !!!')
+                            mesh_closed = False
                         else:
                             boundaries.append(boundary)
                         break
             except KeyError:
                 break
+
+        if not mesh_closed:
+            print('FOUND OPEN BOUNDARY!!!')
 
         connectivity = {'v_v': v_v,
                         'v_f': v_f,

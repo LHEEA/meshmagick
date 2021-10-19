@@ -625,24 +625,13 @@ Getting hydrostatics properties of the mesh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To get an hydrostatic report on the current configuration of the mesh, you may use the :abbr:`-hs (--hydrostatics)`
-option::
+option along with the :abbr:`--zcog` option to specify the z position of the center of gravity (mandatory)::
 
-    >$ meshmagick SEAREV.vtp -hs
+    >$ meshmagick SEAREV.vtp -hs --zcog -2
 
 that gives:
 
-.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -hs
-
-When using this option alone (without giving a mass or center of gravity), the system considers that the current
-displacement correspond to the mass of the body. However, the vertical position of the center of gravity used in the
-computation of the K44 and K55 stiffness coefficients is considered to be 0 as specified at the beginning of the
-report. You may also want to specify this vertical position by using the --zcog option, by eg.::
-
-    >$ meshmagick SEAREV.vtp -hs --zcog 2
-
-that gives the following report:
-
-.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -hs --zcog 2
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -hs --zcog -2
 
 In our case, taking a center of gravity so high results in an unstable configuration as you can see in the report, as
 the longitudinal metacentric height (GML) is negative.
@@ -668,21 +657,6 @@ the longitudinal metacentric height (GML) is negative.
     You can easily change the default density of water as well as gravity by using the ``--rho-water`` and
     ``--grav`` options.
 
-Displaying the mesh with hydrostatic results
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-As usual, you can combine the command line options with the ``--show`` option to display the mesh in the meshmagick
-viewer. In hydrostatics mode, it will also show forces applying on the body::
-
-    >$ meshmagick SEAREV.vtp -hs --show
-
-will show the following:
-
-.. image:: ../img/show_hydrostatics.png
-
-In the viewer, we have pressed the ``w`` key to get a wireframe representation and see the application points. We can
-see that the buoyancy center and the gravity center of the current configuration have nearly the same horizontal
-position.
 
 Getting the mesh vertical position that complies with a given mass displacement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -690,11 +664,11 @@ Getting the mesh vertical position that complies with a given mass displacement
 In that mode, the mesh is displaced so that its mas displacement becomes equal to a specified mass. This is achieved
 by::
 
-    >$ meshmagick SEAREV.vtp -hs --disp 1500
+    >$ meshmagick SEAREV.vtp -hs --zcog -2 -mdisp 1500
 
 which gives:
 
-.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -hs --disp 1500
+.. program-output:: python ../meshmagick_cli.py ../meshmagick/tests/data/SEAREV.vtp -hs --zcog -2 -mdisp 1500
 
 This mode is active as long as you don't use the ``--cog`` option that trig the 3D equilibrium searching algorithm
 that is presented in the following.
@@ -710,7 +684,7 @@ that is presented in the following.
 
 This mode is active as long as you use the ``--cog`` option such that::
 
-    >$ meshmagick SEAREV.vtp -hs --cog 0 4 -2 --show
+    >$ meshmagick SEAREV.vtp -hs --cog 0 4 -2
 
 That command outputs the following report:
 
@@ -744,53 +718,6 @@ and displays the following viewer:
     * In order to perform 3D hydrostatic equilibrium searching possible, it is mandatory to use a watertight mesh so
       that the boundary intersection polygons are closed.
 
-Adding external static forces
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Beside the default gravity and buoyancy forces used in hydrostatic equilibrium, it is possible to add some external
-forces to the floater. This may be by e.g. the force applied by the wind on the rotor of a floating wind turbine or
-anchor forces.
-
-Two modes are available: **relative** or **absolute** force. In both mode, the force application point follows
-naturally the body during its position modifications. In **relative** mode, the direction of the force follows the
-body. This is generally the case for the preceding wind turbine application example. In the absolute mode the
-direction of the force remains fixed with respect to the absolute frame. This is the case of mooring forces.
-
-.. note::
-
-    Note that for these options to be used, you always need to specify a center of gravity position along with the
-    ``--cog`` option.
-
-Absolute forces
-+++++++++++++++
-
-This is achieved using the :``-af (--absolute-force)`` option. By example, applying a vertical mooring load of
-200 tons at one side of the SEAREV is obtained by issuing::
-
-    >$ meshmagick SEAREV.vtp -hs -af 0 15 -5 0 0 -2000000 --cog 0 0 -2 --show
-
-Note that the parameters of the options are first the 3 coordinates of the application point then the 3 components of
-the force vector.
-
-As the ``--show`` option has been used, the command displays the following viewer:
-
-.. image:: ../img/hs_absolute_force.png
-
-where you can observe that the force represented in blue has the right vertical orientation and made the SEAREV roll.
-
-Relative forces
-+++++++++++++++
-
-This is achieved using the ``-af (--absolute-force)`` option. By example, applying a vertical mooring load of
-200 tons at one side of the SEAREV is obtained by issuing::
-
-    >$ meshmagick SEAREV.vtp -hs --cog 0 0 -3 -rf 0 0 5 5000000 0 0 --show
-
-which displays the following viewer:
-
-.. image:: ../img/hs_relative_force.png
-
-where you can observe that the force represented in blue has followed the pitch of the body.
 
 Saving the hydrostatic report in a text file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
