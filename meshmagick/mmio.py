@@ -781,7 +781,7 @@ def load_GDF(filename):
     for icell in range(nf):
         
         n_coords = 0
-        face_coords = np.zeros((12,), dtype=np.float)
+        face_coords = np.zeros((12,), dtype=float)
         
         while n_coords < 12:
             line = np.array(ifile.readline().split())
