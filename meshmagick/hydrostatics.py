@@ -275,7 +275,7 @@ def full_equilibrium(mesh, cog, disp_tons, rho_water, grav, reltol=1e-6, verbose
         print("========================")
         print("3DOF equilibrium")
         print("========================")
-        print("Target diplacement:    {:.3f} tons".format(disp_tons))
+        print("Target displacement:    {:.3f} tons".format(disp_tons))
         print("COG pos: ", cog)
 
     disp_kg = disp_tons * 1000
