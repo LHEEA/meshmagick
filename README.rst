@@ -1,7 +1,7 @@
 Meshmagick
 ==========
 
-**NEW IN v3.3**: It is now possible to load last .msh file format version (4.1) of GMSH generated mesh files.
+**NEW IN v3.4**: It is now possible to load last .msh file format version (4.1) of GMSH generated mesh files.
 Compatibility with format version 2.1 is still ensured.
 
 
