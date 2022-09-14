@@ -1,6 +1,10 @@
 Meshmagick
 ==========
 
+**NEW IN v3.3**: It is now possible to load last .msh file format version (4.1) of GMSH generated mesh files.
+Compatibility with format version 2.1 is still ensured.
+
+
 **Meshmagick** is a command line utility as well as a python module for the manipulation of meshes encountered in the
 hydrodynamics community.
 
