@@ -30,7 +30,6 @@ qu'il faut sourcer dans le .bashrc soit ajotuer la ligne suivante dans le bashrc
     source /home/<username>/python-argcomplete
 L'autocompletion devrait etre maintenant active pour meshmagick
 """
-
 # TODO: move meshmagick.py at the root level of the project ?
 
 import os, sys
@@ -58,9 +57,9 @@ __email__ = "Francois.Rongere@dice-engineering.com"
 __all__ = ['main']
 
 
+
 def list_medium():
     return ', '.join(densities.list_medium())
-
 
 # =======================================================================
 #                         COMMAND LINE USAGE
@@ -69,6 +68,7 @@ def list_medium():
 
 try:
     import argcomplete
+
     has_argcomplete = True
 except:
     has_argcomplete = False
@@ -121,9 +121,9 @@ parser = argparse.ArgumentParser(
                 appropriate reader/writer. This behaviour might be bypassed using the
                 -ifmt and -ofmt optional arguments. When using these options, keywords
                 defined in the table above must be used as format identifiers.
-
+                
                 .. rubric:: Footnotes
-
+                
                 .. [#f1] NEMOH is an open source BEM Software for seakeeping developped at
                          Ecole Centrale de Nantes (LHHEA)
                 .. [#f2] WAMIT is a BEM Software for seakeeping developped by WAMIT, Inc.
@@ -334,14 +334,13 @@ parser.add_argument('--thickness', type=float,
                     help="""The thickness of the shell used for the evaluation of inertia
                     parameters of the mesh. The default value is 0.02m.""")
 
+
 # Arguments for hydrostatics computations
 # TODO: l'option -hs devrait etre une sous-commande au sens de argparse
 # TODO: completer l'aide de -hs
-
 parser.add_argument('-pn', '--project-name', default="NO_NAME", type=str, metavar='Project Name',
                     help="""The project name for hydrostatics ourput
                     """)
-
 parser.add_argument('-hs', '--hydrostatics', action='store_true',
                     help="""Compute hydrostatics data and throws a report on the
                     command line. When used along with options -mdisp, --cog or
@@ -387,8 +386,17 @@ parser.add_argument('-g', '--grav', default=9.81, type=float, metavar='G',
                     Default is 9.81 m/s**2.
                     """)
 
+
 parser.add_argument('--hs-report', type=str, metavar='filename',
                     help="""Write the hydrostatic report into the file given as an argument""")
+parser.add_argument('-lid', nargs='*', action='append', metavar='Arg',
+                    help="""Generate a polygonal lid on the free surface z = 0from the set of points (x, y). 
+                    All the points are listed one after other such as: x1, y1, x2, y2, ...
+                    At least three points are required. The number of coordinates must be even.""")
+
+parser.add_argument('-mesh_size', '-ms', type=float,
+                    help="""Mesh size used for generating the lid meshes. Default is the mean edge length.
+                    """)
 
 
 parser.add_argument('-sh', '--show', action='store_true',
@@ -407,6 +415,7 @@ def main():
     args = parser.parse_args()
 
     verbose = True
+
     if args.quiet:
         verbose = False
 
@@ -445,6 +454,7 @@ def main():
 
     if args.concatenate_file is not None:
         print('Concatenate %s with %s' % (args.infilename, args.concatenate_file))
+        print("WARNING: the two meshes must have the same format.")
         # Loading the file
         if os.path.isfile(args.concatenate_file):
             Vc, Fc = mmio.load_mesh(args.concatenate_file, format)
@@ -768,6 +778,60 @@ def main():
 
         if verbose:
             print('\t-> Done.')
+    if args.lid is not None:
+
+        try:
+            import gmsh
+        except:
+            raise ImportError('gmsh has to be available for generating lids.')
+
+        try:
+            import pygmsh
+        except:
+            raise ImportError('pygmsh has to be available for generating lids.')
+
+        nb_lid = len(args.lid)
+
+        # Face size.
+        if(args.mesh_size is not None):
+            mesh_size = args.mesh_size
+        else:
+            mesh_size = mesh.mean_edge_length
+            if(nb_lid == 1):
+                print("Mean edge length (%f m) is used as mesh size for generating the lid mesh." % mesh_size)
+            else:
+                print("Mean edge length (%f m) is used as mesh size for generating the lid meshes." % mesh_size)
+
+        # Generation of the lid mesh files.
+        for ilid, lid in enumerate(args.lid):
+            if(len(lid) % 2 == 1):
+                raise KeyError("\nNumber of vertices (x, y) for generating a lid must be even.")
+            if(int(len(lid) / 2.) < 3):
+                raise KeyError("\nAt least three vertices are necessary to define a lid.")
+            nb_points = int(len(lid) / 2.)
+            with pygmsh.geo.Geometry() as geom:
+                list_vertices = []
+                it = iter(lid)
+                for coord in it:
+                    x = float(coord)
+                    y = float(next(it))
+                    list_vertices.append([x, y])
+                geom.add_polygon(list_vertices, mesh_size=mesh_size)
+                geom.generate_mesh()
+                pygmsh.write("Lid_" + str(ilid + 1) + ".msh")
+
+            # Conversation of the .msh lid files into .obj lid files.
+            V, F = mmio.load_mesh("Lid_" + str(ilid + 1) + ".msh", "msh")
+            mmio.write_OBJ("Lid_" + str(ilid + 1) + ".obj", V, F)
+            print("Lid_" + str(ilid + 1) + ".obj is generated.")
+
+            # Concatenation of the meshfile and all the lids.
+            mesh_c = Mesh(V, F, name="Lid_" + str(ilid + 1))
+            mesh += mesh_c
+        if(nb_lid == 1):
+            print("%s concatenated with the lid mesh file." % args.infilename)
+        else:
+            print("%s concatenated with the lid mesh files." % args.infilename)
 
     # Listing available medium
     if args.list_medium:
@@ -829,6 +893,7 @@ def main():
             print(("\t\t%.3E\t%.3E\t%.3E" % (mat[2, 0], mat[2, 1], mat[2, 2])))
             point = inertia.reduction_point
             print(("\tExpressed at point : \t\t%.3E\t%.3E\t%.3E" % (point[0], point[1], point[2])))
+
 
     if args.hydrostatics:
         water_density = args.water_density

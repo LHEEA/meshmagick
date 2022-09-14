@@ -172,7 +172,7 @@ def load_HST(filename):
             faces = np.concatenate((faces, faces_tmp))
             nf += nf_tmp
 
-    return vertices, faces - 1
+    return vertices, faces-1
 
 
 def load_DAT(filename):
@@ -180,26 +180,26 @@ def load_DAT(filename):
     
     """
     _check_file(filename)
-
+    
     with open(filename, 'r') as f:
         data = f.read()
-
+    
     import re
-
+    
     # NODE SECTION
     node_section_pattern = re.compile(r'NODE\s*((?:\d+(?:\s+\S+){3}\s+)+)\*RETURN')
     node_sections = node_section_pattern.findall(data)
-
+    
     if len(node_sections) > 1:
         raise RuntimeError('Not possible to have several NODE sections in Diodore DAT files')
-
+    
     nodes = []
     node_dict = {}
     for inode, node_str in enumerate(node_sections[0].splitlines()):
         node_split = node_str.split()
         nodes.append(node_split[1:])
         node_dict[node_split[0]] = inode
-
+        
     vertices = np.array(nodes, dtype=float)
 
     faces = []
@@ -220,7 +220,7 @@ def load_DAT(filename):
             ]
 
             faces.append(triangle)
-
+    
     # QUADRANGLE FACES SECTION
     quadrangle_section_pattern = re.compile(r'ELEMENT\S+Q4C000.+\s*((?:(?:\d+\s+){5})+)\*RETURN')
     quadrangle_sections = quadrangle_section_pattern.findall(data)
@@ -239,7 +239,7 @@ def load_DAT(filename):
             faces.append(quadrangle)
 
     faces = np.array(faces, dtype=int)
-
+    
     return vertices, faces
 
 
@@ -267,7 +267,7 @@ def load_INP(filename):
     """
     _check_file(filename)
     import re
-
+    
     with open(filename, 'r') as f:
         text = f.read()
 
@@ -348,7 +348,7 @@ def load_INP(filename):
         id_new = - np.ones(max(idx_array) + 1, dtype=int)
         # FIXME: cette partie est tres buggee !!!
         for i, idx in enumerate(idx_array):
-            id_new[idx] = i + 1
+            id_new[idx] = i+1
 
         mesh_files[file]['ELEM_SECTIONS'] = []
         for elem_section in pattern_elem_section.findall(data):
@@ -410,7 +410,7 @@ def load_INP(filename):
                 faces = np.concatenate((faces, elems))
                 nb_elems = faces.shape[0]
 
-    return vertices, faces - 1
+    return vertices, faces-1
 
 
 def load_TEC(filename):
@@ -434,15 +434,15 @@ def load_TEC(filename):
     ----
     TEC files have a 1-indexing
     """
-
+    
     import re
 
     _check_file(filename)
 
     data_pattern = re.compile(
-        r'ZONE.*\s*N\s*=\s*(\d+)\s*,\s*E=\s*(\d+)\s*,\s*F\s*=\s*FEPOINT\s*,\s*ET\s*=\s*QUADRILATERAL\s+'
-        + r'(^(?:\s*' + real_str + r'){3,})\s+'
-        + r'(^(?:\s*\d+)*)', re.MULTILINE)
+                    r'ZONE.*\s*N\s*=\s*(\d+)\s*,\s*E=\s*(\d+)\s*,\s*F\s*=\s*FEPOINT\s*,\s*ET\s*=\s*QUADRILATERAL\s+'
+                    + r'(^(?:\s*' + real_str + r'){3,})\s+'
+                    + r'(^(?:\s*\d+)*)', re.MULTILINE)
 
     with open(filename, 'r') as f:
         data = f.read()
@@ -452,7 +452,7 @@ def load_TEC(filename):
     nf = int(nf)
 
     vertices = np.asarray(list(map(float, vertices.split())), dtype=float).reshape((nv, -1))[:, :3]
-    faces = np.asarray(list(map(int, faces.split())), dtype=int).reshape((nf, 4)) - 1
+    faces = np.asarray(list(map(int, faces.split())), dtype=int).reshape((nf, 4))-1
 
     return vertices, faces
 
@@ -478,7 +478,7 @@ def load_VTU(filename):
     ----
     VTU files have a 0-indexing
     """
-
+    
     _check_file(filename)
 
     from vtk import vtkXMLUnstructuredGridReader
@@ -715,7 +715,7 @@ def load_NAT(filename):
     ----
     NAT files have a 1-indexing
     """
-
+    
     _check_file(filename)
 
     ifile = open(filename, 'r')
@@ -733,7 +733,7 @@ def load_NAT(filename):
     faces = np.array(faces, dtype=int)
 
     ifile.close()
-    return vertices, faces - 1
+    return vertices, faces-1
 
 
 def load_GDF(filename):
@@ -780,17 +780,17 @@ def load_GDF(filename):
 
     iv = 0
     for icell in range(nf):
-
+        
         n_coords = 0
-        face_coords = np.zeros((12,), dtype=np.float)
-
+        face_coords = np.zeros((12,), dtype=float)
+        
         while n_coords < 12:
             line = np.array(ifile.readline().split())
-            face_coords[n_coords:n_coords + len(line)] = line
+            face_coords[n_coords:n_coords+len(line)] = line
             n_coords += len(line)
 
-        vertices[iv:iv + 4, :] = np.split(face_coords, 4)
-        faces[icell, :] = np.arange(iv, iv + 4)
+        vertices[iv:iv+4, :] = np.split(face_coords, 4)
+        faces[icell, :] = np.arange(iv, iv+4)
         iv += 4
 
     ifile.close()
@@ -817,7 +817,7 @@ def load_MAR(filename):
     ----
     MAR files have a 1-indexing
     """
-
+    
     _check_file(filename)
 
     ifile = open(filename, 'r')
@@ -844,7 +844,7 @@ def load_MAR(filename):
 
     ifile.close()
 
-    return vertices, faces - 1
+    return vertices, faces-1
 
 
 def load_MSH22(filename):
@@ -970,7 +970,7 @@ def load_MED(filename):
     ----
     MED files have a 1-indexing
     """
-
+    
     try:
         import h5py
     except ImportError:
@@ -1006,11 +1006,11 @@ def load_MED(filename):
     if nb_quadrangles == 0:
         quadrangles = np.zeros((0, 4), dtype=int)
 
-    faces = np.zeros((nb_triangles + nb_quadrangles, 4), dtype=int)
+    faces = np.zeros((nb_triangles+nb_quadrangles, 4), dtype=int)
     faces[:nb_triangles] = triangles
     # faces[:nb_triangles, -1] = triangles[:, 0]
     faces[nb_triangles:] = quadrangles
-
+    
     vertices = np.ascontiguousarray(vertices)
     return vertices, faces
 
@@ -1035,7 +1035,7 @@ def load_WRL(filename):
     import re
 
     _check_file(filename)
-
+    
     # Checking version
     with open(filename, 'r') as f:
         line = f.readline()
@@ -1073,31 +1073,31 @@ def load_NEM(filename):
     ----
     This format is different from that is used directly by Nemoh software. It is only dedicated to the Mesh tool.
     """
-
+    
     _check_file(filename)
-
+    
     ifile = open(filename, 'r')
-
+    
     nv = int(ifile.readline())
     nf = int(ifile.readline())
-
+    
     vertices = []
     for ivertex in range(nv):
         vertices.append(list(map(float, ifile.readline().split())))
     vertices = np.asarray(vertices, dtype=float)
-
+    
     faces = []
     for iface in range(nf):
         faces.append(list(map(int, ifile.readline().split())))
     faces = np.asarray(faces, dtype=int)
     faces -= 1
-
+    
     return vertices, faces
+             
 
-
-# =======================================================================
+#=======================================================================
 #                             MESH WRITERS
-# =======================================================================
+#=======================================================================
 # Contains here all functions to write meshes in different file formats
 
 def write_mesh(filename, vertices, faces, file_format):
@@ -1156,7 +1156,7 @@ def write_DAT(filename, vertices, faces):
                 '\n'.join(
                     ''.join(
                         (
-                            '{:8d}'.format(idx + 1),
+                            '{:8d}'.format(idx+1),
                             ''.join('{:13.5E}'.format(elt) for elt in node)
                         )
                     ) for (idx, node) in enumerate(vertices)
@@ -1171,7 +1171,7 @@ def write_DAT(filename, vertices, faces):
     tri_block = '$\n$ ELEMENT,TYPE=T3C000,ELSTRUCTURE={0}'.format(root_filename.upper())
     nq = 0
     nt = 0
-    for (idx, cell) in enumerate(faces + 1):
+    for (idx, cell) in enumerate(faces+1):
         if cell[0] != cell[-1]:
             # quadrangle
             nq += 1
@@ -1179,7 +1179,7 @@ def write_DAT(filename, vertices, faces):
                 (
                     quad_block,
                     '\n',
-                    '{:8d}'.format(idx + 1),
+                    '{:8d}'.format(idx+1),
                     ''.join('{:8d}'.format(node_id) for node_id in cell)
                 )
             )
@@ -1191,7 +1191,7 @@ def write_DAT(filename, vertices, faces):
                 (
                     tri_block,
                     '\n',
-                    '{:8d}'.format(idx + 1),
+                    '{:8d}'.format(idx+1),
                     ''.join('{:8d}'.format(node_id) for node_id in cell[:3])
                 )
             )
@@ -1240,16 +1240,16 @@ def write_HST(filename, vertices, faces):
     )))
 
     coordinates_block = ''.join((  # block
-        'COORDINATES\n',
-        '\n'.join(  # line
-            ''.join(
-                (
-                    '{:10d}'.format(idx + 1),  # index
-                    ''.join('{:16.6E}'.format(elt) for elt in node)  # node coordinates
-                )
-            ) for (idx, node) in enumerate(vertices)
-        ),
-        '\nENDCOORDINATES\n\n'
+            'COORDINATES\n',
+            '\n'.join(  # line
+                ''.join(
+                    (
+                        '{:10d}'.format(idx+1),  # index
+                        ''.join('{:16.6E}'.format(elt) for elt in node)  # node coordinates
+                    )
+                ) for (idx, node) in enumerate(vertices)
+            ),
+            '\nENDCOORDINATES\n\n'
     ))
 
     ofile.write(coordinates_block)
@@ -1285,7 +1285,7 @@ def write_TEC(filename, vertices, faces):
     faces: ndarray
         numpy array of the faces' nodes connectivities
     """
-
+    
     ofile = open(filename, 'w')
 
     nv = vertices.shape[0]
@@ -1297,7 +1297,7 @@ def write_TEC(filename, vertices, faces):
     ofile.write('ZONE T=\"MESH\" \n')
     ofile.write('N={nv:10d} ,E={nf:10d} , F=FEPOINT, ET=QUADRILATERAL\n'.format(nv=nv, nf=nf))
 
-    node_block = '\n'.join(  # block
+    node_block = '\n'.join( # block
         ''.join(
             ''.join('{:16.6E}'.format(elt) for elt in node)
         ) for node in vertices
@@ -1387,7 +1387,7 @@ def write_VTK(filename, vertices, faces):
     faces: ndarray
         numpy array of the faces' nodes connectivities
     """
-
+    
     nv = vertices.shape[0]
     nf = faces.shape[0]
 
@@ -1395,20 +1395,20 @@ def write_VTK(filename, vertices, faces):
     quadrangles_mask = np.invert(triangle_mask)
     nb_triangles = len(np.where(triangle_mask)[0])
     nb_quandrangles = len(np.where(quadrangles_mask)[0])
-
+    
     with open(filename, 'w') as f:
-
+        
         f.write('# vtk DataFile Version 4.0\n')
         f.write('vtk file generated by meshmagick on %s\n' % time.strftime('%c'))
         f.write('ASCII\n')
         f.write('DATASET POLYDATA\n')
         f.write('POINTS %u float\n' % nv)
-
+        
         for vertex in vertices:
             f.write('%f %f %f\n' % (vertex[0], vertex[1], vertex[2]))
-
-        f.write('POLYGONS %u %u\n' % (nf, 4 * nb_triangles + 5 * nb_quandrangles))
-
+        
+        f.write('POLYGONS %u %u\n' % (nf, 4*nb_triangles+5*nb_quandrangles))
+        
         for face in faces:
             if face[0] == face[-1]:  # Triangle
                 f.write('3 %u %u %u\n' % (face[0], face[1], face[2]))
@@ -1417,27 +1417,28 @@ def write_VTK(filename, vertices, faces):
 
 
 def write_OBJ(filename, vertices, faces):
+    
     with open(filename, 'w') as ofile:
-
+        
         # HEADER
         ofile.write("# Wavefront OBJ file exported by Meshmagick (Copyright Ecole Centrale de Nantes)\n")
         ofile.write("# File Created: %s\n\n\n" % time.strftime('%c'))
         ofile.write("# Vertices: %u\n\n" % vertices.shape[0])
-
+    
         for vertex in vertices:
             ofile.write("v  %15.6f\t%15.6f\t%15.6f\n" % (vertex[0], vertex[1], vertex[2]))
-
+        
         ofile.write("\n\n\n# Faces: %u\n\n" % faces.shape[0])
         for face in faces:
-            ofile.write("f  %10u  %10u  %10u" % (face[0] + 1, face[1] + 1, face[2] + 1))
-
+            ofile.write("f  %10u  %10u  %10u" % (face[0]+1, face[1]+1, face[2]+1))
+            
             if face[0] == face[-1]:
                 # Triangle
                 ofile.write("\n")
             else:
                 # Quadrangle
-                ofile.write("  %10u\n" % (face[-1] + 1))
-
+                ofile.write("  %10u\n" % (face[-1]+1))
+                
 
 def _build_vtkUnstructuredGrid(vertices, faces):
     """Internal function that builds a VTK object for manipulation by the VTK library.
@@ -1453,7 +1454,7 @@ def _build_vtkUnstructuredGrid(vertices, faces):
     -------
     vtkObject
     """
-
+    
     import vtk
 
     nv = max(np.shape(vertices))
@@ -1489,7 +1490,7 @@ def _build_vtkUnstructuredGrid(vertices, faces):
 
 def _build_vtkPolyData(vertices, faces):
     """Builds a vtkPolyData object from vertices and faces"""
-
+    
     import vtk
 
     # Create a vtkPoints object and store the points in it
@@ -1537,7 +1538,7 @@ def write_NAT(filename, vertices, faces):
     --------
     load_NAT
     """
-
+    
     ofile = open(filename, 'w')
 
     nv = max(np.shape(vertices))
@@ -1547,7 +1548,7 @@ def write_NAT(filename, vertices, faces):
     ofile.write('%6u%6u\n' % (nv, nf))
     for vertex in vertices:
         ofile.write('%15.6E%15.6E%15.6E\n' % (vertex[0], vertex[1], vertex[2]))
-    for cell in faces + 1:
+    for cell in faces+1:
         ofile.write('%10u%10u%10u%10u\n' % (cell[0], cell[1], cell[2], cell[3]))
 
     ofile.close()
@@ -1570,19 +1571,19 @@ def write_NEM(filename, vertices, faces):
     This file format is different from that used by Nemoh itself. It is only used by the Mesh tool.
     """
     ofile = open(filename, 'w')
-
+    
     ofile.write('%u\n' % vertices.shape[0])
     ofile.write('%u\n' % faces.shape[0])
-
+    
     for vertex in vertices:
         ofile.write('%15.6f\t%15.6f\t%15.6f\n' % (vertex[0], vertex[1], vertex[2]))
-
-    for face in faces + 1:
+    
+    for face in faces+1:
         ofile.write('%10u\t%10u\t%10u\t%10u\n' % (face[0], face[1], face[2], face[3]))
-
+        
     ofile.close()
-
-
+    
+    
 def write_GDF(filename, vertices, faces):
     """Writes .gdf file format for the WAMIT (Wamit INC. (c)) BEM software.
 
@@ -1634,7 +1635,7 @@ def write_MAR(filename, vertices, faces):
     ofile.write('{0:6d}{1:6d}\n'.format(2, 0))  # TODO : mettre les symetries en argument
 
     for (idx, vertex) in enumerate(vertices):
-        ofile.write('{0:6d}{1:16.6f}{2:16.6f}{3:16.6f}\n'.format(idx + 1, vertex[0], vertex[1], vertex[2]))
+        ofile.write('{0:6d}{1:16.6f}{2:16.6f}{3:16.6f}\n'.format(idx+1, vertex[0], vertex[1], vertex[2]))
 
     ofile.write('{0:6d}{1:6d}{2:6d}{3:6d}{4:6d}\n'.format(0, 0, 0, 0, 0))
 
@@ -1679,7 +1680,7 @@ def write_STL(filename, vertices, faces):
     new_faces = faces[quads_ids].copy()
     new_faces[:, :3] = new_faces[:, t1]
     new_faces[:, -1] = new_faces[:, 0]
-
+    
     faces[quads_ids, :3] = faces[:, t2][quads_ids]
     faces[quads_ids, -1] = faces[quads_ids, 0]
 
@@ -1734,7 +1735,6 @@ def write_WRL(filename, vertices, faces):
 
 def know_extension(ext):
     return ext in extension_dict
-
 
 extension_dict = {  # keyword,  reader,   writer
     'mar': (load_MAR, write_MAR),
