@@ -3,7 +3,6 @@
 from pathlib import Path
 
 from meshmagick.mmio import *
-from meshmagick.inertia import sphere
 import os
 
 
@@ -28,7 +27,6 @@ def test_all_io():
 
 def test_load_gdf_compressed():
     
-    body = sphere(10)
     vertices, faces = load_VTP('meshmagick/tests/data/SEAREV.vtp')
     body_path = Path("temp_mesh.gdf")
     write_GDF(body_path, vertices, faces, ulen=1, gravity=9.81, isx=0, isy=0)
