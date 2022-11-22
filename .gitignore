@@ -99,4 +99,5 @@ ENV/
 .idea
 
 # VSCode project settings
-.vscode
+.vscode/*
+*settings.json
