@@ -246,7 +246,7 @@ def load_DAT(filename):
 def load_INP(filename):
     """Loads DIODORE (PRINCIPIA (c)) configuration file format.
     
-    It parses the .INP file and extract meshes defined in subsequent .DAT files using the different informations
+    It parses the .INP file and extract meshes defined in subsequent .DAT files using the different information
     contained in the .INP file.
 
     Parameters
@@ -271,7 +271,7 @@ def load_INP(filename):
     with open(filename, 'r') as f:
         text = f.read()
 
-    # Retrieving frames into a dictionnary frames
+    # Retrieving frames into a dictionary frames
     pattern_frame_str = r'^\s*\*FRAME,NAME=(.+)[\r\n]+(.*)'
     pattern_frame = re.compile(pattern_frame_str, re.MULTILINE)
 

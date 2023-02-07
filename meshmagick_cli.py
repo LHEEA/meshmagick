@@ -124,19 +124,19 @@ parser = argparse.ArgumentParser(
                 
                 .. rubric:: Footnotes
                 
-                .. [#f1] NEMOH is an open source BEM Software for seakeeping developped at
+                .. [#f1] NEMOH is an open source BEM Software for seakeeping developed at
                          Ecole Centrale de Nantes (LHHEA)
-                .. [#f2] WAMIT is a BEM Software for seakeeping developped by WAMIT, Inc.
-                .. [#f3] DIODORE is a BEM Software for seakeeping developped by PRINCIPIA
-                .. [#f4] HYDROSTAR is a BEM Software for seakeeping developped by
+                .. [#f2] WAMIT is a BEM Software for seakeeping developed by WAMIT, Inc.
+                .. [#f3] DIODORE is a BEM Software for seakeeping developed by PRINCIPIA
+                .. [#f4] HYDROSTAR is a BEM Software for seakeeping developed by
                          BUREAU VERITAS
-                .. [#f5] GMSH is an open source meshing software developped by C. Geuzaine
+                .. [#f5] GMSH is an open source meshing software developed by C. Geuzaine
                          and J.-_faces. Remacle
-                .. [#f6] PARAVIEW is an open source visualization software developped by
+                .. [#f6] PARAVIEW is an open source visualization software developed by
                          Kitware
-                .. [#f7] TECPLOT is a visualization software developped by Tecplot
+                .. [#f7] TECPLOT is a visualization software developed by Tecplot
                 .. [#f8] SALOME-MECA is an open source software for computational mechanics
-                         developped by EDF-R&D
+                         developed by EDF-R&D
 
 
                 """,
@@ -168,7 +168,7 @@ parser.add_argument('-q', '--quiet',
                     action='store_true')
 
 parser.add_argument('-i', '--info',
-                    help="""extract informations on the mesh on the standard output""",
+                    help="""extract information of the mesh to the standard output""",
                     action='store_true')
 
 parser.add_argument('--quality',
@@ -288,7 +288,7 @@ parser.add_argument('-tq', '--triangulate-quadrangles', action='store_true',
                     mesh export in a format that only deal with triangular cells like STL format.""")
 
 parser.add_argument('-sym', '--symmetrize', nargs='*', action='append', metavar='Arg',
-                    help="""Symmetrize the mesh by a plane defined wether by 4 scalars, i.e.
+                    help="""Symmetrize the mesh by a plane defined whether by 4 scalars, i.e.
                     the plane normal vector coordinates and a scalar c such as N.X=c is the
                     plane equation (with X a point of the plane) or a string among ['Oxy',
                     'Oxz', 'Oyz', '/Oxy', '/Oxz', '/Oyz'] which are shortcuts for planes
@@ -360,7 +360,7 @@ parser.add_argument('-cog', '--cog', nargs=3, metavar=('Xg', 'Yg', 'Zg'),
 parser.add_argument('-zg', '--zcog', default=None, type=float, metavar='Zcog',
                     help="""Specifies the z position of the center of gravity. This
                         is the minimal data needed for hydrostatic stiffness matrix
-                        computation. It is however overwriten by the third component
+                        computation. It is however overwritten by the third component
                         of cog when --cog option is used. If none of these two option
                         is given, zcog is set to 0.
                         """)
@@ -478,7 +478,7 @@ def main():
         tol = float(args.merge_duplicates)
         mesh.merge_duplicates(atol=tol)
 
-    # TODO : put that dict at the begining of the main function or in the module
+    # TODO : put that dict at the beginning of the main function or in the module
     plane_str_list = {'Oxy': [0., 0., 1.],
                       'Oxz': [0., 1., 0.],
                       'Oyz': [1., 0., 0.],

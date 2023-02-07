@@ -88,7 +88,7 @@ class MMViewer:
         self.axes_planes = None
 
         self.polydatas = list()
-        self.hiden = dict()  # TODO: A terminer -> cf methode self.hide()
+        self.hidden = dict()  # TODO: A terminer -> cf methode self.hide()
 
     def normals_on(self):
         """Displays the normals"""
@@ -479,7 +479,7 @@ class MMViewer:
             print(("No mesh with index %u" % index))
             return
         
-        self.hiden
+        self.hidden
 
     def save(self):
         """Saves the main object in a 'mmviewer_save.vtp' vtp file is the current folder"""

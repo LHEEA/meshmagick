@@ -1487,7 +1487,7 @@ class Mesh(object):
 
         Note
         ----
-        This method should not be called as is but it overides the + binary operator for convenience.
+        This method should not be called as is but it overrides the + binary operator for convenience.
         """
 
         assert isinstance(mesh_to_add, Mesh)
@@ -1657,7 +1657,7 @@ class Mesh(object):
             tol = 1e-9
             if math.fabs(hs[0]) > tol or math.fabs(hs[1]) > tol:
                 if self._verbose:
-                    print("\t--> WARNING: the mesh does not seem watertight althought marked as closed...")
+                    print("\t--> WARNING: the mesh does not seem watertight although marked as closed...")
 
             if hs[2] < 0:
                 flipped = True
@@ -1804,7 +1804,7 @@ class Mesh(object):
         return
 
     def triangulate_quadrangles(self):
-        """Triangulates every quadrangles of the mesh by simple spliting.
+        """Triangulates every quadrangles of the mesh by simple splitting.
 
         Each quadrangle gives two triangles.
 
@@ -1997,7 +1997,7 @@ class Mesh(object):
         ----------
         rho_medium : float, optional
             The medium density (kg/m**3). Default is 7850 kg/m**3 (Steel density)
-        thickness : flaot, optional
+        thickness : float, optional
             The hull thickness (m). Default is 0.02 m.
 
         Returns

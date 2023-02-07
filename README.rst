@@ -25,7 +25,7 @@ software as well as the hydrostatics parameters (stiffness matrix, position of t
 draft...). Inertial properties of meshes may also be computed, based on assumptions.
 
 **Meshmagick** is primarily a command line utility for everyday hydrodynamicists. However, it also comes with a
-package that can be imported in a python script and give the full access to the command line options, programatically.
+package that can be imported in a python script and give the full access to the command line options, programmatically.
 
 .. note::
     **Meshmagick** is the property of **Ecole Centrale de Nantes** and is maintained by François Rongère <francois

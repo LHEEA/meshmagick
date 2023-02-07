@@ -962,7 +962,7 @@ class Hydrostatics(object):
     #         self._reinit_clipper()
     #         self._update_hydrostatic_properties()
     #
-    #         # TODO: animation may be trigged here
+    #         # TODO: animation may be triggered here
     #
     #         residual = self.residual
     #         scale = self._scale
@@ -1014,7 +1014,7 @@ class Hydrostatics(object):
     #
     #     if self.verbose:
     #         if code == 0:
-    #             print("\t-> Maximum number of restart reached. Failed to find an equilibrum position.")
+    #             print("\t-> Maximum number of restart reached. Failed to find an equilibrium position.")
     #         elif code == 1:
     #             print(("Stable equilibrium reached after %u iterations and %u random restart" % (iter, nb_restart)))
     #             print(('\t-> Mesh has been translated in z by: %f' % z_correction))
@@ -1128,7 +1128,7 @@ class Hydrostatics(object):
             self._reinit_clipper()
             self._update_hydrostatic_properties()
 
-            # TODO: animation may be trigged here
+            # TODO: animation may be triggered here
 
             residual = self.residual
             scale = self._scale
@@ -1182,7 +1182,7 @@ class Hydrostatics(object):
 
         if self.verbose:
             if code == 0:
-                print("\t-> Maximum number of restart reached. Failed to find an equilibrum position.")
+                print("\t-> Maximum number of restart reached. Failed to find an equilibrium position.")
             elif code == 1:
                 print(("Stable equilibrium reached after %u iterations and %u random restart" % (iter, nb_restart)))
             elif code == 2:

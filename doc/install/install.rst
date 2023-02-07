@@ -18,7 +18,7 @@ All you need to do from the root directory of the repository is::
     pip install -e .
 
 Note that the ``-e`` option stands for editable and it says pip not to copy files from the repository to the python conda
-install but keep the files in place. Although not mandatory, this option is very usefull as to update meshmagick to a
+install but keep the files in place. Although not mandatory, this option is very useful as to update meshmagick to a
 newer version, you only have to pull it from GiHub and it will be readily available to you, without having to reinstall.
 
 
