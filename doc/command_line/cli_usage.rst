@@ -35,10 +35,10 @@ The format of the file is generally guessed from the extensions. Sometimes the e
 enough to guess the file format. You should then use the ``-ifmt (--input-format)`` and
 ``-ofmt (--output-format)`` options to explicitly declare the file format::
 
-    >$ meshmagick SEAREV.vtp -ifmt paraview SEAREV.vtp -ofmt nemoh SEAREV.dat
+    >$ meshmagick SEAREV.vtp -ifmt vtp -o SEAREV.dat -ofmt nemoh
 
 This way, we told Meshmagick that SEAREV.dat must be in the
-`Nemoh <https://lheea.ec-nantes.fr/doku.php/emo/nemoh/start>`_ input mesh file format.
+`Nemoh <https://gitlab.com/lheea/Nemoh>`_ input mesh file format.
 
 Quiet mode
 ----------
