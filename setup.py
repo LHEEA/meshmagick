@@ -33,7 +33,7 @@ setup(
     install_requires=['numpy', 'argcomplete', 'vtk', 'scipy'],
     entry_points={
         'console_scripts': [
-            'meshmagick=meshmagick_cli:main',
+            'meshmagick=meshmagick.cli:main',
         ],
     },
     classifiers=[
