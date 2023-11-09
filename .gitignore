@@ -97,3 +97,7 @@ ENV/
 
 # Pycharm project settings
 .idea
+
+# VSCode project settings
+.vscode/*
+*settings.json
