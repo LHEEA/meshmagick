@@ -1675,7 +1675,15 @@ def write_MAR(filename, vertices, faces):
 
     ofile = open(filename, 'w')
 
-    ofile.write('{0:6d}{1:6d}\n'.format(2, 0))  # TODO : mettre les symetries en argument
+    # TODO : mettre les symetries en argument
+    if vertices[:,1].min()<0.:
+        ofile.write('{0:6d}{1:6d}\n'.format(2, 0))
+        print('WARNING: no symmetry in Oxz plane was detected, file header was written accordingly. '\
+            'Modify if needed.')
+    else:
+        ofile.write('{0:6d}{1:6d}\n'.format(2, 1))
+        print('WARNING: a symmetry in Oxz plane was detected, file header was written accordingly. '\
+            'Modify if needed.')
 
     for (idx, vertex) in enumerate(vertices):
         ofile.write('{0:6d}{1:16.6f}{2:16.6f}{3:16.6f}\n'.format(idx+1, vertex[0], vertex[1], vertex[2]))
@@ -1688,11 +1696,9 @@ def write_MAR(filename, vertices, faces):
     ) + '\n'
     ofile.write(cell_block)
     ofile.write('%6u%6u%6u%6u\n' % (0, 0, 0, 0))
+    ofile.write('%6u\n' % (0))
 
     ofile.close()
-
-    print('WARNING: if you described only one part of the mesh using symmetry for Nemoh, you may manually modify the ' \
-          'file header accordingly')
 
 
 def write_RAD(filename, vertices, faces):
